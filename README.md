@@ -56,7 +56,7 @@ Orb.to_wat(CalculateMean)
 # """
 ```
 
-Run with Orb.Wasmtime:
+Run with [Orb.Wasmtime](https://github.com/RoyalIcing/orb_wasmtime):
 
 ```elixir
 alias OrbWasmtime.Instance
