@@ -1,6 +1,9 @@
 # Orb: Write WebAssembly in Elixir, then run it anywhere
 
-Orb is a DSL for WebAssembly with the full power of the Elixir language, including macros.
+Orb is a DSL for WebAssembly with the full power of the Elixir language:
+- Break problems into smaller modules and compose them together
+- Macros
+- Share code with the Hex package manager
 
 ## Installation
 

@@ -193,11 +193,11 @@ defmodule OrbTest do
     use Orb
 
     wasm do
-      func validate(num: I32), I32, lt: I32, gt: I32 do
-        lt = I32.lt_s(num, 1)
-        gt = I32.gt_s(num, 255)
+      func validate(num: I32), I32, under?: I32, over?: I32 do
+        under? = I32.lt_s(num, 1)
+        over? = I32.gt_s(num, 255)
 
-        I32.or(lt, gt) |> I32.eqz()
+        I32.or(under?, over?) |> I32.eqz()
       end
     end
   end
@@ -208,13 +208,13 @@ defmodule OrbTest do
     wasm_source = """
     (module $WithinRange
       (func $validate (export "validate") (param $num i32) (result i32)
-        (local $lt i32)
-        (local $gt i32)
+        (local $under? i32)
+        (local $over? i32)
         (i32.lt_s (local.get $num) (i32.const 1))
-        (local.set $lt)
+        (local.set $under?)
         (i32.gt_s (local.get $num) (i32.const 255))
-        (local.set $gt)
-        (i32.eqz (i32.or (local.get $lt) (local.get $gt)))
+        (local.set $over?)
+        (i32.eqz (i32.or (local.get $under?) (local.get $over?)))
       )
     )
     """
