@@ -65,6 +65,37 @@ defmodule OrbTest do
     end
   end
 
+  describe "~S" do
+    test "assigns data" do
+      defmodule HTMLTypes do
+        use Orb
+
+        wasm do
+          func doctype(), I32 do
+            ~S"<!doctype html>"
+          end
+
+          func mime_type(), I32 do
+            ~S"text/html"
+          end
+        end
+      end
+
+      assert to_wat(HTMLTypes) == """
+             (module $HTMLTypes
+               (data (i32.const 255) "<!doctype html>")
+               (data (i32.const 271) "text/html")
+               (func $doctype (export "doctype") (result i32)
+                 (i32.const 255)
+               )
+               (func $mime_type (export "mime_type") (result i32)
+                 (i32.const 271)
+               )
+             )
+             """
+    end
+  end
+
   defmodule SingleFunc do
     use Orb
 
