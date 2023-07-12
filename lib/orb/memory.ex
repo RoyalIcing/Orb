@@ -8,9 +8,10 @@ defmodule Orb.Memory do
   defstruct name: "", min: 0, exported?: false
 
   def from(nil), do: nil
+  def from([]), do: nil
 
   def from(list) when is_list(list) do
-    case Enum.sum(list) do
+    case Enum.max(list) do
       0 ->
         nil
 

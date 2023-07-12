@@ -34,7 +34,7 @@ defmodule OrbTest do
   end
 
   describe "memory" do
-    test "pages: 2" do
+    test "Memory.pages/1" do
       defmodule Pages2 do
         use Orb
 
@@ -48,17 +48,18 @@ defmodule OrbTest do
              """
     end
 
-    test "2 x pages: 2" do
+    test "3 x Memory.pages/1 takes the maximum" do
       defmodule TwicePages2 do
         use Orb
 
         Memory.pages(2)
-        Memory.pages(2)
+        Memory.pages(3)
+        Memory.pages(1)
       end
 
       assert to_wat(TwicePages2) == """
              (module $TwicePages2
-               (memory (export "memory") 4)
+               (memory (export "memory") 3)
              )
              """
     end
