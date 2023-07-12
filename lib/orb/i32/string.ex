@@ -48,7 +48,7 @@ defmodule Orb.I32.String do
 
   use Orb
 
-  wasm_memory(pages: 1)
+  Memory.pages(1)
 
   wasm do
     func streq(address_a: I32, address_b: I32),
