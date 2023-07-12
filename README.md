@@ -31,7 +31,7 @@ defmodule CalculateMean do
     tally: 0
   )
 
-  wasm U32 do
+  wasm do
     func insert(element: I32) do
       @count = @count + 1
       @tally = @tally + element

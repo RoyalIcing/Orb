@@ -204,7 +204,7 @@ defmodule OrbTest do
     Memory.pages(1)
 
     wasm do
-      for {status, message} <- ^@statuses do
+      inline for {status, message} <- ^@statuses do
         # data(status * 24, "#{message}\\00")
         # data(status * 24, message)
         data_nul_terminated(status * 24, message)
@@ -306,7 +306,7 @@ defmodule OrbTest do
       tally: 0
     )
 
-    wasm U32 do
+    wasm do
       func insert(element: I32) do
         @count = @count + 1
         @tally = @tally + element
@@ -330,7 +330,7 @@ defmodule OrbTest do
         (global.set $tally)
       )
       (func $calculate_mean (export "calculate_mean") (result i32)
-        (i32.div_u (global.get $tally) (global.get $count))
+        (i32.div_s (global.get $tally) (global.get $count))
       )
     )
     """
@@ -353,7 +353,7 @@ defmodule OrbTest do
 
     Memory.pages(2)
 
-    wasm U32 do
+    wasm do
       func get_is_valid(), I32, str: I32.U8.Pointer, char: I32 do
         str = 1024
 

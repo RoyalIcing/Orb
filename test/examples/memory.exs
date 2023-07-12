@@ -18,7 +18,7 @@ defmodule Examples.Memory do
 
     Memory.pages(2)
 
-    wasm U32 do
+    wasm do
       func memcpy(dest: I32.U8.Pointer, src: I32.U8.Pointer, byte_count: I32),
         i: I32 do
         loop EachByte do
@@ -205,7 +205,7 @@ defmodule Examples.Memory do
     # increase_memory pages: 2
     # @wasm_memory 2
 
-    wasm U32 do
+    wasm do
       func cons(hd: I32.Pointer, tl: I32.Pointer), I32.Pointer, ptr: I32.Pointer do
         ptr = call(:bump_alloc, 8)
         ptr[at!: 0] = hd

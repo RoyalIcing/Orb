@@ -21,7 +21,7 @@ defmodule Orb do
       tally: 0
     )
 
-    wasm U32 do
+    wasm do
       func insert(element: I32) do
         @count = @count + 1
         @tally = @tally + element
@@ -36,9 +36,9 @@ defmodule Orb do
 
   One thing you’ll notice is that we must specify the type of function parameters and return values. Our `insert` function accepts a 32-bit integer, denoted using `I32`. It returns no value, unlike `calculate_mean` which returns a 32-bit integer.
 
-  We get to write math with the intuitive `+` and `/` operators. These are enabled by the first argument to `wasm`: `U32`. Some operators like division have two variations in WebAssembly: signed and unsigned. A signed 32-bit number loses 1-bit of information due to the sign itself taking up one bit. So you may want to consider whether you want to support negative numbers and use signed math with `S32` or only support unsigned positive numbers with `U32`.
+  We get to write math with the intuitive `+` and `/` operators. Some operators like division have two variations in WebAssembly: signed and unsigned. By default math perform signed operations, but if you want unsigned math you can pass U32 to `wasm/2` like so: `wasm U32 do`.
 
-  Let’s see the same module without the `U32` enabling math operators and without the `@` & `=` magic for setting globals:
+  Let’s see the same module without math operators and without the `@` & `=` magic for setting globals:
 
   ```elixir
   defmodule CalculateMean do
@@ -1163,12 +1163,12 @@ defmodule Orb do
     end
   end
 
-  defmacro wasm(transform \\ nil, do: block) do
+  defmacro wasm(transform \\ Orb.S32, do: block) do
     # block = interpolate_external_values(block, __ENV__)
 
     block =
       case Macro.expand_literals(transform, __CALLER__) do
-        nil -> block
+        :no_magic -> block
         Orb.S32 -> Orb.S32.apply_to_ast(block)
         Orb.U32 -> Orb.U32.apply_to_ast(block)
       end
@@ -1485,12 +1485,13 @@ defmodule Orb do
     end)
   end
 
-  defmacro snippet(transform \\ nil, locals \\ [], do: block) do
+  defmacro snippet(transform \\ Orb.S32, locals \\ [], do: block) do
     block = interpolate_external_values(block, __CALLER__)
 
     block =
       case Macro.expand_literals(transform, __CALLER__) do
-        nil -> block
+        :no_magic -> block
+        Orb.S32 -> Orb.S32.apply_to_ast(block)
         Orb.U32 -> Orb.U32.apply_to_ast(block)
       end
 
