@@ -828,8 +828,15 @@ defmodule Orb do
 
     defmacro enum(keys) do
       quote do
-        @wasm_global_old for {key, index} <- Enum.with_index(unquote(keys)),
-                             do: {key, Orb.i32(index)}
+        @wasm_globals (for {key, value} <- Enum.with_index(unquote(keys)) do
+                         Orb.Global.new(
+                           :i32,
+                           key,
+                           :readonly,
+                           :internal,
+                           Orb.I32.__global_value(value)
+                         )
+                       end)
       end
     end
   end

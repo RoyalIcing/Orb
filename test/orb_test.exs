@@ -53,6 +53,21 @@ defmodule OrbTest do
              )
              """
     end
+
+    test "I32 enum" do
+      defmodule GlobalsI32Enum do
+        use Orb
+
+        I32.enum([:first, :second])
+      end
+
+      assert to_wat(GlobalsI32Enum) == """
+             (module $GlobalsI32Enum
+               (global $first i32 (i32.const 0))
+               (global $second i32 (i32.const 1))
+             )
+             """
+    end
   end
 
   describe "memory" do
