@@ -18,6 +18,52 @@ defmodule OrbTest do
     assert to_wat(wasm) == wasm_source
   end
 
+  test "funcp" do
+    wasm =
+      funcp answer(), I32 do
+        42
+      end
+
+    wasm_source = """
+    (func $answer (result i32)
+      (i32.const 42)
+    )\
+    """
+
+    assert to_wat(wasm) == wasm_source
+  end
+
+  describe "memory" do
+    test "pages: 2" do
+      defmodule Example do
+        use Orb
+
+        wasm_memory(pages: 2)
+      end
+
+      assert to_wat(Example) == """
+             (module $Example
+               (memory (export "memory") 2)
+             )
+             """
+    end
+
+    test "2 x pages: 2" do
+      defmodule Example do
+        use Orb
+
+        wasm_memory(pages: 2)
+        wasm_memory(pages: 2)
+      end
+
+      assert to_wat(Example) == """
+             (module $Example
+               (memory (export "memory") 4)
+             )
+             """
+    end
+  end
+
   defmodule SingleFunc do
     use Orb
 
