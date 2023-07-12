@@ -808,15 +808,18 @@ defmodule Orb do
       end
     end
 
-    defmacro export_enum(keys) do
+    defmacro export_enum(keys, offset \\ 0) do
       quote do
-        unquote(__MODULE__).export_global(:readonly, Enum.with_index(unquote(keys)))
+        unquote(__MODULE__).export_global(
+          :readonly,
+          Enum.with_index(unquote(keys), unquote(offset))
+        )
       end
     end
 
-    defmacro enum(keys) do
+    defmacro enum(keys, offset \\ 0) do
       quote do
-        unquote(__MODULE__).global(:readonly, Enum.with_index(unquote(keys)))
+        unquote(__MODULE__).global(:readonly, Enum.with_index(unquote(keys), unquote(offset)))
       end
     end
   end
