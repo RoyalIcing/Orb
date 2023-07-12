@@ -259,6 +259,8 @@ defmodule Orb do
 
         Module.register_attribute(__MODULE__, :wasm_memory, accumulate: true)
 
+        Module.register_attribute(__MODULE__, :wasm_globals, accumulate: true)
+
         # FIXME: clean up these names and decide if it should be one attribute or many.
         Module.register_attribute(__MODULE__, :wasm_global, accumulate: true)
         Module.register_attribute(__MODULE__, :wasm_internal_globals, accumulate: true)
@@ -303,7 +305,7 @@ defmodule Orb do
               memory: nil,
               exported_globals: [],
               exported_mutable_global_types: [],
-              globals: [],
+              globals_old: [],
               body: []
 
     def new(options) do
@@ -803,8 +805,8 @@ defmodule Orb do
 
     defmacro global(list) do
       quote do
-        @wasm_global for {key, value} <- unquote(list),
-                         do: {key, Orb.I32.__global_value(value)}
+        @wasm_global_old for {key, value} <- unquote(list),
+                             do: {key, Orb.I32.__global_value(value)}
       end
     end
 
@@ -834,8 +836,8 @@ defmodule Orb do
 
     defmacro enum(keys) do
       quote do
-        @wasm_global for {key, index} <- Enum.with_index(unquote(keys)),
-                         do: {key, Orb.i32(index)}
+        @wasm_global_old for {key, index} <- Enum.with_index(unquote(keys)),
+                             do: {key, Orb.i32(index)}
       end
     end
   end
@@ -1041,9 +1043,9 @@ defmodule Orb do
             # name: unquote(name),
             name: @wasm_name,
             imports: List.flatten(List.wrap(@wasm_imports)),
-            globals:
+            globals_old:
               List.flatten(List.wrap(@wasm_internal_globals)) ++
-                List.flatten(List.wrap(@wasm_global)),
+                List.flatten(List.wrap(@wasm_global_old)),
             exported_globals: List.flatten(List.wrap(@wasm_global_exported_readonly)),
             exported_mutable_global_types:
               List.flatten(List.wrap(@wasm_exported_mutable_global_types)),
@@ -1183,7 +1185,7 @@ defmodule Orb do
 
   defmacro global(list) do
     quote do
-      @wasm_global unquote(list)
+      @wasm_global_old unquote(list)
     end
   end
 
@@ -1864,7 +1866,7 @@ defmodule Orb do
           exported_globals: exported_globals,
           exported_mutable_global_types: exported_mutable_global_types,
           memory: memory,
-          globals: globals,
+          globals_old: globals,
           body: body
         },
         indent
@@ -1967,7 +1969,7 @@ defmodule Orb do
   end
 
   def do_wat(
-        %Global{name: name, type: type, initial_value: initial_value, exported: exported},
+        %Orb.Global{name: name, type: type, initial_value: initial_value, exported: exported},
         indent
       ) do
     # (global $count (mut i32) (i32.const 0))
