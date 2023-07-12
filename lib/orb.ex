@@ -1017,10 +1017,10 @@ defmodule Orb do
         def __wasm_module__() do
           ModuleDefinition.new(
             name: @wasm_name,
-            imports: List.flatten(List.wrap(@wasm_imports)),
-            globals: List.flatten(List.wrap(@wasm_globals)),
+            imports: @wasm_imports |> Enum.reverse() |> List.flatten(),
+            globals: @wasm_globals |> Enum.reverse() |> List.flatten(),
             memory: Memory.from(@wasm_memory),
-            body: List.flatten(@wasm_body)
+            body: @wasm_body |> Enum.reverse() |> List.flatten()
           )
         end
 
