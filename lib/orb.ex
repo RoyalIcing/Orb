@@ -822,8 +822,7 @@ defmodule Orb do
 
     defmacro export_enum(keys) do
       quote do
-        @wasm_global_exported_readonly for {key, index} <- Enum.with_index(unquote(keys)),
-                                           do: {key, Orb.i32(index)}
+        unquote(__MODULE__).export_global(:readonly, Enum.with_index(unquote(keys)))
       end
     end
 

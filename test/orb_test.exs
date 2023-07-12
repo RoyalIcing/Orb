@@ -59,10 +59,13 @@ defmodule OrbTest do
         use Orb
 
         I32.enum([:first, :second])
+        I32.export_enum([:apples, :pears])
       end
 
       assert to_wat(GlobalsI32Enum) == """
              (module $GlobalsI32Enum
+               (global $apples (export "apples") i32 (i32.const 0))
+               (global $pears (export "pears") i32 (i32.const 1))
                (global $first i32 (i32.const 0))
                (global $second i32 (i32.const 1))
              )
