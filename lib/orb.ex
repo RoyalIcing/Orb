@@ -647,7 +647,7 @@ defmodule Orb do
       # import Unsigned
 
       quote do
-        unquote(do_u(__get_block_items(expression)))
+        unquote(Orb.U32.apply_to_ast(__get_block_items(expression)))
       end
     end
 
@@ -848,9 +848,6 @@ defmodule Orb do
                          do: {key, Orb.i32(index)}
       end
     end
-  end
-
-  defmodule U32 do
   end
 
   defmodule F32 do
@@ -1170,9 +1167,9 @@ defmodule Orb do
     # block = interpolate_external_values(block, __ENV__)
 
     block =
-      case Macro.expand_literals(transform, __ENV__) do
+      case Macro.expand_literals(transform, __CALLER__) do
         nil -> block
-        U32 -> I32.do_u(block)
+        Orb.U32 -> Orb.U32.apply_to_ast(block)
       end
 
     %{body: body, constants: constants} = do_module_body(block, [], __CALLER__, __CALLER__.module)
@@ -1493,7 +1490,7 @@ defmodule Orb do
     block =
       case Macro.expand_literals(transform, __CALLER__) do
         nil -> block
-        U32 -> I32.do_u(block)
+        Orb.U32 -> Orb.U32.apply_to_ast(block)
       end
 
     block_items =
