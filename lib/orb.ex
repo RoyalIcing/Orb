@@ -163,12 +163,27 @@ defmodule Orb do
   
   ```
   
-  - Pages
-  - Reading memory
-  - Writing memory
-  - Data
-  - Strings
-  - Custom types with `Access`
+  ### Pages
+  
+  Each page is 64 KiB (64 * 1024 = 65,536 bytes). By default your module will have no memory.
+  
+  ```elixir
+  memory(pages: 4)
+  
+  memory(increase_pages: 4)
+  
+  memory(min_pages: 4)
+  ```
+  
+  ### Reading memory
+  ### Writing memory
+  
+  ### Data
+  
+  
+  ### Strings
+  
+  ### Custom types with `Access`
   
   ## Control flow
   
