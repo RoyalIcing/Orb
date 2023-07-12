@@ -55,7 +55,7 @@ Orb.to_wat(CalculateMean)
 #     (global.set $tally)
 #   )
 #   (func $calculate_mean (export "calculate_mean") (result i32)
-#     (i32.div_u (global.get $tally) (global.get $count))
+#     (i32.div_s (global.get $tally) (global.get $count))
 #   )
 # )
 # """
