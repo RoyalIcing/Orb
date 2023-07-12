@@ -790,13 +790,14 @@ defmodule Orb do
     # TODO: stash away which module so we can do smart stuff like with local types
     def __global_value(mod) when is_atom(mod), do: mod.initial_i32() |> Orb.i32()
 
-    defmacro global(list) do
+    defmacro global(mutability \\ :mutable, list)
+             when mutability in ~w{readonly mutable}a do
       quote do
         @wasm_globals (for {key, value} <- unquote(list) do
                          Orb.Global.new(
                            :i32,
                            key,
-                           :mutable,
+                           unquote(mutability),
                            :internal,
                            Orb.I32.__global_value(value)
                          )
@@ -828,15 +829,7 @@ defmodule Orb do
 
     defmacro enum(keys) do
       quote do
-        @wasm_globals (for {key, value} <- Enum.with_index(unquote(keys)) do
-                         Orb.Global.new(
-                           :i32,
-                           key,
-                           :readonly,
-                           :internal,
-                           Orb.I32.__global_value(value)
-                         )
-                       end)
+        unquote(__MODULE__).global(:readonly, Enum.with_index(unquote(keys)))
       end
     end
   end
