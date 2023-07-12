@@ -1197,12 +1197,6 @@ defmodule Orb do
     end
   end
 
-  defmacro wasm_memory(pages: count) do
-    quote do
-      @wasm_memory unquote(count)
-    end
-  end
-
   defmacro wasm_import(mod, name, func_type) do
     # case definition do
     #   {:func, _meta, [name, arg1]} ->

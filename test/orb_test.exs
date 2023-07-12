@@ -327,7 +327,7 @@ defmodule OrbTest do
   defmodule FileNameSafe do
     use Orb
 
-    wasm_memory(pages: 2)
+    Memory.pages(2)
 
     wasm U32 do
       func get_is_valid(), I32, str: I32.U8.Pointer, char: I32 do
