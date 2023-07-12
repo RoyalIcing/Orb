@@ -216,7 +216,7 @@ defmodule OrbTest do
     end
   end
 
-  # FIXME: this shouldn’t live in wasm_builder_test.exs
+  # FIXME: this shouldn’t live in orb_test.exs
   test "works" do
     alias OrbWasmtime.Instance
 
