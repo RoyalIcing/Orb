@@ -295,9 +295,6 @@ defmodule Orb do
               imports: [],
               memory: nil,
               globals: [],
-              exported_globals: [],
-              exported_mutable_global_types: [],
-              globals_old: [],
               body: []
 
     def new(options) do
@@ -1072,12 +1069,6 @@ defmodule Orb do
 
     imports = List.flatten(imports)
 
-    # TODO split into readonly_globals and mutable_globals?
-    internal_global_types = Keyword.get(options, :globals, [])
-    # TODO rename to export_readonly_globals?
-    exported_global_types = Keyword.get(options, :exported_globals, [])
-    exported_mutable_global_types = Keyword.get(options, :exported_mutable_globals, [])
-
     %{body: block_items, constants: constants} = do_module_body(block, options, env, env.module)
     Module.put_attribute(env.module, :wasm_constants, constants)
 
@@ -1817,9 +1808,6 @@ defmodule Orb do
           name: name,
           imports: imports,
           globals: globals,
-          exported_globals: exported_globals,
-          exported_mutable_global_types: exported_mutable_global_types,
-          globals_old: globals_old,
           memory: memory,
           body: body
         },
@@ -1838,31 +1826,6 @@ defmodule Orb do
       for global = %Orb.Global{} <- globals do
         Orb.ToWat.to_wat(global, "  " <> indent)
       end,
-      for(
-        {name, {:i32_const, initial_value}} <- exported_globals,
-        # TODO: handle more than just (mut i32), e.g. non-mut or f64
-        do: [
-          "  " <> indent,
-          ~s[(global $#{name} (export "#{name}") i32 (i32.const #{initial_value}))],
-          "\n"
-        ]
-      ),
-      for(
-        {name, {:i32_const, initial_value}} <- exported_mutable_global_types,
-        # TODO: handle more than just (mut i32), e.g. non-mut or f64
-        do: [
-          "  " <> indent,
-          # ~s[(export "#{name}" (global $#{name} i32 (i32.const #{initial_value})))],
-          # ~s[(global $#{name} i32 (i32.const #{initial_value}))],
-          ~s[(global $#{name} (export "#{name}") (mut i32) (i32.const #{initial_value}))],
-          "\n"
-        ]
-      ),
-      for(
-        {name, {:i32_const, initial_value}} <- globals_old,
-        # TODO: handle more than just (mut i32), e.g. non-mut or f64
-        do: ["  " <> indent, "(global $#{name} (mut i32) (i32.const #{initial_value}))", "\n"]
-      ),
       case body do
         [] ->
           ""
