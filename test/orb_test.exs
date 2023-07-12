@@ -33,6 +33,28 @@ defmodule OrbTest do
     assert to_wat(wasm) == wasm_source
   end
 
+  describe "globals" do
+    test "I32" do
+      defmodule GlobalsI32 do
+        use Orb
+
+        I32.global(abc: 42)
+        I32.export_global(:mutable, public1: 11)
+        I32.export_global(:readonly, public2: 22)
+        I32.export_global(public3: 33)
+      end
+
+      assert to_wat(GlobalsI32) == """
+             (module $GlobalsI32
+               (global $public3 (export "public3") i32 (i32.const 33))
+               (global $public2 (export "public2") i32 (i32.const 22))
+               (global $public1 (export "public1") (mut i32) (i32.const 11))
+               (global $abc (mut i32) (i32.const 42))
+             )
+             """
+    end
+  end
+
   describe "memory" do
     test "Memory.pages/1" do
       defmodule Pages2 do

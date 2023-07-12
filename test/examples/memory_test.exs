@@ -2,10 +2,10 @@ defmodule Examples.MemoryTest do
   use ExUnit.Case, async: true
 
   Code.require_file("memory.exs", __DIR__)
+  alias Examples.Memory
 
   alias OrbWasmtime.Wasm
   alias OrbWasmtime.Instance
-  alias Examples.Memory
 
   describe "Copying" do
     alias Examples.Memory.Copying
