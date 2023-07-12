@@ -39,6 +39,7 @@ defmodule OrbTest do
         use Orb
 
         I32.global(abc: 42)
+        I32.global(:readonly, CONST: 99)
         I32.export_global(:mutable, public1: 11)
         I32.export_global(:readonly, public2: 22)
       end
@@ -46,6 +47,7 @@ defmodule OrbTest do
       assert to_wat(GlobalsI32) == """
              (module $GlobalsI32
                (global $abc (mut i32) (i32.const 42))
+               (global $CONST i32 (i32.const 99))
                (global $public1 (export "public1") (mut i32) (i32.const 11))
                (global $public2 (export "public2") i32 (i32.const 22))
              )
