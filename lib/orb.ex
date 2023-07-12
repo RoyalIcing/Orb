@@ -1175,20 +1175,6 @@ defmodule Orb do
     end
   end
 
-  # TODO: remove
-  defmacro global(list) do
-    quote do
-      @wasm_global_old unquote(list)
-    end
-  end
-
-  # TODO: remove
-  defmacro global(:export_readonly, list) do
-    quote do
-      @wasm_global_exported_readonly unquote(list)
-    end
-  end
-
   defmacro wasm_import(mod, name, func_type) do
     # case definition do
     #   {:func, _meta, [name, arg1]} ->
