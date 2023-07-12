@@ -99,16 +99,14 @@ defmodule OrbTest do
   defmodule SingleFunc do
     use Orb
 
-    defwasm do
-      memory(export(:mem), 1)
-
+    wasm do
       func answer(), I32 do
         42
       end
     end
   end
 
-  test "defwasm/1 defines __wasm_module__/0" do
+  test "wasm/1 defines __wasm_module__/0" do
     alias Orb
 
     wasm = SingleFunc.__wasm_module__()
@@ -116,7 +114,6 @@ defmodule OrbTest do
     assert wasm == %Orb.ModuleDefinition{
              name: "SingleFunc",
              body: [
-               %Orb.Memory{name: {:export, :mem}, min: 1},
                %Orb.Func{
                  name: :answer,
                  params: [],
@@ -129,10 +126,9 @@ defmodule OrbTest do
            }
   end
 
-  test "to_wat/1 defwasm" do
+  test "to_wat/1 wasm" do
     wasm_source = """
     (module $SingleFunc
-      (memory (export "mem") 1)
       (func $answer (export "answer") (result i32)
         (i32.const 42)
       )
@@ -145,9 +141,7 @@ defmodule OrbTest do
   defmodule ManyFuncs do
     use Orb
 
-    defwasm do
-      memory(export(:mem), 1)
-
+    wasm do
       func answer(), I32 do
         I32.mul(2, 21)
       end
@@ -162,10 +156,9 @@ defmodule OrbTest do
     end
   end
 
-  test "to_wat/1 defwasm many funcs" do
+  test "to_wat/1 wasm many funcs" do
     wasm_source = """
     (module $ManyFuncs
-      (memory (export "mem") 1)
       (func $answer (export "answer") (result i32)
         (i32.mul (i32.const 2) (i32.const 21))
       )
@@ -208,9 +201,9 @@ defmodule OrbTest do
 
     def status_table(), do: @statuses
 
-    wasm do
-      wasm_import_old(:env, :buffer, memory(1))
+    Memory.pages(1)
 
+    wasm do
       for {status, message} <- ^@statuses do
         # data(status * 24, "#{message}\\00")
         # data(status * 24, message)
@@ -238,7 +231,7 @@ defmodule OrbTest do
   test "to_wat/1 many data" do
     wasm_source = ~s"""
     (module $HTTPStatusLookup
-      (import "env" "buffer" (memory 1))
+      (memory (export "memory") 1)
       (data (i32.const #{200 * 24}) "OK\\00")
       (data (i32.const #{201 * 24}) "Created\\00")
       (data (i32.const #{204 * 24}) "No Content\\00")

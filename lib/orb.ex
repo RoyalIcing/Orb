@@ -209,6 +209,12 @@ defmodule Orb do
 
   ## Composing modules together
 
+  ## Hex packages
+
+  - GoldenOrb
+      - String builder
+  - SilverOrb
+
   ## Running your module
   """
 
@@ -1508,10 +1514,6 @@ defmodule Orb do
 
       unquote(do_snippet(locals, block_items))
     end
-  end
-
-  def memory(name \\ nil, min) do
-    %Memory{name: name, min: min}
   end
 
   def pack_strings_nul_terminated(start_offset, strings_record) do
