@@ -1169,6 +1169,7 @@ defmodule Orb do
     block =
       case Macro.expand_literals(transform, __CALLER__) do
         nil -> block
+        Orb.S32 -> Orb.S32.apply_to_ast(block)
         Orb.U32 -> Orb.U32.apply_to_ast(block)
       end
 

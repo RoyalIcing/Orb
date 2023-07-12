@@ -1,4 +1,4 @@
-defmodule Orb.U32 do
+defmodule Orb.S32 do
   def apply_to_ast(nodes) do
     Macro.prewalk(nodes, fn
       # Allow values known at compile time to be executed at compile-time by Elixir
@@ -21,22 +21,22 @@ defmodule Orb.U32 do
         node
 
       {:/, meta, [a, b]} ->
-        {:{}, meta, [:i32, :div_u, {a, b}]}
+        {:{}, meta, [:i32, :div_s, {a, b}]}
 
       {:<=, meta, [a, b]} ->
-        {:{}, meta, [:i32, :le_u, {a, b}]}
+        {:{}, meta, [:i32, :le_s, {a, b}]}
 
       {:>=, meta, [a, b]} ->
-        {:{}, meta, [:i32, :ge_u, {a, b}]}
+        {:{}, meta, [:i32, :ge_s, {a, b}]}
 
       {:<, meta, [a, b]} ->
-        {:{}, meta, [:i32, :lt_u, {a, b}]}
+        {:{}, meta, [:i32, :lt_s, {a, b}]}
 
       {:>, meta, [a, b]} ->
-        {:{}, meta, [:i32, :gt_u, {a, b}]}
+        {:{}, meta, [:i32, :gt_s, {a, b}]}
 
       {:>>>, meta, [a, b]} ->
-        {:{}, meta, [:i32, :shr_u, {a, b}]}
+        {:{}, meta, [:i32, :shr_s, {a, b}]}
 
       {:<<<, meta, [a, b]} ->
         {:{}, meta, [:i32, :shl, {a, b}]}
@@ -49,7 +49,7 @@ defmodule Orb.U32 do
 
       # FIXME: I don’t like this, as it’s not really a proper “call” e.g. it breaks |> piping
       {:rem, meta, [a, b]} ->
-        {:{}, meta, [:i32, :rem_u, {a, b}]}
+        {:{}, meta, [:i32, :rem_s, {a, b}]}
 
       other ->
         other
