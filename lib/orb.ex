@@ -291,17 +291,9 @@ defmodule Orb do
       # param_types = [:i32]
       %__MODULE__{
         name: name,
-        param_types: expand_type(params),
-        result_type: {:result, expand_type(result_type)}
+        param_types: params,
+        result_type: {:result, result_type}
       }
-    end
-
-    defp expand_type(type) do
-      case Macro.expand_literals(type, __ENV__) do
-        Orb.I32 -> :i32
-        Orb.F32 -> :f32
-        _ -> type
-      end
     end
   end
 
@@ -493,6 +485,8 @@ defmodule Orb do
     import Kernel, except: [and: 2, or: 2]
 
     require Ops
+
+    def wasm_type(), do: :i32
 
     def add(a, b)
     def sub(a, b)
@@ -852,6 +846,8 @@ defmodule Orb do
 
   defmodule F32 do
     require Ops
+
+    def wasm_type(), do: :f32
 
     for op <- Ops.f32(1) do
       def unquote(op)(a) do
@@ -1579,6 +1575,8 @@ defmodule Orb do
     {:result, type}
   end
 
+  def result({a, b}) when is_atom(a) and is_atom(b), do: {:result, {a, b}}
+
   # TODO: unused
   def i32_const(value), do: {:i32_const, value}
   def i32_boolean(0), do: {:i32_const, 0}
@@ -1840,6 +1838,9 @@ defmodule Orb do
 
       :f32 ->
         "f32"
+
+      tuple when is_tuple(tuple) ->
+        tuple |> Tuple.to_list() |> Enum.map(&do_type/1) |> Enum.join(" ")
 
       type ->
         #         Code.ensure_loaded!(type)

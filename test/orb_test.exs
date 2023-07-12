@@ -315,6 +315,11 @@ defmodule OrbTest do
       func calculate_mean(), I32 do
         @tally / @count
       end
+
+      func calculate_mean_and_count(), {I32, I32} do
+        @tally / @count
+        @count
+      end
     end
   end
 
@@ -332,6 +337,10 @@ defmodule OrbTest do
       (func $calculate_mean (export "calculate_mean") (result i32)
         (i32.div_s (global.get $tally) (global.get $count))
       )
+      (func $calculate_mean_and_count (export "calculate_mean_and_count") (result i32 i32)
+        (i32.div_s (global.get $tally) (global.get $count))
+        (global.get $count)
+      )
     )
     """
 
@@ -346,6 +355,7 @@ defmodule OrbTest do
     Instance.call(inst, :insert, 5)
     Instance.call(inst, :insert, 6)
     assert Instance.call(inst, :calculate_mean) == 5
+    assert Instance.call(inst, :calculate_mean_and_count) == {5, 3}
   end
 
   defmodule FileNameSafe do
