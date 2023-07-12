@@ -46,10 +46,10 @@ defmodule OrbTest do
 
       assert to_wat(GlobalsI32) == """
              (module $GlobalsI32
+               (global $abc (mut i32) (i32.const 42))
                (global $public3 (export "public3") i32 (i32.const 33))
                (global $public2 (export "public2") i32 (i32.const 22))
                (global $public1 (export "public1") (mut i32) (i32.const 11))
-               (global $abc (mut i32) (i32.const 42))
              )
              """
     end

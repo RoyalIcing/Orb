@@ -262,7 +262,7 @@ defmodule Orb do
         Module.register_attribute(__MODULE__, :wasm_globals, accumulate: true)
 
         # FIXME: clean up these names and decide if it should be one attribute or many.
-        Module.register_attribute(__MODULE__, :wasm_global, accumulate: true)
+        Module.register_attribute(__MODULE__, :wasm_global_old, accumulate: true)
         Module.register_attribute(__MODULE__, :wasm_internal_globals, accumulate: true)
         Module.register_attribute(__MODULE__, :wasm_global_exported_readonly, accumulate: true)
 
@@ -303,6 +303,7 @@ defmodule Orb do
     defstruct name: nil,
               imports: [],
               memory: nil,
+              globals: [],
               exported_globals: [],
               exported_mutable_global_types: [],
               globals_old: [],
@@ -399,20 +400,6 @@ defmodule Orb do
 
   defmodule Data do
     defstruct [:offset, :value, :nul_terminated]
-  end
-
-  defmodule Global do
-    defstruct [:name, :type, :initial_value, :exported]
-
-    def new(name, exported, {:i32_const, value})
-        when is_atom(name) and exported in ~w[internal exported]a do
-      %__MODULE__{
-        name: name,
-        type: :i32,
-        initial_value: value,
-        exported: exported == :exported
-      }
-    end
   end
 
   defmodule IfElse do
@@ -805,8 +792,15 @@ defmodule Orb do
 
     defmacro global(list) do
       quote do
-        @wasm_global_old for {key, value} <- unquote(list),
-                             do: {key, Orb.I32.__global_value(value)}
+        @wasm_globals (for {key, value} <- unquote(list) do
+                         Orb.Global.new(
+                           :i32,
+                           key,
+                           :mutable,
+                           :internal,
+                           Orb.I32.__global_value(value)
+                         )
+                       end)
       end
     end
 
@@ -931,7 +925,7 @@ defmodule Orb do
       mod.fetch(ref, key)
     end
 
-    defimpl ToWat do
+    defimpl Orb.ToWat do
       def to_wat(%VariableReference{global_or_local: :global, identifier: identifier}, indent) do
         [indent, "(global.get $", to_string(identifier), ?)]
       end
@@ -1043,6 +1037,7 @@ defmodule Orb do
             # name: unquote(name),
             name: @wasm_name,
             imports: List.flatten(List.wrap(@wasm_imports)),
+            globals: List.flatten(List.wrap(@wasm_globals)),
             globals_old:
               List.flatten(List.wrap(@wasm_internal_globals)) ++
                 List.flatten(List.wrap(@wasm_global_old)),
@@ -1183,12 +1178,14 @@ defmodule Orb do
     end
   end
 
+  # TODO: remove
   defmacro global(list) do
     quote do
       @wasm_global_old unquote(list)
     end
   end
 
+  # TODO: remove
   defmacro global(:export_readonly, list) do
     quote do
       @wasm_global_exported_readonly unquote(list)
@@ -1540,10 +1537,6 @@ defmodule Orb do
     %Import{module: module, name: name, type: type}
   end
 
-  # def global(name, type, initial_value) do
-  #   %Global{name: name, type: type, initial_value: initial_value, exported: false}
-  # end
-
   @primitive_types [:i32, :f32, :i32_u8]
 
   def param(name, type) when type in @primitive_types do
@@ -1823,7 +1816,6 @@ defmodule Orb do
 
   ####
 
-  # TODO: make this a separate function to the underlying say do_wat()
   def to_wat(term) when is_atom(term),
     do: do_wat(term.__wasm_module__(), "") |> IO.chardata_to_string()
 
@@ -1863,10 +1855,11 @@ defmodule Orb do
         %ModuleDefinition{
           name: name,
           imports: imports,
+          globals: globals,
           exported_globals: exported_globals,
           exported_mutable_global_types: exported_mutable_global_types,
+          globals_old: globals_old,
           memory: memory,
-          globals_old: globals,
           body: body
         },
         indent
@@ -1879,7 +1872,10 @@ defmodule Orb do
           []
 
         %Memory{} ->
-          ToWat.to_wat(memory, "  " <> indent)
+          Orb.ToWat.to_wat(memory, "  " <> indent)
+      end,
+      for global = %Orb.Global{} <- globals do
+        Orb.ToWat.to_wat(global, "  " <> indent)
       end,
       for(
         {name, {:i32_const, initial_value}} <- exported_globals,
@@ -1902,7 +1898,7 @@ defmodule Orb do
         ]
       ),
       for(
-        {name, {:i32_const, initial_value}} <- globals,
+        {name, {:i32_const, initial_value}} <- globals_old,
         # TODO: handle more than just (mut i32), e.g. non-mut or f64
         do: ["  " <> indent, "(global $#{name} (mut i32) (i32.const #{initial_value}))", "\n"]
       ),
@@ -1915,6 +1911,10 @@ defmodule Orb do
       end,
       [indent, ")", "\n"]
     ]
+  end
+
+  def do_wat(%ModuleDefinition{}, _indent) do
+    raise "Should have been caught by previous"
   end
 
   def do_wat(%Import{module: nil, name: name, type: type}, indent) do
@@ -2215,7 +2215,7 @@ defmodule Orb do
   def do_wat(%struct{} = value, indent) do
     # Protocol.assert_impl!(struct, Orb.ToWat)
 
-    ToWat.to_wat(value, indent)
+    Orb.ToWat.to_wat(value, indent)
   end
 end
 
