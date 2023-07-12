@@ -41,7 +41,6 @@ defmodule OrbTest do
         I32.global(abc: 42)
         I32.export_global(:mutable, public1: 11)
         I32.export_global(:readonly, public2: 22)
-        I32.export_global(public3: 33)
       end
 
       assert to_wat(GlobalsI32) == """
@@ -49,7 +48,6 @@ defmodule OrbTest do
                (global $abc (mut i32) (i32.const 42))
                (global $public1 (export "public1") (mut i32) (i32.const 11))
                (global $public2 (export "public2") i32 (i32.const 22))
-               (global $public3 (export "public3") i32 (i32.const 33))
              )
              """
     end

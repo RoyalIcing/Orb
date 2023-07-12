@@ -793,7 +793,7 @@ defmodule Orb do
       end
     end
 
-    defmacro export_global(mutability \\ :readonly, list)
+    defmacro export_global(mutability, list)
              when mutability in ~w{readonly mutable}a do
       quote do
         @wasm_globals (for {key, value} <- unquote(list) do
