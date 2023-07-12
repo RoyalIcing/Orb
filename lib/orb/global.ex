@@ -9,7 +9,7 @@ defmodule Orb.Global do
       name: name,
       type: type,
       initial_value: value,
-      mutability: :mutable,
+      mutability: mutability,
       exported: exported == :exported
     }
   end

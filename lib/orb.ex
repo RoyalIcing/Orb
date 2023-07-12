@@ -806,18 +806,16 @@ defmodule Orb do
 
     defmacro export_global(mutability \\ :readonly, list)
              when mutability in ~w{readonly mutable}a do
-      case mutability do
-        :readonly ->
-          quote do
-            @wasm_global_exported_readonly for {key, value} <- unquote(list),
-                                               do: {key, Orb.I32.__global_value(value)}
-          end
-
-        :mutable ->
-          quote do
-            @wasm_exported_mutable_global_types for {key, value} <- unquote(list),
-                                                    do: {key, Orb.I32.__global_value(value)}
-          end
+      quote do
+        @wasm_globals (for {key, value} <- unquote(list) do
+                         Orb.Global.new(
+                           :i32,
+                           key,
+                           unquote(mutability),
+                           :exported,
+                           Orb.I32.__global_value(value)
+                         )
+                       end)
       end
     end
 
