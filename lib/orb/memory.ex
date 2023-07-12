@@ -18,4 +18,19 @@ defmodule Orb.Memory do
         %__MODULE__{min: min}
     end
   end
+
+  defimpl Orb.ToWat do
+    def to_wat(%Orb.Memory{min: min}, indent) do
+      [
+        indent,
+        ~S{(memory (export "memory")},
+        case min do
+          nil -> []
+          int -> [" ", to_string(int)]
+        end,
+        ~S{)},
+        "\n"
+      ]
+    end
+  end
 end

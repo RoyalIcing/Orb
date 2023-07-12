@@ -1884,17 +1884,8 @@ defmodule Orb do
         nil ->
           []
 
-        %Memory{min: min} ->
-          [
-            "  ",
-            ~S{(memory (export "memory")},
-            case min do
-              nil -> []
-              int -> [" ", to_string(int)]
-            end,
-            ~S{)},
-            "\n"
-          ]
+        %Memory{} ->
+          ToWat.to_wat(memory, "  " <> indent)
       end,
       for(
         {name, {:i32_const, initial_value}} <- exported_globals,

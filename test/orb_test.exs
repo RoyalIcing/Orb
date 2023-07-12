@@ -35,29 +35,29 @@ defmodule OrbTest do
 
   describe "memory" do
     test "pages: 2" do
-      defmodule Example do
+      defmodule Pages2 do
         use Orb
 
         Memory.pages(2)
       end
 
-      assert to_wat(Example) == """
-             (module $Example
+      assert to_wat(Pages2) == """
+             (module $Pages2
                (memory (export "memory") 2)
              )
              """
     end
 
     test "2 x pages: 2" do
-      defmodule Example do
+      defmodule TwicePages2 do
         use Orb
 
         Memory.pages(2)
         Memory.pages(2)
       end
 
-      assert to_wat(Example) == """
-             (module $Example
+      assert to_wat(TwicePages2) == """
+             (module $TwicePages2
                (memory (export "memory") 4)
              )
              """
