@@ -261,15 +261,6 @@ defmodule Orb do
 
         Module.register_attribute(__MODULE__, :wasm_globals, accumulate: true)
 
-        # FIXME: clean up these names and decide if it should be one attribute or many.
-        Module.register_attribute(__MODULE__, :wasm_global_old, accumulate: true)
-        Module.register_attribute(__MODULE__, :wasm_internal_globals, accumulate: true)
-        Module.register_attribute(__MODULE__, :wasm_global_exported_readonly, accumulate: true)
-
-        Module.register_attribute(__MODULE__, :wasm_exported_mutable_global_types,
-          accumulate: true
-        )
-
         Module.register_attribute(__MODULE__, :wasm_imports, accumulate: true)
         Module.register_attribute(__MODULE__, :wasm_body, accumulate: true)
         # @wasm_memory 0
@@ -1027,20 +1018,10 @@ defmodule Orb do
     defmacro __before_compile__(_env) do
       quote do
         def __wasm_module__() do
-          # import Kernel, except: [if: 2, @: 1]
-          # import OrbUsing2
-
           ModuleDefinition.new(
-            # name: unquote(name),
             name: @wasm_name,
             imports: List.flatten(List.wrap(@wasm_imports)),
             globals: List.flatten(List.wrap(@wasm_globals)),
-            globals_old:
-              List.flatten(List.wrap(@wasm_internal_globals)) ++
-                List.flatten(List.wrap(@wasm_global_old)),
-            exported_globals: List.flatten(List.wrap(@wasm_global_exported_readonly)),
-            exported_mutable_global_types:
-              List.flatten(List.wrap(@wasm_exported_mutable_global_types)),
             memory: Memory.from(@wasm_memory),
             body: List.flatten(@wasm_body)
           )
@@ -1106,9 +1087,6 @@ defmodule Orb do
       # @before_compile unquote(__MODULE__).BeforeCompile
 
       @wasm_imports unquote(imports)
-      @wasm_internal_globals unquote(internal_global_types)
-      @wasm_global_exported_readonly unquote(exported_global_types)
-      @wasm_exported_mutable_global_types unquote(exported_mutable_global_types)
 
       import Kernel, except: [if: 2, @: 1]
       import OrbUsing
