@@ -33,22 +33,22 @@ defmodule Orb do
     end
   end
   ```
-  
+
   One thing you’ll notice is that we must specify the type of function parameters and return values. Our `insert` function accepts a 32-bit integer, denoted using `I32`. It returns no value, unlike `calculate_mean` which returns a 32-bit integer.
-  
+
   We get to write math with the intuitive `+` and `/` operators. These are enabled by the first argument to `wasm`: `U32`. Some operators like division have two variations in WebAssembly: signed and unsigned. A signed 32-bit number loses 1-bit of information due to the sign itself taking up one bit. So you may want to consider whether you want to support negative numbers and use signed math with `S32` or only support unsigned positive numbers with `U32`.
-  
+
   Let’s see the same module without the `U32` enabling math operators and without the `@` & `=` magic for setting globals:
-  
+
   ```elixir
   defmodule CalculateMean do
     use Orb
-  
+
     I32.global(
       count: 0,
       tally: 0
     )
-  
+
     wasm do
       func insert(element: I32) do
         I32.add(global_get(:count), 1)
@@ -56,24 +56,24 @@ defmodule Orb do
         I32.add(global_get(:tally), element)
         global_set(:tally)
       end
-  
+
       func calculate_mean(), I32 do
         I32.div_u(global_get(:tally), global_get(:count))
       end
     end
   end
   ```
-  
+
   This is the exact same logic as before. In fact, this is what the first version expands to. Orb adds “sugar syntax” to make authoring WebAssembly nicer, to make it feel like writing Elixir or Ruby.
-  
+
   ## Stack based
-  
+
   While it looks like Elixir, there are some key differences between it and programs written in Orb. The first is that state is mutable. While immutability is one of the best features of Elixir, in WebAssembly variables are mutable because that’s how computer memory works.
-  
+
   The second key difference is that WebAssembly is stack based. Every function has an implicit stack of values that you can push and pop from. This is low level enough that WebAssembly runtimes can optimize it to efficient CPU instructions whilst not being as restrictive (and platform specific) as raw registers.
-  
+
   In Elixir when you write:
-  
+
   ```elixir
   def example() do
     1
@@ -81,11 +81,11 @@ defmodule Orb do
     3
   end
   ```
-  
+
   The first two lines with `1` and `2` are inert — they have no effect — and the result from the function is `3`.
-  
+
   In WebAssembly / Orb when you write the same sort of thing:
-  
+
   ```elixir
   wasm do
     func example() do
@@ -95,124 +95,125 @@ defmodule Orb do
     end
   end
   ```
-  
+
   Then what’s happening is that we are pushing `1` onto the stack, then `2`, and then `3`. Now the stack has three items on it. Which will become our return value: a tuple of 3 integers. (Our function has no return type specified, so this will be an error if you attempted to compile the resulting module).
-  
+
   You can use the stack to unlock different patterns, but for the most part Orb avoids the need to interact with it. It’s just something to keep in mind if you are used to lines of code with simple values not having any side effects. In Orb a line with `42` written will push that value `42` onto the stack!
-  
+
   ## Locals
-  
+
   Locals are variables that live for the lifetime of the function. They must be specified upfront with their type, and are initialized to zero.
-  
+
   Here we have two locals: `under?` and `over?`, both 32-bit integers.
-  
+
   ```elixir
   defmodule WithinRange do
     use Orb
-  
+
     wasm do
       func validate(num: I32), I32, under?: I32, over?: I32 do
         under? = I32.lt_s(num, 1)
         over? = I32.gt_s(num, 255)
-  
+
         I32.or(under?, over?) |> I32.eqz()
       end
     end
   end
   ```
-  
+
   ## Globals
-  
+
   Globals are like locals, but live for the duration of the entire instantiated module’s life. Their initial type and value must be specified.
-  
+
   Globals by default are internal-only: nothing outside the module can see them. They can be exported to expose them to the outside world.
-  
+
   When exporting a global you decide if it is readonly or mutable.
-  
+
   ```elixir
   I32.global(some_internal_global: 99)
-  
+
   I32.export_readonly_global(some_public_constant: 1001)
-  
+
   I32.export_mutable_global(some_public_variable: 42)
-  
+
   # You can define multiple globals at once:
   I32.global(magic_number_a: 99, magic_number_b: 12, magic_number_c: -5)
   ```
-  
+
   ```elixir
   I32.globalp(some_internal_global: 99)
-  
+
   I32.global_readonly(:readonly, some_public_constant: 1001)
-  
+
   I32.global_mutable(some_public_variable: 42)
-  
+
   # You can define multiple globals at once:
   I32.globalp(magic_number_a: 99, magic_number_b: 12, magic_number_c: -5)
   ```
-  
+
   ## Memory
-  
+
   WebAssembly provides a buffer of memory when you need more than a handful integers or floats. This is a contiguous array of random-access memory which you can freely read and write to.
-  
+
   Memory comes in 64KiB segments called pages. You can have some multiple of these 64KiB pages.
-  
+
   To read from memory, you can use the `I32.load(address)` function. This loads a 32-bit integer at the given address. Addresses are themselves 32-bit integers. This mean you can perform pointer arithmetic to calculate whatever address you need to access. However, this can prove unsafe, as it‘s easy to calculate the wrong address and corrupt your memory. For this reason, Orb provides higher level constructs for making working with memory more pleasant.
-  
+
   ```elixir
-  
+
   ```
-  
+
   ### Pages
-  
+
   Each page is 64 KiB (64 * 1024 = 65,536 bytes). By default your module will have no memory.
-  
+
   ```elixir
   memory(pages: 4)
-  
+
   memory(increase_pages: 4)
-  
+
   memory(min_pages: 4)
   ```
-  
+
   ### Reading memory
   ### Writing memory
-  
+
   ### Data
-  
-  
+
+
   ### Strings
-  
+
   ### Custom types with `Access`
-  
+
   ## Control flow
-  
+
   - If statements
   - Loops
   - Blocks
   - Calling other functions
-  
+
   ## Exporting
-  
+
   - Functions
   - Globals
-  
+
   ## Importing
-  
+
   ## Use Elixir features
-  
+
   - Piping
   - Module attributes
   - Inline for
-  
+
   ## Define your own functions and macros
-  
+
   ## Composing modules together
-  
+
   ## Running your module
   """
 
   alias Orb.Ops
+  alias Orb.Memory
   alias Orb.ToWat
   require Ops
 
@@ -232,8 +233,8 @@ defmodule Orb do
 
     quote do
       import Orb
-      alias Orb.{I32, U32, F32}
-      require Orb.I32
+      alias Orb.{I32, U32, F32, Memory}
+      require Orb.{I32, Memory}
 
       # @wasm_name __MODULE__ |> Module.split() |> List.last()
       # @before_compile {unquote(__MODULE__), :register_attributes}
@@ -394,22 +395,6 @@ defmodule Orb do
 
   defmodule Import do
     defstruct [:module, :name, :type]
-  end
-
-  defmodule Memory do
-    defstruct name: "", min: 0, exported?: false
-
-    def from(nil), do: nil
-
-    def from(list) when is_list(list) do
-      case Enum.sum(list) do
-        0 ->
-          nil
-
-        _min ->
-          %__MODULE__{min: Enum.sum(list)}
-      end
-    end
   end
 
   defmodule Data do

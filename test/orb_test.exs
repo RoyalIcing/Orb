@@ -38,7 +38,7 @@ defmodule OrbTest do
       defmodule Example do
         use Orb
 
-        wasm_memory(pages: 2)
+        Memory.pages(2)
       end
 
       assert to_wat(Example) == """
@@ -52,8 +52,8 @@ defmodule OrbTest do
       defmodule Example do
         use Orb
 
-        wasm_memory(pages: 2)
-        wasm_memory(pages: 2)
+        Memory.pages(2)
+        Memory.pages(2)
       end
 
       assert to_wat(Example) == """
