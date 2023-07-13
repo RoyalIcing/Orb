@@ -1899,26 +1899,6 @@ defmodule Orb do
   end
 
   def do_wat(
-        %Orb.Global{name: name, type: type, initial_value: initial_value, exported: exported},
-        indent
-      ) do
-    # (global $count (mut i32) (i32.const 0))
-    [
-      indent,
-      "(global ",
-      case exported do
-        false -> [?$, to_string(name)]
-        true -> ["(export ", to_string(name), ?)]
-      end,
-      " (mut ",
-      type,
-      ") (i32.const ",
-      to_string(initial_value),
-      "))"
-    ]
-  end
-
-  def do_wat(
         %Func{
           name: name,
           params: params,
