@@ -116,6 +116,24 @@ defmodule OrbTest do
     end
   end
 
+  describe "imports" do
+    test "can declare import" do
+      defmodule ImportsLog32 do
+        use Orb
+
+        # Import.func(:log, :int32, as: :log32, params: I32, result: I32))
+        # wasm_import(:log, :int32, funcp(log32(I32), I32))
+        wasm_import(:log, :int32, func(name: :log32, params: I32, result: I32))
+      end
+
+      assert to_wat(ImportsLog32) == """
+             (module $ImportsLog32
+               (import "log" "int32" (func $log32 (param i32) (result i32)))
+             )
+             """
+    end
+  end
+
   describe "~S" do
     test "assigns data" do
       defmodule HTMLTypes do

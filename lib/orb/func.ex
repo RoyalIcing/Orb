@@ -53,6 +53,15 @@ defmodule Orb.Func do
     defimpl Orb.ToWat do
       alias Orb.ToWat.Instructions
 
+      def to_wat(%Param{name: nil, type: type}, indent) do
+        [
+          indent,
+          "(param ",
+          Instructions.do_type(type),
+          ?)
+        ]
+      end
+
       def to_wat(%Param{name: name, type: type}, indent) do
         [
           indent,
@@ -82,8 +91,17 @@ defmodule Orb.Func do
     defimpl Orb.ToWat do
       alias Orb.ToWat.Instructions
 
-      def to_wat(%Orb.Func.Type{name: name, param_types: :i32, result_type: result_type}, indent) do
-        ~s[#{indent}(func $#{name} (param i32) #{Instructions.to_wat(result_type)})]
+      def to_wat(%Type{name: name, param_types: param_types, result_type: result_type}, indent) do
+        [
+          indent,
+          "(func $",
+          to_string(name),
+          " ",
+          Orb.ToWat.to_wat(%Param{name: nil, type: param_types}, ""),
+          " ",
+          Instructions.do_wat(result_type),
+          ?)
+        ]
       end
     end
   end
