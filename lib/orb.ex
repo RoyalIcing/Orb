@@ -270,28 +270,6 @@ defmodule Orb do
     end
   end
 
-  defmodule Param do
-    defstruct [:name, :type]
-  end
-
-  defmodule Func do
-    defstruct [:name, :params, :result, :local_types, :body, :exported?, :source_module]
-  end
-
-  defmodule FuncType do
-    defstruct [:name, :param_types, :result_type]
-
-    # TODO: should this be its own struct type?
-    def imported_func(name, params, result_type) do
-      # param_types = [:i32]
-      %__MODULE__{
-        name: name,
-        param_types: params,
-        result_type: {:result, result_type}
-      }
-    end
-  end
-
   defmodule ModuleDefinition do
     defstruct name: nil,
               imports: [],
@@ -340,7 +318,7 @@ defmodule Orb do
 
       funcs =
         Enum.flat_map(body, fn
-          %Func{} = func ->
+          %Orb.Func{} = func ->
             [%{func | exported?: exported?, source_module: func.source_module || source_module}]
 
           _ ->
@@ -354,10 +332,10 @@ defmodule Orb do
       body = List.flatten(body)
       exported? = visibility == :exported
 
-      # func = Enum.find(body, &match?(%Func{name: ^name}, &1))
+      # func = Enum.find(body, &match?(%Orb.Func{name: ^name}, &1))
       func =
         Enum.find_value(body, fn
-          %Func{name: ^name} = func ->
+          %Orb.Func{name: ^name} = func ->
             %{func | exported?: exported?, source_module: func.source_module || source_module}
 
           _ ->
@@ -390,74 +368,6 @@ defmodule Orb do
 
   defmodule Data do
     defstruct [:offset, :value, :nul_terminated]
-  end
-
-  defmodule IfElse do
-    defstruct [:result, :condition, :when_true, :when_false]
-
-    # def new(:i32, condition, {:i32_const, a}, {:i32_const, b}) do
-    #   [
-    #     a,
-    #     b,
-    #     condition,
-    #     :select!
-    #   ]
-    # end
-
-    def new(condition, when_true) do
-      %__MODULE__{
-        result: nil,
-        condition: optimize_condition(condition),
-        when_true: when_true,
-        when_false: nil
-      }
-    end
-
-    def new(condition, when_true, when_false) do
-      %__MODULE__{
-        result: nil,
-        condition: optimize_condition(condition),
-        when_true: when_true,
-        when_false: when_false
-      }
-    end
-
-    def new(result, condition, when_true, when_false)
-        when not is_nil(result) and not is_nil(when_false) do
-      %__MODULE__{
-        result: result,
-        condition: optimize_condition(condition),
-        when_true: when_true,
-        when_false: when_false
-      }
-    end
-
-    defp optimize_condition({:i32, :gt_u, {n, 0}}), do: n
-    defp optimize_condition(condition), do: condition
-
-    def detecting_result_type(condition, when_true, when_false) do
-      result =
-        case when_true do
-          # TODO: detect actual type instead of assuming i32
-          # [{:return, _value}] -> :i32
-          _ -> nil
-        end
-
-      %__MODULE__{
-        result: result,
-        condition: condition,
-        when_true: when_true,
-        when_false: when_false
-      }
-    end
-  end
-
-  defmodule Loop do
-    defstruct [:identifier, :result, :body]
-  end
-
-  defmodule Block do
-    defstruct [:identifier, :result, :body]
   end
 
   defmodule I32 do
@@ -634,7 +544,7 @@ defmodule Orb do
 
     defmacro when?(condition, do: when_true, else: when_false) do
       quote do
-        IfElse.new(
+        Orb.IfElse.new(
           :i32,
           unquote(condition),
           unquote(__get_block_items(when_true)),
@@ -654,12 +564,9 @@ defmodule Orb do
       ]
     end
 
-    # def eqz?(value, do: when_true, else: when_false) do
-    #   {:i32, :and, {value, when_true}}, else: when_false)
-    # end
-
+    # TODO: remove?
     def eqz?(value, do: when_true, else: when_false) do
-      IfElse.new(:i32, eqz(value), when_true, when_false)
+      Orb.IfElse.new(:i32, eqz(value), when_true, when_false)
     end
 
     def calculate_enum(cases) do
@@ -1060,7 +967,7 @@ defmodule Orb do
                 %Import{
                   module: unquote(first),
                   name: unquote(second),
-                  type: FuncType.imported_func(unquote(name), unquote(arg1), nil)
+                  type: Orb.Func.Type.imported_func(unquote(name), unquote(arg1), nil)
                 }
               end
 
@@ -1156,7 +1063,7 @@ defmodule Orb do
     #       %Import{
     #         module: unquote(first),
     #         name: unquote(second),
-    #         type: FuncType.imported_func(unquote(name), unquote(arg1), nil)
+    #         type: Orb.Func.Type.imported_func(unquote(name), unquote(arg1), nil)
     #       }
     #     end
     #
@@ -1172,52 +1079,12 @@ defmodule Orb do
   end
 
   def expand_type(type, env \\ __ENV__) do
-    case Macro.expand_literals(type, env) do
-      I32 ->
-        :i32
-
-      F32 ->
-        :f32
-
-      I32.U8 ->
-        :i32_u8
-
-      # I32.AlignedPointer -> :i32_aligned_ptr
-      # I32.UnalignedPointer -> :i32_ptr
-      # I32.Pointer ->
-      #   :i32_ptr
-
-      # Memory.I32.Pointer -> :i32
-      # Memory0.I32 -> :i32
-      :i32 ->
-        :i32
-
-      :f32 ->
-        :f32
-
-      nil ->
-        nil
-
-      mod ->
-        #         case Code.ensure_loaded(mod) do
-        #           {:module, mod} ->
-        #             if function_exported?(mod, :wasm_type, 0) do
-        #               # mod.wasm_type()
-        #               mod
-        #             else
-        #               raise "You passed a Orb type module #{mod} that does not implement wasm_type/0."
-        #             end
-        #
-        #           {:error, :nofile} ->
-        # raise "You passed a Orb type module #{mod} that does not exist or cannot be loaded."
-        mod
-        # end
-    end
+    Orb.ToWat.Instructions.expand_type(type, env)
   end
 
   def func(options) do
     name = Keyword.fetch!(options, :name)
-    FuncType.imported_func(name, options[:params], options[:result])
+    Orb.Func.Type.imported_func(name, options[:params], options[:result])
   end
 
   defmacro func(call, do: block) do
@@ -1321,7 +1188,7 @@ defmodule Orb do
     quote do
       # List.flatten([
       #   unquote(Macro.escape(data_els)),
-      %Func{
+      %Orb.Func{
         name: unquote(name),
         params: unquote(params),
         result: result(unquote(result_type)),
@@ -1497,7 +1364,7 @@ defmodule Orb do
   @primitive_types [:i32, :f32, :i32_u8]
 
   def param(name, type) when type in @primitive_types do
-    %Param{name: name, type: type}
+    %Orb.Func.Param{name: name, type: type}
   end
 
   def param(name, type) when is_atom(type) do
@@ -1505,7 +1372,7 @@ defmodule Orb do
     #   raise "Param of type #{type} must implement wasm_type/0."
     # end
 
-    %Param{name: name, type: type}
+    %Orb.Func.Param{name: name, type: type}
   end
 
   def export(name) do
@@ -1606,7 +1473,7 @@ defmodule Orb do
     block_items =
       quote(
         do:
-          IfElse.new(
+          Orb.IfElse.new(
             # unquote(source),
             unquote(source)[:valid?],
             [
@@ -1620,7 +1487,7 @@ defmodule Orb do
       )
 
     quote do
-      %Loop{
+      %Orb.Loop{
         identifier: unquote(identifier),
         result: unquote(result_type),
         body: unquote(block_items)
@@ -1656,7 +1523,7 @@ defmodule Orb do
 
         condition ->
           quote do:
-                  IfElse.new(
+                  Orb.IfElse.new(
                     unquote(condition),
                     [unquote(block_items), {:br, unquote(identifier)}]
                   )
@@ -1664,7 +1531,7 @@ defmodule Orb do
 
     # quote bind_quoted: [identifier: identifier] do
     quote do
-      %Loop{
+      %Orb.Loop{
         identifier: unquote(identifier),
         result: unquote(result_type),
         body: unquote(block_items)
@@ -1679,7 +1546,7 @@ defmodule Orb do
     block_items = __get_block_items(block)
 
     quote do
-      %Block{
+      %Orb.Block{
         identifier: unquote(identifier),
         result: unquote(result_type),
         body: unquote(block_items)
@@ -1727,9 +1594,9 @@ defmodule Orb do
     do: {:br_if, expand_identifier(identifier, __ENV__), condition}
 
   def return(), do: :return
-  def return(if: condition), do: IfElse.new(condition, :return)
+  def return(if: condition), do: Orb.IfElse.new(condition, :return)
   def return(value), do: {:return, value}
-  def return(value, if: condition), do: IfElse.new(condition, {:return, value})
+  def return(value, if: condition), do: Orb.IfElse.new(condition, {:return, value})
 
   def nop(), do: :nop
 
@@ -1739,7 +1606,7 @@ defmodule Orb do
   def unreachable!(), do: :unreachable
 
   def assert!(condition) do
-    IfElse.new(
+    Orb.IfElse.new(
       condition,
       nop(),
       unreachable!()
@@ -1862,10 +1729,6 @@ defmodule Orb do
     ~s"#{indent}(memory #{do_wat(name)} #{min})"
   end
 
-  def do_wat(%FuncType{name: name, param_types: :i32, result_type: result_type}, indent) do
-    ~s[#{indent}(func $#{name} (param i32) #{do_wat(result_type)})]
-  end
-
   def do_wat(%Data{offset: offset, value: value, nul_terminated: nul_terminated}, indent) do
     [
       indent,
@@ -1895,129 +1758,6 @@ defmodule Orb do
       ]
     end
     |> Enum.intersperse("\n")
-  end
-
-  def do_wat(
-        %Func{
-          name: name,
-          params: params,
-          result: result,
-          local_types: local_types,
-          body: body,
-          exported?: exported?
-        },
-        indent
-      ) do
-    [
-      [
-        indent,
-        case exported? do
-          false -> ~s[(func $#{name} ]
-          true -> ~s[(func $#{name} (export "#{name}") ]
-        end,
-        Enum.intersperse(
-          for(param <- params, do: do_wat(param)) ++ if(result, do: [do_wat(result)], else: []),
-          " "
-        ),
-        "\n"
-      ],
-      for {id, type} <- local_types do
-        [
-          "  ",
-          indent,
-          "(local $",
-          to_string(id),
-          " ",
-          do_type(type),
-          ")\n"
-        ]
-      end,
-      do_wat(body, "  " <> indent),
-      "\n",
-      [indent, ")"]
-    ]
-  end
-
-  def do_wat(%Param{name: name, type: type}, indent) do
-    [
-      indent,
-      "(param $",
-      to_string(name),
-      " ",
-      do_type(type),
-      ?)
-    ]
-  end
-
-  def do_wat(
-        %IfElse{
-          result: result,
-          condition: condition,
-          when_true: when_true,
-          when_false: when_false
-        },
-        indent
-      )
-      when not is_nil(condition) do
-    [
-      do_wat(condition, indent),
-      [
-        "\n",
-        indent,
-        "(if ",
-        if(result, do: ["(result ", to_string(expand_type(result)), ") "], else: ""),
-        ?\n
-      ],
-      ["  ", indent, "(then", ?\n],
-      [do_wat(when_true, "    " <> indent), ?\n],
-      ["  ", indent, ")", ?\n],
-      if when_false do
-        [
-          ["  ", indent, "(else", ?\n],
-          [do_wat(when_false, "    " <> indent), ?\n],
-          ["  ", indent, ")", ?\n]
-        ]
-      else
-        []
-      end,
-      [indent, ")"]
-    ]
-  end
-
-  def do_wat(
-        %Loop{identifier: identifier, result: result, body: body},
-        indent
-      ) do
-    [
-      [
-        indent,
-        "(loop $",
-        to_string(identifier),
-        if(result, do: " (result #{result})", else: []),
-        "\n"
-      ],
-      do_wat(body, "  " <> indent),
-      "\n",
-      [indent, ")"]
-    ]
-  end
-
-  def do_wat(
-        %Block{identifier: identifier, result: result, body: body},
-        indent
-      ) do
-    [
-      [
-        indent,
-        "(block $",
-        to_string(identifier),
-        if(result, do: " (result #{result})", else: []),
-        "\n"
-      ],
-      do_wat(body, "  " <> indent),
-      "\n",
-      [indent, ")"]
-    ]
   end
 
   def do_wat(value, indent) when is_atom(value) do

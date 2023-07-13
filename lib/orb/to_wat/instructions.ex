@@ -1,7 +1,55 @@
 defmodule Orb.ToWat.Instructions do
   alias require Orb.Ops
 
+  def expand_type(type, env \\ __ENV__) do
+    case Macro.expand_literals(type, env) do
+      Orb.I32 ->
+        :i32
+
+      Orb.F32 ->
+        :f32
+
+      Orb.I32.U8 ->
+        :i32_u8
+
+      # I32.AlignedPointer -> :i32_aligned_ptr
+      # I32.UnalignedPointer -> :i32_ptr
+      # I32.Pointer ->
+      #   :i32_ptr
+
+      # Memory.I32.Pointer -> :i32
+      # Memory0.I32 -> :i32
+      :i32 ->
+        :i32
+
+      :f32 ->
+        :f32
+
+      nil ->
+        nil
+
+      mod ->
+        #         case Code.ensure_loaded(mod) do
+        #           {:module, mod} ->
+        #             if function_exported?(mod, :wasm_type, 0) do
+        #               # mod.wasm_type()
+        #               mod
+        #             else
+        #               raise "You passed a Orb type module #{mod} that does not implement wasm_type/0."
+        #             end
+        #
+        #           {:error, :nofile} ->
+        # raise "You passed a Orb type module #{mod} that does not exist or cannot be loaded."
+        mod
+        # end
+    end
+  end
+
   def do_wat(instruction), do: do_wat(instruction, "")
+
+  def do_wat(list, indent) when is_list(list) do
+    Enum.map(list, &do_wat(&1, indent)) |> Enum.intersperse("\n")
+  end
 
   def do_wat(:nop, indent), do: [indent, "nop"]
   def do_wat(:pop, _indent), do: []
@@ -84,13 +132,13 @@ defmodule Orb.ToWat.Instructions do
     )
   end
 
-  def do_wat(%struct{} = value, indent) do
+  def do_wat(%_struct{} = value, indent) do
     # Protocol.assert_impl!(struct, Orb.ToWat)
 
     Orb.ToWat.to_wat(value, indent)
   end
 
-  defp do_type(type) do
+  def do_type(type) do
     case type do
       type when type in [:i32, :i32_u8] ->
         "i32"
