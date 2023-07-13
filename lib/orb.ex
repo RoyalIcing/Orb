@@ -204,11 +204,11 @@ defmodule Orb do
   end
   ```
 
-  ### Populating memory with data
+  ### Initializing memory with data
 
-  You can populate the initial memory of your module using `data/2`. This accepts an memory offset and the string to write there.
+  You can populate the initial memory of your module using `Orb.Memory.initial_data/1`. This accepts an memory offset and the string to write there.
 
-  Having to remember each memory offset is a pain, so read the next section on constant strings for an easier approach.
+  Having to allocate and remember each memory offset is a pain, so read the next section on constant strings for an easier approach.
 
   ```elixir
   defmodule MimeTypeDataExample do
@@ -217,8 +217,8 @@ defmodule Orb do
     Memory.pages(1)
 
     wasm do
-      data_nul_terminated(0x100, "text/html")
-      data_nul_terminated(0x200, \"""
+      Memory.initial_data(offset: 0x100, string: "text/html")
+      Memory.initial_data(offset: 0x200, string: \"""
         <!doctype html>
         <meta charset=utf-8>
         <h1>Hello world</h1>
@@ -291,7 +291,7 @@ defmodule Orb do
   end
   ```
 
-  If you want a ternary operator (map to another value), you can use `when?` instead:
+  If you want a ternary operator (map from one value to another), you can use `Orb.I32.when?/2` instead:
 
   ```elixir
   music_volume = I32.when? @party_mode? do
@@ -518,10 +518,6 @@ defmodule Orb do
 
   defmodule Import do
     defstruct [:module, :name, :type]
-  end
-
-  defmodule Data do
-    defstruct [:offset, :value, :nul_terminated]
   end
 
   defmodule I32 do
@@ -1437,20 +1433,12 @@ defmodule Orb do
     Map.new(lookup_table)
   end
 
-  def data(offset, value) do
-    %Data{offset: offset, value: value, nul_terminated: false}
-  end
-
-  def data(packed_map) when is_map(packed_map) do
-    for {_key, %{offset: offset, string: string}} <- packed_map do
-      data(offset, string)
-    end
-  end
-
+  # TODO: remove
   def wasm_import_old(module, name, type) do
     %Import{module: module, name: name, type: type}
   end
 
+  # TODO: merge with existing code?
   @primitive_types [:i32, :f32, :i32_u8]
 
   def param(name, type) when type in @primitive_types do
@@ -1660,15 +1648,6 @@ defmodule Orb do
 
   def const(value) do
     {:const_string, value}
-    # mod = __CALLER__.module
-    # mod = __ENV__.module
-
-    # quote do
-    #   var!(offset) = Module.get_attribute(unquote(mod), :data_offset, 0x4)
-    #   var!(new_offset) = byte_size(unquote(value)) + 1
-    #   Module.put_attribute(unquote(mod), :data_offset, var!(new_offset))
-    #   %Data{offset: var!(offset), value: unquote(value), nul_terminated: true}
-    # end
   end
 
   def const_set_insert(set_name, string) when is_atom(set_name) and is_binary(string) do
@@ -1799,10 +1778,6 @@ defmodule Orb do
     ]
   end
 
-  def do_wat(%ModuleDefinition{}, _indent) do
-    raise "Should have been caught by previous"
-  end
-
   def do_wat(%Import{module: nil, name: name, type: type}, indent) do
     ~s[#{indent}(import "#{name}" #{do_wat(type)})]
   end
@@ -1817,20 +1792,6 @@ defmodule Orb do
 
   def do_wat(%Memory{name: name, min: min}, indent) do
     ~s"#{indent}(memory #{do_wat(name)} #{min})"
-  end
-
-  def do_wat(%Data{offset: offset, value: value, nul_terminated: nul_terminated}, indent) do
-    [
-      indent,
-      "(data (i32.const ",
-      to_string(offset),
-      ") ",
-      ?",
-      value |> String.replace(~S["], ~S[\"]) |> String.replace("\n", ~S"\n"),
-      if(nul_terminated, do: ~S"\00", else: []),
-      ?",
-      ")"
-    ]
   end
 
   def do_wat(%Constants{} = constants, indent) do

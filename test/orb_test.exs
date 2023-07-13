@@ -324,7 +324,7 @@ defmodule OrbTest do
 
       wasm do
         inline for {status, message} <- ^@statuses do
-          data(status * 24, message)
+          Memory.initial_data(offset: status * 24, string: message)
         end
 
         func lookup(status: I32), I32 do

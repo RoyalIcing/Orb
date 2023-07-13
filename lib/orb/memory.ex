@@ -20,6 +20,16 @@ defmodule Orb.Memory do
     end
   end
 
+  def initial_data(offset: offset, string: value) do
+    %Orb.Data{offset: offset, value: value, nul_terminated: false}
+  end
+
+  def initial_data(packed_map) when is_map(packed_map) do
+    for {_key, %{offset: offset, string: string}} <- packed_map do
+      initial_data(offset: offset, string: string)
+    end
+  end
+
   def load!(type, address) do
     type =
       if function_exported?(type, :wasm_type, 0) do
