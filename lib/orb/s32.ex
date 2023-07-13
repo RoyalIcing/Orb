@@ -6,7 +6,7 @@ defmodule Orb.S32 do
 
   defmodule DSL do
     @moduledoc """
-    Signed integer operators.
+    Signed 32-bit integer operators.
     """
 
     import Kernel, except: [/: 2, ===: 2, !==: 2, <=: 2, >=: 2]

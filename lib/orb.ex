@@ -1037,19 +1037,20 @@ defmodule Orb do
       end
 
     import_dsl_quoted =
-      case transform do
+      case Macro.expand_literals(transform, __CALLER__) do
         Orb.S32 ->
           quote do
             import(Orb.I32.DSL)
             import(Orb.S32.DSL)
           end
 
-        transform when transform in [Orb.S32, Orb.U32] ->
+        Orb.U32 ->
           quote do
             import(Orb.I32.DSL)
+            import(Orb.U32.DSL)
           end
 
-        _ ->
+        :no_magic ->
           []
       end
 
@@ -1085,6 +1086,8 @@ defmodule Orb do
       import OrbUsing, only: []
       import OrbUsing2, only: []
       import Orb.I32.DSL, only: []
+      import Orb.S32.DSL, only: []
+      import Orb.U32.DSL, only: []
     end
   end
 

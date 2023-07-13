@@ -1,58 +1,37 @@
 defmodule Orb.U32 do
   def apply_to_ast(nodes) do
-    Macro.prewalk(nodes, fn
-      # Allow values known at compile time to be executed at compile-time by Elixir
-      node = {:+, _, [a, b]} when is_integer(a) and is_integer(b) ->
-        node
+    nodes
+  end
 
-      {:+, meta, [a, b]} ->
-        {:{}, meta, [:i32, :add, {a, b}]}
+  defmodule DSL do
+    @moduledoc """
+    Unsigned 32-bit integer operators.
+    """
 
-      node = {:-, _, [a, b]} when is_integer(a) and is_integer(b) ->
-        node
+    import Kernel, except: [/: 2, ===: 2, !==: 2, <=: 2, >=: 2]
 
-      {:-, meta, [a, b]} ->
-        {:{}, meta, [:i32, :sub, {a, b}]}
+    def left / right do
+      Orb.I32.div_u(left, right)
+    end
 
-      {:*, _meta, [a, b]} ->
-        quote do: Orb.Numeric.Multiply.optimized(Orb.I32, unquote(a), unquote(b))
+    def left >>> right do
+      Orb.I32.shr_u(left, right)
+    end
 
-      node = {:/, _, [a, b]} when is_integer(a) and is_integer(b) ->
-        node
+    def left < right do
+      Orb.I32.lt_u(left, right)
+    end
 
-      {:/, meta, [a, b]} ->
-        {:{}, meta, [:i32, :div_u, {a, b}]}
+    def left > right do
+      Orb.I32.gt_u(left, right)
+    end
 
-      {:<=, meta, [a, b]} ->
-        {:{}, meta, [:i32, :le_u, {a, b}]}
+    def left <= right do
+      Orb.I32.le_u(left, right)
+    end
 
-      {:>=, meta, [a, b]} ->
-        {:{}, meta, [:i32, :ge_u, {a, b}]}
-
-      {:<, meta, [a, b]} ->
-        {:{}, meta, [:i32, :lt_u, {a, b}]}
-
-      {:>, meta, [a, b]} ->
-        {:{}, meta, [:i32, :gt_u, {a, b}]}
-
-      {:>>>, meta, [a, b]} ->
-        {:{}, meta, [:i32, :shr_u, {a, b}]}
-
-      {:<<<, meta, [a, b]} ->
-        {:{}, meta, [:i32, :shl, {a, b}]}
-
-      {:&&&, meta, [a, b]} ->
-        {:{}, meta, [:i32, :and, {a, b}]}
-
-      {:|||, meta, [a, b]} ->
-        {:{}, meta, [:i32, :or, {a, b}]}
-
-      # FIXME: I don’t like this, as it’s not really a proper “call” e.g. it breaks |> piping
-      {:rem, meta, [a, b]} ->
-        {:{}, meta, [:i32, :rem_u, {a, b}]}
-
-      other ->
-        other
-    end)
+    def left >= right do
+      Orb.I32.ge_u(left, right)
+    end
   end
 end
