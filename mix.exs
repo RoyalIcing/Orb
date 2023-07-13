@@ -1,6 +1,8 @@
 defmodule Orb.MixProject do
   use Mix.Project
 
+  @source_url "https://github.com/RoyalIcing/orb"
+
   def project do
     [
       app: :orb,
@@ -10,7 +12,12 @@ defmodule Orb.MixProject do
       deps: deps(),
       description: "DSL for WebAssembly",
       package: package(),
-      source_url: "https://github.com/RoyalIcing/orb"
+
+      # Docs
+      name: "Orb",
+      docs: docs(),
+      source_url: @source_url,
+      homepage_url: "https://calculated.world/orb"
     ]
   end
 
@@ -25,7 +32,8 @@ defmodule Orb.MixProject do
   defp deps do
     [
       {:orb_wasmtime, "~> 0.1.2", only: :test},
-      {:jason, "~> 1.0", only: :test}
+      {:jason, "~> 1.0", only: :test},
+      {:ex_doc, "~> 0.27", only: :dev, runtime: false}
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
     ]
@@ -36,7 +44,16 @@ defmodule Orb.MixProject do
       name: :orb,
       maintainers: ["Patrick George Wyndham Smith"],
       licenses: ["BSD-3-Clause"],
-      links: %{"GitHub" => "https://github.com/RoyalIcing/orb"}
+      links: %{"GitHub" => @source_url}
+    ]
+  end
+
+  defp docs do
+    [
+      # The main page in the docs
+      main: "Orb",
+      # logo: "path/to/logo.png",
+      extras: ["README.md"]
     ]
   end
 end
