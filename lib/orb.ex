@@ -953,80 +953,11 @@ defmodule Orb do
     end
   end
 
-  defp define_module(name, options, block, env) do
-    options = Macro.expand(options, env)
-
-    imports = Keyword.get(options, :imports, [])
-
-    imports =
-      for {first, sub_imports} <- imports do
-        for {second, definition} <- sub_imports do
-          case definition do
-            {:func, _meta, [name, arg1]} ->
-              quote do
-                %Import{
-                  module: unquote(first),
-                  name: unquote(second),
-                  type: Orb.Func.Type.imported_func(unquote(name), unquote(arg1), nil)
-                }
-              end
-
-            _ ->
-              quote do
-                %Import{module: unquote(first), name: unquote(second), type: unquote(definition)}
-              end
-          end
-        end
-      end
-
-    imports = List.flatten(imports)
-
-    %{body: block_items, constants: constants} = do_module_body(block, options, env, env.module)
-    Module.put_attribute(env.module, :wasm_constants, constants)
-
-    Module.put_attribute(env.module, :wasm_name, name)
-
-    quote do
-      # @before_compile unquote(__MODULE__).BeforeCompile
-
-      @wasm_imports unquote(imports)
-
-      # import Kernel, except: [if: 2, @: 1, ===: 2, !==: 2]
-      # import OrbUsing
-      # import OrbUsing2
-
-      @wasm_body unquote(block_items)
-      # @wasm_body do_module_body(unquote(block), unquote(options), unquote(env.module))
-      # @wasm_body unquote(do_module_body(block, options, env.module)[:body])
-
-      # import Kernel
-      # import OrbUsing, only: []
-      # import OrbUsing2, only: []
-    end
-  end
-
   defmacro data_for_constant(value) do
     quote do
       Constants.new(@wasm_constants)
       |> Constants.to_map()
       |> Constants.resolve(unquote(value))
-    end
-  end
-
-  defmacro defwasm(options \\ [], do: block) do
-    name = __CALLER__.module |> Module.split() |> List.last()
-
-    definition = define_module(name, options, block, __CALLER__)
-
-    quote do
-      #       def funcp(name), do: ModuleDefinition.funcp_ref!(__MODULE__, name)
-      #
-      #       def to_wat(), do: Orb.to_wat(__wasm_module__())
-
-      # import Kernel
-      unquote(definition)
-
-      import Kernel
     end
   end
 
