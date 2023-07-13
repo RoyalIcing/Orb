@@ -1027,18 +1027,20 @@ defmodule Orb do
   end
 
   defp mode_pre(mode) do
-    import_dsl_quoted =
+    dsl =
       case mode do
         Orb.S32 ->
           quote do
             import Orb.I32.DSL
             import Orb.S32.DSL
+            import Orb.Global.DSL
           end
 
         Orb.U32 ->
           quote do
             import Orb.I32.DSL
             import Orb.U32.DSL
+            import Orb.Global.DSL
           end
 
         :no_magic ->
@@ -1064,25 +1066,27 @@ defmodule Orb do
           or: 2
         ]
 
+      # TODO: should this be omitted if :no_magic is passed?
       import Orb.IfElse.DSL
-      import Orb.Global.DSL
-      unquote(import_dsl_quoted)
+      unquote(dsl)
     end
   end
 
   defp mode_post(mode) do
-    import_dsl_quoted =
+    dsl =
       case mode do
         Orb.S32 ->
           quote do
             import Orb.I32.DSL, only: []
             import Orb.S32.DSL, only: []
+            import Orb.Global.DSL, only: []
           end
 
         Orb.U32 ->
           quote do
             import Orb.I32.DSL, only: []
             import Orb.U32.DSL, only: []
+            import Orb.Global.DSL, only: []
           end
 
         :no_magic ->
@@ -1092,8 +1096,7 @@ defmodule Orb do
     quote do
       import Kernel
       import Orb.IfElse.DSL, only: []
-      import Orb.Global.DSL, only: []
-      unquote(import_dsl_quoted)
+      unquote(dsl)
     end
   end
 
