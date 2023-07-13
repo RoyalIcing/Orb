@@ -27,7 +27,7 @@ defmodule Orb.I32.DSL do
   end
 
   def left !== right do
-    Orb.I32.NotEqual.optimized(left, right)
+    Orb.I32.NotEqual.optimized(Orb.I32, left, right)
   end
 
   def left ||| right do
