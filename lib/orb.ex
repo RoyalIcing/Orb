@@ -190,13 +190,11 @@ defmodule Orb do
 
     wasm do
       func get_int32(), I32 do
-        # TODO: Memory.load!(I32.U8, 0x100)
-        I32.load(0x100)
+        Memory.load!(I32, 0x100)
       end
 
       func set_int32(value: I32) do
-        # TODO: Memory.store!(I32, 0x100, value)
-        I32.store(0x100, value)
+        Memory.store!(I32, 0x100, value)
       end
     end
   end
