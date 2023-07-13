@@ -1026,29 +1026,24 @@ defmodule Orb do
     end
   end
 
-  defmacro wasm(transform \\ Orb.S32, do: block) do
-    # block = interpolate_external_values(block, __ENV__)
-
+  defp mode_pre(mode) do
     import_dsl_quoted =
-      case Macro.expand_literals(transform, __CALLER__) do
+      case mode do
         Orb.S32 ->
           quote do
-            import(Orb.I32.DSL)
-            import(Orb.S32.DSL)
+            import Orb.I32.DSL
+            import Orb.S32.DSL
           end
 
         Orb.U32 ->
           quote do
-            import(Orb.I32.DSL)
-            import(Orb.U32.DSL)
+            import Orb.I32.DSL
+            import Orb.U32.DSL
           end
 
         :no_magic ->
           []
       end
-
-    %{body: body, constants: constants} = do_module_body(block, [], __CALLER__, __CALLER__.module)
-    Module.put_attribute(__CALLER__.module, :wasm_constants, constants)
 
     quote do
       import Kernel,
@@ -1072,15 +1067,52 @@ defmodule Orb do
       import OrbUsing
       import OrbUsing2
       unquote(import_dsl_quoted)
+    end
+  end
 
-      @wasm_body unquote(body)
+  defp mode_post(mode) do
+    import_dsl_quoted =
+      case mode do
+        Orb.S32 ->
+          quote do
+            import Orb.I32.DSL, only: []
+            import Orb.S32.DSL, only: []
+          end
 
+        Orb.U32 ->
+          quote do
+            import Orb.I32.DSL, only: []
+            import Orb.U32.DSL, only: []
+          end
+
+        :no_magic ->
+          []
+      end
+
+    quote do
       import Kernel
       import OrbUsing, only: []
       import OrbUsing2, only: []
-      import Orb.I32.DSL, only: []
-      import Orb.S32.DSL, only: []
-      import Orb.U32.DSL, only: []
+      unquote(import_dsl_quoted)
+    end
+  end
+
+  defmacro wasm(mode \\ Orb.S32, do: block) do
+    # block = interpolate_external_values(block, __ENV__)
+
+    mode = Macro.expand_literals(mode, __CALLER__)
+    pre = mode_pre(mode)
+    post = mode_post(mode)
+
+    %{body: body, constants: constants} = do_module_body(block, [], __CALLER__, __CALLER__.module)
+    Module.put_attribute(__CALLER__.module, :wasm_constants, constants)
+
+    quote do
+      unquote(pre)
+
+      @wasm_body unquote(body)
+
+      unquote(post)
     end
   end
 
@@ -1315,15 +1347,12 @@ defmodule Orb do
     end)
   end
 
-  defmacro snippet(transform \\ Orb.S32, locals \\ [], do: block) do
+  defmacro snippet(mode \\ Orb.S32, locals \\ [], do: block) do
     block = interpolate_external_values(block, __CALLER__)
 
-    block =
-      case Macro.expand_literals(transform, __CALLER__) do
-        :no_magic -> block
-        Orb.S32 -> Orb.S32.apply_to_ast(block)
-        Orb.U32 -> Orb.U32.apply_to_ast(block)
-      end
+    mode = Macro.expand_literals(mode, __CALLER__)
+    pre = mode_pre(mode)
+    post = mode_post(mode)
 
     block_items =
       case block do
@@ -1337,15 +1366,11 @@ defmodule Orb do
       end
 
     quote do
-      import Kernel, except: [if: 2, @: 1, ===: 2, !==: 2]
-      import OrbUsing
-      import OrbUsing2
+      unquote(pre)
 
       unquote(do_snippet(locals, block_items))
 
-      import Kernel
-      import OrbUsing, only: []
-      import OrbUsing2, only: []
+      unquote(post)
     end
   end
 
