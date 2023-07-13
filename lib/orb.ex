@@ -142,15 +142,20 @@ defmodule Orb do
   I32.global(magic_number_a: 99, magic_number_b: 12, magic_number_c: -5)
   ```
 
+  You can read or write to a global using the `@` prefix:
+
   ```elixir
-  I32.globalp(some_internal_global: 99)
+  defmodule Counter do
+    use Orb
 
-  I32.global(:export_readonly, some_public_constant: 1001)
+    I32.global(counter: 0)
 
-  I32.global(:export_mutable, some_public_variable: 42)
-
-  # You can define multiple globals at once:
-  I32.globalp(magic_number_a: 99, magic_number_b: 12, magic_number_c: -5)
+    wasm do
+      func increment() do
+        @counter = @counter + 1
+      end
+    end
+  end
   ```
 
   ## Memory
@@ -161,27 +166,45 @@ defmodule Orb do
 
   To read from memory, you can use the `I32.load(address)` function. This loads a 32-bit integer at the given address. Addresses are themselves 32-bit integers. This mean you can perform pointer arithmetic to calculate whatever address you need to access. However, this can prove unsafe, as it‘s easy to calculate the wrong address and corrupt your memory. For this reason, Orb provides higher level constructs for making working with memory more pleasant.
 
-  ```elixir
-
-  ```
-
   ### Pages
 
   Each page is 64 KiB (64 * 1024 = 65,536 bytes). By default your module will have no memory.
 
+  Here’s an example with 4 pages of memory:
+
   ```elixir
-  memory(pages: 4)
+  defmodule Example do
+    use Orb
 
-  memory(increase_pages: 4)
-
-  memory(min_pages: 4)
+    Memory.pages(4)
+  end
   ```
 
-  ### Reading memory
+  ### Reading and writing memory
+
+  ```elixir
+  defmodule Example do
+    use Orb
+
+    Memory.pages(1)
+
+    wasm do
+      func get_int32(), I32 do
+        # TODO: Memory.load!(I32.U8, 0x100)
+        I32.load(0x100)
+      end
+
+      func set_int32(value: I32) do
+        # TODO: Memory.store!(I32, 0x100, value)
+        I32.store(0x100, value)
+      end
+    end
+  end
+  ```
+
   ### Writing memory
 
   ### Data
-
 
   ### Strings
 

@@ -114,6 +114,38 @@ defmodule OrbTest do
              )
              """
     end
+
+    test "reading and writing" do
+      defmodule MemoryLoadStore do
+        use Orb
+
+        Memory.pages(1)
+
+        wasm do
+          func get_int32(), I32 do
+            # TODO: Memory.load!(I32.U8, 0x100)
+            I32.load(0x100)
+          end
+
+          func set_int32(value: I32) do
+            # TODO: Memory.store!(I32, 0x100, value)
+            I32.store(0x100, value)
+          end
+        end
+      end
+
+      assert to_wat(MemoryLoadStore) == """
+             (module $MemoryLoadStore
+               (memory (export "memory") 1)
+               (func $get_int32 (export "get_int32") (result i32)
+                 (i32.load (i32.const 256))
+               )
+               (func $set_int32 (export "set_int32") (param $value i32)
+                 (i32.store (i32.const 256) (local.get $value))
+               )
+             )
+             """
+    end
   end
 
   describe "imports" do
