@@ -746,7 +746,7 @@ defmodule Orb do
       end
     end
 
-    defmacro prop(global_name) do
+    defmacro attr_writer(global_name) when is_atom(global_name) do
       quote do
         func unquote(String.to_atom("#{global_name}="))(new_value: I32) do
           local_get(:new_value)
@@ -755,7 +755,8 @@ defmodule Orb do
       end
     end
 
-    defmacro prop(global_name, as: func_name) do
+    defmacro attr_writer(global_name, as: func_name)
+             when is_atom(global_name) and is_atom(func_name) do
       quote do
         func unquote(func_name)(new_value: I32) do
           local_get(:new_value)
