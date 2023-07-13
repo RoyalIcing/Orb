@@ -1040,6 +1040,12 @@ defmodule Orb do
         Orb.U32 -> Orb.U32.apply_to_ast(block)
       end
 
+    import_dsl_quoted =
+      cond do
+        transform in [Orb.S32, Orb.U32] -> quote do: import(Orb.I32.DSL)
+        true -> []
+      end
+
     %{body: body, constants: constants} = do_module_body(block, [], __CALLER__, __CALLER__.module)
     Module.put_attribute(__CALLER__.module, :wasm_constants, constants)
 
@@ -1047,12 +1053,14 @@ defmodule Orb do
       import Kernel, except: [if: 2, @: 1, ===: 2, !==: 2]
       import OrbUsing
       import OrbUsing2
+      unquote(import_dsl_quoted)
 
       @wasm_body unquote(body)
 
       import Kernel
       import OrbUsing, only: []
       import OrbUsing2, only: []
+      import Orb.I32.DSL, only: []
     end
   end
 
@@ -1818,7 +1826,7 @@ defmodule OrbUsing do
 end
 
 defmodule OrbUsing2 do
-  import Kernel, except: [if: 2, @: 1, ===: 2, !==: 2]
+  import Kernel, except: [if: 2, @: 1]
 
   defmacro @{name, meta, _args} do
     #     Kernel.if Module.has_attribute?(__CALLER__.module, name) do
@@ -1830,14 +1838,6 @@ defmodule OrbUsing2 do
     #     else
     {:global_get, meta, [name]}
     # end
-  end
-
-  def left === right do
-    Orb.I32.eq(left, right)
-  end
-
-  def left !== right do
-    Orb.I32.eq(left, right) |> Orb.I32.eqz()
   end
 
   #   defmacro @{name, meta, args} do
