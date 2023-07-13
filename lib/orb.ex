@@ -131,7 +131,7 @@ defmodule Orb do
 
   ```elixir
   I32.global(some_internal_global: 99)
-  
+
   I32.global(:readonly, some_internal_global: 99)
 
   I32.export_global(:readonly, some_public_constant: 1001)
@@ -758,7 +758,7 @@ defmodule Orb do
     end
 
     defmacro attr_writer(global_name, as: func_name)
-             when is_atom(global_name) and is_atom(func_name) do
+             when is_atom(global_name) |> Kernel.and(is_atom(func_name)) do
       quote do
         func unquote(func_name)(new_value: I32) do
           local_get(:new_value)
