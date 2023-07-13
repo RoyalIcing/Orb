@@ -104,7 +104,7 @@ defmodule Orb do
 
   Locals are variables that live for the lifetime of the function. They must be specified upfront with their type, and are initialized to zero.
 
-  Here we have two locals: `under?` and `over?`, both 32-bit integers.
+  Here we have two locals: `under?` and `over?`, both 32-bit integers. We can set their value to a calculation and then read them later.
 
   ```elixir
   defmodule WithinRange do
@@ -112,10 +112,10 @@ defmodule Orb do
 
     wasm do
       func validate(num: I32), I32, under?: I32, over?: I32 do
-        under? = I32.lt_s(num, 1)
-        over? = I32.gt_s(num, 255)
+        under? = num < 1
+        over? = num > 255
 
-        I32.or(under?, over?) |> I32.eqz()
+        not (under? or over?)
       end
     end
   end
@@ -993,7 +993,9 @@ defmodule Orb do
     Module.put_attribute(__CALLER__.module, :wasm_constants, constants)
 
     quote do
-      import Kernel, except: [if: 2, @: 1, <: 2, >: 2, <=: 2, >=: 2, ===: 2, !==: 2, not: 1]
+      import Kernel,
+        except: [if: 2, @: 1, <: 2, >: 2, <=: 2, >=: 2, ===: 2, !==: 2, not: 1, or: 2]
+
       import OrbUsing
       import OrbUsing2
       unquote(import_dsl_quoted)

@@ -45,7 +45,7 @@ defmodule Orb.S32 do
   end
 
   defmodule DSL do
-    import Kernel, except: [===: 2, !==: 2, <=: 2, >=: 2, not: 1]
+    import Kernel, except: [===: 2, !==: 2, <=: 2, >=: 2, not: 1, or: 2]
 
     def left < right do
       Orb.I32.lt_s(left, right)
@@ -65,6 +65,10 @@ defmodule Orb.S32 do
 
     def not value do
       Orb.I32.eqz(value)
+    end
+
+    def left or right do
+      Orb.I32.or(left, right)
     end
   end
 end
