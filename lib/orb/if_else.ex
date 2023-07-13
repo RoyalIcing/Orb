@@ -98,4 +98,50 @@ defmodule Orb.IfElse do
       ]
     end
   end
+
+  defmodule DSL do
+    import Kernel, except: [if: 2]
+    import Orb
+
+    defmacro if(condition, [result: result], do: when_true, else: when_false) do
+      quote do
+        Orb.IfElse.new(
+          unquote(result),
+          unquote(condition),
+          unquote(Orb.__get_block_items(when_true)),
+          unquote(Orb.__get_block_items(when_false))
+        )
+      end
+    end
+
+    defmacro if(condition, result: result, do: when_true, else: when_false) do
+      quote do
+        Orb.IfElse.new(
+          unquote(result),
+          unquote(condition),
+          unquote(when_true),
+          unquote(when_false)
+        )
+      end
+    end
+
+    defmacro if(condition, do: when_true, else: when_false) do
+      quote do
+        Orb.IfElse.new(
+          unquote(condition),
+          unquote(Orb.__get_block_items(when_true)),
+          unquote(Orb.__get_block_items(when_false))
+        )
+      end
+    end
+
+    defmacro if(condition, do: when_true) do
+      quote do
+        Orb.IfElse.new(
+          unquote(condition),
+          unquote(Orb.__get_block_items(when_true))
+        )
+      end
+    end
+  end
 end

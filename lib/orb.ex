@@ -1064,8 +1064,8 @@ defmodule Orb do
           or: 2
         ]
 
-      import OrbUsing
-      import OrbUsing2
+      import Orb.IfElse.DSL
+      import Orb.Global.DSL
       unquote(import_dsl_quoted)
     end
   end
@@ -1091,8 +1091,8 @@ defmodule Orb do
 
     quote do
       import Kernel
-      import OrbUsing, only: []
-      import OrbUsing2, only: []
+      import Orb.IfElse.DSL, only: []
+      import Orb.Global.DSL, only: []
       unquote(import_dsl_quoted)
     end
   end
@@ -1774,83 +1774,4 @@ defmodule Orb do
 
     Orb.ToWat.to_wat(value, indent)
   end
-end
-
-defmodule OrbUsing do
-  import Kernel, except: [if: 2]
-  import Orb
-
-  defmacro if(condition, [result: result], do: when_true, else: when_false) do
-    quote do
-      Orb.IfElse.new(
-        unquote(result),
-        unquote(condition),
-        unquote(Orb.__get_block_items(when_true)),
-        unquote(Orb.__get_block_items(when_false))
-      )
-    end
-  end
-
-  defmacro if(condition, result: result, do: when_true, else: when_false) do
-    quote do
-      Orb.IfElse.new(
-        unquote(result),
-        unquote(condition),
-        unquote(when_true),
-        unquote(when_false)
-      )
-    end
-  end
-
-  defmacro if(condition, do: when_true, else: when_false) do
-    quote do
-      Orb.IfElse.new(
-        unquote(condition),
-        unquote(Orb.__get_block_items(when_true)),
-        unquote(Orb.__get_block_items(when_false))
-      )
-    end
-  end
-
-  defmacro if(condition, do: when_true) do
-    quote do
-      Orb.IfElse.new(
-        unquote(condition),
-        unquote(Orb.__get_block_items(when_true))
-      )
-    end
-  end
-end
-
-defmodule OrbUsing2 do
-  import Kernel, except: [if: 2, @: 1]
-
-  defmacro @{name, meta, _args} do
-    #     Kernel.if Module.has_attribute?(__CALLER__.module, name) do
-    #       term = {name, meta, args}
-    #
-    #       quote do
-    #         Kernel.@(unquote(term))
-    #       end
-    #     else
-    {:global_get, meta, [name]}
-    # end
-  end
-
-  #   defmacro @{name, meta, args} do
-  #     IO.inspect({name, meta, args})
-  #     # dbg(
-  #     #   {__CALLER__.module, name, Module.attributes_in(__CALLER__.module),
-  #     #    Module.has_attribute?(__CALLER__.module, name)}
-  #     # )
-  #
-  #     Kernel.if Module.has_attribute?(__CALLER__.module, name) ||
-  #                 String.starts_with?(to_string(name), "_") do
-  #       # Kernel.@({name, meta, args}) || :foo
-  #       Kernel.@(name) || :foo
-  #       # nil
-  #     else
-  #       {:global_get, meta, [name]}
-  #     end
-  #   end
 end

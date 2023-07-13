@@ -43,4 +43,12 @@ defmodule Orb.Global do
       ]
     end
   end
+
+  defmodule DSL do
+    import Kernel, except: [@: 1]
+
+    defmacro @{name, meta, _args} do
+      {:global_get, meta, [name]}
+    end
+  end
 end
