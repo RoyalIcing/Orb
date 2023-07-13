@@ -200,20 +200,82 @@ defmodule Orb do
   end
   ```
 
-  ### Writing memory
-
   ### Data
+
+  You can populate the initial memory of your module using `data/2`. This accepts an memory offset and the string to write there.
+
+  Having to remember each memory offset is a pain, so read the next section for an easier approach.
+
+  ```elixir
+  defmodule MimeTypeDataExample do
+    use Orb
+
+    Memory.pages(1)
+
+    wasm do
+      data_nul_terminated(0x100, "text/html")
+      data_nul_terminated(0x200, """
+      <!doctype html>
+      <meta charset=utf-8>
+      <h1>Hello world</h1>
+      """)
+
+      func get_mime_type(), I32 do
+        0x100
+      end
+
+      func get_body(), I32 do
+        0x200
+      end
+    end
+  end
+  ```
 
   ### Strings
 
+  You can use constant strings with the `~S` sigil. These will be extracted as `data` definitions at the start of the WebAssembly module, and their memory offsets substituted in their place.
+
+  Each string is packed together for maximum efficiency of memory space. Strings are deduplicated, so you can use the same string constant multiple times and a single allocation will be made.
+
+  ```elixir
+  defmodule MimeTypeStringExample do
+    use Orb
+
+    Memory.pages(1)
+
+    wasm do
+      func get_mime_type(), I32 do
+        ~S"text/html"
+      end
+
+      func get_body(), I32 do
+        ~S"""
+        <!doctype html>
+        <meta charset=utf-8>
+        <h1>Hello world</h1>
+        """
+      end
+    end
+  end
+  ```
+
   ### Custom types with `Access`
+
+  TODO: extract this into its own section.
 
   ## Control flow
 
-  - If statements
-  - Loops
-  - Blocks
-  - Calling other functions
+  Orb supports control flow with if, block, and loop statements.
+
+  ### If statements
+
+
+
+  ### Loops
+
+  ### Blocks
+
+  ## Calling other functions
 
   ## Exporting
 
