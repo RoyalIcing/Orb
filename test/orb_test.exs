@@ -356,7 +356,7 @@ defmodule OrbTest do
         under? = num < 1
         over? = num > 255
 
-        I32.or(under?, over?) === 0
+        not I32.or(under?, over?)
       end
     end
   end

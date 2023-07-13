@@ -460,6 +460,7 @@ defmodule Orb do
     #   def rem(a, b), do: {:i32, :rem_u, {a, b}}
     # end
 
+    # TODO: remove
     def do_u(items) do
       # import Kernel
       # import Kernel, except: [rem: 2]
@@ -972,16 +973,27 @@ defmodule Orb do
       end
 
     import_dsl_quoted =
-      cond do
-        transform in [Orb.S32, Orb.U32] -> quote do: import(Orb.I32.DSL)
-        true -> []
+      case transform do
+        Orb.S32 ->
+          quote do
+            import(Orb.I32.DSL)
+            import(Orb.S32.DSL)
+          end
+
+        transform when transform in [Orb.S32, Orb.U32] ->
+          quote do
+            import(Orb.I32.DSL)
+          end
+
+        _ ->
+          []
       end
 
     %{body: body, constants: constants} = do_module_body(block, [], __CALLER__, __CALLER__.module)
     Module.put_attribute(__CALLER__.module, :wasm_constants, constants)
 
     quote do
-      import Kernel, except: [if: 2, @: 1, ===: 2, !==: 2]
+      import Kernel, except: [if: 2, @: 1, <: 2, >: 2, <=: 2, >=: 2, ===: 2, !==: 2, not: 1]
       import OrbUsing
       import OrbUsing2
       unquote(import_dsl_quoted)

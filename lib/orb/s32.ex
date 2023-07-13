@@ -23,18 +23,6 @@ defmodule Orb.S32 do
       {:/, meta, [a, b]} ->
         {:{}, meta, [:i32, :div_s, {a, b}]}
 
-      {:<=, meta, [a, b]} ->
-        {:{}, meta, [:i32, :le_s, {a, b}]}
-
-      {:>=, meta, [a, b]} ->
-        {:{}, meta, [:i32, :ge_s, {a, b}]}
-
-      {:<, meta, [a, b]} ->
-        {:{}, meta, [:i32, :lt_s, {a, b}]}
-
-      {:>, meta, [a, b]} ->
-        {:{}, meta, [:i32, :gt_s, {a, b}]}
-
       {:>>>, meta, [a, b]} ->
         {:{}, meta, [:i32, :shr_s, {a, b}]}
 
@@ -54,5 +42,29 @@ defmodule Orb.S32 do
       other ->
         other
     end)
+  end
+
+  defmodule DSL do
+    import Kernel, except: [===: 2, !==: 2, <=: 2, >=: 2, not: 1]
+
+    def left < right do
+      Orb.I32.lt_s(left, right)
+    end
+
+    def left > right do
+      Orb.I32.gt_s(left, right)
+    end
+
+    def left <= right do
+      Orb.I32.le_s(left, right)
+    end
+
+    def left >= right do
+      Orb.I32.ge_s(left, right)
+    end
+
+    def not value do
+      Orb.I32.eqz(value)
+    end
   end
 end
