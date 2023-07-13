@@ -101,7 +101,6 @@ defmodule Orb.IfElse do
 
   defmodule DSL do
     import Kernel, except: [if: 2]
-    import Orb
 
     defmacro if(condition, [result: result], do: when_true, else: when_false) do
       quote do

@@ -376,7 +376,6 @@ defmodule Orb do
 
   alias Orb.Ops
   alias Orb.Memory
-  alias Orb.ToWat
   require Ops
 
   defmacro __using__(opts) do
