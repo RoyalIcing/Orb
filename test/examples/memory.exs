@@ -303,13 +303,13 @@ defmodule Examples.Memory do
 
     def hd!(ptr) do
       snippet U32 do
-        I32.load(ptr)
+        Memory.load!(I32, ptr)
       end
     end
 
     def tl!(ptr) do
       snippet U32 do
-        I32.load(ptr + 4)
+        Memory.load!(I32, ptr + 4)
       end
     end
 

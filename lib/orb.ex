@@ -412,8 +412,8 @@ defmodule Orb do
     def rotl(a, b)
     def rotr(a, b)
 
-    def store(offset, i32)
-    def store8(offset, i8)
+    # def store(offset, i32)
+    # def store8(offset, i8)
 
     for op <- Ops.i32(1) do
       def unquote(op)(a) do
@@ -435,17 +435,17 @@ defmodule Orb do
       end
     end
 
-    for op <- Ops.i32(:load) do
-      def unquote(op)(offset) do
-        {:i32, unquote(op), offset}
-      end
-    end
+    # for op <- Ops.i32(:load) do
+    #   def unquote(op)(offset) do
+    #     {:i32, unquote(op), offset}
+    #   end
+    # end
 
-    for op <- Ops.i32(:store) do
-      def unquote(op)(offset, value) do
-        {:i32, unquote(op), offset, value}
-      end
-    end
+    # for op <- Ops.i32(:store) do
+    #   def unquote(op)(offset, value) do
+    #     {:i32, unquote(op), offset, value}
+    #   end
+    # end
 
     def memory8!(offset) do
       %{
