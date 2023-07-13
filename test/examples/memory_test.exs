@@ -110,7 +110,7 @@ defmodule Examples.MemoryTest do
       # Instance.write_i32(inst, i2, 4)
       # Instance.write_i32(inst, i3, 5)
 
-      Instance.log_memory(inst, 0x10000, 32)
+      # Instance.log_memory(inst, 0x10000, 32)
 
       assert Enum.to_list(enum.(l4)) == [6, 5, 4, 3]
       assert Enum.to_list(enum.(l3)) == [5, 4, 3]
@@ -130,7 +130,7 @@ defmodule Examples.MemoryTest do
       assert sum.(l4) == 18
 
       Instance.call(inst, :reverse_in_place, l4)
-      Instance.log_memory(inst, 0x10000, 32)
+      # Instance.log_memory(inst, 0x10000, 32)
       assert Enum.to_list(enum.(l1)) == [3, 4, 5, 6]
       # TODO: is this the right behavior?
       assert Enum.to_list(enum.(l2)) == [4, 5, 6]
