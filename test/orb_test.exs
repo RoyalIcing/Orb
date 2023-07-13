@@ -123,7 +123,7 @@ defmodule OrbTest do
 
         # Import.func(:log, :int32, as: :log32, params: I32, result: I32))
         # wasm_import(:log, :int32, funcp(log32(I32), I32))
-        wasm_import(:log, :int32, func(name: :log32, params: I32, result: I32))
+        wasm_import(:log, :int32, funcp(name: :log32, params: I32, result: I32))
       end
 
       assert to_wat(ImportsLog32) == """

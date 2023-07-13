@@ -1082,11 +1082,6 @@ defmodule Orb do
     Orb.ToWat.Instructions.expand_type(type, env)
   end
 
-  def func(options) do
-    name = Keyword.fetch!(options, :name)
-    Orb.Func.Type.imported_func(name, options[:params], options[:result])
-  end
-
   defmacro func(call, do: block) do
     define_func(call, :public, [], block, __CALLER__)
   end
@@ -1101,6 +1096,11 @@ defmodule Orb do
 
   defmacro func(call, result_type, locals, do: block) when is_list(locals) do
     define_func(call, :public, [result: result_type, locals: locals], block, __CALLER__)
+  end
+
+  def funcp(options) do
+    name = Keyword.fetch!(options, :name)
+    Orb.Func.Type.imported_func(name, options[:params], options[:result])
   end
 
   # TODO: require `globals` option be passed to explicitly list global used.
