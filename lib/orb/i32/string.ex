@@ -13,7 +13,7 @@ defmodule Orb.I32.String do
 
   @impl Access
   def fetch(%Orb.VariableReference{} = var_ref, at!: offset) do
-    ast = {:i32, :load8_u, Orb.I32.Add.neutralize(var_ref, offset)}
+    ast = {:i32, :load8_u, Orb.Numeric.Add.optimized(Orb.I32, var_ref, offset)}
     {:ok, ast}
   end
 
@@ -35,8 +35,8 @@ defmodule Orb.I32.String do
 
       ast =
         Orb.snippet do
-          Orb.I32.when? {:i32, :load8_u, Orb.I32.Add.neutralize(var_ref, 1)} do
-            Orb.I32.Add.neutralize(var_ref, 1)
+          Orb.I32.when? {:i32, :load8_u, Orb.Numeric.Add.optimized(Orb.I32, var_ref, 1)} do
+            Orb.Numeric.Add.optimized(Orb.I32, var_ref, 1)
           else
             0x0
           end

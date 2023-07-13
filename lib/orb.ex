@@ -527,6 +527,7 @@ defmodule Orb do
 
     def wasm_type(), do: :i32
 
+    def add(a, b)
     def sub(a, b)
     def mul(a, b)
     def div_u(a, divisor)
@@ -1057,7 +1058,22 @@ defmodule Orb do
 
     quote do
       import Kernel,
-        except: [if: 2, @: 1, <: 2, >: 2, <=: 2, >=: 2, ===: 2, !==: 2, not: 1, or: 2]
+        except: [
+          if: 2,
+          @: 1,
+          +: 2,
+          -: 2,
+          *: 2,
+          /: 2,
+          <: 2,
+          >: 2,
+          <=: 2,
+          >=: 2,
+          ===: 2,
+          !==: 2,
+          not: 1,
+          or: 2
+        ]
 
       import OrbUsing
       import OrbUsing2

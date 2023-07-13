@@ -15,7 +15,7 @@ defmodule Orb.U32 do
         {:{}, meta, [:i32, :sub, {a, b}]}
 
       {:*, _meta, [a, b]} ->
-        quote do: Orb.I32.Multiply.neutralize(unquote(a), unquote(b))
+        quote do: Orb.Numeric.Multiply.optimized(Orb.I32, unquote(a), unquote(b))
 
       node = {:/, _, [a, b]} when is_integer(a) and is_integer(b) ->
         node

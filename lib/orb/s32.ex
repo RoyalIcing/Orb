@@ -1,47 +1,7 @@
 defmodule Orb.S32 do
+  # TODO: remove this whole system
   def apply_to_ast(nodes) do
-    Macro.prewalk(nodes, fn
-      # Allow values known at compile time to be executed at compile-time by Elixir
-      node = {:+, _, [a, b]} when is_integer(a) and is_integer(b) ->
-        node
-
-      {:+, meta, [a, b]} ->
-        {:{}, meta, [:i32, :add, {a, b}]}
-
-      node = {:-, _, [a, b]} when is_integer(a) and is_integer(b) ->
-        node
-
-      {:-, meta, [a, b]} ->
-        {:{}, meta, [:i32, :sub, {a, b}]}
-
-      {:*, _meta, [a, b]} ->
-        quote do: Orb.I32.Multiply.neutralize(unquote(a), unquote(b))
-
-      node = {:/, _, [a, b]} when is_integer(a) and is_integer(b) ->
-        node
-
-      {:/, meta, [a, b]} ->
-        {:{}, meta, [:i32, :div_s, {a, b}]}
-
-      {:>>>, meta, [a, b]} ->
-        {:{}, meta, [:i32, :shr_s, {a, b}]}
-
-      {:<<<, meta, [a, b]} ->
-        {:{}, meta, [:i32, :shl, {a, b}]}
-
-      {:&&&, meta, [a, b]} ->
-        {:{}, meta, [:i32, :and, {a, b}]}
-
-      {:|||, meta, [a, b]} ->
-        {:{}, meta, [:i32, :or, {a, b}]}
-
-      # FIXME: I don’t like this, as it’s not really a proper “call” e.g. it breaks |> piping
-      {:rem, meta, [a, b]} ->
-        {:{}, meta, [:i32, :rem_s, {a, b}]}
-
-      other ->
-        other
-    end)
+    nodes
   end
 
   defmodule DSL do
@@ -49,7 +9,15 @@ defmodule Orb.S32 do
     Signed integer operators.
     """
 
-    import Kernel, except: [===: 2, !==: 2, <=: 2, >=: 2, not: 1, or: 2]
+    import Kernel, except: [/: 2, ===: 2, !==: 2, <=: 2, >=: 2]
+
+    def left / right do
+      Orb.I32.div_s(left, right)
+    end
+
+    def left >>> right do
+      Orb.I32.shr_s(left, right)
+    end
 
     def left < right do
       Orb.I32.lt_s(left, right)
@@ -65,14 +33,6 @@ defmodule Orb.S32 do
 
     def left >= right do
       Orb.I32.ge_s(left, right)
-    end
-
-    def not value do
-      Orb.I32.eqz(value)
-    end
-
-    def left or right do
-      Orb.I32.or(left, right)
     end
   end
 end
