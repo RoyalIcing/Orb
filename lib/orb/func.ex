@@ -84,7 +84,7 @@ defmodule Orb.Func do
       %__MODULE__{
         name: name,
         param_types: params,
-        result_type: {:result, result_type}
+        result_type: result_type
       }
     end
 
@@ -98,8 +98,16 @@ defmodule Orb.Func do
           to_string(name),
           " ",
           Orb.ToWat.to_wat(%Param{name: nil, type: param_types}, ""),
-          " ",
-          Instructions.do_wat(result_type),
+          case result_type do
+            nil ->
+              []
+
+            result_type ->
+              [
+                " ",
+                Instructions.do_wat({:result, result_type})
+              ]
+          end,
           ?)
         ]
       end

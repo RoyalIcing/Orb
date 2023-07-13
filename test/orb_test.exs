@@ -126,14 +126,19 @@ defmodule OrbTest do
         #   int32: funcp(log_i32(I32), I32)
         # )
 
+        wasm_import(:echo,
+          int32: funcp(name: :echo_i32, params: I32, result: I32)
+        )
+
         wasm_import(:log,
-          int32: funcp(name: :log_i32, params: I32, result: I32)
+          int32: funcp(name: :log_i32, params: I32)
         )
       end
 
       assert to_wat(ImportsLog32) == """
              (module $ImportsLog32
-               (import "log" "int32" (func $log_i32 (param i32) (result i32)))
+               (import "echo" "int32" (func $echo_i32 (param i32) (result i32)))
+               (import "log" "int32" (func $log_i32 (param i32)))
              )
              """
     end
