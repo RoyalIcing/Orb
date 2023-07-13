@@ -1,8 +1,10 @@
 defmodule Orb do
   @moduledoc """
-  A DSL for declaring WebAssembly modules. Orb exposes the semantics of WebAssembly with friendly Elixir functions and macros.
+  Write WebAssembly modules with Elixir.
 
   WebAssembly is a low-level language. The primitives provided are essentially integers and floats. However, it has a unique benefit: it can run in every major application environment: browsers, servers, the edge, and mobile devices like phones, tablets & laptops.
+
+  Orb exposes the semantics of WebAssembly with a friendly Elixir DSL.
 
   ## Example
 
@@ -38,7 +40,7 @@ defmodule Orb do
 
   We get to write math with the intuitive `+` and `/` operators. Some operators like division have two variations in WebAssembly: signed and unsigned. By default math perform signed operations, but if you want unsigned math you can pass U32 to `wasm/2` like so: `wasm U32 do`.
 
-  Let’s see the same module without math operators and without the `@` & `=` magic for setting globals:
+  Let’s see the same module without the magic: no math operators and without conveniences for working with globals:
 
   ```elixir
   defmodule CalculateMean do
@@ -162,25 +164,27 @@ defmodule Orb do
 
   WebAssembly provides a buffer of memory when you need more than a handful integers or floats. This is a contiguous array of random-access memory which you can freely read and write to.
 
-  Memory comes in 64KiB segments called pages. You can have some multiple of these 64KiB pages.
-
-  To read from memory, you can use the `I32.load(address)` function. This loads a 32-bit integer at the given address. Addresses are themselves 32-bit integers. This mean you can perform pointer arithmetic to calculate whatever address you need to access. However, this can prove unsafe, as it‘s easy to calculate the wrong address and corrupt your memory. For this reason, Orb provides higher level constructs for making working with memory more pleasant.
-
   ### Pages
 
-  Each page is 64 KiB (64 * 1024 = 65,536 bytes). By default your module will have no memory.
+  webAssembly Memory comes in 64 KiB segments called pages. You can have some multiple of these 64 KiB (64 * 1024 = 65,536 bytes) pages.
 
-  Here’s an example with 4 pages of memory:
+  By default your module will have no memory, so you must specify how much memory you want upfront.
+
+  Here’s an example with 16 pages (1 MiB) of memory:
 
   ```elixir
   defmodule Example do
     use Orb
 
-    Memory.pages(4)
+    Memory.pages(16)
   end
   ```
 
-  ### Reading and writing memory
+  ### Reading & writing memory
+
+  To read from memory, you can use the `Memory.load/2` function. This loads a value at the given memory address. Addresses are themselves 32-bit integers. This mean you can perform pointer arithmetic to calculate whatever address you need to access.
+
+  However, this can prove unsafe as it’s easy to calculate the wrong address and corrupt your memory. For this reason, Orb provides higher level constructs for making working with memory pointers more pleasant, which are detailed later on.
 
   ```elixir
   defmodule Example do
@@ -200,11 +204,11 @@ defmodule Orb do
   end
   ```
 
-  ### Data
+  ### Populating memory with data
 
   You can populate the initial memory of your module using `data/2`. This accepts an memory offset and the string to write there.
 
-  Having to remember each memory offset is a pain, so read the next section for an easier approach.
+  Having to remember each memory offset is a pain, so read the next section on constant strings for an easier approach.
 
   ```elixir
   defmodule MimeTypeDataExample do
@@ -214,11 +218,11 @@ defmodule Orb do
 
     wasm do
       data_nul_terminated(0x100, "text/html")
-      data_nul_terminated(0x200, """
-      <!doctype html>
-      <meta charset=utf-8>
-      <h1>Hello world</h1>
-      """)
+      data_nul_terminated(0x200, \"""
+        <!doctype html>
+        <meta charset=utf-8>
+        <h1>Hello world</h1>
+        \""")
 
       func get_mime_type(), I32 do
         0x100
@@ -231,7 +235,7 @@ defmodule Orb do
   end
   ```
 
-  ### Strings
+  ## Strings constants
 
   You can use constant strings with the `~S` sigil. These will be extracted as `data` definitions at the start of the WebAssembly module, and their memory offsets substituted in their place.
 
@@ -249,11 +253,11 @@ defmodule Orb do
       end
 
       func get_body(), I32 do
-        ~S"""
+        ~S\"""
         <!doctype html>
         <meta charset=utf-8>
         <h1>Hello world</h1>
-        """
+        \"""
       end
     end
   end
@@ -265,13 +269,80 @@ defmodule Orb do
 
   ## Control flow
 
-  Orb supports control flow with if, block, and loop statements.
+  Orb supports control flow with `if`, `block`, and `loop` statements.
 
   ### If statements
 
+  If you want to run logic conditionally, use an `if` statement.
 
+  ```elixir
+  if @party_mode? do
+    music_volume = 100
+  end
+  ```
+
+  You can add an `else` clause:
+
+  ```elixir
+  if @party_mode? do
+    music_volume = 100
+  else
+    music_volume = 30
+  end
+  ```
+
+  If you want a ternary operator (map to another value), you can use `when?` instead:
+
+  ```elixir
+  music_volume = I32.when? @party_mode? do
+    100
+  else
+    30
+  end
+  ```
+
+  These can be written on single line too:
+
+  ```elixir
+  music_volume = I32.when?(@party_mode?, do: 100, else: 30)
+  ```
 
   ### Loops
+
+  Loops look like the familiar construct in other languages like JavaScript, with two key differences: each loop has a name, and loops by default stop unless you tell them to continue.
+
+  ```elixir
+  i = 0
+  loop CountUp do
+    i = i + 1
+
+    CountUp.continue(if: i < 10)
+  end
+  ```
+
+  Each loop is named, so if you nest them you can specify which particular one to continue.
+
+  ```elixir
+  total_weeks = 10
+  weekday_count = 7
+  week = 0
+  weekday = 0
+  loop Weeks do
+    loop Weekdays do
+      # Do something here with week and weekday
+
+      weekday = weekday + 1
+      Weekdays.continue(if: weekday < weekday_count)
+    end
+
+    week = week + 1
+    Weeks.continue(if: week < total_weeks)
+  end
+  ```
+
+  #### Iterators
+
+  Iterators are an upcoming feature, currently part of SilverOrb that will hopefully become part of Orb itself.
 
   ### Blocks
 
