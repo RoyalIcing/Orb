@@ -1383,11 +1383,6 @@ defmodule Orb do
     Map.new(lookup_table)
   end
 
-  # TODO: remove
-  def wasm_import_old(module, name, type) do
-    %Import{module: module, name: name, type: type}
-  end
-
   # TODO: merge with existing code?
   @primitive_types [:i32, :f32, :i32_u8]
 
