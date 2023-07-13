@@ -1029,13 +1029,6 @@ defmodule Orb do
   defmacro wasm(transform \\ Orb.S32, do: block) do
     # block = interpolate_external_values(block, __ENV__)
 
-    block =
-      case Macro.expand_literals(transform, __CALLER__) do
-        :no_magic -> block
-        Orb.S32 -> Orb.S32.apply_to_ast(block)
-        Orb.U32 -> Orb.U32.apply_to_ast(block)
-      end
-
     import_dsl_quoted =
       case Macro.expand_literals(transform, __CALLER__) do
         Orb.S32 ->

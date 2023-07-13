@@ -1,8 +1,4 @@
 defmodule Orb.U32 do
-  def apply_to_ast(nodes) do
-    nodes
-  end
-
   defmodule DSL do
     @moduledoc """
     Unsigned 32-bit integer operators.
