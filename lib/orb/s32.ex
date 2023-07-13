@@ -45,6 +45,10 @@ defmodule Orb.S32 do
   end
 
   defmodule DSL do
+    @moduledoc """
+    Signed integer operators.
+    """
+
     import Kernel, except: [===: 2, !==: 2, <=: 2, >=: 2, not: 1, or: 2]
 
     def left < right do
