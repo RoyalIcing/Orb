@@ -125,16 +125,18 @@ defmodule Orb do
 
   Globals are like locals, but live for the duration of the entire instantiated module’s life. Their initial type and value must be specified.
 
-  Globals by default are internal-only: nothing outside the module can see them. They can be exported to expose them to the outside world.
+  Globals by default are internal: nothing outside the module can see them. They can be exported to expose them to the outside world.
 
   When exporting a global you decide if it is readonly or mutable.
 
   ```elixir
   I32.global(some_internal_global: 99)
+  
+  I32.global(:readonly, some_internal_global: 99)
 
-  I32.export_readonly_global(some_public_constant: 1001)
+  I32.export_global(:readonly, some_public_constant: 1001)
 
-  I32.export_mutable_global(some_public_variable: 42)
+  I32.export_global(:mutable, some_public_variable: 42)
 
   # You can define multiple globals at once:
   I32.global(magic_number_a: 99, magic_number_b: 12, magic_number_c: -5)
@@ -143,9 +145,9 @@ defmodule Orb do
   ```elixir
   I32.globalp(some_internal_global: 99)
 
-  I32.global_readonly(:readonly, some_public_constant: 1001)
+  I32.global(:export_readonly, some_public_constant: 1001)
 
-  I32.global_mutable(some_public_variable: 42)
+  I32.global(:export_mutable, some_public_variable: 42)
 
   # You can define multiple globals at once:
   I32.globalp(magic_number_a: 99, magic_number_b: 12, magic_number_c: -5)
