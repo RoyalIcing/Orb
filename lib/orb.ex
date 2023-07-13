@@ -241,7 +241,7 @@ defmodule Orb do
 
     quote do
       import Orb
-      alias Orb.{I32, U32, F32, Memory}
+      alias Orb.{I32, I64, S32, U32, F32, Memory}
       require Orb.{I32, Memory}
 
       # @wasm_name __MODULE__ |> Module.split() |> List.last()
