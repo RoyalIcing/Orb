@@ -467,7 +467,6 @@ defmodule Orb do
 
     def wasm_type(), do: :i32
 
-    def add(a, b)
     def sub(a, b)
     def mul(a, b)
     def div_u(a, divisor)
@@ -1976,26 +1975,6 @@ defmodule Orb do
         [
           ["  ", indent, "(else", ?\n],
           [do_wat(when_false, "    " <> indent), ?\n],
-          ["  ", indent, ")", ?\n]
-        ]
-      else
-        []
-      end,
-      [indent, ")"]
-    ]
-  end
-
-  # TODO: remove
-  def do_wat({:if, condition, when_true, when_false}, indent) do
-    [
-      [indent, "(if ", do_wat(condition, ""), ?\n],
-      ["  ", indent, "(then", ?\n],
-      ["    ", indent, do_wat(when_true, ""), ?\n],
-      ["  ", indent, ")", ?\n],
-      if when_false do
-        [
-          ["  ", indent, "(else", ?\n],
-          ["    ", indent, do_wat(when_false, ""), ?\n],
           ["  ", indent, ")", ?\n]
         ]
       else
