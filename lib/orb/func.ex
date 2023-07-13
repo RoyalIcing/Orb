@@ -96,8 +96,16 @@ defmodule Orb.Func do
           indent,
           "(func $",
           to_string(name),
-          " ",
-          Orb.ToWat.to_wat(%Param{name: nil, type: param_types}, ""),
+          case param_types do
+            nil ->
+              []
+
+            param_types ->
+              [
+                " ",
+                Orb.ToWat.to_wat(%Param{name: nil, type: param_types}, "")
+              ]
+          end,
           case result_type do
             nil ->
               []

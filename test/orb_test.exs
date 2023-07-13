@@ -123,7 +123,7 @@ defmodule OrbTest do
 
         # Import.funcp(:log, :int32, as: :log_i32, params: I32, result: I32)
         # wasm_import(:log,
-        #   int32: funcp(log_i32(I32), I32)
+        #   int32: funcp(log_i32(_: I32), I32)
         # )
 
         wasm_import(:echo,
@@ -135,6 +135,10 @@ defmodule OrbTest do
           int32: funcp(name: :log_i32, params: I32),
           int64: funcp(name: :log_i64, params: I64)
         )
+
+        wasm_import(:time,
+          seconds_since_unix_epoch: funcp(name: :unix_time, result: I64)
+        )
       end
 
       assert to_wat(ImportsLog32) == """
@@ -143,6 +147,7 @@ defmodule OrbTest do
                (import "echo" "int64" (func $echo_i64 (param i64) (result i64)))
                (import "log" "int32" (func $log_i32 (param i32)))
                (import "log" "int64" (func $log_i64 (param i64)))
+               (import "time" "seconds_since_unix_epoch" (func $unix_time (result i64)))
              )
              """
     end
