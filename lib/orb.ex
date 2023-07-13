@@ -1056,25 +1056,12 @@ defmodule Orb do
     end
   end
 
-  defmacro wasm_import(mod, name, func_type) do
-    # case definition do
-    #   {:func, _meta, [name, arg1]} ->
-    #     quote do
-    #       %Import{
-    #         module: unquote(first),
-    #         name: unquote(second),
-    #         type: Orb.Func.Type.imported_func(unquote(name), unquote(arg1), nil)
-    #       }
-    #     end
-    #
-    #   _ ->
-    #     quote do
-    #       %Import{module: unquote(first), name: unquote(second), type: unquote(definition)}
-    #     end
-    # end
-
+  defmacro wasm_import(mod, entries) when is_atom(mod) and is_list(entries) do
     quote do
-      @wasm_imports %Import{module: unquote(mod), name: unquote(name), type: unquote(func_type)}
+      @wasm_imports (for {name, type} <-
+                           unquote(entries) do
+                       %Import{module: unquote(mod), name: name, type: type}
+                     end)
     end
   end
 
