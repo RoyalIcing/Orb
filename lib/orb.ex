@@ -1441,19 +1441,11 @@ defmodule Orb do
     %Data{offset: offset, value: value, nul_terminated: false}
   end
 
-  def data_nul_terminated(offset, value) do
-    %Data{offset: offset, value: value, nul_terminated: true}
-  end
-
-  def data_nul_terminated(packed_map) when is_map(packed_map) do
+  def data(packed_map) when is_map(packed_map) do
     for {_key, %{offset: offset, string: string}} <- packed_map do
-      data_nul_terminated(offset, string)
+      data(offset, string)
     end
   end
-
-  # defmacro data_nul_terminated(offset, key, values) do
-  #   %Data{offset: offset, key: key, values: values, nul_terminated: true}
-  # end
 
   def wasm_import_old(module, name, type) do
     %Import{module: module, name: name, type: type}

@@ -292,90 +292,90 @@ defmodule OrbTest do
     assert to_wat(ManyFuncs) == wasm_source
   end
 
-  defmodule HTTPStatusLookup do
-    use Orb
+  describe "data lookup" do
+    defmodule HTTPStatusLookup do
+      use Orb
 
-    @statuses [
-      {200, "OK"},
-      {201, "Created"},
-      {204, "No Content"},
-      {205, "Reset Content"},
-      {301, "Moved Permanently"},
-      {302, "Found"},
-      {303, "See Other"},
-      {304, "Not Modified"},
-      {307, "Temporary Redirect"},
-      {400, "Bad Request"},
-      {401, "Unauthorized"},
-      {403, "Forbidden"},
-      {404, "Not Found"},
-      {405, "Method Not Allowed"},
-      {409, "Conflict"},
-      {412, "Precondition Failed"},
-      {413, "Payload Too Large"},
-      {422, "Unprocessable Entity"},
-      {429, "Too Many Requests"}
-    ]
+      @statuses [
+        {200, "OK"},
+        {201, "Created"},
+        {204, "No Content"},
+        {205, "Reset Content"},
+        {301, "Moved Permanently"},
+        {302, "Found"},
+        {303, "See Other"},
+        {304, "Not Modified"},
+        {307, "Temporary Redirect"},
+        {400, "Bad Request"},
+        {401, "Unauthorized"},
+        {403, "Forbidden"},
+        {404, "Not Found"},
+        {405, "Method Not Allowed"},
+        {409, "Conflict"},
+        {412, "Precondition Failed"},
+        {413, "Payload Too Large"},
+        {422, "Unprocessable Entity"},
+        {429, "Too Many Requests"}
+      ]
 
-    def status_table(), do: @statuses
+      def status_table(), do: @statuses
 
-    Memory.pages(1)
+      Memory.pages(1)
 
-    wasm do
-      inline for {status, message} <- ^@statuses do
-        # data(status * 24, "#{message}\\00")
-        # data(status * 24, message)
-        data_nul_terminated(status * 24, message)
-      end
+      wasm do
+        inline for {status, message} <- ^@statuses do
+          data(status * 24, message)
+        end
 
-      func lookup(status: I32), I32 do
-        I32.mul(status, 24)
+        func lookup(status: I32), I32 do
+          I32.mul(status, 24)
+        end
       end
     end
-  end
 
-  # FIXME: this shouldn’t live in orb_test.exs
-  test "works" do
-    alias OrbWasmtime.Instance
+    # TODO: should this live here?
+    test "works" do
+      alias OrbWasmtime.Instance
 
-    inst = Instance.run(HTTPStatusLookup)
-    assert Instance.call_reading_string(inst, :lookup, 200) == "OK"
+      inst = Instance.run(HTTPStatusLookup)
+      assert Instance.call_reading_string(inst, :lookup, 200) == "OK"
 
-    for {status, status_text} <- HTTPStatusLookup.status_table() do
-      assert Instance.call_reading_string(inst, :lookup, status) == status_text
+      for {status, status_text} <- HTTPStatusLookup.status_table() do
+        assert Instance.call_reading_string(inst, :lookup, status) == status_text
+      end
     end
-  end
 
-  test "to_wat/1 many data" do
-    wasm_source = ~s"""
-    (module $HTTPStatusLookup
-      (memory (export "memory") 1)
-      (data (i32.const #{200 * 24}) "OK\\00")
-      (data (i32.const #{201 * 24}) "Created\\00")
-      (data (i32.const #{204 * 24}) "No Content\\00")
-      (data (i32.const #{205 * 24}) "Reset Content\\00")
-      (data (i32.const #{301 * 24}) "Moved Permanently\\00")
-      (data (i32.const #{302 * 24}) "Found\\00")
-      (data (i32.const #{303 * 24}) "See Other\\00")
-      (data (i32.const #{304 * 24}) "Not Modified\\00")
-      (data (i32.const #{307 * 24}) "Temporary Redirect\\00")
-      (data (i32.const #{400 * 24}) "Bad Request\\00")
-      (data (i32.const #{401 * 24}) "Unauthorized\\00")
-      (data (i32.const #{403 * 24}) "Forbidden\\00")
-      (data (i32.const #{404 * 24}) "Not Found\\00")
-      (data (i32.const #{405 * 24}) "Method Not Allowed\\00")
-      (data (i32.const #{409 * 24}) "Conflict\\00")
-      (data (i32.const #{412 * 24}) "Precondition Failed\\00")
-      (data (i32.const #{413 * 24}) "Payload Too Large\\00")
-      (data (i32.const #{422 * 24}) "Unprocessable Entity\\00")
-      (data (i32.const #{429 * 24}) "Too Many Requests\\00")
-      (func $lookup (export "lookup") (param $status i32) (result i32)
-        (i32.mul (local.get $status) (i32.const 24))
+    test "to_wat/1 many data" do
+      wasm_source = ~s"""
+      (module $HTTPStatusLookup
+        (memory (export "memory") 1)
+        (data (i32.const #{200 * 24}) "OK")
+        (data (i32.const #{201 * 24}) "Created")
+        (data (i32.const #{204 * 24}) "No Content")
+        (data (i32.const #{205 * 24}) "Reset Content")
+        (data (i32.const #{301 * 24}) "Moved Permanently")
+        (data (i32.const #{302 * 24}) "Found")
+        (data (i32.const #{303 * 24}) "See Other")
+        (data (i32.const #{304 * 24}) "Not Modified")
+        (data (i32.const #{307 * 24}) "Temporary Redirect")
+        (data (i32.const #{400 * 24}) "Bad Request")
+        (data (i32.const #{401 * 24}) "Unauthorized")
+        (data (i32.const #{403 * 24}) "Forbidden")
+        (data (i32.const #{404 * 24}) "Not Found")
+        (data (i32.const #{405 * 24}) "Method Not Allowed")
+        (data (i32.const #{409 * 24}) "Conflict")
+        (data (i32.const #{412 * 24}) "Precondition Failed")
+        (data (i32.const #{413 * 24}) "Payload Too Large")
+        (data (i32.const #{422 * 24}) "Unprocessable Entity")
+        (data (i32.const #{429 * 24}) "Too Many Requests")
+        (func $lookup (export "lookup") (param $status i32) (result i32)
+          (i32.mul (local.get $status) (i32.const 24))
+        )
       )
-    )
-    """
+      """
 
-    assert to_wat(HTTPStatusLookup) == wasm_source
+      assert to_wat(HTTPStatusLookup) == wasm_source
+    end
   end
 
   defmodule WithinRange do
