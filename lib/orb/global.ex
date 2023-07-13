@@ -38,7 +38,7 @@ defmodule Orb.Global do
           :mutable -> ["(mut ", to_string(type), ?)]
         end,
         " ",
-        Orb.ToWat.to_wat(initial_value, indent),
+        Orb.ToWat.to_wat(initial_value, ""),
         ")\n"
       ]
     end

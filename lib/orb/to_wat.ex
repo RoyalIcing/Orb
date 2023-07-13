@@ -4,7 +4,7 @@ defprotocol Orb.ToWat do
 end
 
 defimpl Orb.ToWat, for: Tuple do
-  def to_wat({:i32_const, value}, _indent) do
-    ["(i32.const ", to_string(value), ")"]
+  def to_wat(tuple, indent) do
+    Orb.ToWat.Instructions.do_wat(tuple, indent)
   end
 end
