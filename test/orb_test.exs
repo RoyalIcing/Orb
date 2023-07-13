@@ -353,10 +353,10 @@ defmodule OrbTest do
 
     wasm do
       func validate(num: I32), I32, under?: I32, over?: I32 do
-        under? = I32.lt_s(num, 1)
-        over? = I32.gt_s(num, 255)
+        under? = num < 1
+        over? = num > 255
 
-        I32.or(under?, over?) |> I32.eqz()
+        I32.or(under?, over?) === 0
       end
     end
   end

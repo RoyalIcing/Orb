@@ -991,17 +991,17 @@ defmodule Orb do
 
       @wasm_imports unquote(imports)
 
-      import Kernel, except: [if: 2, @: 1]
-      import OrbUsing
-      import OrbUsing2
+      # import Kernel, except: [if: 2, @: 1, ===: 2, !==: 2]
+      # import OrbUsing
+      # import OrbUsing2
 
       @wasm_body unquote(block_items)
       # @wasm_body do_module_body(unquote(block), unquote(options), unquote(env.module))
       # @wasm_body unquote(do_module_body(block, options, env.module)[:body])
 
-      import Kernel
-      import OrbUsing, only: []
-      import OrbUsing2, only: []
+      # import Kernel
+      # import OrbUsing, only: []
+      # import OrbUsing2, only: []
     end
   end
 
@@ -1044,7 +1044,7 @@ defmodule Orb do
     Module.put_attribute(__CALLER__.module, :wasm_constants, constants)
 
     quote do
-      import Kernel, except: [if: 2, @: 1]
+      import Kernel, except: [if: 2, @: 1, ===: 2, !==: 2]
       import OrbUsing
       import OrbUsing2
 
@@ -1309,11 +1309,15 @@ defmodule Orb do
       end
 
     quote do
-      import Kernel, except: [if: 2, @: 1]
+      import Kernel, except: [if: 2, @: 1, ===: 2, !==: 2]
       import OrbUsing
       import OrbUsing2
 
       unquote(do_snippet(locals, block_items))
+
+      import Kernel
+      import OrbUsing, only: []
+      import OrbUsing2, only: []
     end
   end
 
@@ -1814,7 +1818,7 @@ defmodule OrbUsing do
 end
 
 defmodule OrbUsing2 do
-  import Kernel, except: [if: 2, @: 1]
+  import Kernel, except: [if: 2, @: 1, ===: 2, !==: 2]
 
   defmacro @{name, meta, _args} do
     #     Kernel.if Module.has_attribute?(__CALLER__.module, name) do
@@ -1826,6 +1830,14 @@ defmodule OrbUsing2 do
     #     else
     {:global_get, meta, [name]}
     # end
+  end
+
+  def left === right do
+    Orb.I32.eq(left, right)
+  end
+
+  def left !== right do
+    Orb.I32.eq(left, right) |> Orb.I32.eqz()
   end
 
   #   defmacro @{name, meta, args} do
