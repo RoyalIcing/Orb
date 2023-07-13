@@ -550,12 +550,17 @@ defmodule Orb do
       end
     end
 
-    for op <- Ops.i32(2), op not in [:and] do
+    for op <- Ops.i32(2) do
       case op do
         :eq ->
           def eq(0, n), do: {:i32, :eqz, n}
           def eq(n, 0), do: {:i32, :eqz, n}
           def eq(a, b), do: {:i32, :eq, {a, b}}
+
+        :and ->
+          def band(a, b) do
+            {:i32, :and, {a, b}}
+          end
 
         _ ->
           def unquote(op)(a, b) do
