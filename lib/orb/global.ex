@@ -1,4 +1,6 @@
 defmodule Orb.Global do
+  @moduledoc false
+
   defstruct [:name, :type, :initial_value, :mutability, :exported]
 
   def new(:i32 = type, name, mutability, exported, value)
@@ -45,6 +47,10 @@ defmodule Orb.Global do
   end
 
   defmodule DSL do
+    @moduledoc """
+    Adds @global_name support
+    """
+
     import Kernel, except: [@: 1]
 
     defmacro @{name, meta, _args} do

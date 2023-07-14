@@ -1,4 +1,6 @@
 defmodule Orb.Loop do
+  @moduledoc false
+
   defstruct [:identifier, :result, :body]
 
   alias Orb.ToWat.Instructions

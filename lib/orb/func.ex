@@ -1,4 +1,6 @@
 defmodule Orb.Func do
+  @moduledoc false
+
   defstruct [:name, :params, :result, :local_types, :body, :exported?, :source_module]
 
   defimpl Orb.ToWat do
@@ -48,6 +50,8 @@ defmodule Orb.Func do
   end
 
   defmodule Param do
+    @moduledoc false
+
     defstruct [:name, :type]
 
     defimpl Orb.ToWat do
@@ -76,6 +80,8 @@ defmodule Orb.Func do
   end
 
   defmodule Type do
+    @moduledoc false
+
     defstruct [:name, :param_types, :result_type]
 
     # TODO: should this be its own struct type?

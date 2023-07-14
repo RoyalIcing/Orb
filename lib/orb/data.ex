@@ -1,4 +1,6 @@
 defmodule Orb.Data do
+  @moduledoc false
+
   defstruct [:offset, :value, :nul_terminated]
 
   defimpl Orb.ToWat do

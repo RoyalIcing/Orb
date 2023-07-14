@@ -1,4 +1,6 @@
 defmodule Orb.Block do
+  @moduledoc false
+
   defstruct [:identifier, :result, :body]
 
   defimpl Orb.ToWat do

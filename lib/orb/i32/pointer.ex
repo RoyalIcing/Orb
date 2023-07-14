@@ -1,4 +1,8 @@
 defmodule Orb.I32.Pointer do
+  @moduledoc """
+  Custom `Orb.Type` for pointer to 32-bit integer in memory.
+  """
+
   @behaviour Orb.Type
   @behaviour Access
 

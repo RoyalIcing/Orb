@@ -423,7 +423,10 @@ defmodule Orb do
     end
   end
 
+  # TODO: extract this out
   defmodule ModuleDefinition do
+    @moduledoc false
+
     defstruct name: nil,
               imports: [],
               memory: nil,
@@ -515,11 +518,19 @@ defmodule Orb do
     end
   end
 
+  # TODO: extract this out
   defmodule Import do
+    @moduledoc false
+
     defstruct [:module, :name, :type]
   end
 
+  # TODO: break up into multiple modules. Perhaps add/2 etc can be put on Orb.I32.DSL?
   defmodule I32 do
+    @moduledoc """
+    Type for 32-bit integer.
+    """
+
     import Kernel, except: [and: 2, or: 2]
 
     require Ops
@@ -802,7 +813,12 @@ defmodule Orb do
     end
   end
 
+  # TODO: extract
   defmodule F32 do
+    @moduledoc """
+    Type for 32-bit floating point number.
+    """
+
     require Ops
 
     def wasm_type(), do: :f32
@@ -829,6 +845,8 @@ defmodule Orb do
   end
 
   defmodule Constants do
+    @moduledoc false
+
     defstruct offset: 0xFF, items: []
 
     def new(items) do
@@ -859,7 +877,10 @@ defmodule Orb do
     end
   end
 
+  # TODO: extract?
   defmodule VariableReference do
+    @moduledoc false
+
     defstruct [:global_or_local, :identifier, :type]
 
     def global(identifier, type) do
@@ -993,6 +1014,8 @@ defmodule Orb do
   end
 
   defmodule BeforeCompile do
+    @moduledoc false
+
     defmacro __before_compile__(_env) do
       quote do
         def __wasm_module__() do
@@ -1011,12 +1034,15 @@ defmodule Orb do
         def _func(name),
           do: Orb.ModuleDefinition.func_ref!(__MODULE__, name)
 
+        @doc "Import all WebAssembly functions from this module’s Orb definition."
         def funcp(),
           do: Orb.ModuleDefinition.funcp_ref_all!(__MODULE__)
 
+        @doc "Import a specific WebAssembly function from this module’s Orb definition."
         def funcp(name),
           do: Orb.ModuleDefinition.funcp_ref!(__MODULE__, name)
 
+        @doc "Convert this module’s Orb definition to WebAssembly text (Wat) format."
         def to_wat(), do: Orb.to_wat(__wasm_module__())
       end
     end
@@ -1634,7 +1660,12 @@ defmodule Orb do
     )
   end
 
+  # TODO: extract this out
   defmodule MutRef do
+    @moduledoc """
+    Use `Orb.mut!/1` to get a mutable reference to a global or local.
+    """
+
     defstruct [:read, :write, :type]
 
     def from(%VariableReference{} = read) do

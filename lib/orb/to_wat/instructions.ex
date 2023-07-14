@@ -1,4 +1,6 @@
 defmodule Orb.ToWat.Instructions do
+  @moduledoc false
+
   alias require Orb.Ops
 
   def expand_type(type, env \\ __ENV__) do

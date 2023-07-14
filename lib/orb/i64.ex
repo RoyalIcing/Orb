@@ -1,4 +1,8 @@
 defmodule Orb.I64 do
+  @moduledoc """
+  Type for 64-bit integer.
+  """
+
   @behaviour Orb.Type
 
   @impl Orb.Type

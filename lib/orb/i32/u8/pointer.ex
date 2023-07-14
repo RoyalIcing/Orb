@@ -1,4 +1,8 @@
 defmodule Orb.I32.U8.Pointer do
+  @moduledoc """
+  Custom `Orb.Type` for pointer to 8-bit integer (byte) in memory.
+  """
+
   @behaviour Orb.Type
   @behaviour Access
 

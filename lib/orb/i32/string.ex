@@ -1,5 +1,9 @@
 defmodule Orb.I32.String do
-  # TODO: should this be called I32.ASCII?
+  @moduledoc """
+  Custom type for a nul-terminated ASCII string.
+  """
+
+  # TODO: should this be called Orb.I32.ASCII? Or just Orb.ASCII?
 
   @behaviour Orb.Type
   @behaviour Access
@@ -17,7 +21,12 @@ defmodule Orb.I32.String do
     {:ok, ast}
   end
 
+  # TODO: extract to SilverOrb
   defmodule CharIterator do
+    @moduledoc """
+    Custom `Orb.Type`. Iterate over each byte character in an ASCII string.
+    """
+
     @behaviour Orb.Type
     @impl Orb.Type
     def wasm_type(), do: :i32

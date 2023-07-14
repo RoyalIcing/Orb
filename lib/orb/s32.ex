@@ -1,4 +1,6 @@
 defmodule Orb.S32 do
+  @moduledoc false
+
   defmodule DSL do
     @moduledoc """
     Signed 32-bit integer operators.

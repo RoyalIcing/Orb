@@ -1,4 +1,6 @@
 defmodule Orb.IfElse do
+  @moduledoc false
+
   defstruct [:result, :condition, :when_true, :when_false]
 
   alias Orb.ToWat.Instructions
@@ -100,6 +102,8 @@ defmodule Orb.IfElse do
   end
 
   defmodule DSL do
+    @moduledoc false
+
     import Kernel, except: [if: 2]
 
     defmacro if(condition, [result: result], do: when_true, else: when_false) do
