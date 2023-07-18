@@ -1553,10 +1553,6 @@ defmodule Orb do
     %Orb.Func.Param{name: name, type: type}
   end
 
-  def export(name) do
-    {:export, name}
-  end
-
   # TODO: unused
   def i32_const(value), do: {:i32_const, value}
   def i32_boolean(0), do: {:i32_const, 0}
