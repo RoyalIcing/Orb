@@ -1390,7 +1390,10 @@ defmodule Orb do
       %Orb.Func{
         name: unquote(name),
         params: unquote(params),
-        result: result(unquote(result_type)),
+        result: case unquote(result_type) do
+          nil -> nil
+          type -> {:result, type}
+        end,
         local_types: unquote(local_types),
         body: unquote(block_items),
         exported?: unquote(exported?)
@@ -1538,11 +1541,11 @@ defmodule Orb do
   # TODO: merge with existing code?
   @primitive_types [:i32, :f32, :i32_u8]
 
-  def param(name, type) when type in @primitive_types do
+  defp param(name, type) when type in @primitive_types do
     %Orb.Func.Param{name: name, type: type}
   end
 
-  def param(name, type) when is_atom(type) do
+  defp param(name, type) when is_atom(type) do
     # unless function_exported?(type, :wasm_type, 0) do
     #   raise "Param of type #{type} must implement wasm_type/0."
     # end
@@ -1554,19 +1557,6 @@ defmodule Orb do
     {:export, name}
   end
 
-  def result(nil), do: nil
-  def result(type) when type in @primitive_types, do: {:result, type}
-
-  def result(type) when is_atom(type) do
-    # unless function_exported?(type, :wasm_type, 0) do
-    #   raise "Param of type #{type} must implement wasm_type/0."
-    # end
-
-    {:result, type}
-  end
-
-  def result({a, b}) when is_atom(a) and is_atom(b), do: {:result, {a, b}}
-
   # TODO: unused
   def i32_const(value), do: {:i32_const, value}
   def i32_boolean(0), do: {:i32_const, 0}
@@ -1575,6 +1565,11 @@ defmodule Orb do
   def i32(false), do: {:i32_const, 0}
   def i32(true), do: {:i32_const, 1}
   def i32(op) when op in Ops.i32(:all), do: {:i32, op}
+
+  @doc """
+  Pushes a value onto the current stack.
+  """
+  def push(value)
 
   def push(tuple)
       when is_tuple(tuple) and elem(tuple, 0) in [:i32, :i32_const, :local_get, :global_get],
@@ -1585,11 +1580,14 @@ defmodule Orb do
 
   def push(do: [value, {:local_set, local}]), do: [value, {:local_tee, local}]
 
+  @doc """
+  Push value then run the block. Useful for when you mutate a variable but want its previous value.
+  """
   def push(value, do: block) do
     [
       value,
       __get_block_items(block),
-      :pop
+      # :pop
     ]
   end
 
