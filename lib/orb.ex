@@ -1074,6 +1074,9 @@ defmodule Orb do
     end
   end
 
+  @doc """
+  Enter WebAssembly.
+  """
   defmacro wasm(mode \\ Orb.S32, do: block) do
     # block = interpolate_external_values(block, __ENV__)
 
@@ -1095,6 +1098,9 @@ defmodule Orb do
     end
   end
 
+  @doc """
+  Declare a snippet of Orb AST for reuse. Enables DSL, with additions from `mode`.
+  """
   defmacro snippet(mode \\ Orb.S32, locals \\ [], do: block) do
     block = interpolate_external_values(block, __CALLER__)
 
@@ -1137,6 +1143,9 @@ defmodule Orb do
     end)
   end
 
+  @doc """
+  Declare a WebAssembly import for a function or global.
+  """
   defmacro wasm_import(mod, entries) when is_atom(mod) and is_list(entries) do
     quote do
       @wasm_imports (for {name, type} <-
@@ -1146,46 +1155,15 @@ defmodule Orb do
     end
   end
 
-  ####
-
-  def to_wat(term) when is_atom(term),
-    do: do_wat(term.__wasm_module__(), "") |> IO.chardata_to_string()
-
-  def to_wat(term), do: do_wat(term, "") |> IO.chardata_to_string()
-
-  def do_wat(term), do: do_wat(term, "")
-
-  def do_wat(term, indent)
-
-  def do_wat(list, indent) when is_list(list) do
-    Enum.map(list, &do_wat(&1, indent)) |> Enum.intersperse("\n")
+  @doc """
+  Convert Orb AST into WebAssembly text format.
+  """
+  def to_wat(term) when is_atom(term) do
+    term.__wasm_module__() |> Orb.ToWat.to_wat("") |> IO.chardata_to_string()
   end
 
-  def do_wat(%Memory{name: nil, min: min}, indent) do
-    ~s[#{indent}(memory #{min})]
-  end
-
-  def do_wat(%Memory{name: name, min: min}, indent) do
-    ~s"#{indent}(memory #{do_wat(name)} #{min})"
-  end
-
-  def do_wat(value, indent) when is_atom(value) do
-    Orb.ToWat.Instructions.do_wat(value, indent)
-  end
-
-  def do_wat(value, indent) when is_number(value) do
-    Orb.ToWat.Instructions.do_wat(value, indent)
-  end
-
-  def do_wat(value, indent) when is_tuple(value) do
-    Orb.ToWat.Instructions.do_wat(value, indent)
-    # Orb.ToWat.to_wat(value, indent)
-  end
-
-  def do_wat(%_struct{} = value, indent) do
-    # Protocol.assert_impl!(struct, Orb.ToWat)
-
-    Orb.ToWat.to_wat(value, indent)
+  def to_wat(term) do
+    term |> Orb.ToWat.to_wat("") |> IO.chardata_to_string()
   end
 
   def __get_block_items(block) do
