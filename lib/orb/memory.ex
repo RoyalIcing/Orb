@@ -59,7 +59,13 @@ defmodule Orb.Memory do
         raise "You passed a Orb type module #{type} that does not implement wasm_type/0."
       end
 
-    {type, :load, address}
+      load_instruction = if function_exported?(type, :load_instruction, 0) do
+        type.load_instruction()
+      else
+        :load
+      end
+
+    {type, load_instruction, address}
   end
 
   @doc """

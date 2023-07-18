@@ -91,6 +91,8 @@ defmodule Orb.I32.String do
 
       loop EachChar do
         if memory32_8![I32.add(string_ptr, count)].unsigned do
+        # FIXME: remove memory32_8!
+        # if Memory.load!(I32.U8, I32.add(string_ptr, count)) do
           count = I32.add(count, 1)
           EachChar.continue()
         end
