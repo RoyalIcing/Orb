@@ -21,13 +21,13 @@ defmodule Orb.Func do
         [
           indent,
           case exported? do
-            false -> ~s[(func $#{name} ]
-            true -> ~s[(func $#{name} (export "#{name}") ]
+            false -> ~s[(func $#{name}]
+            true -> ~s[(func $#{name} (export "#{name}")]
           end,
-          Enum.intersperse(
+          Enum.map(
             for(param <- params, do: Instructions.do_wat(param)) ++
               if(result, do: [Instructions.do_wat(result)], else: []),
-            " "
+            fn s -> [" ", s] end
           ),
           "\n"
         ],
