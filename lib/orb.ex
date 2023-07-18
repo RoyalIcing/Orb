@@ -1611,9 +1611,22 @@ defmodule Orb do
     end
   end
 
+  @doc """
+  Call local function `f`.
+  """
   def call(f), do: {:call, f, []}
+
+  @doc """
+  Call local function `f`, passing single argument `a`.
+  """
   def call(f, a), do: {:call, f, [a]}
+  @doc """
+  Call local function `f`, passing arguments `a` & `b`.
+  """
   def call(f, a, b), do: {:call, f, [a, b]}
+  @doc """
+  Call local function `f`, passing argument `a`, `b` & `c`.
+  """
   def call(f, a, b, c), do: {:call, f, [a, b, c]}
 
   defp expand_identifier(identifier, env) do
@@ -1628,6 +1641,9 @@ defmodule Orb do
     end
   end
 
+  @doc """
+  Declare a loop that iterates through a source.
+  """
   defmacro loop({:<-, _, [item, source]}, do: block) do
     result_type = nil
 
@@ -1670,6 +1686,9 @@ defmodule Orb do
     end
   end
 
+  @doc """
+  Declare a loop.
+  """
   defmacro loop(identifier, options \\ [], do: block) do
     identifier = expand_identifier(identifier, __CALLER__)
     result_type = Keyword.get(options, :result, nil) |> expand_type()
@@ -1714,6 +1733,9 @@ defmodule Orb do
     end
   end
 
+  @doc """
+  Declare a block, useful for structured control flow.
+  """
   defmacro defblock(identifier, options \\ [], do: block) do
     identifier = expand_identifier(identifier, __CALLER__)
     result_type = Keyword.get(options, :result, nil) |> expand_type()
@@ -1731,10 +1753,16 @@ defmodule Orb do
 
   # import Kernel
 
+  @doc """
+  Run code at compile-time.
+  """
   defmacro inline(do: block) do
     block |> __get_block_items()
   end
 
+  @doc """
+  Run Elixir for-comprehension at compile-time.
+  """
   defmacro inline({:for, meta, [for_arg]}, do: block) do
     # for_arg = interpolate_external_values(for_arg, __CALLER__)
     block = block |> __get_block_items()
@@ -1743,34 +1771,75 @@ defmodule Orb do
     # {:for, meta, [for_arg, [do: quote do: inline(do: unquote(block))]]}
   end
 
+  @doc """
+  Declare a constant string, which will be extracted to the top of the module, and its address substituted in place.
+  """
   def const(value) do
     {:const_string, value}
   end
 
+  # TODO: decide if this idea is dead.
+  @doc false
   def const_set_insert(set_name, string) when is_atom(set_name) and is_binary(string) do
     :todo
   end
 
   # TODO: add a comptime keyword like Zig: https://kristoff.it/blog/what-is-zig-comptime/
 
-  # For blocks
+  @doc """
+  Break from a block.
+  """
   def break(identifier), do: {:br, expand_identifier(identifier, __ENV__)}
 
+  @doc """
+  Break from a block if a condition is true.
+  """
   def break(identifier, if: condition),
     do: {:br_if, expand_identifier(identifier, __ENV__), condition}
 
+  @doc """
+  Return from a function. You may wish to `push/1` values before returning.
+  """
   def return(), do: :return
+  @doc """
+  Return from a function if a condition is true.
+  """
   def return(if: condition), do: Orb.IfElse.new(condition, :return)
+  @doc """
+  Return from a function with the provided value.
+  """
   def return(value), do: {:return, value}
+  @doc """
+  Return from a function with the provided value only if a condition is true.
+  """
   def return(value, if: condition), do: Orb.IfElse.new(condition, {:return, value})
 
+  @doc """
+  A no-op instruction.
+
+  See https://en.wikipedia.org/wiki/NOP_(code)
+  """
   def nop(), do: :nop
 
+  @doc """
+  Drop the last pushed value from the stack.
+  """
   def drop(), do: :drop
+  @doc """
+  Execute the passed expression, but ignore its result by immediately dropping its value.
+  """
   def drop(expression), do: [expression, :drop]
 
+  @doc """
+  Denote a point in code that should not be reachable. Traps.
+
+  Useful for exhaustive conditionals or code you know will not execute.
+  """
   def unreachable!(), do: :unreachable
 
+  @doc """
+  Asserts a condition that _must_ be true, otherwise traps.
+  """
   def assert!(condition) do
     Orb.IfElse.new(
       condition,
@@ -1806,6 +1875,9 @@ defmodule Orb do
 
   def mut!(term), do: MutRef.from(term)
 
+  @doc """
+  For when there’s a language feature of WebAssembly that Orb doesn’t provide. Please file an issue if there’s something you wish existed. https://github.com/RoyalIcing/Orb/issues
+  """
   def raw_wat(source), do: {:raw_wat, String.trim(source)}
   def sigil_A(source, _modifiers), do: {:raw_wat, String.trim(source)}
 
