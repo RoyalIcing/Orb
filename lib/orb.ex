@@ -936,14 +936,6 @@ defmodule Orb do
     end
   end
 
-  def module(name, do: body) do
-    %ModuleDefinition{name: name, body: body}
-  end
-
-  def module(name, body) do
-    %ModuleDefinition{name: name, body: body}
-  end
-
   defmodule Constants do
     @moduledoc false
 
@@ -1023,7 +1015,7 @@ defmodule Orb do
     end
   end
 
-  def do_module_body(block, options, env, env_module) do
+  defp do_module_body(block, options, env, env_module) do
     # TODO split into readonly_globals and mutable_globals?
     internal_global_types = Keyword.get(options, :globals, [])
     # TODO rename to export_readonly_globals?
@@ -1065,22 +1057,22 @@ defmodule Orb do
            constants}
 
         {:const, _, [str]}, constants when is_binary(str) ->
-          {quote(do: data_for_constant(unquote(str))), [str | constants]}
+          {quote(do: Orb.__data_for_constant(unquote(str))), [str | constants]}
 
         {:sigil_S, _, [{:<<>>, _, [str]}, _]}, constants ->
           {
-            quote(do: data_for_constant(unquote(str))),
+            quote(do: Orb.__data_for_constant(unquote(str))),
             [str | constants]
           }
 
         # FIXME: have to decide whether supporting ~s and interpolation is too hard.
         {:sigil_s, _, [{:<<>>, _, [str]}, _]}, constants ->
           {
-            quote(do: data_for_constant(unquote(str))),
+            quote(do: Orb.__data_for_constant(unquote(str))),
             [str | constants]
           }
 
-        # {quote(do: data_for_constant(unquote(str))), [str | constants]}
+        # {quote(do: Orb.__data_for_constant(unquote(str))), [str | constants]}
 
         other, constants ->
           {other, constants}
@@ -1135,7 +1127,7 @@ defmodule Orb do
     end
   end
 
-  defmacro data_for_constant(value) do
+  defmacro __data_for_constant(value) do
     quote do
       Constants.new(@wasm_constants)
       |> Constants.to_map()
@@ -1289,15 +1281,6 @@ defmodule Orb do
     end
   end
 
-  def pack_strings_nul_terminated(start_offset, strings_record) do
-    {lookup_table, _} =
-      Enum.map_reduce(strings_record, start_offset, fn {key, string}, offset ->
-        {{key, %{offset: offset, string: string}}, offset + byte_size(string) + 1}
-      end)
-
-    Map.new(lookup_table)
-  end
-
   ####
 
   def to_wat(term) when is_atom(term),
@@ -1393,7 +1376,7 @@ defmodule Orb do
     # Orb.ToWat.to_wat(value, indent)
   end
 
-  def do_wat(%struct{} = value, indent) do
+  def do_wat(%_struct{} = value, indent) do
     # Protocol.assert_impl!(struct, Orb.ToWat)
 
     Orb.ToWat.to_wat(value, indent)
