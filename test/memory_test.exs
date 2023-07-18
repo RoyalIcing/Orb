@@ -13,6 +13,7 @@ defmodule MemoryTest do
           :drop
 
           memory32_8![0x100].unsigned
+          # memory![0x100].u32_8
           # FIXME: I can’t get this to work for some reason:
           # Memory.load!(I32.U8, 0x100)
           :drop
