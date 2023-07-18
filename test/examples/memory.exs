@@ -86,15 +86,15 @@ defmodule Examples.Memory do
     end
 
     def memcpy(dest, src, byte_count) do
-      call(:memcpy, dest, src, byte_count)
+      Orb.DSL.call(:memcpy, dest, src, byte_count)
     end
 
     def memcpy(dest: dest, src: src, byte_count: byte_count) do
-      call(:memcpy, dest, src, byte_count)
+      Orb.DSL.call(:memcpy, dest, src, byte_count)
     end
 
     def memset(dest: dest, u8: u8, byte_count: byte_count) do
-      call(:memset, dest, u8, byte_count)
+      Orb.DSL.call(:memset, dest, u8, byte_count)
     end
   end
 
@@ -177,7 +177,7 @@ defmodule Examples.Memory do
     end
 
     def alloc(byte_count) do
-      call(:bump_alloc, byte_count)
+      Orb.DSL.call(:bump_alloc, byte_count)
     end
   end
 
@@ -297,7 +297,7 @@ defmodule Examples.Memory do
 
     def cons(head, tail) do
       snippet U32 do
-        call(:cons, head, tail)
+        Orb.DSL.call(:cons, head, tail)
       end
     end
 
@@ -315,7 +315,7 @@ defmodule Examples.Memory do
 
     def reverse_in_place!(%Orb.MutRef{read: read, write: write}) do
       snippet U32 do
-        call(:reverse_in_place, read)
+        Orb.DSL.call(:reverse_in_place, read)
         write
       end
     end

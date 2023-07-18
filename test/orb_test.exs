@@ -4,6 +4,8 @@ defmodule OrbTest do
   use Orb
 
   test "func" do
+    import Orb.DSL
+
     wasm =
       func answer(), I32 do
         42
@@ -19,6 +21,8 @@ defmodule OrbTest do
   end
 
   test "funcp" do
+    import Orb.DSL
+
     wasm =
       funcp answer(), I32 do
         42
@@ -150,6 +154,7 @@ defmodule OrbTest do
     test "can declare import" do
       defmodule ImportsLog32 do
         use Orb
+        import Orb.DSL, only: [funcp: 1]
 
         # Import.funcp(:log, :int32, as: :log_i32, params: I32, result: I32)
         # wasm_import(:log,
