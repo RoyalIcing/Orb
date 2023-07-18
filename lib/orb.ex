@@ -1879,7 +1879,6 @@ defmodule Orb do
   For when there’s a language feature of WebAssembly that Orb doesn’t provide. Please file an issue if there’s something you wish existed. https://github.com/RoyalIcing/Orb/issues
   """
   def raw_wat(source), do: {:raw_wat, String.trim(source)}
-  def sigil_A(source, _modifiers), do: {:raw_wat, String.trim(source)}
 
   ####
 
@@ -1887,28 +1886,6 @@ defmodule Orb do
     do: do_wat(term.__wasm_module__(), "") |> IO.chardata_to_string()
 
   def to_wat(term), do: do_wat(term, "") |> IO.chardata_to_string()
-
-  defp do_type(type) do
-    case type do
-      type when type in [:i32, :i32_u8] ->
-        "i32"
-
-      :f32 ->
-        "f32"
-
-      tuple when is_tuple(tuple) ->
-        tuple |> Tuple.to_list() |> Enum.map(&do_type/1) |> Enum.join(" ")
-
-      type ->
-        #         Code.ensure_loaded!(type)
-        #
-        #         unless function_exported?(type, :wasm_type, 0) do
-        #           raise "Type #{type} must implement wasm_type/0."
-        #         end
-
-        type.wasm_type() |> to_string()
-    end
-  end
 
   def do_wat(term), do: do_wat(term, "")
 
