@@ -106,7 +106,7 @@ defmodule Orb do
 
   So the correct return type from this function would be a tuple of three integers:
 
-    ```elixir
+  ```elixir
   wasm do
     func example(), {I32, I32, I32} do
       1
@@ -118,7 +118,7 @@ defmodule Orb do
 
   If you prefer, Orb allows you to be explicit with your stack pushes with `Orb.push/1`:
 
-    ```elixir
+  ```elixir
   wasm do
     func example(), {I32, I32, I32} do
       push(1)
@@ -293,10 +293,6 @@ defmodule Orb do
   end
   ```
 
-  ### Custom types with `Access`
-
-  TODO: extract this into its own section.
-
   ## Control flow
 
   Orb supports control flow with `if`, `block`, and `loop` statements.
@@ -380,7 +376,7 @@ defmodule Orb do
 
   ```elixir
   defblock Validate do
-    break(Block, if: i < 0)
+    break(Validate, if: i < 0)
 
     # Do something with i
   end
@@ -388,11 +384,11 @@ defmodule Orb do
 
   Blocks can have a type.
 
-    ```elixir
+  ```elixir
   defblock Double, I32 do
     if i < 0 do
       push(0)
-      break(Block)
+      break(Double)
     end
 
     push(i * 2)
@@ -442,7 +438,7 @@ defmodule Orb do
 
   You can pass a name to `YourSourceModule.funcp(name)` to only copy that particular function across.
 
-    ```elixir
+  ```elixir
   defmodule A do
     use Orb
 
@@ -481,6 +477,10 @@ defmodule Orb do
   - Piping
   - Module attributes
   - Inline for
+
+  ### Custom types with `Access`
+
+  TODO: extract this into its own section.
 
   ## Define your own functions and macros
 
