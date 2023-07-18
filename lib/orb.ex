@@ -542,108 +542,6 @@ defmodule Orb do
     end
   end
 
-  # TODO: extract this out
-  defmodule ModuleDefinition do
-    @moduledoc false
-
-    defstruct name: nil,
-              imports: [],
-              memory: nil,
-              globals: [],
-              body: []
-
-    def new(options) do
-      {body, options} = Keyword.pop(options, :body)
-
-      {func_refs, other} = Enum.split_with(body, &match?({:mod_func_ref, _, _}, &1))
-
-      func_refs =
-        func_refs
-        |> Enum.uniq()
-        |> Enum.map(&resolve_func_ref/1)
-        |> List.flatten()
-        |> Enum.uniq_by(fn func -> {func.source_module, func.name} end)
-
-      body = func_refs ++ other
-
-      fields = Keyword.put(options, :body, body)
-      struct!(__MODULE__, fields)
-    end
-
-    defp resolve_func_ref({:mod_func_ref, visiblity, {mod, name}}) do
-      fetch_func!(mod.__wasm_module__(), visiblity, mod, name)
-    end
-
-    defp resolve_func_ref({:mod_func_ref, visiblity, mod}) when is_atom(mod) do
-      fetch_func!(mod.__wasm_module__(), visiblity, mod)
-    end
-
-    defmodule FetchFuncError do
-      defexception [:func_name, :module_definition]
-
-      @impl true
-      def message(%{func_name: func_name, module_definition: module_definition}) do
-        "funcp #{func_name} not found in #{module_definition.name} #{inspect(module_definition.body)}"
-      end
-    end
-
-    def fetch_func!(%__MODULE__{body: body} = module_definition, visibility, source_module) do
-      body = List.flatten(body)
-      exported? = visibility == :exported
-
-      funcs =
-        Enum.flat_map(body, fn
-          %Orb.Func{} = func ->
-            [%{func | exported?: exported?, source_module: func.source_module || source_module}]
-
-          _ ->
-            []
-        end)
-
-      funcs
-    end
-
-    def fetch_func!(%__MODULE__{body: body} = module_definition, visibility, source_module, name) do
-      body = List.flatten(body)
-      exported? = visibility == :exported
-
-      # func = Enum.find(body, &match?(%Orb.Func{name: ^name}, &1))
-      func =
-        Enum.find_value(body, fn
-          %Orb.Func{name: ^name} = func ->
-            %{func | exported?: exported?, source_module: func.source_module || source_module}
-
-          _ ->
-            false
-        end)
-
-      func || raise FetchFuncError, func_name: name, module_definition: module_definition
-    end
-
-    def func_ref!(mod, name) when is_atom(mod) do
-      {:mod_func_ref, :exported, {mod, name}}
-    end
-
-    def func_ref_all!(mod) when is_atom(mod) do
-      {:mod_func_ref, :exported, mod}
-    end
-
-    def funcp_ref!(mod, name) when is_atom(mod) do
-      {:mod_func_ref, :internal, {mod, name}}
-    end
-
-    def funcp_ref_all!(mod) when is_atom(mod) do
-      {:mod_func_ref, :internal, mod}
-    end
-  end
-
-  # TODO: extract this out
-  defmodule Import do
-    @moduledoc false
-
-    defstruct [:module, :name, :type]
-  end
-
   # TODO: break up into multiple modules. Perhaps add/2 etc can be put on Orb.I32.DSL?
   defmodule I32 do
     @moduledoc """
@@ -936,39 +834,6 @@ defmodule Orb do
     end
   end
 
-  defmodule Constants do
-    @moduledoc false
-
-    defstruct offset: 0xFF, items: []
-
-    def new(items) do
-      items = Enum.uniq(items)
-      %__MODULE__{items: items}
-    end
-
-    def to_keylist(%__MODULE__{offset: offset, items: items}) do
-      {lookup_table, _} =
-        items
-        |> Enum.map_reduce(offset, fn string, offset ->
-          {{string, offset}, offset + byte_size(string) + 1}
-        end)
-
-      lookup_table
-    end
-
-    def to_map(%__MODULE__{} = receiver) do
-      receiver |> to_keylist() |> Map.new()
-    end
-
-    def resolve(_constants, {:i32_const_string, _strptr, _string} = value) do
-      value
-    end
-
-    def resolve(constants, value) do
-      {:i32_const_string, Map.fetch!(constants, value), value}
-    end
-  end
-
   # TODO: extract?
   defmodule VariableReference do
     @moduledoc false
@@ -1083,7 +948,7 @@ defmodule Orb do
     block_items =
       case constants do
         [] -> block_items
-        _ -> [quote(do: Constants.new(unquote(constants))) | block_items]
+        _ -> [quote(do: Orb.Constants.new(unquote(constants))) | block_items]
       end
 
     %{
@@ -1098,7 +963,7 @@ defmodule Orb do
     defmacro __before_compile__(_env) do
       quote do
         def __wasm_module__() do
-          ModuleDefinition.new(
+          Orb.ModuleDefinition.new(
             name: @wasm_name,
             imports: @wasm_imports |> Enum.reverse() |> List.flatten(),
             globals: @wasm_globals |> Enum.reverse() |> List.flatten(),
@@ -1129,9 +994,9 @@ defmodule Orb do
 
   defmacro __data_for_constant(value) do
     quote do
-      Constants.new(@wasm_constants)
-      |> Constants.to_map()
-      |> Constants.resolve(unquote(value))
+      Orb.Constants.new(@wasm_constants)
+      |> Orb.Constants.to_map()
+      |> Orb.Constants.resolve(unquote(value))
     end
   end
 
@@ -1276,7 +1141,7 @@ defmodule Orb do
     quote do
       @wasm_imports (for {name, type} <-
                            unquote(entries) do
-                       %Import{module: unquote(mod), name: name, type: type}
+                       %Orb.Import{module: unquote(mod), name: name, type: type}
                      end)
     end
   end
@@ -1296,71 +1161,12 @@ defmodule Orb do
     Enum.map(list, &do_wat(&1, indent)) |> Enum.intersperse("\n")
   end
 
-  def do_wat(
-        %ModuleDefinition{
-          name: name,
-          imports: imports,
-          globals: globals,
-          memory: memory,
-          body: body
-        },
-        indent
-      ) do
-    [
-      [indent, "(module $#{name}", "\n"],
-      [for(import_def <- imports, do: [do_wat(import_def, "  " <> indent), "\n"])],
-      case memory do
-        nil ->
-          []
-
-        %Memory{} ->
-          Orb.ToWat.to_wat(memory, "  " <> indent)
-      end,
-      for global = %Orb.Global{} <- globals do
-        Orb.ToWat.to_wat(global, "  " <> indent)
-      end,
-      case body do
-        [] ->
-          ""
-
-        body ->
-          [indent, do_wat(body, "  " <> indent), "\n"]
-      end,
-      [indent, ")", "\n"]
-    ]
-  end
-
-  def do_wat(%Import{module: nil, name: name, type: type}, indent) do
-    ~s[#{indent}(import "#{name}" #{do_wat(type)})]
-  end
-
-  def do_wat(%Import{module: module, name: name, type: type}, indent) do
-    ~s[#{indent}(import "#{module}" "#{name}" #{do_wat(type)})]
-  end
-
   def do_wat(%Memory{name: nil, min: min}, indent) do
     ~s[#{indent}(memory #{min})]
   end
 
   def do_wat(%Memory{name: name, min: min}, indent) do
     ~s"#{indent}(memory #{do_wat(name)} #{min})"
-  end
-
-  def do_wat(%Constants{} = constants, indent) do
-    # dbg(Constants.to_keylist(constants))
-    for {string, offset} <- Constants.to_keylist(constants) do
-      [
-        indent,
-        "(data (i32.const ",
-        to_string(offset),
-        ") ",
-        ?",
-        string |> String.replace(~S["], ~S[\"]) |> String.replace("\n", ~S"\n"),
-        ?",
-        ")"
-      ]
-    end
-    |> Enum.intersperse("\n")
   end
 
   def do_wat(value, indent) when is_atom(value) do
