@@ -262,6 +262,8 @@ defmodule Orb.DSL do
 
   # FIXME: assumes only 32-bit integer, doesn’t work with 64-bit or float
   def push(n) when is_integer(n), do: {:i32_const, n}
+  # FIXME: assumes only 32-bit float, doesn’t work with 64-bit float
+  def push(n) when is_float(n), do: {:f32_const, n}
   def push(%Orb.VariableReference{} = ref), do: ref
 
   def push(do: [value, {:local_set, local}]), do: [value, {:local_tee, local}]

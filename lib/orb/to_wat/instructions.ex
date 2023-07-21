@@ -70,6 +70,7 @@ defmodule Orb.ToWat.Instructions do
 
   def do_wat({:i32_const, value}, indent), do: "#{indent}(i32.const #{value})"
   def do_wat({:i32_const_string, value, _string}, indent), do: "#{indent}(i32.const #{value})"
+  def do_wat({:f32_const, value}, indent), do: "#{indent}(f32.const #{value})"
   def do_wat({:global_get, identifier}, indent), do: "#{indent}(global.get $#{identifier})"
   def do_wat({:global_set, identifier}, indent), do: "#{indent}(global.set $#{identifier})"
   def do_wat({:local, identifier, type}, indent), do: "#{indent}(local $#{identifier} #{type})"
@@ -83,6 +84,7 @@ defmodule Orb.ToWat.Instructions do
   # “The default type is f64 because on modern CPUs, it’s roughly the same speed as f32 but is capable of more precision.”
   # So should our default be 64-bit too?
   def do_wat(value, indent) when is_float(value), do: "#{indent}(f32.const #{value})"
+
   def do_wat({:i32, op}, indent) when op in Ops.i32(:all), do: "#{indent}(i32.#{op})"
 
   def do_wat({:i32, op, offset}, indent) when op in Ops.i32(:load) or op in Ops.i32(:store) do

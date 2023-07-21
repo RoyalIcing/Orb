@@ -164,7 +164,7 @@ defmodule OperatorsTest do
 
         func lab_to_xyz(l: F32, a: F32, b: F32), {F32, F32, F32} do
           0.0
-          0.0
+          push(0.0)
           0.0
         end
       end
