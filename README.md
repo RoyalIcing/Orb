@@ -1,6 +1,6 @@
-# Orb: Write WebAssembly in Elixir, then run it anywhere
-
 ![Orb logo](orb-logo.svg)
+
+# Orb: Write WebAssembly with the power of Elixir
 
 Orb is a DSL for WebAssembly with the full power of the Elixir language:
 
