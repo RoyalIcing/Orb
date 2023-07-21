@@ -1,4 +1,4 @@
-![Orb logo](orb-logo.svg)
+![Orb logo](orb-logo-orange.svg)
 
 # Orb: Write WebAssembly with the power of Elixir
 
