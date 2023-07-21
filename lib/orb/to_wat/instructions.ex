@@ -76,7 +76,12 @@ defmodule Orb.ToWat.Instructions do
   def do_wat({:local_get, identifier}, indent), do: "#{indent}(local.get $#{identifier})"
   def do_wat({:local_set, identifier}, indent), do: "#{indent}(local.set $#{identifier})"
   def do_wat({:local_tee, identifier}, indent), do: "#{indent}(local.tee $#{identifier})"
+  # TODO: how do we support 64-bit integers?
   def do_wat(value, indent) when is_integer(value), do: "#{indent}(i32.const #{value})"
+  # TODO: how do we support 64-bit floats?
+  # Note that Rust defaults to 64-bit floats: https://doc.rust-lang.org/book/ch03-02-data-types.html
+  # “The default type is f64 because on modern CPUs, it’s roughly the same speed as f32 but is capable of more precision.”
+  # So should our default be 64-bit too?
   def do_wat(value, indent) when is_float(value), do: "#{indent}(f32.const #{value})"
   def do_wat({:i32, op}, indent) when op in Ops.i32(:all), do: "#{indent}(i32.#{op})"
 

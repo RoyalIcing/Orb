@@ -134,4 +134,39 @@ defmodule OperatorsTest do
            )
            """
   end
+
+  test "float 32-bit mode" do
+    defmodule F1 do
+      use Orb
+
+      wasm F32 do
+        func add(), F32 do
+          1.0 + 2.0
+        end
+
+        func multiply(a: F32, b: F32), F32 do
+          a * b
+        end
+
+        func divide(), F32 do
+          # f32 do: 4.0 / 2.0
+          4.0 / 2.0
+        end
+      end
+    end
+
+    assert to_wat(F1) == """
+           (module $F1
+             (func $add (export "add") (result f32)
+               (f32.add (f32.const 1.0) (f32.const 2.0))
+             )
+             (func $multiply (export "multiply") (param $a f32) (param $b f32) (result f32)
+               (f32.mul (local.get $a) (local.get $b))
+             )
+             (func $divide (export "divide") (result f32)
+               (f32.div (f32.const 4.0) (f32.const 2.0))
+             )
+           )
+           """
+  end
 end

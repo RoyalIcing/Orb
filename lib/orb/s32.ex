@@ -6,7 +6,7 @@ defmodule Orb.S32 do
     Signed 32-bit integer operators.
     """
 
-    import Kernel, except: [/: 2, ===: 2, !==: 2, <=: 2, >=: 2]
+    import Kernel, except: [/: 2, <: 2, >: 2, <=: 2, >=: 2]
 
     def left / right do
       Orb.I32.div_s(left, right)

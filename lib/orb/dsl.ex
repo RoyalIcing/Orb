@@ -260,6 +260,7 @@ defmodule Orb.DSL do
       when is_tuple(tuple) and elem(tuple, 0) in [:i32, :i32_const, :local_get, :global_get],
       do: tuple
 
+  # FIXME: assumes only 32-bit integer, doesn’t work with 64-bit or float
   def push(n) when is_integer(n), do: {:i32_const, n}
   def push(%Orb.VariableReference{} = ref), do: ref
 

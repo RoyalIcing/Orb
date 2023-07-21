@@ -1017,6 +1017,12 @@ defmodule Orb do
             import Orb.Global.DSL
           end
 
+        Orb.F32 ->
+          quote do
+            import Orb.F32.DSL
+            import Orb.Global.DSL
+          end
+
         :no_magic ->
           []
       end
@@ -1060,6 +1066,12 @@ defmodule Orb do
           quote do
             import Orb.I32.DSL, only: []
             import Orb.U32.DSL, only: []
+            import Orb.Global.DSL, only: []
+          end
+
+        Orb.F32 ->
+          quote do
+            import Orb.F32.DSL, only: []
             import Orb.Global.DSL, only: []
           end
 
