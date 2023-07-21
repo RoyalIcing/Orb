@@ -289,25 +289,6 @@ defmodule Orb.DSL do
   def local_tee(identifier), do: {:local_tee, identifier}
   def local_tee(identifier, value), do: [value, {:local_tee, identifier}]
 
-  defmacro attr_writer(global_name) when is_atom(global_name) do
-    quote do
-      func unquote(String.to_atom("#{global_name}="))(new_value: I32) do
-        local_get(:new_value)
-        global_set(unquote(global_name))
-      end
-    end
-  end
-
-  defmacro attr_writer(global_name, as: func_name)
-           when is_atom(global_name) |> Kernel.and(is_atom(func_name)) do
-    quote do
-      func unquote(func_name)(new_value: I32) do
-        local_get(:new_value)
-        global_set(unquote(global_name))
-      end
-    end
-  end
-
   @doc """
   Call local function `f`.
   """
