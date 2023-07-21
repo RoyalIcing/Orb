@@ -11,13 +11,12 @@ Orb is a DSL for WebAssembly with the full power of the Elixir language:
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `orb` to your list of dependencies in `mix.exs`:
+The package can be installed via Hex by adding `orb` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:orb, "~> 0.1.0"}
+    {:orb, "~> 0.0.5"}
   ]
 end
 ```
