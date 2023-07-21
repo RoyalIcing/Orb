@@ -811,29 +811,6 @@ defmodule Orb do
     end
   end
 
-  # TODO: extract
-  defmodule F32 do
-    @moduledoc """
-    Type for 32-bit floating point number.
-    """
-
-    require Ops
-
-    def wasm_type(), do: :f32
-
-    for op <- Ops.f32(1) do
-      def unquote(op)(a) do
-        {:f32, unquote(op), a}
-      end
-    end
-
-    for op <- Ops.f32(2) do
-      def unquote(op)(a, b) do
-        {:f32, unquote(op), {a, b}}
-      end
-    end
-  end
-
   # TODO: extract?
   defmodule VariableReference do
     @moduledoc false
