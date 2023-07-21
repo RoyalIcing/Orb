@@ -1,0 +1,44 @@
+# Orb Introduction
+
+```elixir
+Mix.install([
+  {:jason, "~> 1.0"},
+  :orb,
+  :orb_wasmtime
+])
+```
+
+## Section
+
+```elixir
+alias OrbWasmtime.Instance, as: Wasmtime
+```
+
+```elixir
+defmodule Mean do
+  use Orb
+
+  I32.global(sum: 0, count: 0)
+
+  wasm do
+    func insert(n: I32) do
+      @count = @count + 1
+      @sum = @sum + n
+    end
+
+    func calculate_mean(), I32 do
+      @sum / @count
+    end
+  end
+end
+```
+
+```elixir
+a = Wasmtime.run(Mean)
+Wasmtime.call(a, :insert, 3)
+Wasmtime.call(a, :insert, 4)
+Wasmtime.call(a, :insert, 5)
+Wasmtime.call(a, :insert, 6)
+Wasmtime.call(a, :insert, 7)
+Wasmtime.call(a, :calculate_mean)
+```
