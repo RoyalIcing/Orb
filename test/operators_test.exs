@@ -38,6 +38,11 @@ defmodule OperatorsTest do
         func divide(), I32 do
           4 / 2
         end
+
+        func swap(a: I32, b: I32), {I32, I32} do
+          b
+          a
+        end
       end
     end
 
@@ -64,6 +69,10 @@ defmodule OperatorsTest do
              )
              (func $divide (export "divide") (result i32)
                (i32.div_s (i32.const 4) (i32.const 2))
+             )
+             (func $swap (export "swap") (param $a i32) (param $b i32) (result i32 i32)
+               (local.get $b)
+               (local.get $a)
              )
            )
            """
@@ -152,6 +161,12 @@ defmodule OperatorsTest do
           # f32 do: 4.0 / 2.0
           4.0 / 2.0
         end
+
+        func lab_to_xyz(l: F32, a: F32, b: F32), {F32, F32, F32} do
+          0.0
+          0.0
+          0.0
+        end
       end
     end
 
@@ -165,6 +180,11 @@ defmodule OperatorsTest do
              )
              (func $divide (export "divide") (result f32)
                (f32.div (f32.const 4.0) (f32.const 2.0))
+             )
+             (func $lab_to_xyz (export "lab_to_xyz") (param $l f32) (param $a f32) (param $b f32) (result f32 f32 f32)
+               (f32.const 0.0)
+               (f32.const 0.0)
+               (f32.const 0.0)
              )
            )
            """
