@@ -96,6 +96,7 @@ Here are the reasons I chose to write Orb in Elixir.
     - Has unit test library.
     - Has CI integration.
     - Has linting.
+    - Integrates with native libraries in Rust and Zig.
     - Has upcoming type system.
 - Established frameworks:
     - Can integrate with Phoenix LiveView.
