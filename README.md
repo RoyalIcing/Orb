@@ -90,19 +90,21 @@ assert Instance.call(inst, :calculate_mean) == 5
 Here are the reasons I chose to write Orb in Elixir.
 
 - Established language:
-    - Has package manager
-    - Has language server with autocomplete
-    - Has documentation system
-    - Has unit test library
-    - Has CI integration
-    - Has linting
-    - Has upcoming type system
+    - Has package manager.
+    - Has language server with autocomplete.
+    - Has documentation system.
+    - Has unit test library.
+    - Has CI integration.
+    - Has linting.
+    - Has upcoming type system.
 - Established frameworks:
-    - Can integrate with Phoenix LiveView
-    - Can connect to cloud, databases
-    - Can integrate with Rust
-- Community that is friendly
-- Can be extended with additional functions and macros
+    - Can integrate with Phoenix LiveView.
+    - Can connect to cloud, databases.
+    - Can integrate with Rust.
+- Community that is friendly.
+- Can be extended with additional functions and macros:
+  - Unlike say C’s basic string-inserting preprocessor, Elixir is a full programming language without constraints.
+  - We can read files or the network and then generate code.
 
 ----
 
