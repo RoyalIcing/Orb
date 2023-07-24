@@ -106,6 +106,7 @@ Here are the reasons I chose to write Orb in Elixir.
 - Can be extended with additional functions and macros:
   - Unlike say C’s basic string-inserting preprocessor, Elixir is a full programming language without constraints.
   - We can read files or the network and then generate code.
+  - You can create your own DSL. Want to enforce immutable-style programming? Want to add pattern matching? Design a DSL for it.
 
 ----
 
