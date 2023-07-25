@@ -2,9 +2,11 @@ defmodule Orb do
   @moduledoc """
   Write WebAssembly modules with Elixir.
 
-  WebAssembly is a low-level language — the primitives provided are essentially just integers and floats. However, it has a unique benefit: it can run in every major application environment: browsers, servers, the edge, and mobile devices like phones, tablets & laptops.
+  WebAssembly is a low-level language. You work with integers and floats, can perform operations on them like adding or multiplication, and then read and write those values to a block of memory. There’s no concept of a “string” or an “array”, let alone a “hash map” or “HTTP request”.
 
-  Orb exposes the semantics of WebAssembly with a friendly Elixir DSL.
+  That’s where a library like Orb can help out. It takes full advantage of Elixir’s language features by becoming a compiler for WebAssembly. You can define WebAssembly modules in Elixir for “string” or “hash map”, and compose them together into a final module.
+
+  That WebAssembly module can then run in every major application environment: browsers, servers, the edge, and mobile devices like phones, tablets & laptops. This story is still being developed, but I believe like other web standards like JSON, HTML, and HTTP, that WebAssembly will become a first-class citizen on any platform. It’s Turing-complete, designed to be backwards compatible, fast, and works almost everywhere.
 
   ## Example
 
