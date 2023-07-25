@@ -1,6 +1,6 @@
 defmodule Orb.MutRef do
   @moduledoc """
-  Use `Orb.mut!/1` to get a mutable reference to a global or local.
+  Use `Orb.DSL.mut!/1` to get a mutable reference to a global or local.
   """
 
   defstruct [:read, :write, :type]

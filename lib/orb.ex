@@ -118,7 +118,7 @@ defmodule Orb do
   end
   ```
 
-  If you prefer, Orb allows you to be explicit with your stack pushes with `Orb.push/1`:
+  If you prefer, Orb allows you to be explicit with your stack pushes with `Orb.DSL.push/1`:
 
   ```elixir
   wasm do
@@ -399,7 +399,7 @@ defmodule Orb do
 
   ## Calling other functions
 
-  You can `Orb.call/1` other functions defined within your module. Currently, the parameters and return type are not checked, so you must ensure you are calling with the correct arity and types.
+  You can `Orb.DSL.call/1` other functions defined within your module. Currently, the parameters and return type are not checked, so you must ensure you are calling with the correct arity and types.
 
   ```elixir
   char = call(:encode_html_char, char)
