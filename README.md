@@ -7,7 +7,7 @@ Orb is a DSL for WebAssembly with the full power of the Elixir language:
 - Function piping
 - Break problems into smaller modules and compose them together
 - Macros
-- Share code with the Hex package manager
+- Share code via the Hex package manager
 
 ## Installation
 
@@ -84,6 +84,14 @@ assert Instance.call(inst, :calculate_mean) == 5
 - Parsers
 - Formatters & string builders
 - Code generators
+
+## Why WebAssembly?
+
+- It runs on all of today’s major platforms: browser, server, edge, mobile, laptop, tablet, desktop.
+- Universal/isomorphic components (ones that run on the server and browser) are possible in React and Next.js, but they have many different flavours and can get pretty complex for a system that was meant to be declarative.
+- Like HTML and CSS it’s backwards compatible, which means WebAssembly you author today will be guaranteed to still work in a decade or more.
+- It’s memory-safe and sandboxed. It can’t read memory outside of itself or what has been explicitly passed into it. It can be timeboxed to run only for a certain duration.
+- It’s fast.
 
 ## Why develop Orb in Elixir?
 
