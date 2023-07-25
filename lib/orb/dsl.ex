@@ -1,4 +1,8 @@
 defmodule Orb.DSL do
+  @moduledoc """
+  The main DSL which is imported automatically when you call `Orb.wasm/2`.
+  """
+
   alias Orb.Ops
   require Ops
 
