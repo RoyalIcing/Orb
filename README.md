@@ -76,12 +76,12 @@ assert Instance.call(inst, :calculate_mean) == 5
 
 Note there is [another excellent Elixir Wasmtime wrapper out there called Wasmex](https://github.com/tessi/wasmex), you may want to check that out too.
 
-## Project Goals
+## Use cases
 
 - Write a HTML component and run it in:
     - Phoenix LiveView & dead views
     - In the browser using `<wasm-html>` custom element
-- LiveView is amazing, but it makes a trade-off with latency. 
+- LiveView and its server rendering is a fantastic default, but the latency can be noticeable for certain UI interactions. With Orb you could use Elixir to write a WebAssembly module that then runs in the user’s browser.
 - State machines
 - Parsers
 - Formatters & string builders
