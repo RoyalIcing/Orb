@@ -20,7 +20,7 @@ def deps do
 end
 ```
 
-## About
+## Example
 
 ```elixir
 defmodule CalculateMean do
