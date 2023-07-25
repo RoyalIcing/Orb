@@ -4,9 +4,8 @@
 
 Orb is a DSL for WebAssembly with the full power of the Elixir language:
 
-- Function piping
+- Function piping, Macros
 - Break problems into smaller modules and compose them together
-- Macros
 - Share code via the Hex package manager
 
 ## Installation
@@ -75,11 +74,14 @@ Instance.call(inst, :insert, 6)
 assert Instance.call(inst, :calculate_mean) == 5
 ```
 
+Note there is [another excellent Elixir Wasmtime wrapper out there called Wasmex](https://github.com/tessi/wasmex), you may want to check that out too.
+
 ## Project Goals
 
 - Write a HTML component and run it in:
     - Phoenix LiveView & dead views
     - In the browser using `<wasm-html>` custom element
+- LiveView is amazing, but it makes a trade-off with latency. 
 - State machines
 - Parsers
 - Formatters & string builders
