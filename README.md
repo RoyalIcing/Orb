@@ -83,6 +83,8 @@ assert Instance.call(inst, :calculate_mean) == 5
 - State machines
 - Parsers
 - Formatters & string builders
+- Interactive color picker controls
+- Animation that runs fast in the browser, and works on the server
 - Code generators
 
 ## Why WebAssembly?
