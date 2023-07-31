@@ -119,10 +119,11 @@ defmodule Orb.DSL do
       %Orb.Func{
         name: unquote(name),
         params: unquote(params),
-        result: case unquote(result_type) do
-          nil -> nil
-          type -> {:result, type}
-        end,
+        result:
+          case unquote(result_type) do
+            nil -> nil
+            type -> {:result, type}
+          end,
         local_types: unquote(local_types),
         body: unquote(block_items),
         exported?: unquote(exported?)
@@ -278,7 +279,7 @@ defmodule Orb.DSL do
   def push(value, do: block) do
     [
       value,
-      __get_block_items(block),
+      __get_block_items(block)
       # :pop
     ]
   end
@@ -299,17 +300,37 @@ defmodule Orb.DSL do
   def call(f), do: {:call, f, []}
 
   @doc """
-  Call local function `f`, passing single argument `a`.
+  Call local function `f`, passing arguments `args` when list, or single argument otherwise.
   """
+  def call(f, args)
+
+  def call(f, args) when is_list(args), do: {:call, f, args}
   def call(f, a), do: {:call, f, [a]}
+
   @doc """
   Call local function `f`, passing arguments `a` & `b`.
   """
   def call(f, a, b), do: {:call, f, [a, b]}
+
   @doc """
-  Call local function `f`, passing argument `a`, `b` & `c`.
+  Call local function `f`, passing argument `a`, `b`, `c`.
   """
   def call(f, a, b, c), do: {:call, f, [a, b, c]}
+
+  @doc """
+  Call local function `f`, passing argument `a`, `b`, `c`, `d`.
+  """
+  def call(f, a, b, c, d), do: {:call, f, [a, b, c, d]}
+
+  @doc """
+  Call local function `f`, passing argument `a`, `b`, `c`, `d`, `e`.
+  """
+  def call(f, a, b, c, d, e), do: {:call, f, [a, b, c, d, e]}
+
+  @doc """
+  Call local function `f`, passing argument `a`, `b`, `c`, `d`, `e`, `f`.
+  """
+  def call(f, a, b, c, d, e, f), do: {:call, f, [a, b, c, d, e, f]}
 
   def __expand_identifier(identifier, env) do
     identifier = Macro.expand_once(identifier, env) |> Kernel.to_string()
@@ -373,7 +394,10 @@ defmodule Orb.DSL do
   """
   defmacro loop(identifier, options \\ [], do: block) do
     identifier = __expand_identifier(identifier, __CALLER__)
-    result_type = Keyword.get(options, :result, nil) |> Orb.ToWat.Instructions.expand_type(__CALLER__)
+
+    result_type =
+      Keyword.get(options, :result, nil) |> Orb.ToWat.Instructions.expand_type(__CALLER__)
+
     while = Keyword.get(options, :while, nil)
 
     block_items = __get_block_items(block)
@@ -420,7 +444,9 @@ defmodule Orb.DSL do
   """
   defmacro defblock(identifier, options \\ [], do: block) do
     identifier = __expand_identifier(identifier, __CALLER__)
-    result_type = Keyword.get(options, :result, nil) |> Orb.ToWat.Instructions.expand_type(__CALLER__)
+
+    result_type =
+      Keyword.get(options, :result, nil) |> Orb.ToWat.Instructions.expand_type(__CALLER__)
 
     block_items = __get_block_items(block)
 
@@ -508,6 +534,7 @@ defmodule Orb.DSL do
   Drop the last pushed value from the stack.
   """
   def drop(), do: :drop
+
   @doc """
   Execute the passed expression, but ignore its result by immediately dropping its value.
   """
