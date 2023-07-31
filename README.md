@@ -103,6 +103,7 @@ Here are the reasons I chose to write Orb in Elixir.
 
 - Established language:
     - Has package manager.
+    - Has composable modules with `alias` & `use`.
     - Has syntax highlighting in IDEs, GitHub, and in highlighting libraries.
     - Has language server with autocomplete.
     - Has documentation system.
