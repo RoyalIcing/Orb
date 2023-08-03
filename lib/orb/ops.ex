@@ -17,8 +17,10 @@ defmodule Orb.Ops do
   @i32_ops_2 @i_binary_ops ++ @i_relative_ops
   @i32_ops_all @i32_ops_1 ++ @i32_ops_2 ++ @i_load_ops ++ @i_store_ops
 
-  @f32_ops_1 ~w(convert_i32_s convert_i32_u)a
-  @f32_ops_2 ~w(add sub mul div eq ne lt gt le ge)a
+  @f32_ops_1 ~w(floor ceil trunc nearest abs neg sqrt convert_i32_s convert_i32_u)a
+  @f32_ops_2 ~w(add sub mul div eq ne lt gt le ge copysign min max)a
+
+  # TODO: add conversions ops https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/Numeric#conversion
 
   defmacro i32(arity_or_type)
   defmacro i32(1), do: @i32_ops_1 |> Macro.escape()
