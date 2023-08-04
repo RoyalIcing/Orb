@@ -217,6 +217,37 @@ defmodule OrbTest do
              )
              """
     end
+
+    test "works with multiple wasm blocks" do
+      defmodule HTMLTypes2 do
+        use Orb
+
+        wasm do
+          func doctype(), I32 do
+            ~S"<!doctype html>"
+          end
+        end
+
+        wasm do
+          func mime_type(), I32 do
+            ~S"text/html"
+          end
+        end
+      end
+
+      assert to_wat(HTMLTypes2) == """
+             (module $HTMLTypes2
+               (data (i32.const 255) "<!doctype html>")
+               (data (i32.const 271) "text/html")
+               (func $doctype (export "doctype") (result i32)
+                 (i32.const 255)
+               )
+               (func $mime_type (export "mime_type") (result i32)
+                 (i32.const 271)
+               )
+             )
+             """
+    end
   end
 
   defmodule SingleFunc do

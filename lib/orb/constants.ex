@@ -1,10 +1,17 @@
 defmodule Orb.Constants do
   @moduledoc false
 
+  # TODO: decide on non-arbitrary offset, and document it.
   defstruct offset: 0xFF, items: []
 
-  def new(items) do
-    items = Enum.uniq(items)
+  def from_attribute(items) do
+    items =
+      items
+      # Module attributes accumulate by prepending
+      |> Enum.reverse()
+      |> List.flatten()
+      |> Enum.uniq()
+
     %__MODULE__{items: items}
   end
 
@@ -41,10 +48,9 @@ defmodule Orb.Constants do
           ?",
           string |> String.replace(~S["], ~S[\"]) |> String.replace("\n", ~S"\n"),
           ?",
-          ")"
+          ")\n"
         ]
       end
-      |> Enum.intersperse("\n")
     end
   end
 end

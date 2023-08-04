@@ -3,8 +3,9 @@ defmodule Orb.ModuleDefinition do
 
   defstruct name: nil,
             imports: [],
-            memory: nil,
             globals: [],
+            memory: nil,
+            constants: %Orb.Constants{},
             body: []
 
   def new(options) do
@@ -100,6 +101,7 @@ defmodule Orb.ModuleDefinition do
             imports: imports,
             globals: globals,
             memory: memory,
+            constants: constants,
             body: body
           },
           indent
@@ -117,6 +119,7 @@ defmodule Orb.ModuleDefinition do
         for global = %Orb.Global{} <- globals do
           Orb.ToWat.to_wat(global, "  " <> indent)
         end,
+        Orb.ToWat.to_wat(constants, "  " <> indent),
         case body do
           [] ->
             ""

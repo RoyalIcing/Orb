@@ -539,7 +539,7 @@ defmodule Orb do
 
         Module.register_attribute(__MODULE__, :wasm_imports, accumulate: true)
         Module.register_attribute(__MODULE__, :wasm_body, accumulate: true)
-        # @wasm_memory 0
+        Module.register_attribute(__MODULE__, :wasm_constants, accumulate: true)
       end
     end
   end
@@ -943,12 +943,6 @@ defmodule Orb do
 
     constants = Enum.reverse(constants)
 
-    block_items =
-      case constants do
-        [] -> block_items
-        _ -> [quote(do: Orb.Constants.new(unquote(constants))) | block_items]
-      end
-
     %{
       body: block_items,
       constants: constants
@@ -966,6 +960,7 @@ defmodule Orb do
             imports: @wasm_imports |> Enum.reverse() |> List.flatten(),
             globals: @wasm_globals |> Enum.reverse() |> List.flatten(),
             memory: Memory.from(@wasm_memory),
+            constants: Orb.Constants.from_attribute(@wasm_constants),
             body: @wasm_body |> Enum.reverse() |> List.flatten()
           )
         end
@@ -992,7 +987,8 @@ defmodule Orb do
 
   defmacro __data_for_constant(value) do
     quote do
-      Orb.Constants.new(@wasm_constants)
+      @wasm_constants
+      |> Orb.Constants.from_attribute()
       |> Orb.Constants.to_map()
       |> Orb.Constants.resolve(unquote(value))
     end
@@ -1095,6 +1091,8 @@ defmodule Orb do
     post = mode_post(mode)
 
     %{body: body, constants: constants} = do_module_body(block, [], __CALLER__, __CALLER__.module)
+
+    Module.register_attribute(__CALLER__.module, :wasm_constants, accumulate: true)
     Module.put_attribute(__CALLER__.module, :wasm_constants, constants)
 
     quote do
