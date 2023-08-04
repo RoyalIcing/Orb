@@ -575,10 +575,8 @@ defmodule OrbTest do
   end
 
   defmodule SnippetDefiner do
-    use Orb
-
     def hd!(ptr) do
-      snippet U32 do
+      Orb.snippet U32 do
         Memory.load!(I32, ptr + 4)
       end
     end
