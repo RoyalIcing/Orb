@@ -1128,13 +1128,18 @@ defmodule Orb do
       end
 
     quote do
-      unquote(pre)
+      # We want to import and un-import. so we use `with` as a finite scope.
+      with do
+        unquote(pre)
 
-      import Orb.DSL
-      unquote(Orb.DSL.do_snippet(locals, block_items))
-      import Orb.DSL, only: []
+        import Orb.DSL
+        dsl_items = unquote(Orb.DSL.do_snippet(locals, block_items))
+        import Orb.DSL, only: []
 
-      unquote(post)
+        unquote(post)
+
+        dsl_items
+      end
     end
   end
 

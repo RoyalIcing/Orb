@@ -573,4 +573,39 @@ defmodule OrbTest do
     assert to_wat(FileNameSafe) == wasm_source
     # assert Wasm.call(FileNameSafe, "body") == 100
   end
+
+  defmodule SnippetDefiner do
+    use Orb
+
+    def hd!(ptr) do
+      snippet U32 do
+        Memory.load!(I32, ptr + 4)
+      end
+    end
+  end
+
+  defmodule SnippetUser do
+    use Orb
+
+    Memory.pages(1)
+
+    wasm do
+      func answer(), I32 do
+        SnippetDefiner.hd!(0x100)
+      end
+    end
+  end
+
+  test "snippet works" do
+    wasm_source = """
+    (module $SnippetUser
+      (memory (export "memory") 1)
+      (func $answer (export "answer") (result i32)
+        (i32.load (i32.add (i32.const #{0x100}) (i32.const 4)))
+      )
+    )
+    """
+
+    assert to_wat(SnippetUser) == wasm_source
+  end
 end
