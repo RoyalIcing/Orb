@@ -6,7 +6,7 @@ defmodule Orb.MixProject do
   def project do
     [
       app: :orb,
-      version: "0.0.7",
+      version: "0.0.8",
       elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -52,7 +52,7 @@ defmodule Orb.MixProject do
     [
       # The main page in the docs
       main: "Orb",
-      # logo: "path/to/logo.png",
+      logo: "orb-logo-orange.svg",
       extras: ["README.md", "examples/01-intro.livemd"]
     ]
   end
