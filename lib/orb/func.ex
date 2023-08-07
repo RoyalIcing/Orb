@@ -10,14 +10,8 @@ defmodule Orb.Func do
             source_module: nil,
             table_elem_indices: []
 
-  def __add_table_elem(f = %__MODULE__{}, table_allocations, key) do
-    table_allocations = List.flatten(table_allocations)
-    elem_index = Enum.find_index(table_allocations, &match?({^key, _}, &1))
-    case elem_index do
-      nil -> raise "Could not find elem key #{key} in table allocations #{inspect(table_allocations)}"
-      elem_index when is_integer(elem_index) ->
-        update_in(f.table_elem_indices, fn refs -> [elem_index | refs] end)
-    end
+  def __add_table_elem(f = %__MODULE__{}, elem_index) do
+    update_in(f.table_elem_indices, fn refs -> [elem_index | refs] end)
   end
 
   defimpl Orb.ToWat do
@@ -102,22 +96,22 @@ defmodule Orb.Func do
   defmodule Type do
     @moduledoc false
 
-    defstruct [:name, :param_types, :result_type]
+    defstruct [:name, :params, :result]
 
     # TODO: should this be its own struct type?
-    def imported_func(name, params, result_type) do
-      # param_types = [:i32]
+    def imported_func(name, params, result) do
+      # params = [:i32]
       %__MODULE__{
         name: name,
-        param_types: params,
-        result_type: result_type
+        params: params,
+        result: result
       }
     end
 
     defimpl Orb.ToWat do
       alias Orb.ToWat.Instructions
 
-      def to_wat(%Type{name: name, param_types: param_types, result_type: result_type}, indent) do
+      def to_wat(%Type{name: name, params: params, result: result}, indent) do
         [
           indent,
           "(func",
@@ -125,24 +119,24 @@ defmodule Orb.Func do
             nil -> []
             name -> [" $", to_string(name)]
           end,
-          case param_types do
+          case params do
             nil ->
               []
 
-            param_types ->
+            params ->
               [
                 " ",
-                Orb.ToWat.to_wat(%Param{name: nil, type: param_types}, "")
+                Orb.ToWat.to_wat(%Param{name: nil, type: params}, "")
               ]
           end,
-          case result_type do
+          case result do
             nil ->
               []
 
-            result_type ->
+            result ->
               [
                 " ",
-                Instructions.do_wat({:result, result_type})
+                Instructions.do_wat({:result, result})
               ]
           end,
           ?)

@@ -940,17 +940,10 @@ defmodule Orb do
 
     defmacro __before_compile__(_env) do
       quote do
-        # def __wasm_body__() do
-        #   if (function_exported?(__MODULE__, :wasm_body, 1)) do
-        #     for n <- 0..(@wasm_body_n || -1) do
-        #       wasm_body(n)
-        #     end
-        #   else
-        #     []
-        #   end
-        # end
-
         def __wasm_constants__(), do: Orb.Constants.from_attribute(@wasm_constants)
+
+        def __wasm_table_allocations__(),
+          do: Orb.Table.Allocations.from_attribute(@wasm_table_allocations)
 
         def __wasm_module__() do
           Orb.ModuleDefinition.new(
@@ -1164,6 +1157,17 @@ defmodule Orb do
     end)
   end
 
+  defmacro types(modules) do
+    quote do
+      @wasm_types (for mod <- unquote(modules) do
+                     %Orb.Type{
+                       name: mod.type_name(),
+                       inner_type: mod.wasm_type()
+                     }
+                   end)
+    end
+  end
+
   defmacro functype(call, result) do
     env = __ENV__
 
@@ -1186,8 +1190,8 @@ defmodule Orb do
       @wasm_types %Orb.Type{
         name: unquote(name),
         inner_type: %Orb.Func.Type{
-          param_types: unquote(Macro.escape(param_type)),
-          result_type: unquote(result)
+          params: unquote(Macro.escape(param_type)),
+          result: unquote(result)
         }
       }
     end

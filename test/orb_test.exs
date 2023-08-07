@@ -662,13 +662,29 @@ defmodule OrbTest do
     # types do
     #   func(answer(), I32)
     # end
-    functype(answer(), I32)
+    # functype(answer(), I32)
 
     # use Table(
-    Table.allocate(
-      good_answer: :answer,
-      bad_answer: :answer
-    )
+    # Table.allocate(
+    #   good_answer: :answer,
+    #   bad_answer: :answer
+    # )
+
+    defmodule Answer do
+      # use Orb.Type, :answer, %Orb.Func.Type{result: I32}
+      # use Orb.TableEntries, result: I32
+
+      def type_name, do: :answer
+      def wasm_type, do: %Orb.Func.Type{result: I32}
+      def table_func_keys(), do: [:good, :bad]
+
+      def call(elem_index) do
+        Table.call_indirect(type_name(), elem_index)
+      end
+    end
+
+    types([Answer])
+    Table.allocate(Answer)
 
     # global do
     #   i32 state(4), counter(0)
@@ -677,41 +693,24 @@ defmodule OrbTest do
     #   f32 t(0.0)
     # end
 
-    def index, do: 0
-
     wasm do
-      # functype(answer(), I32)
       # type(:answer, funcp(result: I32))
       # answer good_answer do
 
       # end
 
-      # Table.type Answer(), I32, [:good_answer, :bad_answer]
-      # Table.type(answer(), I32, [:good_answer, :bad_answer])
-      # Table.type(name: :answer, result: I32, [:good_answer, :bad_answer])
-
       func good_answer(), I32 do
         42
       end
-      # |> table_elem(@good_answer)
-      # |> table_elem(good_answer)
-      |> Table.elem(:good_answer)
-
-      # |> table_elem(&Table.good_answer/0)
+      |> Table.elem!(Answer, :good)
 
       func bad_answer(), I32 do
         13
       end
-      |> Table.elem(:bad_answer)
-      # |> Table.elem()
+      |> Table.elem!(Answer, :bad)
 
       func answer(), I32 do
-        # call(&Table.good_answer/0)
-        # call(^@good_answer)
-        # call_indirect(Table.elem(:good_answer))
-        # Table.call(functypes[:answer], 0)
-        Table.call(:answer, index())
-        # Answer.call(:good_answer)
+        Answer.call(Table.lookup!(Answer, :good))
       end
     end
   end
