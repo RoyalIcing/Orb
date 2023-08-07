@@ -527,6 +527,9 @@ defmodule Orb do
 
       unquote(attrs)
 
+      def __wasm_body__, do: []
+      defoverridable __wasm_body__: 0
+
       if Module.open?(__MODULE__) do
         # @before_compile unquote(__MODULE__).BeforeCompile
         # Module.put_attribute(__MODULE__, :before_compile, unquote(__MODULE__).BeforeCompile)
@@ -888,9 +891,9 @@ defmodule Orb do
     exported_global_types = Keyword.get(options, :exported_globals, [])
     exported_mutable_global_types = Keyword.get(options, :exported_mutable_globals, [])
 
-    internal_global_types =
-      internal_global_types ++
-        List.flatten(List.wrap(Module.get_attribute(env_module, :wasm_global)))
+    # internal_global_types =
+    #   internal_global_types ++
+    #     List.flatten(List.wrap(Module.get_attribute(env_module, :wasm_global)))
 
     # dbg(env_module)
     # dbg(Module.get_attribute(env_module, :wasm_global))
@@ -957,6 +960,18 @@ defmodule Orb do
 
     defmacro __before_compile__(_env) do
       quote do
+        # def __wasm_body__() do
+        #   if (function_exported?(__MODULE__, :wasm_body, 1)) do
+        #     for n <- 0..(@wasm_body_n || -1) do
+        #       wasm_body(n)
+        #     end
+        #   else
+        #     []
+        #   end
+        # end
+
+        def __wasm_constants__(), do: @wasm_constants
+
         def __wasm_module__() do
           Orb.ModuleDefinition.new(
             name: @wasm_name,
@@ -966,7 +981,8 @@ defmodule Orb do
             globals: @wasm_globals |> Enum.reverse() |> List.flatten(),
             memory: Memory.from(@wasm_memory),
             constants: Orb.Constants.from_attribute(@wasm_constants),
-            body: @wasm_body |> Enum.reverse() |> List.flatten()
+            # body: @wasm_body |> Enum.reverse() |> List.flatten()
+            body: __wasm_body__()
           )
         end
 
@@ -992,7 +1008,9 @@ defmodule Orb do
 
   defmacro __data_for_constant(value) do
     quote do
-      @wasm_constants
+      # @wasm_constants
+      # __MODULE__.__info__(:attributes) |> Keyword.fetch!(:wasm_constants)
+      __wasm_constants__()
       |> Orb.Constants.from_attribute()
       |> Orb.Constants.to_map()
       |> Orb.Constants.resolve(unquote(value))
@@ -1104,7 +1122,15 @@ defmodule Orb do
       unquote(pre)
 
       import Orb.DSL
-      @wasm_body unquote(body)
+
+      # @wasm_body unquote(body)
+
+      def __wasm_body__() do
+        super() ++ unquote(body)
+      end
+
+      defoverridable __wasm_body__: 0
+
       import Orb.DSL, only: []
 
       unquote(post)

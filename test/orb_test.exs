@@ -359,7 +359,7 @@ defmodule OrbTest do
       Memory.pages(1)
 
       wasm do
-        inline for {status, message} <- ^@statuses do
+        inline for {status, message} <- status_table() do
           Memory.initial_data(offset: status * 24, string: message)
         end
 
@@ -677,6 +677,8 @@ defmodule OrbTest do
     #   f32 t(0.0)
     # end
 
+    def index, do: 0
+
     wasm do
       # functype(answer(), I32)
       # type(:answer, funcp(result: I32))
@@ -708,7 +710,7 @@ defmodule OrbTest do
         # call(^@good_answer)
         # call_indirect(Table.elem(:good_answer))
         # Table.call(functypes[:answer], 0)
-        Table.call(:answer, 0)
+        Table.call(:answer, index())
         # Answer.call(:good_answer)
       end
     end
