@@ -858,7 +858,7 @@ defmodule Orb do
     @behaviour Access
 
     @impl Access
-    def fetch(%__MODULE__{global_or_local: :local, identifier: identifier, type: :i32} = ref,
+    def fetch(%__MODULE__{global_or_local: :local, identifier: _identifier, type: :i32} = ref,
           at: offset
         ) do
       ast = {:i32, :load, {:i32, :add, {ref, offset}}}
@@ -866,10 +866,20 @@ defmodule Orb do
     end
 
     def fetch(
-          %__MODULE__{global_or_local: :local, identifier: identifier, type: mod} = ref,
+          %__MODULE__{global_or_local: :local, identifier: _identifier, type: mod} = ref,
           key
         ) do
       mod.fetch(ref, key)
+    end
+
+    @impl Access
+    def get_and_update(_data, _key, _function) do
+      raise UndefinedFunctionError, module: __MODULE__, function: :get_and_update, arity: 3
+    end
+
+    @impl Access
+    def pop(_data, _key) do
+      raise UndefinedFunctionError, module: __MODULE__, function: :pop, arity: 2
     end
 
     defimpl Orb.ToWat do

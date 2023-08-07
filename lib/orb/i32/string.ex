@@ -21,6 +21,16 @@ defmodule Orb.I32.String do
     {:ok, ast}
   end
 
+  @impl Access
+  def get_and_update(_data, _key, _function) do
+    raise UndefinedFunctionError, module: __MODULE__, function: :get_and_update, arity: 3
+  end
+
+  @impl Access
+  def pop(_data, _key) do
+    raise UndefinedFunctionError, module: __MODULE__, function: :pop, arity: 2
+  end
+
   # TODO: extract to SilverOrb
   defmodule CharIterator do
     @moduledoc """
@@ -52,6 +62,16 @@ defmodule Orb.I32.String do
         end
 
       {:ok, ast}
+    end
+
+    @impl Access
+    def get_and_update(_data, _key, _function) do
+      raise UndefinedFunctionError, module: __MODULE__, function: :get_and_update, arity: 3
+    end
+
+    @impl Access
+    def pop(_data, _key) do
+      raise UndefinedFunctionError, module: __MODULE__, function: :pop, arity: 2
     end
   end
 
@@ -91,8 +111,8 @@ defmodule Orb.I32.String do
 
       loop EachChar do
         if memory32_8![I32.add(string_ptr, count)].unsigned do
-        # FIXME: remove memory32_8!
-        # if Memory.load!(I32.U8, I32.add(string_ptr, count)) do
+          # FIXME: remove memory32_8!
+          # if Memory.load!(I32.U8, I32.add(string_ptr, count)) do
           count = I32.add(count, 1)
           EachChar.continue()
         end
