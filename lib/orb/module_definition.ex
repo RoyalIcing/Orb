@@ -45,7 +45,7 @@ defmodule Orb.ModuleDefinition do
     end
   end
 
-  def fetch_func!(%__MODULE__{body: body} = module_definition, visibility, source_module) do
+  def fetch_func!(%__MODULE__{body: body}, visibility, source_module) do
     body = List.flatten(body)
     exported? = visibility == :exported
 
@@ -130,7 +130,7 @@ defmodule Orb.ModuleDefinition do
           Orb.ToWat.to_wat(global, next_indent)
         end,
         Orb.ToWat.to_wat(constants, next_indent),
-        for statement <- body do
+        for statement <- List.flatten(body) do
           Orb.ToWat.to_wat(statement, next_indent)
         end,
         [indent, ")", "\n"]
