@@ -970,7 +970,7 @@ defmodule Orb do
         #   end
         # end
 
-        def __wasm_constants__(), do: @wasm_constants
+        def __wasm_constants__(), do: Orb.Constants.from_attribute(@wasm_constants)
 
         def __wasm_module__() do
           Orb.ModuleDefinition.new(
@@ -1008,12 +1008,8 @@ defmodule Orb do
 
   defmacro __data_for_constant(value) do
     quote do
-      # @wasm_constants
-      # __MODULE__.__info__(:attributes) |> Keyword.fetch!(:wasm_constants)
       __wasm_constants__()
-      |> Orb.Constants.from_attribute()
-      |> Orb.Constants.to_map()
-      |> Orb.Constants.resolve(unquote(value))
+      |> Orb.Constants.lookup(unquote(value))
     end
   end
 

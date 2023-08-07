@@ -2,9 +2,9 @@ defmodule Orb.Constants do
   @moduledoc false
 
   # TODO: decide on non-arbitrary offset, and document it.
-  defstruct offset: 0xFF, items: []
+  defstruct offset: 0xFF, items: [], lookup_table: []
 
-  def from_attribute(items) do
+  def from_attribute(items, offset \\ 0xFF) do
     items =
       items
       # Module attributes accumulate by prepending
@@ -12,34 +12,23 @@ defmodule Orb.Constants do
       |> List.flatten()
       |> Enum.uniq()
 
-    %__MODULE__{items: items}
-  end
-
-  def to_keylist(%__MODULE__{offset: offset, items: items}) do
     {lookup_table, _} =
       items
       |> Enum.map_reduce(offset, fn string, offset ->
         {{string, offset}, offset + byte_size(string) + 1}
       end)
 
-    lookup_table
+    %__MODULE__{offset: offset, items: items, lookup_table: lookup_table}
   end
 
-  def to_map(%__MODULE__{} = receiver) do
-    receiver |> to_keylist() |> Map.new()
-  end
-
-  def resolve(_constants, {:i32_const_string, _strptr, _string} = value) do
-    value
-  end
-
-  def resolve(constants, value) do
-    {:i32_const_string, Map.fetch!(constants, value), value}
+  def lookup(constants, value) do
+    {_, offset} = List.keyfind!(constants.lookup_table, value, 0)
+    {:i32_const_string, offset, value}
   end
 
   defimpl Orb.ToWat do
-    def to_wat(%Orb.Constants{} = constants, indent) do
-      for {string, offset} <- Orb.Constants.to_keylist(constants) do
+    def to_wat(%Orb.Constants{lookup_table: lookup_table}, indent) do
+      for {string, offset} <- lookup_table do
         [
           indent,
           "(data (i32.const ",
