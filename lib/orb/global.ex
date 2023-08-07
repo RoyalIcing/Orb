@@ -3,8 +3,9 @@ defmodule Orb.Global do
 
   defstruct [:name, :type, :initial_value, :mutability, :exported]
 
-  def new(:i32 = type, name, mutability, exported, value)
-      when is_atom(name) and
+  def new(type, name, mutability, exported, value)
+      when type in [:i32, :f32] and
+             is_atom(name) and
              mutability in ~w[readonly mutable]a and
              exported in ~w[internal exported]a do
     %__MODULE__{

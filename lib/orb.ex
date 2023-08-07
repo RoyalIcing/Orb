@@ -516,7 +516,7 @@ defmodule Orb do
     quote do
       import Orb
       alias Orb.{I32, I64, S32, U32, F32, Memory, Table}
-      require Orb.{I32, Table, Memory}
+      require Orb.{I32, F32, Table, Memory}
 
       # @wasm_name __MODULE__ |> Module.split() |> List.last()
       # @before_compile {unquote(__MODULE__), :register_attributes}
