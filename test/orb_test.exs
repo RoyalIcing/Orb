@@ -379,9 +379,12 @@ defmodule OrbTest do
       Memory.pages(1)
 
       wasm do
-        inline for {status, message} <- status_table() do
+        inline for {status, message} <- ^@statuses do
           Memory.initial_data(offset: status * 24, string: message)
         end
+        # inline for {status, message} <- status_table() do
+        #   Memory.initial_data(offset: status * 24, string: message)
+        # end
 
         func lookup(status: I32), I32 do
           I32.mul(status, 24)

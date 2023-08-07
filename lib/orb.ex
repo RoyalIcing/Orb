@@ -1061,6 +1061,15 @@ defmodule Orb do
             import Orb.Global.DSL, only: []
           end
 
+        :any ->
+          quote do
+            import Orb.I32.DSL, only: []
+            import Orb.U32.DSL, only: []
+            import Orb.S32.DSL, only: []
+            import Orb.F32.DSL, only: []
+            import Orb.Global.DSL, only: []
+          end
+
         :no_magic ->
           []
       end
@@ -1143,11 +1152,17 @@ defmodule Orb do
     end
   end
 
-  defp interpolate_external_values(ast, env) do
+  defp interpolate_external_values(ast, _env) do
     Macro.postwalk(ast, fn
-      # TODO: not sure this works after evaluation body at runtime now
       {:^, _, [term]} ->
-        Macro.postwalk(term, &Macro.expand_once(&1, env))
+        quote do
+          with do
+            unquote(mode_post(:any))
+            import Kernel
+
+            unquote(term)
+          end
+        end
 
       {:^, _, _other} ->
         raise "Invalid ^. Expected single argument."
