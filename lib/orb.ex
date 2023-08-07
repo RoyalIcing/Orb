@@ -883,26 +883,7 @@ defmodule Orb do
     end
   end
 
-  defp do_module_body(block, options, env, env_module) do
-    # TODO: remove all this
-    # TODO split into readonly_globals and mutable_globals?
-    internal_global_types = Keyword.get(options, :globals, [])
-    # TODO rename to export_readonly_globals?
-    exported_global_types = Keyword.get(options, :exported_globals, [])
-    exported_mutable_global_types = Keyword.get(options, :exported_mutable_globals, [])
-
-    # internal_global_types =
-    #   internal_global_types ++
-    #     List.flatten(List.wrap(Module.get_attribute(env_module, :wasm_global)))
-
-    # dbg(env_module)
-    # dbg(Module.get_attribute(env_module, :wasm_global))
-
-    globals =
-      (internal_global_types ++ exported_global_types ++ exported_mutable_global_types)
-      |> Keyword.new(fn {key, _} -> {key, nil} end)
-      |> Map.new()
-
+  defp do_module_body(block, env) do
     block = interpolate_external_values(block, env)
 
     block_items =
@@ -916,15 +897,6 @@ defmodule Orb do
 
     {block_items, constants} =
       Macro.prewalk(block_items, [], fn
-        # TODO: remove, replaced by @global_name =
-        {:=, _meta1, [{global, _meta2, nil}, input]}, constants
-        when is_atom(global) and is_map_key(globals, global) ->
-          {[input, Orb.DSL.global_set(global)], constants}
-
-        {atom, _meta, nil}, constants when is_atom(atom) and is_map_key(globals, atom) ->
-          {quote(do: Orb.VariableReference.global(unquote(atom), unquote(globals[atom]))),
-           constants}
-
         {:const, _, [str]}, constants when is_binary(str) ->
           {quote(do: Orb.__data_for_constant(unquote(str))), [str | constants]}
 
@@ -940,8 +912,6 @@ defmodule Orb do
             quote(do: Orb.__data_for_constant(unquote(str))),
             [str | constants]
           }
-
-        # {quote(do: Orb.__data_for_constant(unquote(str))), [str | constants]}
 
         other, constants ->
           {other, constants}
@@ -1109,7 +1079,7 @@ defmodule Orb do
     pre = mode_pre(mode)
     post = mode_post(mode)
 
-    %{body: body, constants: constants} = do_module_body(block, [], __CALLER__, __CALLER__.module)
+    %{body: body, constants: constants} = do_module_body(block, __CALLER__)
 
     Module.register_attribute(__CALLER__.module, :wasm_constants, accumulate: true)
     Module.put_attribute(__CALLER__.module, :wasm_constants, constants)
@@ -1172,6 +1142,7 @@ defmodule Orb do
 
   defp interpolate_external_values(ast, env) do
     Macro.postwalk(ast, fn
+      # TODO: not sure this works after evaluation body at runtime now
       {:^, _, [term]} ->
         Macro.postwalk(term, &Macro.expand_once(&1, env))
 
