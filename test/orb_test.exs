@@ -694,11 +694,6 @@ defmodule OrbTest do
     # end
 
     wasm do
-      # type(:answer, funcp(result: I32))
-      # answer good_answer do
-
-      # end
-
       func good_answer(), I32 do
         42
       end
