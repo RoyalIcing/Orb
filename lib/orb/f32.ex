@@ -3,12 +3,12 @@ defmodule Orb.F32 do
 
   require Orb.Ops, as: Ops
 
-  @behaviour Orb.Type
+  @behaviour Orb.CustomType
 
-  @impl Orb.Type
+  @impl Orb.CustomType
   def wasm_type(), do: :f32
 
-  @impl Orb.Type
+  @impl Orb.CustomType
   def byte_count(), do: 4
 
   for op <- Ops.f32(1) do

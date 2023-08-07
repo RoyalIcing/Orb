@@ -5,14 +5,14 @@ defmodule Orb.I32.String do
 
   # TODO: should this be called Orb.I32.ASCII? Or just Orb.ASCII?
 
-  @behaviour Orb.Type
+  @behaviour Orb.CustomType
   @behaviour Access
 
-  @impl Orb.Type
+  @impl Orb.CustomType
   def wasm_type(), do: :i32
 
   # TODO: is the byte count of the pointer, or the items?
-  @impl Orb.Type
+  @impl Orb.CustomType
   def byte_count(), do: 1
 
   @impl Access
@@ -24,11 +24,11 @@ defmodule Orb.I32.String do
   # TODO: extract to SilverOrb
   defmodule CharIterator do
     @moduledoc """
-    Custom `Orb.Type`. Iterate over each byte character in an ASCII string.
+    Custom `Orb.CustomType`. Iterate over each byte character in an ASCII string.
     """
 
-    @behaviour Orb.Type
-    @impl Orb.Type
+    @behaviour Orb.CustomType
+    @impl Orb.CustomType
     def wasm_type(), do: :i32
 
     @behaviour Access

@@ -1,15 +1,15 @@
 defmodule Orb.I32.Pointer do
   @moduledoc """
-  Custom `Orb.Type` for pointer to 32-bit integer in memory.
+  Custom `Orb.CustomType` for pointer to 32-bit integer in memory.
   """
 
-  @behaviour Orb.Type
+  @behaviour Orb.CustomType
   @behaviour Access
 
-  @impl Orb.Type
+  @impl Orb.CustomType
   def wasm_type(), do: :i32
 
-  @impl Orb.Type
+  @impl Orb.CustomType
   def byte_count(), do: 4
 
   @impl Access
