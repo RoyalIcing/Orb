@@ -515,8 +515,8 @@ defmodule Orb do
 
     quote do
       import Orb
-      alias Orb.{I32, I64, S32, U32, F32, Memory}
-      require Orb.{I32, Memory}
+      alias Orb.{I32, I64, S32, U32, F32, Memory, Table}
+      require Orb.{I32, Table, Memory}
 
       # @wasm_name __MODULE__ |> Module.split() |> List.last()
       # @before_compile {unquote(__MODULE__), :register_attributes}
@@ -537,6 +537,8 @@ defmodule Orb do
 
         Module.register_attribute(__MODULE__, :wasm_globals, accumulate: true)
 
+        Module.register_attribute(__MODULE__, :wasm_types, accumulate: true)
+        Module.register_attribute(__MODULE__, :wasm_table_allocations, accumulate: true)
         Module.register_attribute(__MODULE__, :wasm_imports, accumulate: true)
         Module.register_attribute(__MODULE__, :wasm_body, accumulate: true)
         Module.register_attribute(__MODULE__, :wasm_constants, accumulate: true)
@@ -879,6 +881,7 @@ defmodule Orb do
   end
 
   defp do_module_body(block, options, env, env_module) do
+    # TODO: remove all this
     # TODO split into readonly_globals and mutable_globals?
     internal_global_types = Keyword.get(options, :globals, [])
     # TODO rename to export_readonly_globals?
@@ -957,6 +960,8 @@ defmodule Orb do
         def __wasm_module__() do
           Orb.ModuleDefinition.new(
             name: @wasm_name,
+            types: @wasm_types |> Enum.reverse() |> List.flatten(),
+            table_size: @wasm_table_allocations |> List.flatten() |> length(),
             imports: @wasm_imports |> Enum.reverse() |> List.flatten(),
             globals: @wasm_globals |> Enum.reverse() |> List.flatten(),
             memory: Memory.from(@wasm_memory),
@@ -1154,6 +1159,35 @@ defmodule Orb do
       other ->
         other
     end)
+  end
+
+  defmacro functype(call, result) do
+    env = __ENV__
+
+    call = Macro.expand_once(call, env)
+
+    {name, args} =
+      case Macro.decompose_call(call) do
+        :error -> {Orb.DSL.__expand_identifier(call, env), []}
+        {name, []} -> {name, []}
+        {name, [keywords]} when is_list(keywords) -> {name, keywords}
+      end
+
+    param_type =
+      case for {_, type} <- args, do: Orb.ToWat.Instructions.expand_type(type, env) do
+        [] -> nil
+        list -> List.to_tuple(list)
+      end
+
+    quote do
+      @wasm_types %Orb.Type{
+        name: unquote(name),
+        inner_type: %Orb.Func.Type{
+          param_types: unquote(Macro.escape(param_type)),
+          result_type: unquote(result)
+        }
+      }
+    end
   end
 
   @doc """

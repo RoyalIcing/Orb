@@ -14,7 +14,7 @@ defmodule Orb.Data do
         value |> String.replace(~S["], ~S[\"]) |> String.replace("\n", ~S"\n"),
         if(nul_terminated, do: ~S"\00", else: []),
         ?",
-        ")"
+        ")\n"
       ]
     end
   end

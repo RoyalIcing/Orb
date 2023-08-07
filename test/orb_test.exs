@@ -14,7 +14,7 @@ defmodule OrbTest do
     wasm_source = """
     (func $answer (export "answer") (result i32)
       (i32.const 42)
-    )\
+    )
     """
 
     assert to_wat(wasm) == wasm_source
@@ -31,7 +31,7 @@ defmodule OrbTest do
     wasm_source = """
     (func $answer (result i32)
       (i32.const 42)
-    )\
+    )
     """
 
     assert to_wat(wasm) == wasm_source
@@ -605,5 +605,136 @@ defmodule OrbTest do
     """
 
     assert to_wat(SnippetUser) == wasm_source
+  end
+
+  defmodule TableExample do
+    use Orb
+
+    # a = make_ref()
+    # b = make_ref()
+
+    # @a make_ref()
+
+    # defmodule Table do
+    #   require Orb.DSL
+    #   functype answer(), I32
+    #   def good_answer, do: :answer
+    #   def bad_answer, do: :answer
+
+    #   use Orb.Table
+
+    #   functype good_answer(), I32
+    #   functype bad_answer(), I32
+    # end
+
+    # wasm_table do
+    #   functype good_answer(), I32
+    #   functype bad_answer(), I32
+    # end
+
+    # good_answer = table_func(), I32
+
+    # table_func good_answer(), I32
+
+    # functype answer(), I32
+    # good_answer = table_func(answer)
+    # bad_answer = table_func(answer)
+
+    # @good_answer table_func(answer)
+    # @bad_answer table_func(answer)
+
+    # table(
+    #   good_answer: answer,
+    #   bad_answer: answer,
+    # )
+
+    # functype answer(), I32, elems: [:good_answer, :bad_answer]
+
+    # defmodule Answer do
+    #   use Orb.Table
+
+    #   functype(_(), I32)
+
+    #   elem :good_answer
+    #   elem :bad_answer
+    # end
+
+    # types do
+    #   func(answer(), I32)
+    # end
+    functype(answer(), I32)
+
+    # use Table(
+    Table.allocate(
+      good_answer: :answer,
+      bad_answer: :answer
+    )
+
+    # global do
+    #   i32 state(4), counter(0)
+    #   @state 4
+    #   @counter 0
+    #   f32 t(0.0)
+    # end
+
+    wasm do
+      # functype(answer(), I32)
+      # type(:answer, funcp(result: I32))
+      # answer good_answer do
+
+      # end
+
+      # Table.type Answer(), I32, [:good_answer, :bad_answer]
+      # Table.type(answer(), I32, [:good_answer, :bad_answer])
+      # Table.type(name: :answer, result: I32, [:good_answer, :bad_answer])
+
+      func good_answer(), I32 do
+        42
+      end
+      # |> table_elem(@good_answer)
+      # |> table_elem(good_answer)
+      |> Table.elem(:good_answer)
+
+      # |> table_elem(&Table.good_answer/0)
+
+      func bad_answer(), I32 do
+        13
+      end
+      # |> Table.elem()
+
+      func answer(), I32 do
+        # call(&Table.good_answer/0)
+        # call(^@good_answer)
+        # call_indirect(Table.elem(:good_answer))
+        # Table.call(functypes[:answer], 0)
+        Table.call(:answer, 0)
+        # Answer.call(:good_answer)
+      end
+    end
+  end
+
+  test "table elem" do
+    alias OrbWasmtime.Wasm
+
+    wasm_source = """
+    (module $TableExample
+      (type $answer (func (result i32)))
+      (table 2 funcref)
+      (func $good_answer (export "good_answer") (result i32)
+        (i32.const 42)
+      )
+      (elem (i32.const 0) $good_answer)
+      (func $bad_answer (export "bad_answer") (result i32)
+        (i32.const 13)
+      )
+      (func $answer (export "answer") (result i32)
+        (call_indirect (type $answer) (i32.const 0))
+      )
+    )
+    """
+
+    assert to_wat(TableExample) == wasm_source
+
+    assert Wasm.call(TableExample, :answer) === 42
   end
 end

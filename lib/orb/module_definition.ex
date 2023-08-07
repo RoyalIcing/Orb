@@ -2,6 +2,8 @@ defmodule Orb.ModuleDefinition do
   @moduledoc false
 
   defstruct name: nil,
+            types: [],
+            table_size: 0,
             imports: [],
             globals: [],
             memory: nil,
@@ -98,6 +100,8 @@ defmodule Orb.ModuleDefinition do
     def to_wat(
           %Orb.ModuleDefinition{
             name: name,
+            types: types,
+            table_size: table_size,
             imports: imports,
             globals: globals,
             memory: memory,
@@ -106,26 +110,28 @@ defmodule Orb.ModuleDefinition do
           },
           indent
         ) do
+          next_indent = "  " <> indent
       [
         [indent, "(module $#{name}", "\n"],
-        [for(import_def <- imports, do: [Instructions.do_wat(import_def, "  " <> indent), "\n"])],
+        [for(type <- types, do: [Orb.ToWat.to_wat(type, next_indent), "\n"])],
+        [for(import_def <- imports, do: [Instructions.do_wat(import_def, next_indent), "\n"])],
+        case table_size do
+          0 -> []
+          n -> [next_indent, "(table ", to_string(n), " funcref)\n"]
+        end,
         case memory do
           nil ->
             []
 
           %Orb.Memory{} ->
-            Orb.ToWat.to_wat(memory, "  " <> indent)
+            Orb.ToWat.to_wat(memory, next_indent)
         end,
         for global = %Orb.Global{} <- globals do
-          Orb.ToWat.to_wat(global, "  " <> indent)
+          Orb.ToWat.to_wat(global, next_indent)
         end,
-        Orb.ToWat.to_wat(constants, "  " <> indent),
-        case body do
-          [] ->
-            ""
-
-          body ->
-            [indent, Instructions.do_wat(body, "  " <> indent), "\n"]
+        Orb.ToWat.to_wat(constants, next_indent),
+        for statement <- body do
+          Orb.ToWat.to_wat(statement, next_indent)
         end,
         [indent, ")", "\n"]
       ]

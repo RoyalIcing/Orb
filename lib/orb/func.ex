@@ -1,7 +1,24 @@
 defmodule Orb.Func do
   @moduledoc false
 
-  defstruct [:name, :params, :result, :local_types, :body, :exported?, :source_module]
+  defstruct name: nil,
+            params: [],
+            result: nil,
+            local_types: [],
+            body: [],
+            exported?: false,
+            source_module: nil,
+            table_elem_indices: []
+
+  def __add_table_elem(f = %__MODULE__{}, table_allocations, key) do
+    table_allocations = List.flatten(table_allocations)
+    elem_index = Enum.find_index(table_allocations, &match?({^key, _}, &1))
+    case elem_index do
+      nil -> raise "Could not find elem key #{key} in table allocations #{inspect(table_allocations)}"
+      elem_index when is_integer(elem_index) ->
+        update_in(f.table_elem_indices, fn refs -> [elem_index | refs] end)
+    end
+  end
 
   defimpl Orb.ToWat do
     alias Orb.ToWat.Instructions
@@ -13,7 +30,8 @@ defmodule Orb.Func do
             result: result,
             local_types: local_types,
             body: body,
-            exported?: exported?
+            exported?: exported?,
+            table_elem_indices: table_elem_indices,
           },
           indent
         ) do
@@ -42,9 +60,11 @@ defmodule Orb.Func do
             ")\n"
           ]
         end,
-        Instructions.do_wat(body, "  " <> indent),
-        "\n",
-        [indent, ")"]
+        Enum.map(body, &[Instructions.do_wat(&1, "  " <> indent), "\n"]),
+        [indent, ")\n"],
+        for elem_index <- table_elem_indices do
+          [indent, "(elem (i32.const ", to_string(elem_index), ") $", to_string(name), ")\n"]
+        end
       ]
     end
   end
@@ -100,8 +120,11 @@ defmodule Orb.Func do
       def to_wat(%Type{name: name, param_types: param_types, result_type: result_type}, indent) do
         [
           indent,
-          "(func $",
-          to_string(name),
+          "(func",
+          case name do
+            nil -> []
+            name -> [" $", to_string(name)]
+          end,
           case param_types do
             nil ->
               []

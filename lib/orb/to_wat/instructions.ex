@@ -51,6 +51,7 @@ defmodule Orb.ToWat.Instructions do
 
   def do_wat(list, indent) when is_list(list) do
     Enum.map(list, &do_wat(&1, indent)) |> Enum.intersperse("\n")
+    # Enum.map(list, &do_wat(&1, indent))
   end
 
   def do_wat(:nop, indent), do: [indent, "nop"]

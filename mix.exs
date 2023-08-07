@@ -53,7 +53,10 @@ defmodule Orb.MixProject do
       # The main page in the docs
       main: "Orb",
       logo: "orb-logo-orange.svg",
-      extras: ["README.md", "examples/01-intro.livemd"]
+      extras: [
+        "README.md",
+        "examples/01-intro.livemd"
+      ]
     ]
   end
 end

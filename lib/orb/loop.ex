@@ -18,8 +18,7 @@ defmodule Orb.Loop do
           if(result, do: " (result #{result})", else: []),
           "\n"
         ],
-        Instructions.do_wat(body, "  " <> indent),
-        "\n",
+        Enum.map(body, &[Instructions.do_wat(&1, "  " <> indent), "\n"]),
         [indent, ")"]
       ]
     end

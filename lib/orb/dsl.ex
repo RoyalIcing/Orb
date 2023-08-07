@@ -10,6 +10,43 @@ defmodule Orb.DSL do
     Orb.ToWat.Instructions.expand_type(type, env)
   end
 
+  defmacro functype(call, result) do
+    alias Orb.Func
+
+    env = __ENV__
+
+    call = Macro.expand_once(call, env)
+
+    {name, args} =
+      case Macro.decompose_call(call) do
+        :error -> {Orb.DSL.__expand_identifier(call, env), []}
+        {name, []} -> {name, []}
+        {name, [keywords]} when is_list(keywords) -> {name, keywords}
+      end
+
+    param_type =
+      case (for {_, type} <- args, do: expand_type(type, env)) do
+        [] -> nil
+        list -> List.to_tuple(list)
+      end
+    # params =
+    #   for {name, type} <- args do
+    #     Macro.escape(param(name, expand_type(type, env)))
+    #   end
+
+    quote do
+      # List.flatten([
+      #   unquote(Macro.escape(data_els)),
+      %Orb.Type{
+        name: unquote(name),
+        inner_type: %Func.Type{
+          param_types: unquote(Macro.escape(param_type)),
+          result_type: unquote(result)
+        }
+      }
+    end
+  end
+
   defmacro func(call, do: block) do
     define_func(call, :public, [], block, __CALLER__)
   end
