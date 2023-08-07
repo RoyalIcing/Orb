@@ -700,6 +700,7 @@ defmodule OrbTest do
       func bad_answer(), I32 do
         13
       end
+      |> Table.elem(:bad_answer)
       # |> Table.elem()
 
       func answer(), I32 do
@@ -727,6 +728,7 @@ defmodule OrbTest do
       (func $bad_answer (export "bad_answer") (result i32)
         (i32.const 13)
       )
+      (elem (i32.const 1) $bad_answer)
       (func $answer (export "answer") (result i32)
         (call_indirect (type $answer) (i32.const 0))
       )
