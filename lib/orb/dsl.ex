@@ -3,7 +3,6 @@ defmodule Orb.DSL do
   The main DSL which is imported automatically when you call `Orb.wasm/2`.
   """
 
-  alias Orb.Func
   alias Orb.Ops
   require Ops
 
