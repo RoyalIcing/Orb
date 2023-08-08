@@ -52,7 +52,13 @@ defmodule Orb.ModuleDefinition do
     funcs =
       Enum.flat_map(body, fn
         %Orb.Func{} = func ->
-          [%{func | exported?: exported?, source_module: func.source_module || source_module}]
+          [
+            %{
+              func
+              | exported_names: if(exported?, do: [func.name], else: []),
+                source_module: func.source_module || source_module
+            }
+          ]
 
         _ ->
           []
@@ -69,7 +75,11 @@ defmodule Orb.ModuleDefinition do
     func =
       Enum.find_value(body, fn
         %Orb.Func{name: ^name} = func ->
-          %{func | exported?: exported?, source_module: func.source_module || source_module}
+          %{
+            func
+            | exported_names: if(exported?, do: [func.name], else: []),
+              source_module: func.source_module || source_module
+          }
 
         _ ->
           false
@@ -110,7 +120,8 @@ defmodule Orb.ModuleDefinition do
           },
           indent
         ) do
-          next_indent = "  " <> indent
+      next_indent = "  " <> indent
+
       [
         [indent, "(module $#{name}", "\n"],
         [for(type <- types, do: [Orb.ToWat.to_wat(type, next_indent), "\n"])],

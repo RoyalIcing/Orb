@@ -3,6 +3,7 @@ defmodule Orb.DSL do
   The main DSL which is imported automatically when you call `Orb.wasm/2`.
   """
 
+  alias Orb.Func
   alias Orb.Ops
   require Ops
 
@@ -61,10 +62,10 @@ defmodule Orb.DSL do
 
     name = name
 
-    exported? =
+    exported_names =
       case visibility do
-        :public -> true
-        :private -> false
+        :public -> [to_string(name)]
+        :private -> []
       end
 
     params =
@@ -114,8 +115,6 @@ defmodule Orb.DSL do
     block_items = do_snippet(locals, block_items)
 
     quote do
-      # List.flatten([
-      #   unquote(Macro.escape(data_els)),
       %Orb.Func{
         name: unquote(name),
         params: unquote(params),
@@ -126,10 +125,8 @@ defmodule Orb.DSL do
           end,
         local_types: unquote(local_types),
         body: unquote(block_items),
-        exported?: unquote(exported?)
+        exported_names: unquote(exported_names)
       }
-
-      # ])
     end
   end
 
@@ -245,6 +242,10 @@ defmodule Orb.DSL do
     # end
 
     %Orb.Func.Param{name: name, type: type}
+  end
+
+  def export(f = %Orb.Func{}, name) when is_binary(name) do
+    update_in(f.exported_names, fn names -> [name | names] end)
   end
 
   # TODO: unused

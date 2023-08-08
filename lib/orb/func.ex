@@ -2,11 +2,11 @@ defmodule Orb.Func do
   @moduledoc false
 
   defstruct name: nil,
+            exported_names: [],
             params: [],
             result: nil,
             local_types: [],
             body: [],
-            exported?: false,
             source_module: nil,
             table_elem_indices: []
 
@@ -20,11 +20,11 @@ defmodule Orb.Func do
     def to_wat(
           %Orb.Func{
             name: name,
+            exported_names: exported_names,
             params: params,
             result: result,
             local_types: local_types,
             body: body,
-            exported?: exported?,
             table_elem_indices: table_elem_indices,
           },
           indent
@@ -32,10 +32,13 @@ defmodule Orb.Func do
       [
         [
           indent,
-          case exported? do
-            false -> ~s[(func $#{name}]
-            true -> ~s[(func $#{name} (export "#{name}")]
-          end,
+          [
+            ~s{(func $},
+            to_string(name),
+            for exported_name <- Enum.reverse(exported_names) do
+              [~s{ (export "}, to_string(exported_name), ~s{")}]
+            end
+          ],
           Enum.map(
             for(param <- params, do: Instructions.do_wat(param)) ++
               if(result, do: [Instructions.do_wat(result)], else: []),

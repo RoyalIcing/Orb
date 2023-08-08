@@ -294,7 +294,7 @@ defmodule OrbTest do
                  result: {:result, :i32},
                  local_types: [],
                  body: [42],
-                 exported?: true
+                 exported_names: ["answer"]
                }
              ]
            }
@@ -323,10 +323,17 @@ defmodule OrbTest do
       func get_pi(), :f32 do
         3.14
       end
+      |> export("get_pi_a")
 
       funcp internal(), :f32 do
         99.0
       end
+
+      funcp secret(), :f32 do
+        42.0
+      end
+      |> export("exposed_secret")
+      |> export("tell_everyone")
     end
   end
 
@@ -336,11 +343,14 @@ defmodule OrbTest do
       (func $answer (export "answer") (result i32)
         (i32.mul (i32.const 2) (i32.const 21))
       )
-      (func $get_pi (export "get_pi") (result f32)
+      (func $get_pi (export "get_pi") (export "get_pi_a") (result f32)
         (f32.const 3.14)
       )
       (func $internal (result f32)
         (f32.const 99.0)
+      )
+      (func $secret (export "exposed_secret") (export "tell_everyone") (result f32)
+        (f32.const 42.0)
       )
     )
     """
