@@ -55,7 +55,7 @@ defmodule Orb.DefDSL do
         Macro.var(keyword, nil)
       end)
       multiple when is_list(multiple) ->
-        raise CompileError, line: meta[:line], file: file, description: "Cannot define function with multiple arguments: use keyword list instead."
+        raise CompileError, line: meta[:line], file: file, description: "Cannot define function with multiple arguments, use keyword list instead."
     end
 
     def_call = {name, meta, def_args}
