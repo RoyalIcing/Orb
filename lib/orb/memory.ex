@@ -61,7 +61,8 @@ defmodule Orb.Memory do
         raise "You passed a Orb type module #{type} that does not implement wasm_type/0."
       end
 
-      load_instruction = if function_exported?(type, :load_instruction, 0) do
+    load_instruction =
+      if function_exported?(type, :load_instruction, 0) do
         type.load_instruction()
       else
         :load
@@ -78,14 +79,30 @@ defmodule Orb.Memory do
   ```
   """
   def store!(type, address, value) do
-    type =
+    Code.ensure_loaded!(type)
+
+    primitive_type =
       if function_exported?(type, :wasm_type, 0) do
         type.wasm_type()
       else
         raise "You passed a Orb type module #{type} that does not implement wasm_type/0."
       end
 
-    {type, :store, address, value}
+    load_instruction =
+      if function_exported?(type, :load_instruction, 0) do
+        type.load_instruction()
+      else
+        :load
+      end
+
+    store_instruction =
+      case load_instruction do
+        :load8_u -> :store8
+        :load8_s -> :store8
+        :load -> :store
+      end
+
+    {primitive_type, store_instruction, address, value}
   end
 
   defimpl Orb.ToWat do

@@ -35,4 +35,31 @@ defmodule MemoryTest do
            )
            """
   end
+
+  test "store!/3" do
+    defmodule Store do
+      use Orb
+
+      wasm do
+        func store() do
+          Memory.store!(I32, 0x100, 42)
+          :drop
+
+          Memory.store!(I32.U8, 0x100, 42)
+          :drop
+        end
+      end
+    end
+
+    assert to_wat(Store) == """
+           (module $Store
+             (func $store (export "store")
+               (i32.store (i32.const 256) (i32.const 42))
+               drop
+               (i32.store8 (i32.const 256) (i32.const 42))
+               drop
+             )
+           )
+           """
+  end
 end
