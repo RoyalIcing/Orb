@@ -46,16 +46,18 @@ defmodule Orb.DefDSL do
 
   defp define_elixir_def(call, visibility) do
     {name, func_args} = Macro.decompose_call(call)
+    {_, meta, _} = call
     # arity = length(args)
 
     def_args = case func_args do
       [] -> []
-      [keywords] -> for {keyword, _type} <- keywords do
+      [keywords] -> (for {keyword, _type} <- keywords do
         Macro.var(keyword, nil)
-      end
+      end)
+      multiple when is_list(multiple) ->
+        raise CompileError, line: meta[:line], file: meta[:file], description: "Cannot define function with multiple arguments: use keyword list instead."
     end
 
-    meta = elem(call, 1)
     def_call = {name, meta, def_args}
 
     def_kind = case visibility do
