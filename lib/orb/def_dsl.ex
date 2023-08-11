@@ -34,7 +34,7 @@ defmodule Orb.DefDSL do
 
   defp define(call, visibility, result, locals, block, env) do
     wasm = Orb.DSL.__define_func(call, visibility, [result: result, locals: locals], block, env)
-    ex_def = define_elixir_def(call, visibility)
+    ex_def = define_elixir_def(call, visibility, env)
     quote do
       unquote(ex_def)
 
@@ -44,7 +44,7 @@ defmodule Orb.DefDSL do
     end
   end
 
-  defp define_elixir_def(call, visibility) do
+  defp define_elixir_def(call, visibility, %Macro.Env{file: file}) do
     {name, func_args} = Macro.decompose_call(call)
     {_, meta, _} = call
     # arity = length(args)
@@ -55,7 +55,7 @@ defmodule Orb.DefDSL do
         Macro.var(keyword, nil)
       end)
       multiple when is_list(multiple) ->
-        raise CompileError, line: meta[:line], file: meta[:file], description: "Cannot define function with multiple arguments: use keyword list instead."
+        raise CompileError, line: meta[:line], file: file, description: "Cannot define function with multiple arguments: use keyword list instead."
     end
 
     def_call = {name, meta, def_args}
