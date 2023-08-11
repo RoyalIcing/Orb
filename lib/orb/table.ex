@@ -55,15 +55,21 @@ defmodule Orb.Table do
   #   update_in(f.table_elem_refs, fn refs -> [f.name | refs] end)
   # end
 
-  defmacro elem!(f, key) do
-    quote do
-      Orb.Func.__add_table_elem(unquote(f), Allocations.fetch_index!(__wasm_table_allocations__(), unquote(key)))
+  def do_elem(caller_mod, f, mod, key) do
+    # if Process.put(Orb.DSL, false) do
+    if function_exported?(caller_mod, :__wasm_table_allocations__, 0) do
+      Orb.Func.__add_table_elem(f, Allocations.fetch_index!(caller_mod.__wasm_table_allocations__(), {mod, key}))
+    else
+      f
     end
   end
 
   defmacro elem!(f, mod, key) do
+    caller_mod = __CALLER__.module
+
     quote do
-      Orb.Func.__add_table_elem(unquote(f), Allocations.fetch_index!(__wasm_table_allocations__(), {unquote(mod), unquote(key)}))
+      unquote(__MODULE__).do_elem(unquote(caller_mod), unquote(f), unquote(mod), unquote(key))
+      # Orb.Func.__add_table_elem(unquote(f), Allocations.fetch_index!(unquote(caller_mod).__wasm_table_allocations__(), {unquote(mod), unquote(key)}))
     end
   end
 
@@ -74,14 +80,18 @@ defmodule Orb.Table do
   end
 
   defmacro lookup!(key) do
+    caller_mod = __CALLER__.module
+
     quote do
-      Allocations.fetch_index!(__wasm_table_allocations__(), unquote(key))
+      Allocations.fetch_index!(unquote(caller_mod).__wasm_table_allocations__(), unquote(key))
     end
   end
 
   defmacro lookup!(mod, key) do
+    caller_mod = __CALLER__.module
+
     quote do
-      Allocations.fetch_index!(__wasm_table_allocations__(), {unquote(mod), unquote(key)})
+      Allocations.fetch_index!(unquote(caller_mod).__wasm_table_allocations__(), {unquote(mod), unquote(key)})
     end
   end
 

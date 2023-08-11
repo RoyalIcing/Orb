@@ -31,9 +31,6 @@ defmodule Orb.DSL do
     Orb.Func.Type.imported_func(name, options[:params], options[:result])
   end
 
-  # TODO: require `globals` option be passed to explicitly list global used.
-  # Would be useful for sharing funcp between wasm modules too.
-  # Also incentivises making funcp pure by having all inputs be parameters.
   defmacro funcp(call, do: block) do
     define_func(call, :private, [], block, __CALLER__)
   end
@@ -48,6 +45,10 @@ defmodule Orb.DSL do
 
   defmacro funcp(call, result_type, locals, do: block) when is_list(locals) do
     define_func(call, :private, [result: result_type, locals: locals], block, __CALLER__)
+  end
+
+  def __define_func(call, visibility, options, block, env) do
+    define_func(call, visibility, options, block, env)
   end
 
   defp define_func(call, visibility, options, block, env) do
@@ -124,6 +125,13 @@ defmodule Orb.DSL do
           end,
         local_types: unquote(local_types),
         body: unquote(block_items),
+        # body: fn ->
+        #   if Process.get(Orb.DSL, false) do
+        #     unquote(block_items)
+        #   else
+        #     []
+        #   end
+        # end,
         exported_names: unquote(exported_names)
       }
     end

@@ -515,6 +515,7 @@ defmodule Orb do
 
     quote do
       import Orb
+      import Orb.DefDSL
       alias Orb.{I32, I64, S32, U32, F32, Memory, Table}
       require Orb.{I32, F32, Table, Memory}
 
@@ -959,6 +960,8 @@ defmodule Orb do
           )
         end
 
+        # Orb.DefDSL.define_helpers(__wasm_body__())
+
         # def func(),
         #   do: Orb.ModuleDefinition.func_ref_all!(__MODULE__)
 
@@ -1097,13 +1100,24 @@ defmodule Orb do
     Module.put_attribute(__CALLER__.module, :wasm_constants, constants)
 
     quote do
+      # with do
       unquote(pre)
 
       import Orb.DSL
 
+      # with do
+      #   # Process.put()
+      #   # import Orb.DefDSL
+      #   # unquote(body)
+
+      #   Orb.DefDSL.define_helpers(unquote(body)) |> IO.inspect()
+      # end
+
       # @wasm_body unquote(body)
 
       def __wasm_body__() do
+        # Process.put(Orb.DSL, true)
+
         super() ++ unquote(body)
       end
 
@@ -1112,6 +1126,7 @@ defmodule Orb do
       import Orb.DSL, only: []
 
       unquote(post)
+      # end
     end
   end
 
@@ -1228,10 +1243,14 @@ defmodule Orb do
   Convert Orb AST into WebAssembly text format.
   """
   def to_wat(term) when is_atom(term) do
+    Process.put(Orb.DSL, true)
+
     term.__wasm_module__() |> Orb.ToWat.to_wat("") |> IO.chardata_to_string()
   end
 
   def to_wat(term) do
+    Process.put(Orb.DSL, true)
+
     term |> Orb.ToWat.to_wat("") |> IO.chardata_to_string()
   end
 

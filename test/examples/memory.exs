@@ -176,9 +176,9 @@ defmodule Examples.Memory do
       end
     end
 
-    def alloc(byte_count) do
-      Orb.DSL.call(:bump_alloc, byte_count)
-    end
+    # def alloc(byte_count) do
+    #   Orb.DSL.call(:bump_alloc, byte_count)
+    # end
   end
 
   defmodule LinkedLists do
@@ -283,7 +283,7 @@ defmodule Examples.Memory do
         end
       end
 
-      func list32_sum(ptr(I32)), I32, sum: I32 do
+      func list32_sum(ptr: I32), I32, sum: I32 do
         loop Iterate, result: I32 do
           if I32.eqz(ptr), do: return(sum)
 

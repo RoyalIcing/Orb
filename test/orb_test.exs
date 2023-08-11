@@ -358,6 +358,33 @@ defmodule OrbTest do
     assert to_wat(ManyFuncs) == wasm_source
   end
 
+  defmodule CallSiblingFunc do
+    use Orb
+
+    defwp forty_two(), I32 do
+      42
+    end
+
+    defw meaning_of_life(), I32 do
+      forty_two()
+    end
+  end
+
+  test "using func does def for you" do
+    wasm_source = """
+    (module $CallSiblingFunc
+      (func $forty_two (result i32)
+        (i32.const 42)
+      )
+      (func $meaning_of_life (export "meaning_of_life") (result i32)
+        (call $forty_two)
+      )
+    )
+    """
+
+    assert to_wat(CallSiblingFunc) === wasm_source
+  end
+
   describe "data lookup" do
     defmodule HTTPStatusLookup do
       use Orb
