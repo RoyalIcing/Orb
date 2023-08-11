@@ -52,7 +52,9 @@ defmodule Orb.Memory do
   ```
   """
   def load!(type, address) do
-    type =
+    Code.ensure_loaded!(type)
+
+    primitive_type =
       if function_exported?(type, :wasm_type, 0) do
         type.wasm_type()
       else
@@ -65,7 +67,7 @@ defmodule Orb.Memory do
         :load
       end
 
-    {type, load_instruction, address}
+    {primitive_type, load_instruction, address}
   end
 
   @doc """

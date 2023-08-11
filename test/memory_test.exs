@@ -13,9 +13,9 @@ defmodule MemoryTest do
           :drop
 
           memory32_8![0x100].unsigned
-          # memory![0x100].u32_8
-          # FIXME: I can’t get this to work for some reason:
-          # Memory.load!(I32.U8, 0x100)
+          :drop
+
+          Memory.load!(I32.U8, 0x100)
           :drop
         end
       end
@@ -25,6 +25,8 @@ defmodule MemoryTest do
            (module $Load
              (func $load (export "load")
                (i32.load (i32.const 256))
+               drop
+               (i32.load8_u (i32.const 256))
                drop
                (i32.load8_u (i32.const 256))
                drop
