@@ -365,8 +365,16 @@ defmodule OrbTest do
       42
     end
 
+    defwp forty_two_plus(n: I32), I32 do
+      42 + n
+    end
+
     defw meaning_of_life(), I32 do
-      forty_two()
+      if 1, result: I32 do
+        forty_two_plus(9)
+      else
+        forty_two()
+      end
     end
   end
 
@@ -376,8 +384,19 @@ defmodule OrbTest do
       (func $forty_two (result i32)
         (i32.const 42)
       )
+      (func $forty_two_plus (param $n i32) (result i32)
+        (i32.add (i32.const 42) (local.get $n))
+      )
       (func $meaning_of_life (export "meaning_of_life") (result i32)
-        (call $forty_two)
+        (i32.const 1)
+        (if (result i32)
+          (then
+            (call $forty_two_plus (i32.const 9))
+          )
+          (else
+            (call $forty_two)
+          )
+        )
       )
     )
     """

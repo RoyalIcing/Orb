@@ -34,18 +34,17 @@ defmodule Orb.DefDSL do
 
   defp define(call, visibility, result, locals, block, env) do
     wasm = Orb.DSL.__define_func(call, visibility, [result: result, locals: locals], block, env)
-    ex = define_def(call, visibility)
+    ex_def = define_elixir_def(call, visibility)
     quote do
-      unquote(ex)
+      unquote(ex_def)
+
       Orb.wasm do
         unquote(wasm)
       end
     end
   end
 
-  defp define_def(call, visibility) do
-    # call = Macro.expand_once(call, __ENV__)
-
+  defp define_elixir_def(call, visibility) do
     {name, func_args} = Macro.decompose_call(call)
     # arity = length(args)
 
@@ -63,12 +62,6 @@ defmodule Orb.DefDSL do
       :public -> :def
       :private -> :defp
     end
-
-    # {name, args} =
-    #   case Macro.decompose_call(call) do
-    #     :error -> {Orb.DSL.__expand_identifier(call, __ENV__), []}
-    #     other -> other
-    #   end
 
     quote do
       unquote(def_kind)(unquote(def_call)) do

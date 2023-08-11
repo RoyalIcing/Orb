@@ -79,7 +79,7 @@ defmodule Orb.IfElse do
           indent,
           "(if ",
           if(result,
-            do: ["(result ", to_string(Instructions.expand_type(result)), ") "],
+            do: ["(result ", to_string(Instructions.expand_type(result)), ")"],
             else: ""
           ),
           ?\n
