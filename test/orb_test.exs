@@ -448,7 +448,7 @@ defmodule OrbTest do
         # end
 
         func lookup(status: I32), I32 do
-          I32.mul(status, 24)
+          status * 24
         end
       end
     end
