@@ -500,6 +500,7 @@ defmodule Orb do
   require Ops
 
   defmacro __using__(opts) do
+    # TODO: remove opts
     inline? = Keyword.get(opts, :inline, false)
 
     attrs =

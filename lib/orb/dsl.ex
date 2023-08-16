@@ -473,18 +473,29 @@ defmodule Orb.DSL do
   Run code at compile-time.
   """
   defmacro inline(do: block) do
-    block |> __get_block_items()
+    quote do
+      with do
+        # TODO: DRY this up
+        # use Orb.RestoreKernel
+        import Orb.Global.DSL, only: []
+        import Orb.I32.DSL, only: []
+        import Orb.U32.DSL, only: []
+        import Orb.S32.DSL, only: []
+        import Orb.F32.DSL, only: []
+        import Kernel
+
+        unquote(block)
+      end
+    end
   end
 
   @doc """
   Run Elixir for-comprehension at compile-time.
   """
-  defmacro inline({:for, meta, [for_arg]}, do: block) do
-    # for_arg = interpolate_external_values(for_arg, __CALLER__)
-    block = block |> __get_block_items()
-    # import Kernel
-    {:for, meta, [for_arg, [do: block]]}
-    # {:for, meta, [for_arg, [do: quote do: inline(do: unquote(block))]]}
+  defmacro inline({:for, _meta, [for_arg]}, do: block) do
+    quote do
+      inline(do: for(unquote(for_arg), do: unquote(block)))
+    end
   end
 
   @doc """

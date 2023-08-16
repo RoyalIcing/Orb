@@ -54,6 +54,22 @@ defmodule Orb.Global do
 
     import Kernel, except: [@: 1]
 
+    defmacro @{:@, _meta, [arg]} do
+      quote do
+        Kernel.@(unquote(arg))
+      end
+    end
+
+    # defmacro @{name, meta, _args} do
+    #   if Module.has_attribute?(__CALLER__.module, name) do
+    #     quote do
+    #       Kernel.@(unquote(Macro.var(name, nil)))
+    #     end
+    #   else
+    #     {:global_get, meta, [name]}
+    #   end
+    # end
+
     defmacro @{name, meta, _args} do
       {:global_get, meta, [name]}
     end
