@@ -1,4 +1,4 @@
-defmodule Orb.I32.Pointer do
+defmodule Orb.I32.UnsafePointer do
   @moduledoc """
   Custom `Orb.CustomType` for pointer to 32-bit integer in memory.
   """

@@ -1,4 +1,4 @@
-defmodule Orb.I32.U8.Pointer do
+defmodule Orb.I32.U8.UnsafePointer do
   @moduledoc """
   Custom `Orb.CustomType` for pointer to 8-bit integer (byte) in memory.
   """

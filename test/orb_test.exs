@@ -602,7 +602,7 @@ defmodule OrbTest do
     Memory.pages(2)
 
     wasm do
-      func get_is_valid(), I32, str: I32.U8.Pointer, char: I32 do
+      func get_is_valid(), I32, str: I32.U8.UnsafePointer, char: I32 do
         str = 1024
 
         loop :continue, result: I32 do

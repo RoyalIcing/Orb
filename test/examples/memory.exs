@@ -19,7 +19,7 @@ defmodule Examples.Memory do
     Memory.pages(2)
 
     wasm do
-      func memcpy(dest: I32.U8.Pointer, src: I32.U8.Pointer, byte_count: I32),
+      func memcpy(dest: I32.U8.UnsafePointer, src: I32.U8.UnsafePointer, byte_count: I32),
         i: I32 do
         loop EachByte do
           return(if: I32.eq(i, byte_count))
@@ -72,7 +72,7 @@ defmodule Examples.Memory do
       end
 
       # TODO: add 32-bit-aligned version so we can use faster instructions.
-      func memset(dest: I32.U8.Pointer, u8: I32.U8, byte_count: I32),
+      func memset(dest: I32.U8.UnsafePointer, u8: I32.U8, byte_count: I32),
         i: I32 do
         loop EachByte do
           return(if: I32.eq(i, byte_count))
@@ -206,14 +206,14 @@ defmodule Examples.Memory do
     # @wasm_memory 2
 
     wasm do
-      func cons(hd: I32.Pointer, tl: I32.Pointer), I32.Pointer, ptr: I32.Pointer do
+      func cons(hd: I32.UnsafePointer, tl: I32.UnsafePointer), I32.UnsafePointer, ptr: I32.UnsafePointer do
         ptr = call(:bump_alloc, 8)
         ptr[at!: 0] = hd
         ptr[at!: 1] = tl
         ptr
       end
 
-      func hd(ptr: I32.Pointer), I32.Pointer do
+      func hd(ptr: I32.UnsafePointer), I32.UnsafePointer do
         # Zig: https://godbolt.org/z/bG5zj6bzx
         # ptr[at: 0, fallback: 0x0]
         # ptr |> I32.eqz?(do: 0x0, else: ptr[at!: 0])
@@ -222,17 +222,17 @@ defmodule Examples.Memory do
         # ptr[at!: 0]
       end
 
-      func tl(ptr: I32.Pointer), I32.Pointer do
+      func tl(ptr: I32.UnsafePointer), I32.UnsafePointer do
         # ptr.unwrap[at!: 1]
         # ptr |> I32.eqz?(do: :unreachable, else: ptr[at!: 1])
         I32.eqz(ptr) |> I32.when?(do: 0x0, else: ptr[at!: 1])
         # ptr[at!: 1]
       end
 
-      func reverse_in_place(node: I32.Pointer), I32.Pointer,
-        prev: I32.Pointer,
-        current: I32.Pointer,
-        next: I32.Pointer do
+      func reverse_in_place(node: I32.UnsafePointer), I32.UnsafePointer,
+        prev: I32.UnsafePointer,
+        current: I32.UnsafePointer,
+        next: I32.UnsafePointer do
         current = node
 
         # loop current, result: I32 do
@@ -258,7 +258,7 @@ defmodule Examples.Memory do
         end
       end
 
-      func list_count(ptr: I32.Pointer), I32, count: I32 do
+      func list_count(ptr: I32.UnsafePointer), I32, count: I32 do
         loop Iterate, result: I32 do
           #           I32.match ptr do
           #             0 ->
