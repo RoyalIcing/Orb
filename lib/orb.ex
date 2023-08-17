@@ -532,6 +532,8 @@ defmodule Orb do
 
     defstruct [:global_or_local, :identifier, :type]
 
+    alias Orb.Instruction
+
     def global(identifier, type) do
       %__MODULE__{global_or_local: :global, identifier: identifier, type: type}
     end
@@ -550,7 +552,7 @@ defmodule Orb do
     def fetch(%__MODULE__{global_or_local: :local, identifier: _identifier, type: :i32} = ref,
           at: offset
         ) do
-      ast = {:i32, :load, {:i32, :add, {ref, offset}}}
+      ast = Instruction.i32(:load, Instruction.i32(:add, ref, offset))
       {:ok, ast}
     end
 

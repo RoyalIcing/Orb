@@ -6,6 +6,7 @@ defmodule Orb.I32 do
   import Kernel, except: [and: 2, or: 2]
 
   alias Orb.Ops
+  alias Orb.Instruction
   require Ops
 
   def wasm_type(), do: :i32
@@ -27,25 +28,25 @@ defmodule Orb.I32 do
 
   for op <- Ops.i32(1) do
     def unquote(op)(a) do
-      {:i32, unquote(op), a}
+      Instruction.i32(unquote(op), a)
     end
   end
 
   for op <- Ops.i32(2) do
     case op do
       :eq ->
-        def eq(0, n), do: {:i32, :eqz, n}
-        def eq(n, 0), do: {:i32, :eqz, n}
-        def eq(a, b), do: {:i32, :eq, {a, b}}
+        def eq(0, n), do: Instruction.i32(:eqz, n)
+        def eq(n, 0), do: Instruction.i32(:eqz, n)
+        def eq(a, b), do: Instruction.i32(:eq, a, b)
 
       :and ->
         def band(a, b) do
-          {:i32, :and, {a, b}}
+          Instruction.i32(:and, a, b)
         end
 
       _ ->
         def unquote(op)(a, b) do
-          {:i32, unquote(op), {a, b}}
+          Instruction.i32(unquote(op), a, b)
         end
     end
   end
@@ -61,7 +62,7 @@ defmodule Orb.I32 do
           eq(value, item)
 
         _ ->
-          [eq(value, item), {:i32, :or}]
+          [eq(value, item), Instruction.i32(:or)]
       end
     end
   end

@@ -11,5 +11,6 @@ defmodule Orb.Numeric.Add do
 
   def optimized(_type, a, 0), do: a
   def optimized(_type, 0, b), do: b
-  def optimized(type, a, b), do: {type.wasm_type(), :add, {a, b}}
+  # def optimized(type, a, b), do: {type.wasm_type(), :add, {a, b}}
+  def optimized(type, a, b), do: Orb.Instruction.new(type.wasm_type(), :add, a, b)
 end

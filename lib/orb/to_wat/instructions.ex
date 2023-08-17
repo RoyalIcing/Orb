@@ -96,14 +96,6 @@ defmodule Orb.ToWat.Instructions do
     [indent, "(i32.", to_string(op), " ", do_wat(offset), " ", do_wat(value), ?)]
   end
 
-  def do_wat({:i32, op, a}, indent) when op in Ops.i32(1) do
-    [indent, "(i32.", to_string(op), " ", do_wat(a), ?)]
-  end
-
-  def do_wat({:i32, op, {a, b}}, indent) when op in Ops.i32(2) do
-    [indent, "(i32.", to_string(op), " ", do_wat(a), " ", do_wat(b), ?)]
-  end
-
   def do_wat({:f32, op, a}, indent) when op in Ops.f32(1) do
     [indent, "(f32.", to_string(op), " ", do_wat(a), ?)]
   end
