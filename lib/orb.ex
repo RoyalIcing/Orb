@@ -553,9 +553,6 @@ defmodule Orb do
     def rotl(a, b)
     def rotr(a, b)
 
-    # def store(offset, i32)
-    # def store8(offset, i8)
-
     for op <- Ops.i32(1) do
       def unquote(op)(a) do
         {:i32, unquote(op), a}
@@ -580,28 +577,6 @@ defmodule Orb do
           end
       end
     end
-
-    # for op <- Ops.i32(:load) do
-    #   def unquote(op)(offset) do
-    #     {:i32, unquote(op), offset}
-    #   end
-    # end
-
-    # for op <- Ops.i32(:store) do
-    #   def unquote(op)(offset, value) do
-    #     {:i32, unquote(op), offset, value}
-    #   end
-    # end
-
-    def memory8!(offset) do
-      %{
-        unsigned: {:i32, :load8_u, offset},
-        signed: {:i32, :load8_s, offset}
-      }
-    end
-
-    # Replaced by |||
-    # defp _or(a, b), do: {:i32, :or, {a, b}}
 
     def sum!(items) when is_list(items) do
       Enum.reduce(items, &add/2)
@@ -645,15 +620,7 @@ defmodule Orb do
       ]
     end
 
-    # TODO: remove?
-    def eqz?(value, do: when_true, else: when_false) do
-      Orb.IfElse.new(:i32, eqz(value), when_true, when_false)
-    end
-
-    def calculate_enum(cases) do
-      Map.new(Enum.with_index(cases), fn {key, index} -> {key, {:i32_const, index}} end)
-    end
-
+    @doc "Converts an ASCII little-endian 4-byte string to an 32-bit integer."
     def from_4_byte_ascii(<<int::little-size(32)>>), do: int
 
     defmacro match(value, do: transform) do
