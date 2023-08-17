@@ -24,7 +24,7 @@ defmodule DynamicTest do
             1
           end
 
-        _ ->
+        :viewer ->
           func can_edit?(post_id: I32, author_id: I32), I32 do
             author_id === UserInfo.user_id()
           end
