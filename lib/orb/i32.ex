@@ -54,10 +54,6 @@ defmodule Orb.I32 do
     Enum.reduce(items, &add/2)
   end
 
-  def in_inclusive_range?(value, lower, upper) do
-    band(ge_u(value, lower), le_u(value, upper))
-  end
-
   def in?(value, list) when is_list(list) do
     for {item, index} <- Enum.with_index(list) do
       case index do

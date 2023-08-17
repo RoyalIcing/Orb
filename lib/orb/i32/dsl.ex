@@ -57,4 +57,8 @@ defmodule Orb.I32.DSL do
   def left or right do
     Orb.I32.or(left, right)
   end
+
+  # def left and right do
+  #   Orb.I32.band(left, right)
+  # end
 end
