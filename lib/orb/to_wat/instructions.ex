@@ -96,16 +96,6 @@ defmodule Orb.ToWat.Instructions do
     [indent, "(i32.", to_string(op), " ", do_wat(offset), " ", do_wat(value), ?)]
   end
 
-  def do_wat({:call, f, args}, indent) do
-    [
-      indent,
-      "(call $",
-      to_string(f),
-      for(arg <- args, do: [" ", do_wat(arg)]),
-      ")"
-    ]
-  end
-
   def do_wat({:br, identifier}, indent), do: [indent, "br $", to_string(identifier)]
 
   def do_wat({:br_if, identifier, condition}, indent),

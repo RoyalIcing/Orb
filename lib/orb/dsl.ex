@@ -3,6 +3,7 @@ defmodule Orb.DSL do
   The main DSL which is imported automatically when you call `Orb.wasm/2`.
   """
 
+  alias Orb.Instruction
   alias Orb.Ops
   require Ops
 
@@ -312,33 +313,33 @@ defmodule Orb.DSL do
   """
   def call(f, args)
 
-  def call(f, args) when is_list(args), do: {:call, f, args}
-  def call(f, a), do: {:call, f, [a]}
+  def call(f, args) when is_list(args), do: Instruction.call(f, args)
+  def call(f, a), do: Instruction.call(f, [a])
 
   @doc """
   Call local function `f`, passing arguments `a` & `b`.
   """
-  def call(f, a, b), do: {:call, f, [a, b]}
+  def call(f, a, b), do: Instruction.call(f, [a, b])
 
   @doc """
   Call local function `f`, passing argument `a`, `b`, `c`.
   """
-  def call(f, a, b, c), do: {:call, f, [a, b, c]}
+  def call(f, a, b, c), do: Instruction.call(f, [a, b, c])
 
   @doc """
   Call local function `f`, passing argument `a`, `b`, `c`, `d`.
   """
-  def call(f, a, b, c, d), do: {:call, f, [a, b, c, d]}
+  def call(f, a, b, c, d), do: Instruction.call(f, [a, b, c, d])
 
   @doc """
   Call local function `f`, passing argument `a`, `b`, `c`, `d`, `e`.
   """
-  def call(f, a, b, c, d, e), do: {:call, f, [a, b, c, d, e]}
+  def call(f, a, b, c, d, e), do: Instruction.call(f, [a, b, c, d, e])
 
   @doc """
   Call local function `f`, passing argument `a`, `b`, `c`, `d`, `e`, `f`.
   """
-  def call(f, a, b, c, d, e, f), do: {:call, f, [a, b, c, d, e, f]}
+  def call(f, a, b, c, d, e, f), do: Instruction.call(f, [a, b, c, d, e, f])
 
   def __expand_identifier(identifier, env) do
     identifier = Macro.expand_once(identifier, env) |> Kernel.to_string()
