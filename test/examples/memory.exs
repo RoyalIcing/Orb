@@ -278,7 +278,7 @@ defmodule Examples.Memory do
           # I32.when? ptr, else_return: count
           # I32.when? ptr, else: return(count)
 
-          ptr = call(:tl, ptr)
+          ptr = typed_call(I32, :tl, [ptr])
           count = count + 1
           Iterate.continue()
         end
@@ -288,8 +288,9 @@ defmodule Examples.Memory do
         loop Iterate, result: I32 do
           if I32.eqz(ptr), do: return(sum)
 
+          # sum = sum + typed_call(I32, :hd, [ptr])
           sum = sum + call(:hd, ptr)
-          ptr = call(:tl, ptr)
+          ptr = typed_call(I32, :tl, [ptr])
 
           Iterate.continue()
         end

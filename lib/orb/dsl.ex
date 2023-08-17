@@ -176,19 +176,23 @@ defmodule Orb.DSL do
             4 -> :store
           end
 
+        local_get_instruction = quote do
+          Instruction.local_get(unquote(locals[local]), unquote(local))
+        end
+
         computed_offset =
           case {offset, bytes_factor} do
             {0, _} ->
-              quote do: local_get(unquote(local))
+              quote do: unquote(local_get_instruction)
 
             {offset, 1} ->
-              quote do: Orb.I32.add(local_get(unquote(local)), unquote(offset))
+              quote do: Orb.I32.add(unquote(local_get_instruction), unquote(offset))
 
             # We can compute at compile-time
             {offset, factor} when is_integer(offset) ->
               quote do:
                       Orb.I32.add(
-                        local_get(unquote(local)),
+                        unquote(local_get_instruction),
                         unquote(offset * factor)
                       )
 
@@ -196,7 +200,7 @@ defmodule Orb.DSL do
             {offset, factor} ->
               quote do:
                       Orb.I32.add(
-                        local_get(unquote(local)),
+                        unquote(local_get_instruction),
                         I32.mul(unquote(offset), unquote(factor))
                       )
           end
@@ -303,10 +307,12 @@ defmodule Orb.DSL do
   def local_tee(identifier), do: {:local_tee, identifier}
   def local_tee(identifier, value), do: [value, {:local_tee, identifier}]
 
+  def typed_call(output_type, f, args) when is_list(args), do: Instruction.typed_call(output_type, f, args)
+
   @doc """
   Call local function `f`.
   """
-  def call(f), do: {:call, f, []}
+  def call(f), do: Instruction.call(f, [])
 
   @doc """
   Call local function `f`, passing arguments `args` when list, or single argument otherwise.
