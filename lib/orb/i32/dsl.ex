@@ -22,8 +22,16 @@ defmodule Orb.I32.DSL do
     # Orb.I32.mul(left, right)
   end
 
+  def _left == _right do
+    raise "== is not supported in Orb. Use === instead."
+  end
+
   def left === right do
     Orb.I32.eq(left, right)
+  end
+
+  def _left != _right do
+    raise "!= is not supported in Orb. Use !== instead."
   end
 
   def left !== right do
