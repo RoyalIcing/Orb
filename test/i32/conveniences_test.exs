@@ -7,10 +7,10 @@ defmodule I32ConveniencesTest do
     use Orb
 
     defw is_url_safe?(char: I32.U8), I32 do
-      I32.in_inclusive_range?(char, ?a, ?z)
-      |> I32.or(I32.in_inclusive_range?(char, ?A, ?Z))
-      |> I32.or(I32.in_inclusive_range?(char, ?0, ?9))
-      |> I32.or(I32.in?(char, ~C{~_-.}))
+      I32.in_inclusive_range?(char, ?a, ?z) or
+        I32.in_inclusive_range?(char, ?A, ?Z) or
+        I32.in_inclusive_range?(char, ?0, ?9) or
+        I32.in?(char, ~C{~_-.})
     end
   end
 
