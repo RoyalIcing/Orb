@@ -499,55 +499,30 @@ defmodule Orb do
   alias Orb.Memory
   require Ops
 
-  defmacro __using__(opts) do
-    # TODO: remove opts
-    inline? = Keyword.get(opts, :inline, false)
-
-    attrs =
-      case inline? do
-        true ->
-          nil
-
-        false ->
-          quote do
-            @before_compile unquote(__MODULE__).BeforeCompile
-          end
-      end
-
+  defmacro __using__(_opts) do
     quote do
       import Orb
       import Orb.DefDSL
       alias Orb.{I32, I64, S32, U32, F32, Memory, Table}
       require Orb.{I32, F32, Table, Memory}
 
-      # @wasm_name __MODULE__ |> Module.split() |> List.last()
-      # @before_compile {unquote(__MODULE__), :register_attributes}
-
-      # unless unquote(inline?) do
-      #   @before_compile unquote(__MODULE__).BeforeCompile
-      # end
-
-      unquote(attrs)
+      @before_compile unquote(__MODULE__).BeforeCompile
 
       def __wasm_body__, do: []
       defoverridable __wasm_body__: 0
 
-      if Module.open?(__MODULE__) do
-        # @before_compile unquote(__MODULE__).BeforeCompile
-        # Module.put_attribute(__MODULE__, :before_compile, unquote(__MODULE__).BeforeCompile)
+      # TODO: rename these to orb_ prefix instead of wasm_ ?
+      Module.put_attribute(__MODULE__, :wasm_name, __MODULE__ |> Module.split() |> List.last())
 
-        Module.put_attribute(__MODULE__, :wasm_name, __MODULE__ |> Module.split() |> List.last())
+      Module.register_attribute(__MODULE__, :wasm_memory, accumulate: true)
 
-        Module.register_attribute(__MODULE__, :wasm_memory, accumulate: true)
+      Module.register_attribute(__MODULE__, :wasm_globals, accumulate: true)
 
-        Module.register_attribute(__MODULE__, :wasm_globals, accumulate: true)
-
-        Module.register_attribute(__MODULE__, :wasm_types, accumulate: true)
-        Module.register_attribute(__MODULE__, :wasm_table_allocations, accumulate: true)
-        Module.register_attribute(__MODULE__, :wasm_imports, accumulate: true)
-        Module.register_attribute(__MODULE__, :wasm_body, accumulate: true)
-        Module.register_attribute(__MODULE__, :wasm_constants, accumulate: true)
-      end
+      Module.register_attribute(__MODULE__, :wasm_types, accumulate: true)
+      Module.register_attribute(__MODULE__, :wasm_table_allocations, accumulate: true)
+      Module.register_attribute(__MODULE__, :wasm_imports, accumulate: true)
+      Module.register_attribute(__MODULE__, :wasm_body, accumulate: true)
+      Module.register_attribute(__MODULE__, :wasm_constants, accumulate: true)
     end
   end
 
