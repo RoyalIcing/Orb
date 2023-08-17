@@ -56,7 +56,6 @@ defmodule Orb.I32 do
 
   def in_inclusive_range?(value, lower, upper) do
     band(ge_u(value, lower), le_u(value, upper))
-    # {:i32, :and, {ge_u(value, lower), le_u(value, upper)}}
   end
 
   def in?(value, list) when is_list(list) do
