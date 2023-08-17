@@ -1,24 +1,23 @@
 defmodule DynamicTest do
   use ExUnit.Case, async: true
 
-  defmodule UserInfo do
-    def user_id() do
-      Process.get(:user_id)
+  defmodule CurrentUser do
+    def get_id() do
+      Process.get(:user_id) || raise "User ID must be set."
     end
 
-    def user_type() do
+    def get_type() do
       Process.get(:user_type, :viewer)
     end
   end
 
   # SLIDE
+
   defmodule DynamicA do
     use Orb
 
-    # defw can_edit?(post_id: I32, author_id: I32), I32
-
     wasm do
-      case UserInfo.user_type() do
+      case CurrentUser.get_type() do
         :admin ->
           func can_edit?(post_id: I32, author_id: I32), I32 do
             1
@@ -26,7 +25,7 @@ defmodule DynamicTest do
 
         :viewer ->
           func can_edit?(post_id: I32, author_id: I32), I32 do
-            author_id === UserInfo.user_id()
+            author_id === inline(do: CurrentUser.get_id())
           end
       end
     end
