@@ -216,7 +216,8 @@ defmodule Examples.Memory do
       func hd(ptr: I32.Pointer), I32.Pointer do
         # Zig: https://godbolt.org/z/bG5zj6bzx
         # ptr[at: 0, fallback: 0x0]
-        ptr |> I32.eqz?(do: 0x0, else: ptr[at!: 0])
+        # ptr |> I32.eqz?(do: 0x0, else: ptr[at!: 0])
+        I32.eqz(ptr) |> I32.when?(do: 0x0, else: ptr[at!: 0])
         # ptr &&& ptr[at!: 0]
         # ptr[at!: 0]
       end
@@ -224,7 +225,7 @@ defmodule Examples.Memory do
       func tl(ptr: I32.Pointer), I32.Pointer do
         # ptr.unwrap[at!: 1]
         # ptr |> I32.eqz?(do: :unreachable, else: ptr[at!: 1])
-        ptr |> I32.eqz?(do: 0x0, else: ptr[at!: 1])
+        I32.eqz(ptr) |> I32.when?(do: 0x0, else: ptr[at!: 1])
         # ptr[at!: 1]
       end
 
