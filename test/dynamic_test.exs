@@ -15,6 +15,8 @@ defmodule DynamicTest do
   defmodule DynamicA do
     use Orb
 
+    # defw can_edit?(post_id: I32, author_id: I32), I32
+
     wasm do
       case UserInfo.user_type() do
         :admin ->
