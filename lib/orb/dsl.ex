@@ -485,6 +485,7 @@ defmodule Orb.DSL do
         # TODO: DRY this up
         # use Orb.RestoreKernel
         import Orb.Global.DSL, only: []
+        import Orb.IfElse.DSL, only: []
         import Orb.I32.DSL, only: []
         import Orb.U32.DSL, only: []
         import Orb.S32.DSL, only: []
