@@ -1,8 +1,6 @@
 defmodule MemoryTest do
   use ExUnit.Case, async: true
 
-  use Orb
-
   test "load!/2" do
     defmodule Load do
       use Orb
@@ -22,7 +20,7 @@ defmodule MemoryTest do
       end
     end
 
-    assert to_wat(Load) == """
+    assert Orb.to_wat(Load) == """
            (module $Load
              (func $load (export "load")
                (i32.load (i32.const 256))
@@ -51,7 +49,7 @@ defmodule MemoryTest do
       end
     end
 
-    assert to_wat(Store) == """
+    assert Orb.to_wat(Store) == """
            (module $Store
              (func $store (export "store")
                (i32.store (i32.const 256) (i32.const 42))
