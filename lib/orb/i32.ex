@@ -5,9 +5,8 @@ defmodule Orb.I32 do
 
   import Kernel, except: [and: 2, or: 2]
 
-  alias Orb.Ops
+  require Orb.Ops, as: Ops
   alias Orb.Instruction
-  require Ops
 
   def wasm_type(), do: :i32
 

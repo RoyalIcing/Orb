@@ -2,6 +2,7 @@ defmodule Orb.F32 do
   @moduledoc false
 
   require Orb.Ops, as: Ops
+  alias Orb.Instruction
 
   @behaviour Orb.CustomType
 
@@ -13,13 +14,13 @@ defmodule Orb.F32 do
 
   for op <- Ops.f32(1) do
     def unquote(op)(a) do
-      {:f32, unquote(op), a}
+      Instruction.f32(unquote(op), a)
     end
   end
 
   for op <- Ops.f32(2) do
     def unquote(op)(a, b) do
-      {:f32, unquote(op), {a, b}}
+      Instruction.f32(unquote(op), a, b)
     end
   end
 
@@ -61,43 +62,51 @@ defmodule Orb.F32 do
     import Kernel, except: [+: 2, -: 2, *: 2, ===: 2, !==: 2, /: 2, <=: 2, >=: 2]
 
     def left + right do
-      {:f32, :add, {left, right}}
+      Instruction.f32(:add, left, right)
     end
 
     def left - right do
-      {:f32, :sub, {left, right}}
+      Instruction.f32(:sub, left, right)
     end
 
     def left * right do
-      {:f32, :mul, {left, right}}
+      Instruction.f32(:mul, left, right)
     end
 
     def left / right do
-      {:f32, :div, {left, right}}
+      Instruction.f32(:div, left, right)
+    end
+
+    def _left == _right do
+      raise "== is not supported in Orb. Use === instead."
+    end
+
+    def _left != _right do
+      raise "!= is not supported in Orb. Use !== instead."
     end
 
     def left === right do
-      {:f32, :eq, {left, right}}
+      Instruction.f32(:eq, left, right)
     end
 
     def left !== right do
-      {:f32, :ne, {left, right}}
+      Instruction.f32(:ne, left, right)
     end
 
     def left < right do
-      {:f32, :lt, {left, right}}
+      Instruction.f32(:lt, left, right)
     end
 
     def left > right do
-      {:f32, :gt, {left, right}}
+      Instruction.f32(:gt, left, right)
     end
 
     def left <= right do
-      {:f32, :le, {left, right}}
+      Instruction.f32(:le, left, right)
     end
 
     def left >= right do
-      {:f32, :ge, {left, right}}
+      Instruction.f32(:ge, left, right)
     end
   end
 end
