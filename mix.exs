@@ -55,7 +55,7 @@ defmodule Orb.MixProject do
       logo: "orb-logo-orange.svg",
       extras: [
         "README.md",
-        "examples/01-intro.livemd"
+        "guides/01-intro.livemd"
       ]
     ]
   end
