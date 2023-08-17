@@ -19,11 +19,11 @@ defmodule Orb.Instruction do
 
   def f32(operation), do: new(:f32, operation)
   def f32(operation, a), do: new(:f32, operation, a)
-  @spec f32(any, any, any) :: %Orb.Instruction{operands: [...], operation: any, output_type: any}
   def f32(operation, a, b), do: new(:f32, operation, a, b)
 
   def call(f), do: new(:unknown, {:call, f})
   def call(f, args) when is_list(args), do: new(:unknown, {:call, f}, args)
+  def typed_call(output_type, f, args) when is_list(args), do: new(output_type, {:call, f}, args)
 
   defimpl Orb.ToWat do
     alias Orb.ToWat.Instructions
