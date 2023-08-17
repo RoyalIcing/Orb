@@ -11,8 +11,6 @@ defmodule DynamicTest do
     end
   end
 
-  # SLIDE
-
   defmodule DynamicA do
     use Orb
 
@@ -31,28 +29,45 @@ defmodule DynamicTest do
     end
   end
 
+  defmodule DynamicB do
+    use Orb
+
+    defw can_edit?(post_id: I32, author_id: I32), I32 do
+      with :viewer <- CurrentUser.get_type() do
+        author_id === inline(do: CurrentUser.get_id())
+      else
+        :admin ->
+          1
+      end
+    end
+  end
+
   test "default user" do
     Process.put(:user_id, 123)
 
-    assert DynamicA.to_wat() == """
-           (module $DynamicA
-             (func $can_edit? (export "can_edit?") (param $post_id i32) (param $author_id i32) (result i32)
-               (i32.eq (local.get $author_id) (i32.const 123))
-             )
-           )
-           """
+    expected = """
+      (func $can_edit? (export "can_edit?") (param $post_id i32) (param $author_id i32) (result i32)
+        (i32.eq (local.get $author_id) (i32.const 123))
+      )
+    )
+    """
+
+    assert DynamicA.to_wat() =~ expected
+    assert DynamicB.to_wat() =~ expected
   end
 
   test "admin user" do
     Process.put(:user_id, 123)
     Process.put(:user_type, :admin)
 
-    assert DynamicA.to_wat() == """
-           (module $DynamicA
-             (func $can_edit? (export "can_edit?") (param $post_id i32) (param $author_id i32) (result i32)
-               (i32.const 1)
-             )
-           )
-           """
+    expected = """
+      (func $can_edit? (export "can_edit?") (param $post_id i32) (param $author_id i32) (result i32)
+        (i32.const 1)
+      )
+    )
+    """
+
+    assert DynamicA.to_wat() =~ expected
+    assert DynamicB.to_wat() =~ expected
   end
 end
