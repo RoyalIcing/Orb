@@ -22,12 +22,30 @@ defmodule Orb.Ops do
 
   # TODO: add conversions ops https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/Numeric#conversion
 
+  defguard is_primitive_type(type) when type in [:i32, :i32_u8, :f32]
+
   defmacro i32(arity_or_type)
   defmacro i32(1), do: @i32_ops_1 |> Macro.escape()
   defmacro i32(2), do: @i32_ops_2 |> Macro.escape()
   defmacro i32(:load), do: @i_load_ops |> Macro.escape()
   defmacro i32(:store), do: @i_store_ops |> Macro.escape()
   defmacro i32(:all), do: @i32_ops_all |> Macro.escape()
+
+  # def i32_param_type(op, param_index), do: :error
+  def i32_param_type(op, 0) when op in @i_trunc_ops, do: :f32
+  def i32_param_type(op, 0) when op in @i_unary_ops, do: :i32
+  def i32_param_type(op, 0) when op in @i_test_ops, do: :i32
+  def i32_param_type(op, 0) when op in @i_binary_ops, do: :i32
+  def i32_param_type(op, 0) when op in @i_relative_ops, do: :i32
+  def i32_param_type(op, 1) when op in @i_binary_ops, do: :i32
+  def i32_param_type(op, 1) when op in @i_relative_ops, do: :i32
+  def i32_param_type(_op, _param_index), do: :error
+
+  defp lowest_type(:i32), do: :i32
+  defp lowest_type(:i32_u8), do: :i32
+  defp lowest_type(:f32), do: :f32
+
+  def primitive_types_equal?(a, b), do: lowest_type(a) === lowest_type(b)
 
   defmacro f32(arity_or_type)
   defmacro f32(1), do: @f32_ops_1 |> Macro.escape()

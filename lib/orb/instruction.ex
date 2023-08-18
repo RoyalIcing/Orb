@@ -1,6 +1,8 @@
 defmodule Orb.Instruction do
   defstruct [:type, :operation, :operands]
 
+  require Orb.Ops, as: Ops
+
   def new(type, operation),
     do: %__MODULE__{type: type, operation: operation, operands: []}
 
@@ -44,13 +46,21 @@ defmodule Orb.Instruction do
     operands
   end
 
-  defp type_check_operand!(:i32, :add, %{type: received_type}, _) do
+  defp type_check_operand!(:i32, op, %{type: received_type}, param_index) do
+    expected_type = Ops.i32_param_type(op, param_index)
+
+    if expected_type == :error do
+      raise ArgumentError, "Instruction i32.#{op} does not have a param at #{param_index}."
+    end
+
     case received_type do
-      :i32 ->
+      ^expected_type ->
         nil
 
-      :f32 ->
-        raise Orb.TypeCheckError, expected_type: :i32, received_type: :f32
+        primitive_type when Ops.is_primitive_type(primitive_type) ->
+        unless Ops.primitive_types_equal?(primitive_type, expected_type) do
+          raise Orb.TypeCheckError, expected_type: expected_type, received_type: received_type
+        end
 
       :unknown ->
         # Ignore
@@ -59,11 +69,11 @@ defmodule Orb.Instruction do
 
       mod ->
         primitive_type = mod.wasm_type()
-        primitive_type == :i32 or raise Orb.TypeCheckError, expected_type: :i32, received_type: "#{mod} #{primitive_type}"
+        primitive_type == :i32 or raise Orb.TypeCheckError, expected_type: expected_type, received_type: "#{mod} #{primitive_type}"
     end
   end
 
-  defp type_check_operand!(_output_type, _operation, _operand, _index) do
+  defp type_check_operand!(_type, _operation, _operand, _index) do
     nil
   end
 
