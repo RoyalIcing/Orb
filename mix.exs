@@ -1,12 +1,12 @@
 defmodule Orb.MixProject do
   use Mix.Project
 
-  @source_url "https://github.com/RoyalIcing/orb"
+  @source_url "https://github.com/RoyalIcing/Orb"
 
   def project do
     [
       app: :orb,
-      version: "0.0.12",
+      version: "0.0.13",
       elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
