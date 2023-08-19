@@ -31,7 +31,9 @@ defmodule Orb.Ops do
   defmacro i32(:store), do: @i_store_ops |> Macro.escape()
   defmacro i32(:all), do: @i32_ops_all |> Macro.escape()
 
-  # def i32_param_type(op, param_index), do: :error
+  defp i32_arity(op) when op in @i32_ops_1, do: 1
+  defp i32_arity(op) when op in @i32_ops_2, do: 2
+
   def i32_param_type(op, 0) when op in @i_load_ops, do: :i32
   def i32_param_type(op, 0) when op in @i_store_ops, do: :i32
   def i32_param_type(op, 1) when op in @i_store_ops, do: :i32
@@ -43,6 +45,24 @@ defmodule Orb.Ops do
   def i32_param_type(op, 0) when op in @i_relative_ops, do: :i32
   def i32_param_type(op, 1) when op in @i_relative_ops, do: :i32
   def i32_param_type(_op, _param_index), do: :error
+
+  def i32_param_type!(op, param_index) do
+    case i32_param_type(op, param_index) do
+      :error ->
+        arity = i32_arity(op)
+
+        raise ArgumentError,
+              "WebAssembly instruction i32.#{op}/#{arity} does not accept a #{nth(param_index)} param."
+
+      type ->
+        type
+    end
+  end
+
+  defp nth(0), do: "1st"
+  defp nth(1), do: "2nd"
+  defp nth(2), do: "3rd"
+  defp nth(n), do: "#{n + 1}th"
 
   defp lowest_type(:i32), do: :i32
   defp lowest_type(:i32_u8), do: :i32

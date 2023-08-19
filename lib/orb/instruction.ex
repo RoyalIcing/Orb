@@ -46,12 +46,16 @@ defmodule Orb.Instruction do
     operands
   end
 
-  defp type_check_operand!(:i32, op, %{type: received_type}, param_index) when is_atom(op) do
-    expected_type = Ops.i32_param_type(op, param_index)
+  defp type_check_operand!(:i32, op, number, param_index) when is_atom(op) and is_float(number) do
+    expected_type = Ops.i32_param_type!(op, param_index)
 
-    if expected_type == :error do
-      raise ArgumentError, "Instruction i32.#{op} does not have a param at #{param_index}."
+    unless Ops.primitive_types_equal?(:f32, expected_type) do
+      raise Orb.TypeCheckError, expected_type: expected_type, received_type: :f32
     end
+  end
+
+  defp type_check_operand!(:i32, op, %{type: received_type}, param_index) when is_atom(op) do
+    expected_type = Ops.i32_param_type!(op, param_index)
 
     case received_type do
       ^expected_type ->
@@ -71,6 +75,10 @@ defmodule Orb.Instruction do
         primitive_type = mod.wasm_type()
         primitive_type == :i32 or raise Orb.TypeCheckError, expected_type: expected_type, received_type: "#{mod} #{primitive_type}"
     end
+  end
+
+  defp type_check_operand!(:i32, op, _operand, param_index) when is_atom(op) do
+    Ops.i32_param_type!(op, param_index)
   end
 
   defp type_check_operand!(_type, _operation, _operand, _index) do
