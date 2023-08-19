@@ -46,11 +46,16 @@ defmodule Orb.Instruction do
     operands
   end
 
-  defp type_check_operand!(:i32, op, number, param_index) when is_atom(op) and is_float(number) do
+  defp type_check_operand!(:i32, op, number, param_index) when is_atom(op) and is_number(number) do
     expected_type = Ops.i32_param_type!(op, param_index)
 
-    unless Ops.primitive_types_equal?(:f32, expected_type) do
-      raise Orb.TypeCheckError, expected_type: expected_type, received_type: :f32
+    received_type = cond do
+      is_integer(number) -> :i32
+      is_float(number) -> :f32
+    end
+
+    unless Ops.primitive_types_equal?(received_type, expected_type) do
+      raise Orb.TypeCheckError, expected_type: expected_type, received_type: received_type
     end
   end
 
