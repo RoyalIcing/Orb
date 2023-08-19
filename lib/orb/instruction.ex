@@ -46,7 +46,7 @@ defmodule Orb.Instruction do
     operands
   end
 
-  defp type_check_operand!(:i32, op, %{type: received_type}, param_index) do
+  defp type_check_operand!(:i32, op, %{type: received_type}, param_index) when is_atom(op) do
     expected_type = Ops.i32_param_type(op, param_index)
 
     if expected_type == :error do
