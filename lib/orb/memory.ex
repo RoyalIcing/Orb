@@ -49,6 +49,7 @@ defmodule Orb.Memory do
 
   ```elixir
   Memory.load!(I32, 0x100)
+  Memory.load!(I32.U8, 0x100)
   ```
   """
   def load!(type, address) do
@@ -68,7 +69,7 @@ defmodule Orb.Memory do
         :load
       end
 
-    {primitive_type, load_instruction, address}
+    Orb.Instruction.new(primitive_type, load_instruction, address)
   end
 
   @doc """
@@ -76,6 +77,7 @@ defmodule Orb.Memory do
 
   ```elixir
   Memory.store!(I32, 0x100, 42)
+  Memory.store!(I32.U8, 0x100, ?a)
   ```
   """
   def store!(type, address, value) do
@@ -102,7 +104,7 @@ defmodule Orb.Memory do
         :load -> :store
       end
 
-    {primitive_type, store_instruction, address, value}
+    Orb.Instruction.new(primitive_type, store_instruction, [address, value])
   end
 
   defimpl Orb.ToWat do

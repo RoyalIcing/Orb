@@ -32,12 +32,15 @@ defmodule Orb.Ops do
   defmacro i32(:all), do: @i32_ops_all |> Macro.escape()
 
   # def i32_param_type(op, param_index), do: :error
+  def i32_param_type(op, 0) when op in @i_load_ops, do: :i32
+  def i32_param_type(op, 0) when op in @i_store_ops, do: :i32
+  def i32_param_type(op, 1) when op in @i_store_ops, do: :i32
   def i32_param_type(op, 0) when op in @i_trunc_ops, do: :f32
   def i32_param_type(op, 0) when op in @i_unary_ops, do: :i32
   def i32_param_type(op, 0) when op in @i_test_ops, do: :i32
   def i32_param_type(op, 0) when op in @i_binary_ops, do: :i32
-  def i32_param_type(op, 0) when op in @i_relative_ops, do: :i32
   def i32_param_type(op, 1) when op in @i_binary_ops, do: :i32
+  def i32_param_type(op, 0) when op in @i_relative_ops, do: :i32
   def i32_param_type(op, 1) when op in @i_relative_ops, do: :i32
   def i32_param_type(_op, _param_index), do: :error
 

@@ -86,15 +86,15 @@ defmodule Examples.Memory do
     end
 
     def memcpy(dest, src, byte_count) do
-      Orb.DSL.call(:memcpy, dest, src, byte_count)
+      Orb.DSL.typed_call(I32, :memcpy, [dest, src, byte_count])
     end
 
     def memcpy(dest: dest, src: src, byte_count: byte_count) do
-      Orb.DSL.call(:memcpy, dest, src, byte_count)
+      Orb.DSL.typed_call(I32, :memcpy, [dest, src, byte_count])
     end
 
     def memset(dest: dest, u8: u8, byte_count: byte_count) do
-      Orb.DSL.call(:memset, dest, u8, byte_count)
+      Orb.DSL.typed_call(I32, :memset, [dest, u8, byte_count])
     end
   end
 
@@ -169,7 +169,7 @@ defmodule Examples.Memory do
         # end
       end
 
-      func(alloc(size: I32), I32, do: call(:bump_alloc, size))
+      func(alloc(size: I32), I32, do: typed_call(I32, :bump_alloc, [size]))
 
       func free_all() do
         @bump_offset = Constants.bump_init_offset()
@@ -207,7 +207,7 @@ defmodule Examples.Memory do
 
     wasm do
       func cons(hd: I32.UnsafePointer, tl: I32.UnsafePointer), I32.UnsafePointer, ptr: I32.UnsafePointer do
-        ptr = call(:bump_alloc, 8)
+        ptr = typed_call(I32, :bump_alloc, [8])
         ptr[at!: 0] = hd
         ptr[at!: 1] = tl
         ptr
@@ -289,7 +289,7 @@ defmodule Examples.Memory do
           if I32.eqz(ptr), do: return(sum)
 
           # sum = sum + typed_call(I32, :hd, [ptr])
-          sum = sum + call(:hd, ptr)
+          sum = sum + typed_call(I32, :hd, [ptr])
           ptr = typed_call(I32, :tl, [ptr])
 
           Iterate.continue()
@@ -299,7 +299,7 @@ defmodule Examples.Memory do
 
     def cons(head, tail) do
       snippet U32 do
-        Orb.DSL.call(:cons, head, tail)
+        Orb.DSL.typed_call(I32.UnsafePointer, :cons, [head, tail])
       end
     end
 
@@ -315,10 +315,10 @@ defmodule Examples.Memory do
       end
     end
 
-    def reverse_in_place!(%Orb.MutRef{read: read, write: write}) do
+    def reverse_in_place!(%Orb.MutRef{read: read, write: write_instruction}) do
       snippet U32 do
-        Orb.DSL.call(:reverse_in_place, read)
-        write
+        Orb.DSL.typed_call(I32.UnsafePointer, :reverse_in_place, [read])
+        write_instruction
       end
     end
 

@@ -17,7 +17,8 @@ defmodule Orb.I32.String do
 
   @impl Access
   def fetch(%Orb.VariableReference{} = var_ref, at!: offset) do
-    ast = Orb.Instruction.i32(:load8_u, Orb.Numeric.Add.optimized(Orb.I32, var_ref, offset))
+    # ast = Orb.Instruction.i32(:load8_u, Orb.Numeric.Add.optimized(Orb.I32, var_ref, offset))
+    ast = Orb.Memory.load!(Orb.I32.U8, Orb.Numeric.Add.optimized(Orb.I32, var_ref, offset))
     {:ok, ast}
   end
 
@@ -139,8 +140,8 @@ defmodule Orb.I32.String do
   # TODO: is it safe to call this empty() ?
   def null(), do: {:i32_const, 0}
 
-  def streq(address_a, address_b), do: Orb.DSL.call(:streq, address_a, address_b)
-  def strlen(string_ptr), do: Orb.DSL.call(:strlen, string_ptr)
+  def streq(address_a, address_b), do: Orb.DSL.typed_call(I32, :streq, [address_a, address_b])
+  def strlen(string_ptr), do: Orb.DSL.typed_call(I32, :strlen, [string_ptr])
 
   defmacro match(value, do: transform) do
     statements =

@@ -58,4 +58,25 @@ defmodule I32StringTest do
 
     assert streq.(0x00300, 0x00400) == 1
   end
+
+  defmodule StringCharAccess do
+    use Orb
+
+    Memory.pages(1)
+
+    wasm do
+      func read_first_char(str_ptr: I32.String), I32, char: I32.U8 do
+        char = str_ptr[at!: 0]
+        char
+      end
+    end
+  end
+
+  test "StringCharAccess" do
+    inst = Instance.run(StringCharAccess)
+    read_first_char = Instance.capture(inst, :read_first_char, 1)
+
+    Instance.write_string_nul_terminated(inst, 0x00100, "hello")
+    assert read_first_char.(0x00100) == ?h
+  end
 end
