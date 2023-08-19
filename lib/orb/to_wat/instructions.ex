@@ -130,6 +130,7 @@ defmodule Orb.ToWat.Instructions do
       :f32 ->
         "f32"
 
+      # e.g. {I32, I32}
       tuple when is_tuple(tuple) ->
         tuple |> Tuple.to_list() |> Enum.map(&do_type/1) |> Enum.join(" ")
 

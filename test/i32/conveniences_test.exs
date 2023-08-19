@@ -17,6 +17,15 @@ defmodule I32ConveniencesTest do
       #   I32.in_inclusive_range?(char, ?0, ?9) or
       #   I32.in?(char, ~C{~_-.})
     end
+
+    defw is_abc?(char: I32.U8), I32 do
+      I32.match char do
+        ?a -> 1
+        ?b -> 1
+        ?c -> 1
+        _ -> 0
+      end
+    end
   end
 
   test "url safe characters" do
