@@ -42,24 +42,24 @@ defmodule TypeCheckTest do
   end
 
   test "raises correct errors" do
-    assert_raise Orb.TypeCheckError, "Expected type i32, found f32.", fn ->
-      PassLocalF32ToI32Add.to_wat()
-    end
+    assert_raise Orb.TypeCheckError,
+                 "Expected type i32, found f32.",
+                 &PassLocalF32ToI32Add.to_wat/0
 
-    assert_raise Orb.TypeCheckError, "Expected type i32, found f32.", fn ->
-      PassConstantF32ToI32Add.to_wat()
-    end
+    assert_raise Orb.TypeCheckError,
+                 "Expected type i32, found f32.",
+                 &PassConstantF32ToI32Add.to_wat/0
 
-    assert_raise Orb.TypeCheckError, "Expected type f32, found i32.", fn ->
-      PassLocalI32ToI32Trunc.to_wat()
-    end
+    assert_raise Orb.TypeCheckError,
+                 "Expected type f32, found i32.",
+                 &PassLocalI32ToI32Trunc.to_wat/0
 
-    assert_raise ArgumentError, "WebAssembly instruction i32.add/2 does not accept a 3rd param.", fn ->
-      I32AddWithThreeArgs.to_wat()
-    end
+    assert_raise ArgumentError,
+                 "WebAssembly instruction i32.add/2 does not accept a 3rd param.",
+                 &I32AddWithThreeArgs.to_wat/0
 
-    assert_raise Orb.TypeCheckError, "Expected type f32, found i32.", fn ->
-      PassConstantI32ToI32Trunc.to_wat()
-    end
+    assert_raise Orb.TypeCheckError,
+                 "Expected type f32, found i32.",
+                 &PassConstantI32ToI32Trunc.to_wat/0
   end
 end
