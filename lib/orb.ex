@@ -673,7 +673,7 @@ defmodule Orb do
     end
   end
 
-  defp mode_pre(mode) do
+  def __mode_pre(mode) do
     dsl =
       case mode do
         Orb.S32 ->
@@ -775,7 +775,7 @@ defmodule Orb do
     # block = interpolate_external_values(block, __ENV__)
 
     mode = Macro.expand_literals(mode, __CALLER__)
-    pre = mode_pre(mode)
+    pre = __mode_pre(mode)
     post = mode_post(mode)
 
     %{body: body, constants: constants} = do_module_body(block, __CALLER__)
@@ -784,33 +784,31 @@ defmodule Orb do
     Module.put_attribute(__CALLER__.module, :wasm_constants, constants)
 
     quote do
-      # with do
-      unquote(pre)
+      with do
+        unquote(pre)
+        import Orb, only: []
+        import Orb.DSL
 
-      import Orb.DSL
+        # with do
+        #   # Process.put()
+        #   # import Orb.DefDSL
+        #   # unquote(body)
 
-      # with do
-      #   # Process.put()
-      #   # import Orb.DefDSL
-      #   # unquote(body)
+        #   Orb.DefDSL.define_helpers(unquote(body)) |> IO.inspect()
+        # end
 
-      #   Orb.DefDSL.define_helpers(unquote(body)) |> IO.inspect()
-      # end
+        # @wasm_body unquote(body)
 
-      # @wasm_body unquote(body)
+        def __wasm_body__() do
+          # Process.put(Orb.DSL, true)
 
-      def __wasm_body__() do
-        # Process.put(Orb.DSL, true)
+          super() ++ unquote(body)
+        end
 
-        super() ++ unquote(body)
+        defoverridable __wasm_body__: 0
       end
 
-      defoverridable __wasm_body__: 0
-
-      import Orb.DSL, only: []
-
       unquote(post)
-      # end
     end
   end
 
@@ -821,7 +819,7 @@ defmodule Orb do
     block = interpolate_external_values(block, __CALLER__)
 
     mode = Macro.expand_literals(mode, __CALLER__)
-    pre = mode_pre(mode)
+    pre = __mode_pre(mode)
     post = mode_post(mode)
 
     block_items =

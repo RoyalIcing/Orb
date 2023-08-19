@@ -507,6 +507,24 @@ defmodule Orb.DSL do
   end
 
   @doc """
+  Used to bring back wasm-mode when inside `inline/1`.
+  """
+  defmacro wasm(mode \\ Orb.S32, do: block) do
+    mode = Macro.expand_literals(mode, __CALLER__)
+    pre = Orb.__mode_pre(mode)
+
+    quote do
+      with do
+        unquote(pre)
+        import Orb, only: []
+        import Orb.DSL
+
+        unquote(__get_block_items(block))
+      end
+    end
+  end
+
+  @doc """
   Declare a constant string, which will be extracted to the top of the module, and its address substituted in place.
   """
   def const(value) do
