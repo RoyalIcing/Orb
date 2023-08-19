@@ -20,10 +20,7 @@ defmodule Orb do
   defmodule CalculateMean do
     use Orb
 
-    I32.global(
-      count: 0,
-      tally: 0
-    )
+    I32.global(count: 0, tally: 0)
 
     wasm do
       func insert(element: I32) do
@@ -46,10 +43,7 @@ defmodule Orb do
   defmodule CalculateMean do
     use Orb
 
-    I32.global(
-      count: 0,
-      tally: 0
-    )
+    I32.global(count: 0, tally: 0)
 
     wasm do
       func insert(element: I32) do
