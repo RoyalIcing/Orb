@@ -771,9 +771,10 @@ defmodule Orb do
   @doc """
   Enter WebAssembly.
   """
-  defmacro wasm(mode \\ Orb.S32, do: block) do
+  defmacro wasm(mode \\ nil, do: block) do
     # block = interpolate_external_values(block, __ENV__)
 
+    mode = mode || Module.get_attribute(__CALLER__.module, :wasm_mode, Orb.S32)
     mode = Macro.expand_literals(mode, __CALLER__)
     pre = __mode_pre(mode)
     post = mode_post(mode)

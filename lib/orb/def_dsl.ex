@@ -1,5 +1,10 @@
 defmodule Orb.DefDSL do
 
+  defmacro wasm_mode(mode) do
+    mode = Macro.expand_literals(mode, __CALLER__)
+    Module.put_attribute(__CALLER__.module, :wasm_mode, mode)
+  end
+
   defmacro defw(call, do: block) do
     define(call, :public, nil, [], block, __CALLER__)
   end
@@ -35,6 +40,7 @@ defmodule Orb.DefDSL do
   defp define(call, visibility, result, locals, block, env) do
     wasm = Orb.DSL.__define_func(call, visibility, [result: result, locals: locals], block, env)
     ex_def = define_elixir_def(call, visibility, result, env)
+
     quote do
       unquote(ex_def)
 
