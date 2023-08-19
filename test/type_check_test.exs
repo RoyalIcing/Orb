@@ -9,12 +9,24 @@ defmodule TypeCheckTest do
     end
   end
 
+  test "passing F32 param to I32.add fails" do
+    assert_raise Orb.TypeCheckError,
+                 "Expected type i32, found f32.",
+                 &PassLocalF32ToI32Add.to_wat/0
+  end
+
   defmodule PassConstantF32ToI32Add do
     use Orb
 
     defw example(), I32 do
       I32.add(2.0, 1)
     end
+  end
+
+  test "passing F32 constant to I32.add fails" do
+    assert_raise Orb.TypeCheckError,
+                 "Expected type i32, found f32.",
+                 &PassConstantF32ToI32Add.to_wat/0
   end
 
   defmodule PassLocalI32ToI32Trunc do
@@ -25,12 +37,10 @@ defmodule TypeCheckTest do
     end
   end
 
-  defmodule I32AddWithThreeArgs do
-    use Orb
-
-    defw example(a: I32), I32 do
-      Orb.Instruction.new(:i32, :add, [1, 2, 3])
-    end
+  test "passing I32 param to I32.trunc_f32_s fails" do
+    assert_raise Orb.TypeCheckError,
+                 "Expected type f32, found i32.",
+                 &PassLocalI32ToI32Trunc.to_wat/0
   end
 
   defmodule PassConstantI32ToI32Trunc do
@@ -41,25 +51,23 @@ defmodule TypeCheckTest do
     end
   end
 
-  test "raises correct errors" do
-    assert_raise Orb.TypeCheckError,
-                 "Expected type i32, found f32.",
-                 &PassLocalF32ToI32Add.to_wat/0
-
-    assert_raise Orb.TypeCheckError,
-                 "Expected type i32, found f32.",
-                 &PassConstantF32ToI32Add.to_wat/0
-
-    assert_raise Orb.TypeCheckError,
-                 "Expected type f32, found i32.",
-                 &PassLocalI32ToI32Trunc.to_wat/0
-
-    assert_raise ArgumentError,
-                 "WebAssembly instruction i32.add/2 does not accept a 3rd param.",
-                 &I32AddWithThreeArgs.to_wat/0
-
+  test "passing constant integer to I32.trunc_f32_s fails" do
     assert_raise Orb.TypeCheckError,
                  "Expected type f32, found i32.",
                  &PassConstantI32ToI32Trunc.to_wat/0
+  end
+
+  defmodule I32AddWithThreeArgs do
+    use Orb
+
+    defw example(a: I32), I32 do
+      Orb.Instruction.new(:i32, :add, [1, 2, 3])
+    end
+  end
+
+  test "passing 3rd argument to I32.add fails" do
+    assert_raise ArgumentError,
+                 "WebAssembly instruction i32.add/2 does not accept a 3rd argument.",
+                 &I32AddWithThreeArgs.to_wat/0
   end
 end

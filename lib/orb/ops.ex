@@ -52,7 +52,7 @@ defmodule Orb.Ops do
         arity = i32_arity(op)
 
         raise ArgumentError,
-              "WebAssembly instruction i32.#{op}/#{arity} does not accept a #{nth(param_index)} param."
+              "WebAssembly instruction i32.#{op}/#{arity} does not accept a #{nth(param_index)} argument."
 
       type ->
         type
