@@ -1,7 +1,7 @@
 defmodule Orb.ToWat.Instructions do
   @moduledoc false
 
-  def expand_type(type, env \\ __ENV__) do
+  def expand_type(type, env) do
     case Macro.expand_literals(type, env) do
       Orb.I32 ->
         :i32

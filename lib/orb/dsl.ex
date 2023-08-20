@@ -7,7 +7,7 @@ defmodule Orb.DSL do
   alias Orb.Ops
   require Ops
 
-  def expand_type(type, env \\ __ENV__) do
+  def expand_type(type, env) do
     Orb.ToWat.Instructions.expand_type(type, env)
   end
 
@@ -54,6 +54,7 @@ defmodule Orb.DSL do
 
   defp define_func(call, visibility, options, block, env) do
     call = Macro.expand_once(call, __ENV__)
+    {_, meta, _} = call
 
     {name, args} =
       case Macro.decompose_call(call) do
@@ -73,13 +74,18 @@ defmodule Orb.DSL do
       case args do
         [args] when is_list(args) ->
           for {name, type} <- args do
-            Macro.escape(param(name, expand_type(type, env)))
+            Macro.escape(%Orb.Func.Param{name: name, type: expand_type(type, env)})
           end
 
-        args ->
-          for {name, _meta, [type]} <- args do
-            Macro.escape(param(name, expand_type(type, env)))
-          end
+        [] ->
+          []
+
+        [_ | _] ->
+          raise CompileError,
+            line: meta[:line],
+            file: env.file,
+            description:
+              "Cannot define function with multiple arguments, use keyword list instead."
       end
 
     arg_types =
@@ -158,9 +164,10 @@ defmodule Orb.DSL do
             4 -> :store
           end
 
-        local_get_instruction = quote do
-          Instruction.local_get(unquote(locals[local]), unquote(local))
-        end
+        local_get_instruction =
+          quote do
+            Instruction.local_get(unquote(locals[local]), unquote(local))
+          end
 
         computed_offset =
           case {offset, bytes_factor} do
@@ -187,7 +194,12 @@ defmodule Orb.DSL do
                       )
           end
 
-        quote do: Orb.Instruction.i32(unquote(store_instruction), unquote(computed_offset), unquote(value))
+        quote do:
+                Orb.Instruction.i32(
+                  unquote(store_instruction),
+                  unquote(computed_offset),
+                  unquote(value)
+                )
 
       {:=, _, [{local, _, nil}, input]}
       when is_atom(local) and is_map_key(locals, local) and
@@ -221,21 +233,6 @@ defmodule Orb.DSL do
       other ->
         other
     end)
-  end
-
-  # TODO: merge with existing code?
-  @primitive_types [:i32, :f32, :i32_u8]
-
-  defp param(name, type) when type in @primitive_types do
-    %Orb.Func.Param{name: name, type: type}
-  end
-
-  defp param(name, type) when is_atom(type) do
-    # unless function_exported?(type, :wasm_type, 0) do
-    #   raise "Param of type #{type} must implement wasm_type/0."
-    # end
-
-    %Orb.Func.Param{name: name, type: type}
   end
 
   def export(f = %Orb.Func{}, name) when is_binary(name) do
@@ -289,7 +286,8 @@ defmodule Orb.DSL do
   def local_tee(identifier), do: {:local_tee, identifier}
   def local_tee(identifier, value), do: [value, {:local_tee, identifier}]
 
-  def typed_call(output_type, f, args) when is_list(args), do: Instruction.typed_call(output_type, f, args)
+  def typed_call(output_type, f, args) when is_list(args),
+    do: Instruction.typed_call(output_type, f, args)
 
   @doc """
   Call local function `f`.
