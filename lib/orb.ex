@@ -371,8 +371,8 @@ defmodule Orb do
   Blocks provide a structured way to skip code.
 
   ```elixir
-  block Validate do
-    break(Validate, if: i < 0)
+  Control.block Validate do
+    Validate.break(if: i < 0)
 
     # Do something with i
   end
@@ -381,10 +381,10 @@ defmodule Orb do
   Blocks can have a type.
 
   ```elixir
-  block Double, I32 do
+  Control.block Double, I32 do
     if i < 0 do
       push(0)
-      break(Double)
+      Double.break()
     end
 
     push(i * 2)
