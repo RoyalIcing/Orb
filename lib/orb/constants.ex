@@ -21,9 +21,24 @@ defmodule Orb.Constants do
     %__MODULE__{offset: offset, items: items, lookup_table: lookup_table}
   end
 
+  defmodule NulTerminatedString do
+    defstruct memory_offset: nil, string: nil, type: Orb.I32.String
+
+    defimpl Orb.ToWat do
+      def to_wat(%Orb.Constants.NulTerminatedString{memory_offset: memory_offset}, indent) do
+        [
+          indent,
+          "(i32.const ",
+          to_string(memory_offset),
+          ")"
+        ]
+      end
+    end
+  end
+
   def lookup(constants, value) do
-    {_, offset} = List.keyfind!(constants.lookup_table, value, 0)
-    {:i32_const_string, offset, value}
+    {_, memory_offset} = List.keyfind!(constants.lookup_table, value, 0)
+    %NulTerminatedString{memory_offset: memory_offset, string: value}
   end
 
   defimpl Orb.ToWat do
