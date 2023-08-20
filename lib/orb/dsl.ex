@@ -440,12 +440,9 @@ defmodule Orb.DSL do
   @doc """
   Declare a block, useful for structured control flow.
   """
-  defmacro defblock(identifier, options \\ [], do: block) do
+  defmacro block(identifier, result_type \\ nil, do: block) do
     identifier = __expand_identifier(identifier, __CALLER__)
-
-    result_type =
-      Keyword.get(options, :result, nil) |> Macro.expand_literals(__CALLER__)
-
+    result_type = Macro.expand_literals(result_type, __CALLER__)
     block_items = __get_block_items(block)
 
     quote do

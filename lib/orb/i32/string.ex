@@ -187,7 +187,7 @@ defmodule Orb.I32.String do
       end
 
     quote do
-      defblock :i32_string_match, result: I32 do
+      block :i32_string_match, I32 do
         unquote(statements)
         unquote(final_instruction)
       end

@@ -606,8 +606,8 @@ defmodule OrbTest do
         str = 1024
 
         loop :continue, result: I32 do
-          defblock Outer do
-            defblock :inner do
+          block Outer do
+            block :inner do
               char = str[at!: 0]
               break(:inner, if: I32.eq(char, ?/))
               break(Outer, if: char)

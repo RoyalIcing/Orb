@@ -371,7 +371,7 @@ defmodule Orb do
   Blocks provide a structured way to skip code.
 
   ```elixir
-  defblock Validate do
+  block Validate do
     break(Validate, if: i < 0)
 
     # Do something with i
@@ -381,7 +381,7 @@ defmodule Orb do
   Blocks can have a type.
 
   ```elixir
-  defblock Double, I32 do
+  block Double, I32 do
     if i < 0 do
       push(0)
       break(Double)
@@ -393,10 +393,10 @@ defmodule Orb do
 
   ## Calling other functions
 
-  You can `Orb.DSL.call/1` other functions defined within your module. Currently, the parameters and return type are not checked, so you must ensure you are calling with the correct arity and types.
+  You can `Orb.DSL.typed_call/3` other functions defined within your module. Currently, the parameters are not checked, so you must ensure you are calling with the correct arity and types.
 
   ```elixir
-  char = call(:encode_html_char, char)
+  char = typed_call(I32, :encode_html_char, char)
   ```
 
   ## Composing modules together

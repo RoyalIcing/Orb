@@ -128,7 +128,7 @@ defmodule Orb.I32 do
       end
 
     quote do
-      defblock :i32_match, result: Orb.I32 do
+      block :i32_match, Orb.I32 do
         unquote(statements)
         unquote(final_instruction)
       end
@@ -163,7 +163,7 @@ defmodule Orb.I32 do
       end
 
     quote do
-      defblock :i32_map, result: Orb.I32 do
+      block :i32_map, Orb.I32 do
         unquote(statements)
         unquote(final_instruction)
       end
