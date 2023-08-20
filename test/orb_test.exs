@@ -291,7 +291,7 @@ defmodule OrbTest do
                %Orb.Func{
                  name: :answer,
                  params: [],
-                 result: :i32,
+                 result: Orb.I32,
                  local_types: [],
                  body: [42],
                  exported_names: ["answer"]

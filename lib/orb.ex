@@ -831,7 +831,7 @@ defmodule Orb do
 
     locals =
       for {key, type} <- locals, into: %{} do
-        {key, Orb.ToWat.Instructions.expand_type(type, __CALLER__)}
+        {key, Macro.expand_literals(type, __CALLER__)}
       end
 
     quote do
@@ -894,7 +894,7 @@ defmodule Orb do
       end
 
     param_type =
-      case for {_, type} <- args, do: Orb.ToWat.Instructions.expand_type(type, env) do
+      case for {_, type} <- args, do: Macro.expand_literals(type, env) do
         [] -> nil
         list -> List.to_tuple(list)
       end

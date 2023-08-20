@@ -3,9 +3,10 @@ defmodule Orb.Loop do
 
   defstruct [:identifier, :result, :body]
 
-  alias Orb.ToWat.Instructions
-
   defimpl Orb.ToWat do
+    alias Orb.ToWat.Instructions
+    import Orb.ToWat.Helpers
+
     def to_wat(
           %Orb.Loop{identifier: identifier, result: result, body: body},
           indent
@@ -15,7 +16,7 @@ defmodule Orb.Loop do
           indent,
           "(loop $",
           to_string(identifier),
-          if(result, do: " (result #{result})", else: []),
+          if(result, do: [" (result ", do_type(result), ")"], else: []),
           "\n"
         ],
         Enum.map(body, &[Instructions.do_wat(&1, "  " <> indent), "\n"]),

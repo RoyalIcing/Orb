@@ -1,50 +1,6 @@
 defmodule Orb.ToWat.Instructions do
   @moduledoc false
 
-  def expand_type(type, env) do
-    case Macro.expand_literals(type, env) do
-      Orb.I32 ->
-        :i32
-
-      Orb.F32 ->
-        :f32
-
-      Orb.I32.U8 ->
-        :i32_u8
-
-      # I32.AlignedPointer -> :i32_aligned_ptr
-      # I32.UnalignedPointer -> :i32_ptr
-      # I32.Pointer ->
-      #   :i32_ptr
-
-      # Memory.I32.Pointer -> :i32
-      # Memory0.I32 -> :i32
-      :i32 ->
-        :i32
-
-      :f32 ->
-        :f32
-
-      nil ->
-        nil
-
-      mod ->
-        #         case Code.ensure_loaded(mod) do
-        #           {:module, mod} ->
-        #             if function_exported?(mod, :wasm_type, 0) do
-        #               # mod.wasm_type()
-        #               mod
-        #             else
-        #               raise "You passed a Orb type module #{mod} that does not implement wasm_type/0."
-        #             end
-        #
-        #           {:error, :nofile} ->
-        # raise "You passed a Orb type module #{mod} that does not exist or cannot be loaded."
-        mod
-        # end
-    end
-  end
-
   def do_wat(instruction), do: do_wat(instruction, "")
 
   def do_wat(list, indent) when is_list(list) do

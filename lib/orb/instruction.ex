@@ -78,7 +78,7 @@ defmodule Orb.Instruction do
 
       mod ->
         primitive_type = mod.wasm_type()
-        primitive_type == :i32 or raise Orb.TypeCheckError, expected_type: expected_type, received_type: "#{mod} #{primitive_type}"
+        primitive_type == expected_type or raise Orb.TypeCheckError, expected_type: expected_type, received_type: "#{primitive_type} via #{inspect(mod)}"
     end
   end
 

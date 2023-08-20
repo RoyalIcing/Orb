@@ -7,10 +7,6 @@ defmodule Orb.DSL do
   alias Orb.Ops
   require Ops
 
-  def expand_type(type, env) do
-    Orb.ToWat.Instructions.expand_type(type, env)
-  end
-
   defmacro func(call, do: block) do
     define_func(call, :public, [], block, __CALLER__)
   end
@@ -74,7 +70,7 @@ defmodule Orb.DSL do
       case args do
         [args] when is_list(args) ->
           for {name, type} <- args do
-            Macro.escape(%Orb.Func.Param{name: name, type: expand_type(type, env)})
+            Macro.escape(%Orb.Func.Param{name: name, type: Macro.expand_literals(type, env)})
           end
 
         [] ->
@@ -92,20 +88,20 @@ defmodule Orb.DSL do
       case args do
         [args] when is_list(args) ->
           for {name, type} <- args do
-            {name, expand_type(type, env)}
+            {name, Macro.expand_literals(type, env)}
           end
 
         args ->
           for {name, _meta, [type]} <- args do
-            {name, expand_type(type, env)}
+            {name, Macro.expand_literals(type, env)}
           end
       end
 
-    result_type = Keyword.get(options, :result, nil) |> expand_type(env)
+    result_type = Keyword.get(options, :result, nil) |> Macro.expand_literals(env)
 
     local_types =
       for {key, type} <- Keyword.get(options, :locals, []) do
-        {key, expand_type(type, env)}
+        {key, Macro.expand_literals(type, env)}
       end
 
     locals = Map.new(arg_types ++ local_types)
@@ -398,7 +394,7 @@ defmodule Orb.DSL do
     identifier = __expand_identifier(identifier, __CALLER__)
 
     result_type =
-      Keyword.get(options, :result, nil) |> Orb.ToWat.Instructions.expand_type(__CALLER__)
+      Keyword.get(options, :result, nil) |> Macro.expand_literals(__CALLER__)
 
     while = Keyword.get(options, :while, nil)
 
@@ -448,7 +444,7 @@ defmodule Orb.DSL do
     identifier = __expand_identifier(identifier, __CALLER__)
 
     result_type =
-      Keyword.get(options, :result, nil) |> Orb.ToWat.Instructions.expand_type(__CALLER__)
+      Keyword.get(options, :result, nil) |> Macro.expand_literals(__CALLER__)
 
     block_items = __get_block_items(block)
 

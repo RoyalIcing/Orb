@@ -5,6 +5,7 @@ defmodule Orb.Block do
 
   defimpl Orb.ToWat do
     alias Orb.ToWat.Instructions
+    import Orb.ToWat.Helpers
 
     def to_wat(
           %Orb.Block{identifier: identifier, result: result, body: body},
@@ -15,7 +16,7 @@ defmodule Orb.Block do
           indent,
           "(block $",
           to_string(identifier),
-          if(result, do: " (result #{result})", else: []),
+          if(result, do: [" (result ", do_type(result), ")"], else: []),
           "\n"
         ],
         Instructions.do_wat(body, "  " <> indent),

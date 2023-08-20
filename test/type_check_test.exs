@@ -11,7 +11,7 @@ defmodule TypeCheckTest do
 
   test "passing F32 param to I32.add fails" do
     assert_raise Orb.TypeCheckError,
-                 "Expected type i32, found f32.",
+                 "Expected type i32, found f32 via Orb.F32.",
                  &PassLocalF32ToI32Add.to_wat/0
   end
 
@@ -39,7 +39,7 @@ defmodule TypeCheckTest do
 
   test "passing I32 param to I32.trunc_f32_s fails" do
     assert_raise Orb.TypeCheckError,
-                 "Expected type f32, found i32.",
+                 "Expected type f32, found i32 via Orb.I32.",
                  &PassLocalI32ToI32Trunc.to_wat/0
   end
 
