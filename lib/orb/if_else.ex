@@ -62,6 +62,8 @@ defmodule Orb.IfElse do
   end
 
   defimpl Orb.ToWat do
+    import Orb.ToWat.Helpers
+
     def to_wat(
           %Orb.IfElse{
             result: result,
@@ -79,7 +81,7 @@ defmodule Orb.IfElse do
           indent,
           "(if ",
           if(result,
-            do: ["(result ", to_string(Instructions.expand_type(result)), ")"],
+            do: ["(result ", do_type(result), ")"],
             else: ""
           ),
           ?\n
