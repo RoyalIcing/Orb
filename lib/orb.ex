@@ -789,6 +789,7 @@ defmodule Orb do
         unquote(pre)
         import Orb, only: []
         import Orb.DSL
+        require Orb.Control, as: Control
 
         # with do
         #   # Process.put()

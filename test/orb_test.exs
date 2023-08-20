@@ -605,12 +605,12 @@ defmodule OrbTest do
       func get_is_valid(), I32, str: I32.U8.UnsafePointer, char: I32 do
         str = 1024
 
-        loop :continue, result: I32 do
-          block Outer do
-            block :inner do
+        loop Loop, result: I32 do
+          Control.block Outer do
+            Control.block :inner do
               char = str[at!: 0]
-              break(:inner, if: I32.eq(char, ?/))
-              break(Outer, if: char)
+              Control.break(:inner, if: I32.eq(char, ?/))
+              Outer.break(if: char)
               return(1)
             end
 
@@ -618,7 +618,7 @@ defmodule OrbTest do
           end
 
           str = str + 1
-          {:br, :continue}
+          Loop.continue()
         end
       end
     end
@@ -633,7 +633,7 @@ defmodule OrbTest do
         (local $char i32)
         (i32.const 1024)
         (local.set $str)
-        (loop $continue (result i32)
+        (loop $Loop (result i32)
           (block $Outer
             (block $inner
               (i32.load8_u (local.get $str))
@@ -641,14 +641,14 @@ defmodule OrbTest do
               (i32.eq (local.get $char) (i32.const 47))
               br_if $inner
               (local.get $char)
-              br_if $Outer
+              (br_if $Outer)
               (return (i32.const 1))
             )
             (return (i32.const 0))
           )
           (i32.add (local.get $str) (i32.const 1))
           (local.set $str)
-          br $continue
+          (br $Loop)
         )
       )
     )

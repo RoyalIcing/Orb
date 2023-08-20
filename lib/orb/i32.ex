@@ -104,7 +104,7 @@ defmodule Orb.I32 do
             quote do
               %Orb.IfElse{
                 condition: Orb.I32.eq(unquote(value), unquote(match)),
-                when_true: [unquote(__get_block_items(result)), break(:i32_match)]
+                when_true: [unquote(__get_block_items(result)), Orb.Control.break(:i32_match)]
               }
             end
 
@@ -112,7 +112,7 @@ defmodule Orb.I32 do
             quote do
               %Orb.IfElse{
                 condition: Orb.I32.in?(unquote(value), unquote(matches)),
-                when_true: [unquote(__get_block_items(result)), break(:i32_match)]
+                when_true: [unquote(__get_block_items(result)), Orb.Control.break(:i32_match)]
               }
             end
         end
@@ -128,9 +128,13 @@ defmodule Orb.I32 do
       end
 
     quote do
-      block :i32_match, Orb.I32 do
-        unquote(statements)
-        unquote(final_instruction)
+      with do
+        require Orb.Control
+
+        Orb.Control.block :i32_match, Orb.I32 do
+          unquote(statements)
+          unquote(final_instruction)
+        end
       end
     end
   end
@@ -148,7 +152,7 @@ defmodule Orb.I32 do
             quote do
               %Orb.IfElse{
                 condition: unquote(match),
-                when_true: [unquote(__get_block_items(target)), break(:i32_map)]
+                when_true: [unquote(__get_block_items(target)), Orb.Control.break(:i32_map)]
               }
             end
         end
@@ -163,9 +167,13 @@ defmodule Orb.I32 do
       end
 
     quote do
-      block :i32_map, Orb.I32 do
-        unquote(statements)
-        unquote(final_instruction)
+      with do
+        require Orb.Control
+
+        Orb.Control.block :i32_map, Orb.I32 do
+          unquote(statements)
+          unquote(final_instruction)
+        end
       end
     end
   end

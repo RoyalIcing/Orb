@@ -24,4 +24,37 @@ defmodule Orb.Loop do
       ]
     end
   end
+
+  defmodule Branch do
+    defstruct [:identifier, :if]
+
+    defimpl Orb.ToWat do
+      def to_wat(
+            %Orb.Loop.Branch{identifier: identifier, if: nil},
+            indent
+          ) do
+        [
+          indent,
+          "(br $",
+          to_string(identifier),
+          ")"
+        ]
+      end
+
+      def to_wat(
+            %Orb.Loop.Branch{identifier: identifier, if: condition},
+            indent
+          ) do
+        [
+          indent,
+          Orb.ToWat.Instructions.do_wat(condition),
+          "\n",
+          indent,
+          "(br_if $",
+          to_string(identifier),
+          ")"
+        ]
+      end
+    end
+  end
 end

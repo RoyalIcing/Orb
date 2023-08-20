@@ -373,7 +373,7 @@ defmodule Orb.DSL do
               unquote(__get_block_items(block)),
               unquote(source)[:next],
               Orb.VariableReference.as_set(unquote(source)),
-              {:br, unquote(identifier)}
+              %Orb.Loop.Branch{identifier: unquote(identifier)}
             ]
           )
       )
@@ -403,12 +403,13 @@ defmodule Orb.DSL do
     block_items =
       Macro.prewalk(block_items, fn
         {{:., _, [{:__aliases__, _, [identifier]}, :continue]}, _, []} ->
-          # quote do: br(unquote(identifier))
-          quote do: {:br, unquote(identifier)}
+          quote do: %Orb.Loop.Branch{identifier: unquote(identifier)}
 
         {{:., _, [{:__aliases__, _, [identifier]}, :continue]}, _, [[if: condition]]} ->
-          # quote do: br(unquote(identifier))
-          quote do: {:br_if, unquote(identifier), unquote(condition)}
+          quote do: %Orb.Loop.Branch{
+                  identifier: unquote(identifier),
+                  if: unquote(condition)
+                }
 
         other ->
           other
@@ -423,7 +424,10 @@ defmodule Orb.DSL do
           quote do:
                   Orb.IfElse.new(
                     unquote(condition),
-                    [unquote(block_items), {:br, unquote(identifier)}]
+                    [
+                      unquote(block_items),
+                      %Orb.Loop.Branch{identifier: unquote(identifier)}
+                    ]
                   )
       end
 
@@ -436,25 +440,6 @@ defmodule Orb.DSL do
       }
     end
   end
-
-  @doc """
-  Declare a block, useful for structured control flow.
-  """
-  defmacro block(identifier, result_type \\ nil, do: block) do
-    identifier = __expand_identifier(identifier, __CALLER__)
-    result_type = Macro.expand_literals(result_type, __CALLER__)
-    block_items = __get_block_items(block)
-
-    quote do
-      %Orb.Block{
-        identifier: unquote(identifier),
-        result: unquote(result_type),
-        body: unquote(block_items)
-      }
-    end
-  end
-
-  # import Kernel
 
   @doc """
   Run code at compile-time.
@@ -498,6 +483,7 @@ defmodule Orb.DSL do
         unquote(pre)
         import Orb, only: []
         import Orb.DSL
+        require Orb.Control, as: Control
 
         unquote(__get_block_items(block))
       end
@@ -518,17 +504,6 @@ defmodule Orb.DSL do
   end
 
   # TODO: add a comptime keyword like Zig: https://kristoff.it/blog/what-is-zig-comptime/
-
-  @doc """
-  Break from a block.
-  """
-  def break(identifier), do: {:br, __expand_identifier(identifier, __ENV__)}
-
-  @doc """
-  Break from a block if a condition is true.
-  """
-  def break(identifier, if: condition),
-    do: {:br_if, __expand_identifier(identifier, __ENV__), condition}
 
   @doc """
   Return from a function. You may wish to `push/1` values before returning.
