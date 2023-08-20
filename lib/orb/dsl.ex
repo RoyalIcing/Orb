@@ -66,7 +66,7 @@ defmodule Orb.DSL do
 
     exported_names =
       case visibility do
-        :public -> [to_string(name)]
+        :public -> quote do: [to_string(unquote(name))]
         :private -> []
       end
 
