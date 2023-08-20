@@ -107,27 +107,4 @@ defmodule Orb.ToWat.Instructions do
 
     Orb.ToWat.to_wat(value, indent)
   end
-
-  def do_type(type) do
-    case type do
-      type when type in [:i32, :i32_u8] ->
-        "i32"
-
-      :f32 ->
-        "f32"
-
-      # e.g. {I32, I32}
-      tuple when is_tuple(tuple) ->
-        tuple |> Tuple.to_list() |> Enum.map(&do_type/1) |> Enum.join(" ")
-
-      type ->
-        #         Code.ensure_loaded!(type)
-        #
-        #         unless function_exported?(type, :wasm_type, 0) do
-        #           raise "Type #{type} must implement wasm_type/0."
-        #         end
-
-        type.wasm_type() |> to_string()
-    end
-  end
 end

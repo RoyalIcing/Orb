@@ -16,6 +16,7 @@ defmodule Orb.Func do
 
   defimpl Orb.ToWat do
     alias Orb.ToWat.Instructions
+    import Orb.ToWat.Helpers
 
     def to_wat(
           %Orb.Func{
@@ -40,8 +41,8 @@ defmodule Orb.Func do
             end
           ],
           Enum.map(
-            for(param <- params, do: Instructions.do_wat(param)) ++
-              if(result, do: [["(result ", Instructions.do_type(result), ")"]], else: []),
+            for(param <- params, do: Orb.ToWat.to_wat(param, "")) ++
+              if(result, do: [["(result ", do_type(result), ")"]], else: []),
             fn s -> [" ", s] end
           ),
           "\n"
@@ -53,7 +54,7 @@ defmodule Orb.Func do
             "(local $",
             to_string(id),
             " ",
-            Instructions.do_type(type),
+            do_type(type),
             ")\n"
           ]
         end,
@@ -72,13 +73,13 @@ defmodule Orb.Func do
     defstruct [:name, :type]
 
     defimpl Orb.ToWat do
-      alias Orb.ToWat.Instructions
+      import Orb.ToWat.Helpers
 
       def to_wat(%Param{name: nil, type: type}, indent) do
         [
           indent,
           "(param ",
-          Instructions.do_type(type),
+          do_type(type),
           ?)
         ]
       end
@@ -89,7 +90,7 @@ defmodule Orb.Func do
           "(param $",
           to_string(name),
           " ",
-          Instructions.do_type(type),
+          do_type(type),
           ?)
         ]
       end
@@ -112,7 +113,7 @@ defmodule Orb.Func do
     end
 
     defimpl Orb.ToWat do
-      alias Orb.ToWat.Instructions
+      import Orb.ToWat.Helpers
 
       def to_wat(%Type{name: name, params: params, result: result}, indent) do
         [
@@ -139,7 +140,7 @@ defmodule Orb.Func do
             result ->
               [
                 " (result ",
-                Instructions.do_type(result),
+                do_type(result),
                 ")"
               ]
           end,
