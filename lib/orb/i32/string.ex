@@ -46,7 +46,8 @@ defmodule Orb.I32.String do
 
     @impl Access
     def fetch(%Orb.VariableReference{} = var_ref, :value) do
-      {:ok, {:i32, :load8_u, var_ref}}
+      ast = Orb.Memory.load!(I32.U8, var_ref)
+      {:ok, ast}
     end
 
     def fetch(%Orb.VariableReference{} = var_ref, :next) do
@@ -55,7 +56,7 @@ defmodule Orb.I32.String do
 
       ast =
         Orb.snippet do
-          Orb.I32.when? {:i32, :load8_u, Orb.Numeric.Add.optimized(Orb.I32, var_ref, 1)} do
+          Orb.I32.when? Orb.Memory.load!(I32.U8, Orb.Numeric.Add.optimized(Orb.I32, var_ref, 1)) do
             Orb.Numeric.Add.optimized(Orb.I32, var_ref, 1)
           else
             0x0
@@ -123,7 +124,7 @@ defmodule Orb.I32.String do
       # loop EachChar, while: memory32_8![count] do
 
       loop EachChar do
-        if memory32_8![I32.add(string_ptr, count)].unsigned do
+        if Memory.load!(I32.U8, I32.add(string_ptr, count)) do
           # FIXME: remove memory32_8!
           # if Memory.load!(I32.U8, I32.add(string_ptr, count)) do
           count = I32.add(count, 1)

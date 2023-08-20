@@ -10,10 +10,6 @@ defmodule MemoryTest do
           Memory.load!(I32, 0x100)
           :drop
 
-          # TODO: remove this, replaced by Memory.load!(I32.U8)
-          memory32_8![0x100].unsigned
-          :drop
-
           Memory.load!(I32.U8, 0x100)
           :drop
         end
@@ -24,8 +20,6 @@ defmodule MemoryTest do
            (module $Load
              (func $load (export "load")
                (i32.load (i32.const 256))
-               drop
-               (i32.load8_u (i32.const 256))
                drop
                (i32.load8_u (i32.const 256))
                drop

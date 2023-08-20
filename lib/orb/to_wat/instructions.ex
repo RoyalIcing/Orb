@@ -1,8 +1,6 @@
 defmodule Orb.ToWat.Instructions do
   @moduledoc false
 
-  alias require Orb.Ops
-
   def expand_type(type, env \\ __ENV__) do
     case Macro.expand_literals(type, env) do
       Orb.I32 ->
@@ -85,16 +83,6 @@ defmodule Orb.ToWat.Instructions do
   # “The default type is f64 because on modern CPUs, it’s roughly the same speed as f32 but is capable of more precision.”
   # So should our default be 64-bit too?
   def do_wat(value, indent) when is_float(value), do: "#{indent}(f32.const #{value})"
-
-  def do_wat({:i32, op}, indent) when op in Ops.i32(:all), do: "#{indent}(i32.#{op})"
-
-  def do_wat({:i32, op, offset}, indent) when op in Ops.i32(:load) or op in Ops.i32(:store) do
-    [indent, "(i32.", to_string(op), " ", do_wat(offset), ?)]
-  end
-
-  def do_wat({:i32, op, offset, value}, indent) when op in Ops.i32(:store) do
-    [indent, "(i32.", to_string(op), " ", do_wat(offset), " ", do_wat(value), ?)]
-  end
 
   def do_wat({:br, identifier}, indent), do: [indent, "br $", to_string(identifier)]
 

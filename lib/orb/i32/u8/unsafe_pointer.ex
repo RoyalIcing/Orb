@@ -3,6 +3,8 @@ defmodule Orb.I32.U8.UnsafePointer do
   Custom `Orb.CustomType` for pointer to 8-bit integer (byte) in memory.
   """
 
+  alias Orb.{Memory, I32, VariableReference}
+
   @behaviour Orb.CustomType
   @behaviour Access
 
@@ -13,8 +15,8 @@ defmodule Orb.I32.U8.UnsafePointer do
   def byte_count(), do: 1
 
   @impl Access
-  def fetch(%Orb.VariableReference{} = var_ref, at!: offset) do
-    ast = {:i32, :load8_u, Orb.Numeric.Add.optimized(Orb.I32, var_ref, offset)}
+  def fetch(%VariableReference{} = var_ref, at!: offset) do
+    ast = Memory.load!(I32.U8, Orb.Numeric.Add.optimized(I32, var_ref, offset))
     {:ok, ast}
   end
 

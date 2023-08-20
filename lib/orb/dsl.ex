@@ -140,20 +140,6 @@ defmodule Orb.DSL do
 
   def do_snippet(locals, block_items) do
     Macro.prewalk(block_items, fn
-      # TODO: remove, replace with I32.store8
-      {:=, _, [{{:., _, [Access, :get]}, _, [{:memory32_8!, _, nil}, offset]}, value]} ->
-        quote do: {:i32, :store8, unquote(offset), unquote(value)}
-
-      {{:., _, [{{:., _, [Access, :get]}, _, [{:memory32_8!, _, nil}, offset]}, :unsigned]}, _, _} ->
-        quote do: {:i32, :load8_u, unquote(offset)}
-
-      # TODO: remove, replace with I32.store
-      {:=, _, [{{:., _, [Access, :get]}, _, [{:memory32!, _, nil}, offset]}, value]} ->
-        quote do: {:i32, :store, unquote(offset), unquote(value)}
-
-      {{:., _, [Access, :get]}, _, [{:memory32!, _, nil}, offset]} ->
-        quote do: {:i32, :load, unquote(offset)}
-
       # local[at!: offset] = value
       {:=, _meta,
        [
@@ -205,7 +191,7 @@ defmodule Orb.DSL do
                       )
           end
 
-        quote do: {:i32, unquote(store_instruction), unquote(computed_offset), unquote(value)}
+        quote do: Orb.Instruction.i32(unquote(store_instruction), unquote(computed_offset), unquote(value))
 
       {:=, _, [{local, _, nil}, input]}
       when is_atom(local) and is_map_key(locals, local) and

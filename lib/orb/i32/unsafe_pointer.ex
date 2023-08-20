@@ -3,6 +3,8 @@ defmodule Orb.I32.UnsafePointer do
   Custom `Orb.CustomType` for pointer to 32-bit integer in memory.
   """
 
+  alias Orb.{Memory, I32, VariableReference}
+
   @behaviour Orb.CustomType
   @behaviour Access
 
@@ -13,13 +15,13 @@ defmodule Orb.I32.UnsafePointer do
   def byte_count(), do: 4
 
   @impl Access
-  def fetch(%Orb.VariableReference{} = var_ref, at!: offset) do
+  def fetch(%VariableReference{} = var_ref, at!: offset) do
     address =
       offset
-      |> then(&Orb.Numeric.Multiply.optimized(Orb.I32, &1, 4))
-      |> then(&Orb.Numeric.Add.optimized(Orb.I32, &1, var_ref))
+      |> then(&Orb.Numeric.Multiply.optimized(I32, &1, 4))
+      |> then(&Orb.Numeric.Add.optimized(I32, &1, var_ref))
 
-    ast = {:i32, :load, address}
+    ast = Memory.load!(I32, address)
     {:ok, ast}
   end
 
