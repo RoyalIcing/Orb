@@ -216,7 +216,7 @@ defmodule Orb.DSL do
       # @some_global = input
       {:=, _, [{:@, _, [{global, _, nil}]}, input]} when is_atom(global) ->
         # quote do: Orb.Instruction.global_set(unquote(Macro.var(:wasm_global_type, nil)).(unquote(global)), unquote(global), unquote(input))
-        quote do: Orb.Instruction.global_set(Process.get(:orb_global_types).(unquote(global)), unquote(global), unquote(input))
+        quote do: Orb.Instruction.global_set(Orb.__lookup_global_type!(unquote(global)), unquote(global), unquote(input))
 
       # @some_global
       #       node = {:@, meta, [{global, _, nil}]} when is_atom(global) ->
@@ -276,6 +276,7 @@ defmodule Orb.DSL do
     ]
   end
 
+  # def global_get(identifier), do: Orb.Instruction.global_get(Orb.__lookup_global_type!(identifier), identifier)
   def global_get(identifier), do: {:global_get, identifier}
   def global_set(identifier), do: {:global_set, identifier}
 

@@ -70,8 +70,10 @@ defmodule Orb.Global do
     #   end
     # end
 
-    defmacro @{name, meta, _args} do
-      {:global_get, meta, [name]}
+    defmacro @{name, _meta, _args} do
+      quote do
+        Orb.Instruction.global_get(Orb.__lookup_global_type!(unquote(name)), unquote(name))
+      end
     end
   end
 end

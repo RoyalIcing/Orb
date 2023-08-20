@@ -641,9 +641,9 @@ defmodule Orb do
 
           # I tried having this be a Macro.var but it’s not working.
           # So resort to the ultimate hole puncher.
-          Process.put(:orb_global_types, get_global_type)
+          Process.put({Orb, :global_types}, get_global_type)
           body = __wasm_body__(get_global_type)
-          Process.delete(:orb_global_types)
+          Process.delete({Orb, :global_types})
 
           Orb.ModuleDefinition.new(
             name: @wasm_name,
@@ -956,5 +956,9 @@ defmodule Orb do
       {:__block__, _meta, block_items} -> block_items
       single -> [single]
     end
+  end
+
+  def __lookup_global_type!(global_identifier) do
+    Process.get({Orb, :global_types}).(global_identifier)
   end
 end
