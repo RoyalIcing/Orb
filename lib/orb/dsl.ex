@@ -119,11 +119,7 @@ defmodule Orb.DSL do
       %Orb.Func{
         name: unquote(name),
         params: unquote(params),
-        result:
-          case unquote(result_type) do
-            nil -> nil
-            type -> {:result, type}
-          end,
+        result: unquote(result_type),
         local_types: unquote(local_types),
         body: unquote(block_items),
         # body: fn ->

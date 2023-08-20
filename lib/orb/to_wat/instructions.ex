@@ -65,8 +65,6 @@ defmodule Orb.ToWat.Instructions do
 
   def do_wat({:export, name}, indent), do: [indent, ~S/(export "/, to_string(name), ~S/")/]
 
-  def do_wat({:result, value}, _indent), do: ["(result ", do_type(value), ")"]
-
   def do_wat({:i32_const, value}, indent), do: "#{indent}(i32.const #{value})"
   def do_wat({:i32_const_string, value, _string}, indent), do: "#{indent}(i32.const #{value})"
   def do_wat({:f32_const, value}, indent), do: "#{indent}(f32.const #{value})"

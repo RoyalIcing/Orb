@@ -41,7 +41,7 @@ defmodule Orb.Func do
           ],
           Enum.map(
             for(param <- params, do: Instructions.do_wat(param)) ++
-              if(result, do: [Instructions.do_wat(result)], else: []),
+              if(result, do: [["(result ", Instructions.do_type(result), ")"]], else: []),
             fn s -> [" ", s] end
           ),
           "\n"
@@ -138,8 +138,9 @@ defmodule Orb.Func do
 
             result ->
               [
-                " ",
-                Instructions.do_wat({:result, result})
+                " (result ",
+                Instructions.do_type(result),
+                ")"
               ]
           end,
           ?)
