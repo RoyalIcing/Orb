@@ -29,9 +29,14 @@ defmodule Orb.Instruction do
 
   def local_get(type, local_name), do: new(type, {:local_get, local_name})
   def local_tee(type, local_name, value), do: new(type, {:local_tee, local_name}, [value])
-  def local_set(type, local_name, value), do: new(:local_effect, {:local_set, local_name, type}, [value])
 
-  def global_set(type, local_name, value), do: new(:global_effect, {:global_set, local_name, type}, [value])
+  def local_set(type, local_name, value),
+    do: new(:local_effect, {:local_set, local_name, type}, [value])
+
+  def global_get(type, global_name), do: new(type, {:global_get, global_name})
+
+  def global_set(type, global_name, value),
+    do: new(:global_effect, {:global_set, global_name, type}, [value])
 
   defp type_check_operands(type, operation, operands) do
     Enum.with_index(operands, &type_check_operand!(type, operation, &1, &2))
@@ -46,8 +51,7 @@ defmodule Orb.Instruction do
         is_float(number) -> :f32
       end
 
-
-      type_check_operand!(type, op, %{type: received_type}, param_index)
+    type_check_operand!(type, op, %{type: received_type}, param_index)
   end
 
   defp type_check_operand!(:i32, op, %{type: received_type}, param_index) when is_atom(op) do
@@ -56,11 +60,21 @@ defmodule Orb.Instruction do
     types_must_match!(expected_type, received_type)
   end
 
-  defp type_check_operand!(:local_effect, {:local_set, _, expected_type}, %{type: received_type}, 0) do
+  defp type_check_operand!(
+         :local_effect,
+         {:local_set, _, expected_type},
+         %{type: received_type},
+         0
+       ) do
     types_must_match!(expected_type, received_type)
   end
 
-  defp type_check_operand!(:global_effect, {:global_set, _, expected_type}, %{type: received_type}, 0) do
+  defp type_check_operand!(
+         :global_effect,
+         {:global_set, _, expected_type},
+         %{type: received_type},
+         0
+       ) do
     types_must_match!(expected_type, received_type)
   end
 
@@ -93,21 +107,6 @@ defmodule Orb.Instruction do
 
     def to_wat(
           %Orb.Instruction{
-            operation: {:local_get, local_name},
-            operands: []
-          },
-          indent
-        ) do
-      [
-        indent,
-        "(local.get $",
-        to_string(local_name),
-        ")"
-      ]
-    end
-
-    def to_wat(
-          %Orb.Instruction{
             operation: {:call, f},
             operands: operands
           },
@@ -124,16 +123,12 @@ defmodule Orb.Instruction do
 
     def to_wat(
           %Orb.Instruction{
-            operation: {:local_get, local_name}
+            operation: {:local_get, local_name},
+            operands: []
           },
           indent
         ) do
-      [
-        indent,
-        "(local.get $",
-        to_string(local_name),
-        ")"
-      ]
+      [indent, "(local.get $", to_string(local_name), ")"]
     end
 
     def to_wat(
@@ -170,7 +165,17 @@ defmodule Orb.Instruction do
 
     def to_wat(
           %Orb.Instruction{
-            operation: {:global_set, local_name, _},
+            operation: {:global_get, global_name},
+            operands: []
+          },
+          indent
+        ) do
+      [indent, "(global.get $", to_string(global_name), ")"]
+    end
+
+    def to_wat(
+          %Orb.Instruction{
+            operation: {:global_set, global_name, _},
             operands: operands
           },
           indent
@@ -179,7 +184,7 @@ defmodule Orb.Instruction do
         for(operand <- operands, do: [indent, Instructions.do_wat(operand), "\n"]),
         indent,
         "(global.set $",
-        to_string(local_name),
+        to_string(global_name),
         ")"
       ]
     end

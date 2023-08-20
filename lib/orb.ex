@@ -502,8 +502,8 @@ defmodule Orb do
 
       @before_compile unquote(__MODULE__).BeforeCompile
 
-      def __wasm_body__, do: []
-      defoverridable __wasm_body__: 0
+      def __wasm_body__(_), do: []
+      defoverridable __wasm_body__: 1
 
       # TODO: rename these to orb_ prefix instead of wasm_ ?
       Module.put_attribute(__MODULE__, :wasm_name, __MODULE__ |> Module.split() |> List.last())
@@ -627,7 +627,9 @@ defmodule Orb do
       quote do
         def __wasm_constants__(), do: Orb.Constants.from_attribute(@wasm_constants)
 
-        @wasm_global_types Map.new(List.flatten(@wasm_globals), fn global -> {global.name, global.type} end)
+        @wasm_global_types Map.new(List.flatten(@wasm_globals), fn global ->
+                             {global.name, global.type}
+                           end) |> Map.merge(%{__MODULE__: __MODULE__})
         def __wasm_global_type__(global_name) when is_atom(global_name),
           do: Map.fetch!(@wasm_global_types, global_name)
 
@@ -635,6 +637,14 @@ defmodule Orb do
           do: Orb.Table.Allocations.from_attribute(@wasm_table_allocations)
 
         def __wasm_module__() do
+          get_global_type = &__wasm_global_type__/1
+
+          # I tried having this be a Macro.var but it’s not working.
+          # So resort to the ultimate hole puncher.
+          Process.put(:orb_global_types, get_global_type)
+          body = __wasm_body__(get_global_type)
+          Process.delete(:orb_global_types)
+
           Orb.ModuleDefinition.new(
             name: @wasm_name,
             types: @wasm_types |> Enum.reverse() |> List.flatten(),
@@ -644,7 +654,7 @@ defmodule Orb do
             memory: Memory.from(@wasm_memory),
             constants: Orb.Constants.from_attribute(@wasm_constants),
             # body: @wasm_body |> Enum.reverse() |> List.flatten()
-            body: __wasm_body__()
+            body: body
           )
         end
 
@@ -805,13 +815,11 @@ defmodule Orb do
 
         # @wasm_body unquote(body)
 
-        def __wasm_body__() do
-          # Process.put(Orb.DSL, true)
-
-          super() ++ unquote(body)
+        def __wasm_body__(wasm_global_type) do
+          super(wasm_global_type) ++ unquote(body)
         end
 
-        defoverridable __wasm_body__: 0
+        defoverridable __wasm_body__: 1
       end
 
       unquote(post)

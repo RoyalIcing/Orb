@@ -50,7 +50,11 @@ defmodule Orb.DSL do
 
   defp define_func(call, visibility, options, block, env) do
     call = Macro.expand_once(call, __ENV__)
-    {_, meta, _} = call
+
+    line = case call do
+      {_, meta, _} -> meta[:line]
+      _ -> env.line
+    end
 
     {name, args} =
       case Macro.decompose_call(call) do
@@ -78,7 +82,7 @@ defmodule Orb.DSL do
 
         [_ | _] ->
           raise CompileError,
-            line: meta[:line],
+            line: line,
             file: env.file,
             description:
               "Cannot define function with multiple arguments, use keyword list instead."
@@ -211,7 +215,8 @@ defmodule Orb.DSL do
 
       # @some_global = input
       {:=, _, [{:@, _, [{global, _, nil}]}, input]} when is_atom(global) ->
-        quote do: Orb.Instruction.global_set(__MODULE__.__wasm_global_type__(unquote(global)), unquote(global), unquote(input))
+        # quote do: Orb.Instruction.global_set(unquote(Macro.var(:wasm_global_type, nil)).(unquote(global)), unquote(global), unquote(input))
+        quote do: Orb.Instruction.global_set(Process.get(:orb_global_types).(unquote(global)), unquote(global), unquote(input))
 
       # @some_global
       #       node = {:@, meta, [{global, _, nil}]} when is_atom(global) ->
