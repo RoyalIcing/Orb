@@ -39,7 +39,7 @@ defmodule DefwTest do
               use Orb
 
               # @wasm_mode Orb.F32
-              wasm_mode Orb.F32
+              wasm_mode(Orb.F32)
 
               defw add(first: I32, second: I32) do
                 first + second
@@ -51,18 +51,34 @@ defmodule DefwTest do
     assert (module_wat do
               use Orb
 
-              wasm_mode Orb.F32
+              wasm_mode(Orb.F32)
 
               defw add_f32(f1: F32, f2: F32) do
                 f1 + f2
               end
 
-              wasm_mode Orb.S32
+              wasm_mode(Orb.S32)
 
               defw add_i32(i1: I32, i2: I32) do
                 i1 + i2
               end
             end) =~ "(i32.add (local.get $i1) (local.get $i2))"
+  end
+
+  test "globals work" do
+    assert (module_wat do
+              use Orb
+
+              I32.enum([:component_l, :component_a, :component_b], 1)
+              I32.export_global(:mutable, last_changed_component: 0)
+
+              defw l_changed(new_value: F32) do
+                @last_changed_component = @component_l
+              end
+            end) =~ """
+               (global.get $component_l)
+               (global.set $last_changed_component)
+           """
   end
 
   test "multiple args errs" do
