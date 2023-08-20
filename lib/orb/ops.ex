@@ -24,6 +24,16 @@ defmodule Orb.Ops do
 
   defguard is_primitive_type(type) when type in [:i32, :i32_u8, :f32]
 
+  defp lowest_type(:i32), do: :i32
+  defp lowest_type(:i32_u8), do: :i32
+  defp lowest_type(:f32), do: :f32
+
+  def to_primitive_type(type) when is_primitive_type(type), do: type
+  def to_primitive_type(:unknown), do: :unknown
+  def to_primitive_type(mod) when is_atom(mod), do: to_primitive_type(mod.wasm_type())
+
+  def types_compatible?(a, b), do: lowest_type(to_primitive_type(a)) === lowest_type(to_primitive_type(b))
+
   defmacro i32(arity_or_type)
   defmacro i32(1), do: @i32_ops_1 |> Macro.escape()
   defmacro i32(2), do: @i32_ops_2 |> Macro.escape()
@@ -63,12 +73,6 @@ defmodule Orb.Ops do
   defp nth(1), do: "2nd"
   defp nth(2), do: "3rd"
   defp nth(n), do: "#{n + 1}th"
-
-  defp lowest_type(:i32), do: :i32
-  defp lowest_type(:i32_u8), do: :i32
-  defp lowest_type(:f32), do: :f32
-
-  def primitive_types_equal?(a, b), do: lowest_type(a) === lowest_type(b)
 
   defmacro f32(arity_or_type)
   defmacro f32(1), do: @f32_ops_1 |> Macro.escape()

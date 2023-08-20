@@ -211,7 +211,7 @@ defmodule Orb.DSL do
 
       # @some_global = input
       {:=, _, [{:@, _, [{global, _, nil}]}, input]} when is_atom(global) ->
-        [input, Orb.DSL.global_set(global)]
+        quote do: Orb.Instruction.global_set(__MODULE__.__wasm_global_type__(unquote(global)), unquote(global), unquote(input))
 
       # @some_global
       #       node = {:@, meta, [{global, _, nil}]} when is_atom(global) ->

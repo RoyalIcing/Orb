@@ -627,6 +627,10 @@ defmodule Orb do
       quote do
         def __wasm_constants__(), do: Orb.Constants.from_attribute(@wasm_constants)
 
+        @wasm_global_types Map.new(List.flatten(@wasm_globals), fn global -> {global.name, global.type} end)
+        def __wasm_global_type__(global_name) when is_atom(global_name),
+          do: Map.fetch!(@wasm_global_types, global_name)
+
         def __wasm_table_allocations__(),
           do: Orb.Table.Allocations.from_attribute(@wasm_table_allocations)
 

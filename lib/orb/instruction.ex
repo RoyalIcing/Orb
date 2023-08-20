@@ -29,54 +29,39 @@ defmodule Orb.Instruction do
 
   def local_get(type, local_name), do: new(type, {:local_get, local_name})
   def local_tee(type, local_name, value), do: new(type, {:local_tee, local_name}, [value])
-  def local_set(type, local_name, value), do: new(nil, {:local_set, local_name, type}, [value])
+  def local_set(type, local_name, value), do: new(:local_effect, {:local_set, local_name, type}, [value])
+
+  def global_set(type, local_name, value), do: new(:global_effect, {:global_set, local_name, type}, [value])
 
   defp type_check_operands(type, operation, operands) do
     Enum.with_index(operands, &type_check_operand!(type, operation, &1, &2))
     operands
   end
 
-  defp type_check_operand!(:i32, op, number, param_index)
-       when is_atom(op) and is_number(number) do
-    expected_type = Ops.i32_param_type!(op, param_index)
-
+  defp type_check_operand!(type, op, number, param_index)
+       when is_number(number) do
     received_type =
       cond do
         is_integer(number) -> :i32
         is_float(number) -> :f32
       end
 
-    unless Ops.primitive_types_equal?(received_type, expected_type) do
-      raise Orb.TypeCheckError, expected_type: expected_type, received_type: received_type
-    end
+
+      type_check_operand!(type, op, %{type: received_type}, param_index)
   end
 
   defp type_check_operand!(:i32, op, %{type: received_type}, param_index) when is_atom(op) do
     expected_type = Ops.i32_param_type!(op, param_index)
 
-    case received_type do
-      ^expected_type ->
-        nil
+    types_must_match!(expected_type, received_type)
+  end
 
-      primitive_type when Ops.is_primitive_type(primitive_type) ->
-        unless Ops.primitive_types_equal?(primitive_type, expected_type) do
-          raise Orb.TypeCheckError, expected_type: expected_type, received_type: received_type
-        end
+  defp type_check_operand!(:local_effect, {:local_set, _, expected_type}, %{type: received_type}, 0) do
+    types_must_match!(expected_type, received_type)
+  end
 
-      :unknown ->
-        # Ignore
-        nil
-
-      # raise "Expected type i32, found unknown type."
-
-      mod ->
-        primitive_type = mod.wasm_type()
-
-        primitive_type == expected_type or
-          raise Orb.TypeCheckError,
-            expected_type: expected_type,
-            received_type: "#{primitive_type} via #{inspect(mod)}"
-    end
+  defp type_check_operand!(:global_effect, {:global_set, _, expected_type}, %{type: received_type}, 0) do
+    types_must_match!(expected_type, received_type)
   end
 
   defp type_check_operand!(:i32, op, _operand, param_index) when is_atom(op) do
@@ -85,6 +70,22 @@ defmodule Orb.Instruction do
 
   defp type_check_operand!(_type, _operation, _operand, _index) do
     nil
+  end
+
+  defp types_must_match!(same, same), do: nil
+
+  defp types_must_match!(expected_type, received_type) do
+    case received_type do
+      :unknown ->
+        # Ignore
+        nil
+
+      type ->
+        Ops.types_compatible?(type, expected_type) or
+          raise Orb.TypeCheckError,
+            expected_type: expected_type,
+            received_type: type
+    end
   end
 
   defimpl Orb.ToWat do
@@ -162,6 +163,22 @@ defmodule Orb.Instruction do
         for(operand <- operands, do: [indent, Instructions.do_wat(operand), "\n"]),
         indent,
         "(local.set $",
+        to_string(local_name),
+        ")"
+      ]
+    end
+
+    def to_wat(
+          %Orb.Instruction{
+            operation: {:global_set, local_name, _},
+            operands: operands
+          },
+          indent
+        ) do
+      [
+        for(operand <- operands, do: [indent, Instructions.do_wat(operand), "\n"]),
+        indent,
+        "(global.set $",
         to_string(local_name),
         ")"
       ]

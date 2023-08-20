@@ -70,4 +70,34 @@ defmodule TypeCheckTest do
                  "WebAssembly instruction i32.add/2 does not accept a 3rd argument.",
                  &I32AddWithThreeArgs.to_wat/0
   end
+
+  defmodule LocalI32SetToF32 do
+    use Orb
+
+    defw example(), a: I32 do
+      a = 5.0
+    end
+  end
+
+  test "setting i32 local to f32 fails" do
+    assert_raise Orb.TypeCheckError,
+                 "Expected type i32 via Orb.I32, found f32.",
+                 &LocalI32SetToF32.to_wat/0
+  end
+
+  defmodule GlobalI32SetToF32 do
+    use Orb
+
+    I32.global(a: 42)
+
+    defw example() do
+      @a = 5.0
+    end
+  end
+
+  test "setting i32 global to f32 fails" do
+    assert_raise Orb.TypeCheckError,
+                 "Expected type i32, found f32.",
+                 &GlobalI32SetToF32.to_wat/0
+  end
 end
