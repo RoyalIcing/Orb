@@ -37,13 +37,13 @@ defmodule Orb.Control do
   @doc """
   Break from a block.
   """
-  def break(identifier), do: {:br, __expand_identifier(identifier, __ENV__)}
+  def break(identifier), do: %Orb.Block.Branch{identifier: __expand_identifier(identifier, __ENV__)}
 
   @doc """
   Break from a block if a condition is true.
   """
   def break(identifier, if: condition),
-    do: {:br_if, __expand_identifier(identifier, __ENV__), condition}
+    do: %Orb.Block.Branch{identifier: __expand_identifier(identifier, __ENV__), if: condition}
 
   def return(), do: :return
 end

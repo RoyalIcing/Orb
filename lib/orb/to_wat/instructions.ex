@@ -38,14 +38,6 @@ defmodule Orb.ToWat.Instructions do
   # So should our default be 64-bit too?
   def do_wat(value, indent) when is_float(value), do: "#{indent}(f32.const #{value})"
 
-  def do_wat({:br, identifier}, indent), do: [indent, "br $", to_string(identifier)]
-
-  def do_wat({:br_if, identifier, condition}, indent),
-    do: [indent, do_wat(condition), "\n", indent, "br_if $", to_string(identifier)]
-
-  def do_wat({:br_if, identifier}, indent),
-    do: [indent, "br_if $", to_string(identifier)]
-
   # def do_wat({:raw_wat, source}, indent), do: "#{indent}#{source}"
   def do_wat({:raw_wat, source}, indent) do
     lines = String.split(source, "\n")

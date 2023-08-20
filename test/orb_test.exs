@@ -639,7 +639,7 @@ defmodule OrbTest do
               (i32.load8_u (local.get $str))
               (local.set $char)
               (i32.eq (local.get $char) (i32.const 47))
-              br_if $inner
+              (br_if $inner)
               (local.get $char)
               (br_if $Outer)
               (return (i32.const 1))
