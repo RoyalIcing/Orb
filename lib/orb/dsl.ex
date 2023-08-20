@@ -200,15 +200,14 @@ defmodule Orb.DSL do
       {:=, _, [{local, _, nil}, input]}
       when is_atom(local) and is_map_key(locals, local) and
              is_struct(:erlang.map_get(local, locals), Orb.VariableReference) ->
-        [input, quote(do: {:local_set, unquote(local)})]
+        quote do: Orb.Instruction.local_set(unquote(locals[local]), unquote(local), unquote(input))
 
       {:=, _, [{local, _, nil}, input]}
       when is_atom(local) and is_map_key(locals, local) ->
-        [input, quote(do: {:local_set, unquote(local)})]
+        quote do: Orb.Instruction.local_set(unquote(locals[local]), unquote(local), unquote(input))
 
-      {atom, _meta, nil} when is_atom(atom) and is_map_key(locals, atom) ->
-        # {:local_get, meta, [atom]}
-        quote do: Orb.VariableReference.local(unquote(atom), unquote(locals[atom]))
+      {local, _meta, nil} when is_atom(local) and is_map_key(locals, local) ->
+        quote do: Orb.VariableReference.local(unquote(local), unquote(locals[local]))
 
       # @some_global = input
       {:=, _, [{:@, _, [{global, _, nil}]}, input]} when is_atom(global) ->
@@ -259,7 +258,7 @@ defmodule Orb.DSL do
   def push(n) when is_float(n), do: {:f32_const, n}
   def push(%Orb.VariableReference{} = ref), do: ref
 
-  def push(do: [value, {:local_set, local}]), do: [value, {:local_tee, local}]
+  def push(do: %Orb.Instruction{operation: {:local_set, identifier, type}, operands: [value]}), do: Orb.Instruction.local_tee(type, identifier, value)
 
   @doc """
   Push value then run the block. Useful for when you mutate a variable but want its previous value.
@@ -275,12 +274,7 @@ defmodule Orb.DSL do
   def global_get(identifier), do: {:global_get, identifier}
   def global_set(identifier), do: {:global_set, identifier}
 
-  def local(identifier, type), do: {:local, identifier, type}
-  def local_get(identifier), do: {:local_get, identifier}
   def local_set(identifier), do: {:local_set, identifier}
-  # TODO: use local_tee when using push(local = …)
-  def local_tee(identifier), do: {:local_tee, identifier}
-  def local_tee(identifier, value), do: [value, {:local_tee, identifier}]
 
   def typed_call(output_type, f, args) when is_list(args),
     do: Instruction.typed_call(output_type, f, args)

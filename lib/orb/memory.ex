@@ -69,7 +69,7 @@ defmodule Orb.Memory do
         :load
       end
 
-    Orb.Instruction.new(primitive_type, load_instruction, address)
+    Orb.Instruction.new(primitive_type, load_instruction, [address])
   end
 
   @doc """

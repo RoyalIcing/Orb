@@ -46,4 +46,28 @@ defmodule I32ConveniencesTest do
     assert Wasm.call(URLEncoding, :is_url_safe?, ?/) == 0
     assert Wasm.call(URLEncoding, :is_url_safe?, ?*) == 0
   end
+
+  defmodule Attrs do
+    use Orb
+
+    I32.global(first: 7)
+
+    wasm do
+      I32.attr_writer(:first)
+    end
+  end
+
+  test "attr_writer works" do
+    assert Attrs.to_wat() === """
+    (module $Attrs
+      (global $first (mut i32) (i32.const 7))
+      (func $first= (export "first=") (param $new_value i32)
+        (local.get $new_value)
+        (global.set $first)
+      )
+    )
+    """
+
+    assert Wasm.call(Attrs, :"first=", 9) == nil
+  end
 end

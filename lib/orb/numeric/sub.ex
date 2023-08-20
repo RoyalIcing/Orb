@@ -10,5 +10,5 @@ defmodule Orb.Numeric.Subtract do
   """
 
   def optimized(_type, a, 0), do: a
-  def optimized(type, a, b), do: Orb.Instruction.new(type.wasm_type(), :sub, a, b)
+  def optimized(type, a, b), do: Orb.Instruction.new(type.wasm_type(), :sub, [a, b])
 end

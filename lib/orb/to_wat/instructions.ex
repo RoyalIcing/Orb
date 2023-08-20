@@ -26,10 +26,9 @@ defmodule Orb.ToWat.Instructions do
   def do_wat({:f32_const, value}, indent), do: "#{indent}(f32.const #{value})"
   def do_wat({:global_get, identifier}, indent), do: "#{indent}(global.get $#{identifier})"
   def do_wat({:global_set, identifier}, indent), do: "#{indent}(global.set $#{identifier})"
-  def do_wat({:local, identifier, type}, indent), do: "#{indent}(local $#{identifier} #{type})"
-  def do_wat({:local_get, identifier}, indent), do: "#{indent}(local.get $#{identifier})"
+  # def do_wat({:local_get, identifier}, indent), do: "#{indent}(local.get $#{identifier})"
+  # def do_wat({:local_tee, identifier}, indent), do: "#{indent}(local.tee $#{identifier})"
   def do_wat({:local_set, identifier}, indent), do: "#{indent}(local.set $#{identifier})"
-  def do_wat({:local_tee, identifier}, indent), do: "#{indent}(local.tee $#{identifier})"
   # TODO: how do we support 64-bit integers?
   def do_wat(value, indent) when is_integer(value), do: "#{indent}(i32.const #{value})"
   # TODO: how do we support 64-bit floats?
