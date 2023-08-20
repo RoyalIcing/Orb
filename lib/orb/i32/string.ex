@@ -171,7 +171,7 @@ defmodule Orb.I32.String do
             quote do
               Orb.IfElse.new(
                 streq(unquote(value), unquote(match)),
-                [unquote(Orb.__get_block_items(target)), break(:i32_string_match)]
+                [unquote(Orb.__get_block_items(target)), Orb.Control.break(:i32_string_match)]
               )
             end
         end
@@ -187,7 +187,7 @@ defmodule Orb.I32.String do
       end
 
     quote do
-      block :i32_string_match, I32 do
+      Orb.Control.block :i32_string_match, I32 do
         unquote(statements)
         unquote(final_instruction)
       end
