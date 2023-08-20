@@ -87,8 +87,20 @@ defmodule Orb.I32.String do
          byte_a: I32,
          byte_b: I32 do
       loop EachByte, result: I32 do
-        byte_a = memory32_8![I32.add(address_a, i)].unsigned
-        byte_b = memory32_8![I32.add(address_b, i)].unsigned
+        byte_a = Memory.load!(I32.U8, I32.add(address_a, i))
+        byte_b = Memory.load!(I32.U8, I32.add(address_b, i))
+
+        # I32.match byte_a do
+        #   0 ->
+        #     return(byte_b === 0)
+
+        #   byte_b ->
+        #     i = i + 1
+        #     EachByte.continue()
+
+        #   _ ->
+        #     return(0x0)
+        # end
 
         if I32.eqz(byte_a) do
           return(I32.eqz(byte_b))
