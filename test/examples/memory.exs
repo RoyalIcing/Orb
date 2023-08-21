@@ -207,7 +207,7 @@ defmodule Examples.Memory do
 
     wasm do
       func cons(hd: I32.UnsafePointer, tl: I32.UnsafePointer), I32.UnsafePointer, ptr: I32.UnsafePointer do
-        ptr = typed_call(I32, :bump_alloc, [8])
+        ptr = typed_call(I32.UnsafePointer, :bump_alloc, [8])
         ptr[at!: 0] = hd
         ptr[at!: 1] = tl
         ptr
