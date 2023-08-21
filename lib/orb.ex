@@ -595,6 +595,9 @@ defmodule Orb do
         {:const, _, [str]}, constants when is_binary(str) ->
           {quote(do: Orb.__data_for_constant(unquote(str))), [str | constants]}
 
+        {:const, _, [expression]}, constants ->
+          {quote(do: Orb.__data_for_constant(unquote(expression))), [expression | constants]}
+
         {:sigil_S, _, [{:<<>>, _, [str]}, _]}, constants ->
           {
             quote(do: Orb.__data_for_constant(unquote(str))),
@@ -796,10 +799,12 @@ defmodule Orb do
     %{body: body, constants: constants} = do_module_body(block, __CALLER__)
 
     Module.register_attribute(__CALLER__.module, :wasm_constants, accumulate: true)
-    Module.put_attribute(__CALLER__.module, :wasm_constants, constants)
+    # Module.put_attribute(__CALLER__.module, :wasm_constants, constants)
 
     quote do
       with do
+        @wasm_constants unquote(constants)
+
         unquote(pre)
         import Orb, only: []
         import Orb.DSL
