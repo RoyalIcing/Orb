@@ -20,15 +20,13 @@ defmodule Mean do
 
   I32.global(sum: 0, count: 0)
 
-  wasm do
-    func insert(n: I32) do
-      @count = @count + 1
-      @sum = @sum + n
-    end
+  defw insert(n: I32) do
+    @count = @count + 1
+    @sum = @sum + n
+  end
 
-    func calculate_mean(), I32 do
-      @sum / @count
-    end
+  defw calculate_mean(), I32 do
+    @sum / @count
   end
 end
 ```
