@@ -1,4 +1,4 @@
-defmodule Orb.DefDSL do
+defmodule Orb.DefwDSL do
 
   defmacro wasm_mode(mode) do
     mode = Macro.expand_literals(mode, __CALLER__)

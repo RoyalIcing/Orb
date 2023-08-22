@@ -496,7 +496,7 @@ defmodule Orb do
   defmacro __using__(_opts) do
     quote do
       import Orb
-      import Orb.DefDSL
+      import Orb.DefwDSL
       alias Orb.{I32, I64, S32, U32, F32, Memory, Table}
       require Orb.{I32, F32, Table, Memory}
 
@@ -661,7 +661,7 @@ defmodule Orb do
           )
         end
 
-        # Orb.DefDSL.define_helpers(__wasm_body__())
+        # Orb.DefwDSL.define_helpers(__wasm_body__())
 
         # def func(),
         #   do: Orb.ModuleDefinition.func_ref_all!(__MODULE__)
@@ -812,10 +812,10 @@ defmodule Orb do
 
         # with do
         #   # Process.put()
-        #   # import Orb.DefDSL
+        #   # import Orb.DefwDSL
         #   # unquote(body)
 
-        #   Orb.DefDSL.define_helpers(unquote(body)) |> IO.inspect()
+        #   Orb.DefwDSL.define_helpers(unquote(body)) |> IO.inspect()
         # end
 
         # @wasm_body unquote(body)
