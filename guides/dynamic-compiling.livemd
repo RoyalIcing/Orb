@@ -1,0 +1,82 @@
+# Dynamic Orb module
+
+```elixir
+Mix.install([{:orb, "~> 0.0.18"}, :orb_wasmtime])
+```
+
+## Section
+
+```elixir
+defmodule CurrentUser do
+  def get_id() do
+    Process.get(:user_id) || raise "User ID must be set."
+  end
+
+  def get_type() do
+    Process.get(:user_type, :viewer)
+  end
+
+  def get() do
+    %{
+      type: get_type(),
+      id: get_id()
+    }
+  end
+end
+```
+
+```elixir
+defmodule DynamicExample do
+  use Orb
+
+  defw can_edit?(post_id: I32, author_id: I32), I32 do
+    inline do
+      case CurrentUser.get() do
+        %{type: :viewer, id: user_id} ->
+          wasm do
+            author_id === user_id
+          end
+
+        %{type: :admin} ->
+          1
+      end
+    end
+  end
+end
+```
+
+```elixir
+Process.put(:user_type, :viewer)
+Process.put(:user_id, 1234)
+
+DynamicExample.to_wat() |> IO.puts()
+
+OrbWasmtime.Wasm.call(DynamicExample, :can_edit?, 42, 1234)
+|> IO.inspect(label: "can edit post by user 1234")
+
+OrbWasmtime.Wasm.call(DynamicExample, :can_edit?, 42, 1235)
+|> IO.inspect(label: "can edit post by user 1235")
+
+OrbWasmtime.Wasm.call(DynamicExample, :can_edit?, 42, 876)
+|> IO.inspect(label: "can edit post by user 876")
+
+:ok
+```
+
+```elixir
+Process.put(:user_type, :admin)
+Process.put(:user_id, 1)
+
+DynamicExample.to_wat() |> IO.puts()
+
+OrbWasmtime.Wasm.call(DynamicExample, :can_edit?, 42, 1234)
+|> IO.inspect(label: "can edit post by user 1234")
+
+OrbWasmtime.Wasm.call(DynamicExample, :can_edit?, 42, 1235)
+|> IO.inspect(label: "can edit post by user 1235")
+
+OrbWasmtime.Wasm.call(DynamicExample, :can_edit?, 42, 876)
+|> IO.inspect(label: "can edit post by user 876")
+
+:ok
+```
