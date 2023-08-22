@@ -21,6 +21,22 @@ defmodule Orb.DefDSL do
     define(call, :public, result, locals, block, __CALLER__)
   end
 
+  defmacro defwi(call, do: block) do
+    define(call, :internal, nil, [], block, __CALLER__)
+  end
+
+  defmacro defwi(call, locals, do: block) when is_list(locals) do
+    define(call, :internal, nil, locals, block, __CALLER__)
+  end
+
+  defmacro defwi(call, result, do: block) do
+    define(call, :internal, result, [], block, __CALLER__)
+  end
+
+  defmacro defwi(call, result, locals, do: block) when is_list(locals) do
+    define(call, :internal, result, locals, block, __CALLER__)
+  end
+
   defmacro defwp(call, do: block) do
     define(call, :private, nil, [], block, __CALLER__)
   end
@@ -38,8 +54,19 @@ defmodule Orb.DefDSL do
   end
 
   defp define(call, visibility, result, locals, block, env) do
-    wasm = Orb.DSL.__define_func(call, visibility, [result: result, locals: locals], block, env)
-    ex_def = define_elixir_def(call, visibility, result, env)
+    func_visibility = case visibility do
+      :internal -> :private
+      other -> other
+    end
+
+    def_kind = case visibility do
+      :public -> :def
+      :internal -> :def
+      :private -> :defp
+    end
+
+    wasm = Orb.DSL.__define_func(call, func_visibility, [result: result, locals: locals], block, env)
+    ex_def = define_elixir_def(call, def_kind, result, env)
 
     quote do
       unquote(ex_def)
@@ -50,7 +77,7 @@ defmodule Orb.DefDSL do
     end
   end
 
-  defp define_elixir_def(call, visibility, result, %Macro.Env{file: file}) do
+  defp define_elixir_def(call, def_kind, result, %Macro.Env{file: file}) do
     {name, func_args} = Macro.decompose_call(call)
     {_, meta, _} = call
     # arity = length(args)
@@ -65,11 +92,6 @@ defmodule Orb.DefDSL do
     end
 
     def_call = {name, meta, def_args}
-
-    def_kind = case visibility do
-      :public -> :def
-      :private -> :defp
-    end
 
     quote do
       unquote(def_kind)(unquote(def_call)) do

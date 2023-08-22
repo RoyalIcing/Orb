@@ -81,6 +81,54 @@ defmodule DefwTest do
            """
   end
 
+  defmodule Visibilities do
+    use Orb
+
+    defw first() do
+      1
+    end
+
+    defwi second() do
+      2
+    end
+
+    defwp third() do
+      3
+    end
+  end
+
+  test "defwi does not export from wasm but makes a public Elixir function" do
+    assert Visibilities.to_wat() =~ """
+             (func $first (export "first")
+               (i32.const 1)
+             )
+             (func $second
+               (i32.const 2)
+             )
+             (func $third
+               (i32.const 3)
+             )
+           """
+
+    assert {:first, 0} in Visibilities.__info__(:functions)
+    assert {:second, 0} in Visibilities.__info__(:functions)
+    refute {:third, 0} in Visibilities.__info__(:functions)
+
+    assert Visibilities.first() == %Orb.Instruction{
+             type: nil,
+             operation: {:call, :first},
+             operands: []
+           }
+
+    assert Visibilities.second() == %Orb.Instruction{
+             type: nil,
+             operation: {:call, :second},
+             operands: []
+           }
+
+    assert_raise UndefinedFunctionError, &Visibilities.third/0
+  end
+
   test "multiple args errs" do
     assert_raise CompileError,
                  ~r[#{location(+5)}: Cannot define function with multiple arguments, use keyword list instead.],
