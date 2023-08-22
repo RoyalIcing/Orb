@@ -9,6 +9,13 @@ defmodule DynamicTest do
     def get_type() do
       Process.get(:user_type, :viewer)
     end
+
+    def get() do
+      %{
+        type: get_type(),
+        id: get_id()
+      }
+    end
   end
 
   defmodule DynamicA do
@@ -33,12 +40,24 @@ defmodule DynamicTest do
     use Orb
 
     defw can_edit?(post_id: I32, author_id: I32), I32 do
-      with :viewer <- CurrentUser.get_type() do
-        author_id === inline(do: CurrentUser.get_id())
-      else
-        :admin ->
-          1
+      inline do
+        case CurrentUser.get() do
+          %{type: :viewer, id: user_id} ->
+            wasm do
+              author_id === user_id
+            end
+
+          %{type: :admin} ->
+            1
+        end
       end
+
+      # inline with %{type: :viewer, id: user_id} <- CurrentUser.get() do
+      #   author_id === user_id
+      # else
+      #   %{type: :admin} ->
+      #     1
+      # end
     end
   end
 
