@@ -22,15 +22,13 @@ defmodule Orb do
 
     I32.global(count: 0, tally: 0)
 
-    wasm do
-      func insert(element: I32) do
-        @count = @count + 1
-        @tally = @tally + element
-      end
+    defw insert(element: I32) do
+      @count = @count + 1
+      @tally = @tally + element
+    end
 
-      func calculate_mean(), I32 do
-        @tally / @count
-      end
+    defw calculate_mean(), I32 do
+      @tally / @count
     end
   end
   ```
@@ -45,17 +43,15 @@ defmodule Orb do
 
     I32.global(count: 0, tally: 0)
 
-    wasm do
-      func insert(element: I32) do
-        I32.add(global_get(:count), 1)
-        global_set(:count)
-        I32.add(global_get(:tally), element)
-        global_set(:tally)
-      end
+    defw insert(element: I32) do
+      I32.add(global_get(:count), 1)
+      global_set(:count)
+      I32.add(global_get(:tally), element)
+      global_set(:tally)
+    end
 
-      func calculate_mean(), I32 do
-        I32.div_u(global_get(:tally), global_get(:count))
-      end
+    defw calculate_mean(), I32 do
+      I32.div_u(global_get(:tally), global_get(:count))
     end
   end
   ```
@@ -89,12 +85,10 @@ defmodule Orb do
   In WebAssembly / Orb when you write the same sort of thing:
 
   ```elixir
-  wasm do
-    func example() do
-      1
-      2
-      3
-    end
+  defw example() do
+    1
+    2
+    3
   end
   ```
 
@@ -103,24 +97,20 @@ defmodule Orb do
   So the correct return type from this function would be a tuple of three integers:
 
   ```elixir
-  wasm do
-    func example(), {I32, I32, I32} do
-      1
-      2
-      3
-    end
+  defw example(), {I32, I32, I32} do
+    1
+    2
+    3
   end
   ```
 
   If you prefer, Orb allows you to be explicit with your stack pushes with `Orb.DSL.push/1`:
 
   ```elixir
-  wasm do
-    func example(), {I32, I32, I32} do
-      push(1)
-      push(2)
-      push(3)
-    end
+  defw example(), {I32, I32, I32} do
+    push(1)
+    push(2)
+    push(3)
   end
   ```
 
@@ -136,13 +126,11 @@ defmodule Orb do
   defmodule WithinRange do
     use Orb
 
-    wasm do
-      func validate(num: I32), I32, under?: I32, over?: I32 do
-        under? = num < 1
-        over? = num > 255
+    defw validate(num: I32), I32, under?: I32, over?: I32 do
+      under? = num < 1
+      over? = num > 255
 
-        not (under? or over?)
-      end
+      not (under? or over?)
     end
   end
   ```
@@ -176,10 +164,8 @@ defmodule Orb do
 
     I32.global(counter: 0)
 
-    wasm do
-      func increment() do
-        @counter = @counter + 1
-      end
+    defw increment() do
+      @counter = @counter + 1
     end
   end
   ```
@@ -216,14 +202,12 @@ defmodule Orb do
 
     Memory.pages(1)
 
-    wasm do
-      func get_int32(), I32 do
-        Memory.load!(I32, 0x100)
-      end
+    defw get_int32(), I32 do
+      Memory.load!(I32, 0x100)
+    end
 
-      func set_int32(value: I32) do
-        Memory.store!(I32, 0x100, value)
-      end
+    defw set_int32(value: I32) do
+      Memory.store!(I32, 0x100, value)
     end
   end
   ```
@@ -245,14 +229,14 @@ defmodule Orb do
         <meta charset=utf-8>
         <h1>Hello world</h1>
         \""")
+    end
 
-      func get_mime_type(), I32 do
-        0x100
-      end
+    defw get_mime_type(), I32 do
+      0x100
+    end
 
-      func get_body(), I32 do
-        0x200
-      end
+    defw get_body(), I32 do
+      0x200
     end
   end
   ```
@@ -273,18 +257,16 @@ defmodule Orb do
 
     Memory.pages(1)
 
-    wasm do
-      func get_mime_type(), I32 do
-        ~S"text/html"
-      end
+    defw get_mime_type(), I32 do
+      ~S"text/html"
+    end
 
-      func get_body(), I32 do
-        ~S\"""
-        <!doctype html>
-        <meta charset=utf-8>
-        <h1>Hello world</h1>
-        \"""
-      end
+    defw get_body(), I32 do
+      ~S\"""
+      <!doctype html>
+      <meta charset=utf-8>
+      <h1>Hello world</h1>
+      \"""
     end
   end
   ```
@@ -393,7 +375,21 @@ defmodule Orb do
 
   ## Calling other functions
 
-  You can `Orb.DSL.typed_call/3` other functions defined within your module. Currently, the parameters are not checked, so you must ensure you are calling with the correct arity and types.
+  When you use `defw`, a corresponding Elixir function is defined for you using `def`.
+
+  ```elixir
+  defw magic_number(), I32 do
+    42
+  end
+  ```
+
+  ```elixir
+  defw some_example(), n: I32 do
+    n = magic_number()
+  end
+  ```
+
+  You can also use `Orb.DSL.typed_call/3` to manually call functions defined within your module. Currently, the parameters are not checked, so you must ensure you are calling with the correct arity and types.
 
   ```elixir
   char = typed_call(I32, :encode_html_char, char)
@@ -409,25 +405,28 @@ defmodule Orb do
   defmodule A do
     use Orb
 
-    wasm do
-      func square(n: I32), I32 do
-        n * n
-      end
+    defwi square(n: I32), I32 do
+      n * n
     end
   end
   ```
+
+  The `defwi` means that that WebAssembly function remains _internal_ but a public Elixir function is defined.
 
   ```elixir
   defmodule B do
     use Orb
 
     # Copies all functions defined in A as private functions into this module.
-    A.funcp()
-
     wasm do
-      func example(n: I32), I32 do
-        call(:square, 42)
-      end
+      A.funcp()
+    end
+
+    # Allows square to be called by Elixir.
+    import A
+
+    defw example(n: I32), I32 do
+      square(42)
     end
   end
   ```
@@ -438,14 +437,12 @@ defmodule Orb do
   defmodule A do
     use Orb
 
-    wasm do
-      func square(n: I32), I32 do
-        n * n
-      end
+    defwi square(n: I32), I32 do
+      n * n
+    end
 
-      func double(n: I32), I32 do
-        2 * n
-      end
+    defwi double(n: I32), I32 do
+      2 * n
     end
   end
   ```
@@ -454,12 +451,14 @@ defmodule Orb do
   defmodule B do
     use Orb
 
-    A.funcp(:square)
-
     wasm do
-      func example(n: I32), I32 do
-        call(:square, 42)
-      end
+      A.funcp(:square)
+    end
+
+    import A, only: [square: 1]
+
+    defw example(n: I32), I32 do
+      square(42)
     end
   end
   ```
@@ -471,8 +470,13 @@ defmodule Orb do
   ## Use Elixir features
 
   - Piping
-  - Module attributes
-  - Inline for
+
+  ## Inline
+
+  - `inline do:`
+    - Module attributes
+    - `wasm do:`
+  - `inline for`
 
   ### Custom types with `Access`
 
@@ -482,9 +486,9 @@ defmodule Orb do
 
   ## Hex packages
 
-  - GoldenOrb
-      - String builder
   - SilverOrb
+      - String builder
+  - GoldenOrb
 
   ## Running your module
   """
