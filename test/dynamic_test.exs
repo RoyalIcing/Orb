@@ -51,13 +51,6 @@ defmodule DynamicTest do
             1
         end
       end
-
-      # inline with %{type: :viewer, id: user_id} <- CurrentUser.get() do
-      #   author_id === user_id
-      # else
-      #   %{type: :admin} ->
-      #     1
-      # end
     end
   end
 

@@ -563,13 +563,11 @@ defmodule OrbTest do
   defmodule WithinRange do
     use Orb
 
-    wasm do
-      func validate(num: I32), I32, under?: I32, over?: I32 do
-        under? = num < 1
-        over? = num > 255
+    defw validate(num: I32), I32, under?: I32, over?: I32 do
+      under? = num < 1
+      over? = num > 255
 
-        not (under? or over?)
-      end
+      not (under? or over?)
     end
   end
 
@@ -606,20 +604,18 @@ defmodule OrbTest do
       tally: 0
     )
 
-    wasm do
-      func insert(element: I32) do
-        @count = @count + 1
-        @tally = @tally + element
-      end
+    defw insert(element: I32) do
+      @count = @count + 1
+      @tally = @tally + element
+    end
 
-      func calculate_mean(), I32 do
-        @tally / @count
-      end
+    defw calculate_mean(), I32 do
+      @tally / @count
+    end
 
-      func calculate_mean_and_count(), {I32, I32} do
-        @tally / @count
-        @count
-      end
+    defw calculate_mean_and_count(), {I32, I32} do
+      @tally / @count
+      @count
     end
   end
 

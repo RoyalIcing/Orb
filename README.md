@@ -31,15 +31,13 @@ defmodule CalculateMean do
     tally: 0
   )
 
-  wasm do
-    func insert(element: I32) do
-      @count = @count + 1
-      @tally = @tally + element
-    end
+  defw insert(element: I32) do
+    @count = @count + 1
+    @tally = @tally + element
+  end
 
-    func calculate_mean(), I32 do
-      @tally / @count
-    end
+  defw calculate_mean(), I32 do
+    @tally / @count
   end
 end
 
