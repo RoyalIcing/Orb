@@ -1,0 +1,49 @@
+# Orb state machine DSL
+
+```elixir
+Mix.install([{:orb, "~> 0.0.18"}, :orb_wasmtime])
+```
+
+## Section
+
+```elixir
+defmodule BumpAllocator do
+  use Orb
+
+  I32.global(
+    bump_offset: 0xFF,
+    bump_mark: 0
+  )
+
+  Memory.pages(1)
+
+  defwi bump_alloc(size: I32), I32.UnsafePointer,
+    ptr: I32.UnsafePointer do
+    ptr = @bump_offset
+    @bump_offset = @bump_offset + size
+    ptr
+  end
+end
+
+defmodule MyModule do
+  use Orb
+
+  Memory.pages(1)
+  BumpAllocator.include()
+
+  defw example(), ptr: I32.UnsafePointer do
+    ptr = BumpAllocator.bump_alloc(42)
+    # Do something with ptr
+  end
+end
+
+defmodule MyModule do
+  use Orb
+  use BumpAllocator
+
+  defw example(), ptr: I32.UnsafePointer do
+    ptr = bump_alloc(42)
+    # Do something with ptr
+  end
+end
+```
