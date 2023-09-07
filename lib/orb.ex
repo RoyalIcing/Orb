@@ -673,6 +673,14 @@ defmodule Orb do
         def _func(name),
           do: Orb.ModuleDefinition.func_ref!(__MODULE__, name)
 
+        @doc "Include all internal (`defwi` & `defwp`) WebAssembly functions from this module’s Orb definition into the context’s module."
+        def include() do
+          Orb.wasm do
+            # Orb.ModuleDefinition.Include.all_internal(__MODULE__)
+            Orb.ModuleDefinition.funcp_ref_all!(__MODULE__)
+          end
+        end
+
         @doc "Import all WebAssembly functions from this module’s Orb definition."
         def funcp(),
           do: Orb.ModuleDefinition.funcp_ref_all!(__MODULE__)

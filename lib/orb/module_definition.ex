@@ -89,6 +89,7 @@ defmodule Orb.ModuleDefinition do
   end
 
   def func_ref!(mod, name) when is_atom(mod) do
+    # TODO: convert to struct
     {:mod_func_ref, :exported, {mod, name}}
   end
 
