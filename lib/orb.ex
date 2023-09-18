@@ -636,7 +636,8 @@ defmodule Orb do
 
         @wasm_global_types Map.new(List.flatten(@wasm_globals), fn global ->
                              {global.name, global.type}
-                           end) |> Map.merge(%{__MODULE__: __MODULE__})
+                           end)
+                           |> Map.merge(%{__MODULE__: __MODULE__})
         def __wasm_global_type__(global_name) when is_atom(global_name),
           do: Map.fetch!(@wasm_global_types, global_name)
 
@@ -940,13 +941,20 @@ defmodule Orb do
     end
   end
 
+  defmacro include(mod) do
+    quote do
+      wasm do
+        Orb.ModuleDefinition.funcp_ref_all!(unquote(mod))
+      end
+    end
+  end
+
   @doc """
   Declare a WebAssembly import for a function or global.
   """
   defmacro wasm_import(mod, entries) when is_atom(mod) and is_list(entries) do
     quote do
-      @wasm_imports (for {name, type} <-
-                           unquote(entries) do
+      @wasm_imports (for {name, type} <- unquote(entries) do
                        %Orb.Import{module: unquote(mod), name: name, type: type}
                      end)
     end

@@ -142,6 +142,7 @@ defmodule Orb.I32.String do
 
       import Orb
 
+      # unquote(__MODULE__).include()
       Orb.wasm do
         unquote(__MODULE__).funcp()
         # unquote(__MODULE__).funcp(:streq)

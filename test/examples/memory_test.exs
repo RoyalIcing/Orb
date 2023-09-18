@@ -42,6 +42,27 @@ defmodule Examples.MemoryTest do
     end
   end
 
+  describe "use Copying" do
+    alias Examples.Memory.Copying
+
+    defmodule CopyingUser do
+      use Orb
+      use Copying
+
+      Memory.pages(1)
+
+      defw example() do
+        Copying.memcpy(0x400, ~S"hello", 3)
+      end
+    end
+
+    test "memcpy" do
+      inst = Instance.run(CopyingUser)
+      Instance.call(inst, :example)
+      assert Instance.read_memory(inst, 0x400, 4) == "hel\0"
+    end
+  end
+
   describe "BumpAllocator" do
     alias Memory.BumpAllocator
 

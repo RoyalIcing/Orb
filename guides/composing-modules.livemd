@@ -29,7 +29,7 @@ defmodule MyModule do
   use Orb
 
   Memory.pages(1)
-  BumpAllocator.include()
+  Orb.include(BumpAllocator)
 
   defw example(), ptr: I32.UnsafePointer do
     ptr = BumpAllocator.bump_alloc(42)
