@@ -17,6 +17,47 @@ defmodule Orb.Global do
     }
   end
 
+  def new32(name, mutability, exported, value)
+      when is_atom(name) and
+             mutability in ~w[readonly mutable]a and
+             exported in ~w[internal exported]a and is_integer(value) do
+    %__MODULE__{
+      name: name,
+      type: :i32,
+      initial_value: {:i32_const, value},
+      mutability: mutability,
+      exported: exported == :exported
+    }
+  end
+
+  def new32(name, mutability, exported, value)
+      when is_atom(name) and
+             mutability in ~w[readonly mutable]a and
+             exported in ~w[internal exported]a and is_float(value) do
+    %__MODULE__{
+      name: name,
+      type: :f32,
+      initial_value: {:f32_const, value},
+      mutability: mutability,
+      exported: exported == :exported
+    }
+  end
+
+  defmacro register32(mutability, exported, list)
+           when mutability in ~w{readonly mutable}a and
+                  exported in ~w[internal exported]a do
+    quote do
+      @wasm_globals (for {key, value} <- unquote(list) do
+                       Orb.Global.new32(
+                         key,
+                         unquote(mutability),
+                         unquote(exported),
+                         value
+                       )
+                     end)
+    end
+  end
+
   defimpl Orb.ToWat do
     def to_wat(
           %Orb.Global{
@@ -53,7 +94,10 @@ defmodule Orb.Global do
 
       defmacro @{name, _meta, [arg]} do
         quote do
-          Orb.I32.global(:readonly, [{unquote(name), unquote(arg)}])
+          with do
+            require Orb.Global
+            Orb.Global.register32(:readonly, :internal, [{unquote(name), unquote(arg)}])
+          end
         end
       end
     end
@@ -63,7 +107,10 @@ defmodule Orb.Global do
 
       defmacro @{name, _meta, [arg]} do
         quote do
-          Orb.I32.global(:mutable, [{unquote(name), unquote(arg)}])
+          with do
+            require Orb.Global
+            Orb.Global.register32(:mutable, :internal, [{unquote(name), unquote(arg)}])
+          end
         end
       end
     end
@@ -73,7 +120,10 @@ defmodule Orb.Global do
 
       defmacro @{name, _meta, [arg]} do
         quote do
-          Orb.I32.export_global(:readonly, [{unquote(name), unquote(arg)}])
+          with do
+            require Orb.Global
+            Orb.Global.register32(:readonly, :exported, [{unquote(name), unquote(arg)}])
+          end
         end
       end
     end
@@ -83,7 +133,10 @@ defmodule Orb.Global do
 
       defmacro @{name, _meta, [arg]} do
         quote do
-          Orb.I32.export_global(:mutable, [{unquote(name), unquote(arg)}])
+          with do
+            require Orb.Global
+            Orb.Global.register32(:mutable, :exported, [{unquote(name), unquote(arg)}])
+          end
         end
       end
     end

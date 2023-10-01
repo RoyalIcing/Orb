@@ -78,6 +78,10 @@ defmodule OrbTest do
           @public2 22
         end
 
+        global :readonly do
+          @five_quarters 1.25
+        end
+
         def all_attributes do
           [@abc, @const, @public1, @public2]
         end
@@ -89,6 +93,7 @@ defmodule OrbTest do
                (global $const i32 (i32.const 99))
                (global $public1 (export "public1") (mut i32) (i32.const 11))
                (global $public2 (export "public2") i32 (i32.const 22))
+               (global $five_quarters f32 (f32.const 1.25))
              )
              """
 
