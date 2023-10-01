@@ -82,7 +82,7 @@ defmodule OrbTest do
           @five_quarters 1.25
         end
 
-        global :readonly do
+        global :mutable do
           @language "en"
           @mime_type "text/html"
         end
@@ -107,8 +107,8 @@ defmodule OrbTest do
                (global $public1 (export "public1") (mut i32) (i32.const 11))
                (global $public2 (export "public2") i32 (i32.const 22))
                (global $five_quarters f32 (f32.const 1.25))
-               (global $language i32 (i32.const 255))
-               (global $mime_type i32 (i32.const 258))
+               (global $language (mut i32) (i32.const 255))
+               (global $mime_type (mut i32) (i32.const 258))
                (data (i32.const 255) \"en\")
                (data (i32.const 258) \"text/html\")
                (func $mime_type_constant (export \"mime_type_constant\") (result i32)
