@@ -83,7 +83,7 @@ defmodule OrbTest do
         end
 
         def all_attributes do
-          [@abc, @const, @public1, @public2]
+          [@abc, @const, @public1, @public2, @five_quarters]
         end
       end
 
@@ -97,7 +97,7 @@ defmodule OrbTest do
              )
              """
 
-      assert GlobalDo.all_attributes() == [42, 99, 11, 22]
+      assert GlobalDo.all_attributes() == [42, 99, 11, 22, 1.25]
     end
 
     test "I32 enum" do
