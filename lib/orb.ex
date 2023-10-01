@@ -950,6 +950,39 @@ defmodule Orb do
   end
 
   @doc """
+  Declare WebAssembly globals.
+  """
+  defmacro global(mode \\ :mutable, do: block) do
+    quote do
+      unquote(block)
+
+      with do
+        case unquote(mode) do
+          :readonly ->
+            import Kernel, except: [@: 1]
+            import Orb.Global.Declare.ReadonlyDSL
+            unquote(block)
+
+          :mutable ->
+            import Kernel, except: [@: 1]
+            import Orb.Global.Declare.MutableDSL
+            unquote(block)
+
+          :export_readonly ->
+            import Kernel, except: [@: 1]
+            import Orb.Global.Declare.ExportReadonlyDSL
+            unquote(block)
+
+          :export_mutable ->
+            import Kernel, except: [@: 1]
+            import Orb.Global.Declare.ExportMutableDSL
+            unquote(block)
+        end
+      end
+    end
+  end
+
+  @doc """
   Declare a WebAssembly import for a function or global.
   """
   defmacro wasm_import(mod, entries) when is_atom(mod) and is_list(entries) do

@@ -47,6 +47,48 @@ defmodule Orb.Global do
     end
   end
 
+  defmodule Declare do
+    defmodule ReadonlyDSL do
+      import Kernel, except: [@: 1]
+
+      defmacro @{name, _meta, [arg]} do
+        quote do
+          Orb.I32.global(:readonly, [{unquote(name), unquote(arg)}])
+        end
+      end
+    end
+
+    defmodule MutableDSL do
+      import Kernel, except: [@: 1]
+
+      defmacro @{name, _meta, [arg]} do
+        quote do
+          Orb.I32.global(:mutable, [{unquote(name), unquote(arg)}])
+        end
+      end
+    end
+
+    defmodule ExportReadonlyDSL do
+      import Kernel, except: [@: 1]
+
+      defmacro @{name, _meta, [arg]} do
+        quote do
+          Orb.I32.export_global(:readonly, [{unquote(name), unquote(arg)}])
+        end
+      end
+    end
+
+    defmodule ExportMutableDSL do
+      import Kernel, except: [@: 1]
+
+      defmacro @{name, _meta, [arg]} do
+        quote do
+          Orb.I32.export_global(:mutable, [{unquote(name), unquote(arg)}])
+        end
+      end
+    end
+  end
+
   defmodule DSL do
     @moduledoc """
     Adds @global_name support

@@ -58,6 +58,43 @@ defmodule OrbTest do
              """
     end
 
+    test "global do" do
+      defmodule GlobalDo do
+        use Orb
+
+        global do
+          @abc 42
+        end
+
+        global :readonly do
+          @const 99
+        end
+
+        global :export_mutable do
+          @public1 11
+        end
+
+        global :export_readonly do
+          @public2 22
+        end
+
+        def all_attributes do
+          [@abc, @const, @public1, @public2]
+        end
+      end
+
+      assert to_wat(GlobalDo) == """
+             (module $GlobalDo
+               (global $abc (mut i32) (i32.const 42))
+               (global $const i32 (i32.const 99))
+               (global $public1 (export "public1") (mut i32) (i32.const 11))
+               (global $public2 (export "public2") i32 (i32.const 22))
+             )
+             """
+
+      assert GlobalDo.all_attributes() == [42, 99, 11, 22]
+    end
+
     test "I32 enum" do
       defmodule GlobalsI32Enum do
         use Orb
@@ -505,6 +542,7 @@ defmodule OrbTest do
         inline for {status, message} <- @statuses do
           Memory.initial_data(offset: status * 24, string: message)
         end
+
         # inline for {status, message} <- status_table() do
         #   Memory.initial_data(offset: status * 24, string: message)
         # end
@@ -609,6 +647,7 @@ defmodule OrbTest do
       @tally = @tally + element
     end
 
+    # defw calculate_mean() :: I32 do
     defw calculate_mean(), I32 do
       @tally / @count
     end
