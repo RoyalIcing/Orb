@@ -647,10 +647,16 @@ defmodule Orb do
         def __wasm_module__() do
           get_global_type = &__wasm_global_type__/1
 
+          constants = Orb.Constants.from_attribute(@wasm_constants)
+
+
           # I tried having this be a Macro.var but it’s not working.
           # So resort to the ultimate hole puncher.
           Process.put({Orb, :global_types}, get_global_type)
+          Process.put({Orb, :constants}, constants)
           body = __wasm_body__(get_global_type)
+          globals = @wasm_globals |> Enum.reverse() |> List.flatten() |> Enum.map(&Orb.Global.expand/1)
+          Process.delete({Orb, :constants})
           Process.delete({Orb, :global_types})
 
           Orb.ModuleDefinition.new(
@@ -658,9 +664,9 @@ defmodule Orb do
             types: @wasm_types |> Enum.reverse() |> List.flatten(),
             table_size: @wasm_table_allocations |> List.flatten() |> length(),
             imports: @wasm_imports |> Enum.reverse() |> List.flatten(),
-            globals: @wasm_globals |> Enum.reverse() |> List.flatten(),
+            globals: globals,
             memory: Memory.from(@wasm_memory),
-            constants: Orb.Constants.from_attribute(@wasm_constants),
+            constants: constants,
             # body: @wasm_body |> Enum.reverse() |> List.flatten()
             body: body
           )
@@ -1003,5 +1009,9 @@ defmodule Orb do
 
   def __lookup_global_type!(global_identifier) do
     Process.get({Orb, :global_types}).(global_identifier)
+  end
+
+  def __lookup_constant!(constant_value) when is_binary(constant_value) do
+    Orb.Constants.lookup(Process.get({Orb, :constants}), constant_value)
   end
 end

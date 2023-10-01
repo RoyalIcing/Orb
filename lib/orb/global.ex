@@ -43,6 +43,21 @@ defmodule Orb.Global do
     }
   end
 
+  def new32(name, mutability, exported, value)
+      when is_atom(name) and
+             mutability in ~w[readonly mutable]a and
+             exported in ~w[internal exported]a and is_binary(value) do
+    require Orb
+
+    %__MODULE__{
+      name: name,
+      type: :i32_string,
+      initial_value: value,
+      mutability: mutability,
+      exported: exported == :exported
+    }
+  end
+
   defmacro register32(mutability, exported, list)
            when mutability in ~w{readonly mutable}a and
                   exported in ~w[internal exported]a do
@@ -55,7 +70,18 @@ defmodule Orb.Global do
                          value
                        )
                      end)
+      @wasm_constants (for {_key, value} when is_binary(value) <- unquote(list) do
+                         value
+                       end)
     end
+  end
+
+  def expand(%Orb.Global{type: :i32_string, initial_value: string} = global) do
+    %Orb.Global{global | type: :i32, initial_value: Orb.__lookup_constant!(string)}
+  end
+
+  def expand(%Orb.Global{} = global) do
+    global
   end
 
   defimpl Orb.ToWat do
