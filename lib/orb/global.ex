@@ -87,6 +87,11 @@ defmodule Orb.Global do
         end
       end
     end
+
+    defmacro __import_mode(:readonly), do: quote(do: import(ReadonlyDSL))
+    defmacro __import_mode(:mutable), do: quote(do: import(MutableDSL))
+    defmacro __import_mode(:export_readonly), do: quote(do: import(ExportReadonlyDSL))
+    defmacro __import_mode(:export_mutable), do: quote(do: import(ExportMutableDSL))
   end
 
   defmodule DSL do

@@ -957,27 +957,12 @@ defmodule Orb do
       unquote(block)
 
       with do
-        case unquote(mode) do
-          :readonly ->
-            import Kernel, except: [@: 1]
-            import Orb.Global.Declare.ReadonlyDSL
-            unquote(block)
+        import Kernel, except: [@: 1]
 
-          :mutable ->
-            import Kernel, except: [@: 1]
-            import Orb.Global.Declare.MutableDSL
-            unquote(block)
+        require Orb.Global.Declare
+        Orb.Global.Declare.__import_mode(unquote(mode))
 
-          :export_readonly ->
-            import Kernel, except: [@: 1]
-            import Orb.Global.Declare.ExportReadonlyDSL
-            unquote(block)
-
-          :export_mutable ->
-            import Kernel, except: [@: 1]
-            import Orb.Global.Declare.ExportMutableDSL
-            unquote(block)
-        end
+        unquote(block)
       end
     end
   end
