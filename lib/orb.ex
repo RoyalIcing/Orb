@@ -638,43 +638,25 @@ defmodule Orb do
                              {global.name, global.type}
                            end)
                            |> Map.merge(%{__MODULE__: __MODULE__})
-        def __wasm_global_type__(global_name) when is_atom(global_name),
-          do: Map.fetch!(@wasm_global_types, global_name)
+        def __wasm_global_types__(), do: @wasm_global_types
 
         def __wasm_table_allocations__(),
           do: Orb.Table.Allocations.from_attribute(@wasm_table_allocations)
 
-        def __wasm_module__(level \\ 0) do
-          get_global_type = &__wasm_global_type__/1
-
-          # Orb.Constants = :ets.new(Orb.Constants, [:set, :private, :named_table])
-          # constants = Orb.Constants.from_attribute(@wasm_constants)
-
-          if level === 0 do
-            Orb.Constants.__begin()
-          end
+        def __wasm_module__() do
+          Orb.Compiler.begin()
 
           # I tried having this be a Macro.var but it’s not working.
           # So resort to the ultimate hole puncher.
-          Process.put({Orb, :global_types}, get_global_type)
-          # Process.put({Orb, :constants}, constants)
+          Process.put({Orb, :global_types}, __wasm_global_types__())
+
           globals =
             @wasm_globals |> Enum.reverse() |> List.flatten() |> Enum.map(&Orb.Global.expand/1)
 
-          body = __wasm_body__(get_global_type)
-
-          # Process.delete({Orb, :constants})
+          body = Orb.Compiler.get_body_of(__MODULE__)
           Process.delete({Orb, :global_types})
 
-          body = Orb.ModuleDefinition.expand_body_func_refs(body)
-
-          constants = case level do
-            0 ->
-              Orb.Constants.__done()
-
-            _ ->
-              %Orb.Constants{}
-          end
+          %{constants: constants} = Orb.Compiler.done()
 
           Orb.ModuleDefinition.new(
             name: @wasm_name,
@@ -684,7 +666,6 @@ defmodule Orb do
             globals: globals,
             memory: Memory.from(@wasm_memory),
             constants: constants,
-            # body: @wasm_body |> Enum.reverse() |> List.flatten()
             body: body
           )
         end
@@ -714,7 +695,7 @@ defmodule Orb do
           do: Orb.ModuleDefinition.funcp_ref!(__MODULE__, name)
 
         @doc "Convert this module’s Orb definition to WebAssembly text (Wat) format."
-        def to_wat(), do: Orb.to_wat(__wasm_module__(0))
+        def to_wat(), do: Orb.to_wat(__wasm_module__())
       end
     end
   end
@@ -849,8 +830,8 @@ defmodule Orb do
 
         # @wasm_body unquote(body)
 
-        def __wasm_body__(wasm_global_type) do
-          super(wasm_global_type) ++ unquote(body)
+        def __wasm_body__(context) do
+          super(context) ++ unquote(body)
         end
 
         defoverridable __wasm_body__: 1
@@ -1000,7 +981,7 @@ defmodule Orb do
   def to_wat(term) when is_atom(term) do
     Process.put(Orb.DSL, true)
 
-    term.__wasm_module__(0) |> Orb.ToWat.to_wat("") |> IO.chardata_to_string()
+    term.__wasm_module__() |> Orb.ToWat.to_wat("") |> IO.chardata_to_string()
   end
 
   def to_wat(term) do
@@ -1018,7 +999,7 @@ defmodule Orb do
   end
 
   def __lookup_global_type!(global_identifier) do
-    Process.get({Orb, :global_types}).(global_identifier)
+    Process.get({Orb, :global_types}) |> Map.fetch!(global_identifier)
   end
 
   def __lookup_constant!(constant_value) when is_binary(constant_value) do

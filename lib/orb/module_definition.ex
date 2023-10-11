@@ -30,23 +30,23 @@ defmodule Orb.ModuleDefinition do
   end
 
   defp resolve_func_ref({:mod_func_ref, visiblity, {mod, name}}) do
-    fetch_func!(mod.__wasm_module__(1), visiblity, mod, name)
+    fetch_func!(Orb.Compiler.get_body_of(mod), visiblity, mod, name)
   end
 
   defp resolve_func_ref({:mod_func_ref, visiblity, mod}) when is_atom(mod) do
-    fetch_func!(mod.__wasm_module__(1), visiblity, mod)
+    fetch_func!(Orb.Compiler.get_body_of(mod), visiblity, mod)
   end
 
   defmodule FetchFuncError do
-    defexception [:func_name, :module_definition]
+    defexception [:func_name, :source_module]
 
     @impl true
-    def message(%{func_name: func_name, module_definition: module_definition}) do
-      "funcp #{func_name} not found in #{module_definition.name} #{inspect(module_definition.body)}"
+    def message(%{func_name: func_name, source_module: source_module}) do
+      "funcp #{func_name} not found in #{source_module}"
     end
   end
 
-  def fetch_func!(%__MODULE__{body: body}, visibility, source_module) do
+  def fetch_func!(body, visibility, source_module) when is_list(body) do
     body = List.flatten(body)
     exported? = visibility == :exported
 
@@ -68,7 +68,7 @@ defmodule Orb.ModuleDefinition do
     funcs
   end
 
-  def fetch_func!(%__MODULE__{body: body} = module_definition, visibility, source_module, name) do
+  def fetch_func!(body, visibility, source_module, name) when is_list(body) do
     body = List.flatten(body)
     exported? = visibility == :exported
 
@@ -86,7 +86,7 @@ defmodule Orb.ModuleDefinition do
           false
       end)
 
-    func || raise FetchFuncError, func_name: name, module_definition: module_definition
+    func || raise FetchFuncError, func_name: name, source_module: source_module
   end
 
   def func_ref!(mod, name) when is_atom(mod) do
