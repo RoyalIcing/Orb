@@ -597,21 +597,21 @@ defmodule Orb do
     {block_items, constants} =
       Macro.prewalk(block_items, [], fn
         {:const, _, [str]}, constants when is_binary(str) ->
-          {quote(do: Orb.__data_for_constant(unquote(str))), [str | constants]}
+          {quote(do: Orb.__lookup_constant!(unquote(str))), [str | constants]}
 
         {:const, _, [expression]}, constants ->
-          {quote(do: Orb.__data_for_constant(unquote(expression))), [expression | constants]}
+          {quote(do: Orb.__lookup_constant!(unquote(expression))), [expression | constants]}
 
         {:sigil_S, _, [{:<<>>, _, [str]}, _]}, constants ->
           {
-            quote(do: Orb.__data_for_constant(unquote(str))),
+            quote(do: Orb.__lookup_constant!(unquote(str))),
             [str | constants]
           }
 
         # FIXME: have to decide whether supporting ~s and interpolation is too hard.
         {:sigil_s, _, [{:<<>>, _, [str]}, _]}, constants ->
           {
-            quote(do: Orb.__data_for_constant(unquote(str))),
+            quote(do: Orb.__lookup_constant!(unquote(str))),
             [str | constants]
           }
 
@@ -632,7 +632,7 @@ defmodule Orb do
 
     defmacro __before_compile__(_env) do
       quote do
-        def __wasm_constants__(), do: Orb.Constants.from_attribute(@wasm_constants)
+        # def __wasm_constants__(), do: Orb.Constants.from_attribute(@wasm_constants)
 
         @wasm_global_types Map.new(List.flatten(@wasm_globals), fn global ->
                              {global.name, global.type}
@@ -644,22 +644,37 @@ defmodule Orb do
         def __wasm_table_allocations__(),
           do: Orb.Table.Allocations.from_attribute(@wasm_table_allocations)
 
-        def __wasm_module__() do
+        def __wasm_module__(level \\ 0) do
           get_global_type = &__wasm_global_type__/1
 
-          constants = Orb.Constants.from_attribute(@wasm_constants)
+          # Orb.Constants = :ets.new(Orb.Constants, [:set, :private, :named_table])
+          # constants = Orb.Constants.from_attribute(@wasm_constants)
+
+          if level === 0 do
+            Orb.Constants.__begin()
+          end
 
           # I tried having this be a Macro.var but it’s not working.
           # So resort to the ultimate hole puncher.
           Process.put({Orb, :global_types}, get_global_type)
-          Process.put({Orb, :constants}, constants)
-          body = __wasm_body__(get_global_type)
-
+          # Process.put({Orb, :constants}, constants)
           globals =
             @wasm_globals |> Enum.reverse() |> List.flatten() |> Enum.map(&Orb.Global.expand/1)
 
-          Process.delete({Orb, :constants})
+          body = __wasm_body__(get_global_type)
+
+          # Process.delete({Orb, :constants})
           Process.delete({Orb, :global_types})
+
+          body = Orb.ModuleDefinition.expand_body_func_refs(body)
+
+          constants = case level do
+            0 ->
+              Orb.Constants.__done()
+
+            _ ->
+              %Orb.Constants{}
+          end
 
           Orb.ModuleDefinition.new(
             name: @wasm_name,
@@ -699,7 +714,7 @@ defmodule Orb do
           do: Orb.ModuleDefinition.funcp_ref!(__MODULE__, name)
 
         @doc "Convert this module’s Orb definition to WebAssembly text (Wat) format."
-        def to_wat(), do: Orb.to_wat(__wasm_module__())
+        def to_wat(), do: Orb.to_wat(__wasm_module__(0))
       end
     end
   end
@@ -985,7 +1000,7 @@ defmodule Orb do
   def to_wat(term) when is_atom(term) do
     Process.put(Orb.DSL, true)
 
-    term.__wasm_module__() |> Orb.ToWat.to_wat("") |> IO.chardata_to_string()
+    term.__wasm_module__(0) |> Orb.ToWat.to_wat("") |> IO.chardata_to_string()
   end
 
   def to_wat(term) do
@@ -1007,8 +1022,9 @@ defmodule Orb do
   end
 
   def __lookup_constant!(constant_value) when is_binary(constant_value) do
-    Process.get({Orb, :constants})
-    |> Orb.Constants.lookup(constant_value)
+    Orb.Constants.__lookup(constant_value)
+    # Process.get({Orb, :constants})
+    # |> Orb.Constants.lookup(constant_value)
   end
 
   defmacro __data_for_constant(value) do

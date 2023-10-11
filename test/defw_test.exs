@@ -1,5 +1,6 @@
 defmodule DefwTest do
   use ExUnit.Case, async: true
+  alias OrbWasmtime.Instance
 
   defmacrop location(plus) do
     caller = __CALLER__
@@ -141,5 +142,42 @@ defmodule DefwTest do
                      end
                    end
                  end
+  end
+
+  test "constant strings are mapped into a single address space" do
+    defmodule SharedStringConstants do
+      use Orb
+
+      defwi foo(), I32.String do
+        ~S"foo"
+      end
+
+      defwi cdata_start(), I32.String do
+        ~S"<![CDATA["
+      end
+    end
+
+    defmodule SharedStringConsumer do
+      use Orb
+
+      Orb.include(SharedStringConstants)
+      import SharedStringConstants
+
+      Memory.pages(1)
+
+      defw cdata_start2(), I32.String do
+        ~S"<![CDATA["
+      end
+
+      defw use_other(), I32.String do
+        cdata_start()
+      end
+    end
+
+    IO.puts(SharedStringConsumer.to_wat())
+    i = Instance.run(SharedStringConsumer)
+    # assert Instance.read_memory(i, 0xFF, 20) == ""
+    assert Instance.call_reading_string(i, :cdata_start2) == "<![CDATA["
+    assert Instance.call_reading_string(i, :use_other) == "<![CDATA["
   end
 end

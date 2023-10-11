@@ -4,6 +4,66 @@ defmodule Orb.Constants do
   # TODO: decide on non-arbitrary offset, and document it.
   defstruct offset: 0xFF, items: [], lookup_table: []
 
+  def __begin(start_offset \\ 0xFF) do
+    tid = Process.get(__MODULE__)
+    if not is_nil(tid) do
+      raise "Must not nest Orb.Constants scopes."
+    end
+
+    # try do
+    #   :ets.delete(__MODULE__)
+    # rescue
+    #   ArgumentError -> nil
+    # end
+
+    # __MODULE__ = :ets.new(__MODULE__, [:set, :private, :named_table])
+    tid = :ets.new(__MODULE__, [:set, :private])
+    :ets.insert(tid, {:offset, start_offset})
+    Process.put(__MODULE__, tid)
+    nil
+  end
+
+  defp lookup_offset(string) when is_binary(string) do
+    tid = Process.get(__MODULE__)
+
+    case :ets.lookup_element(tid, string, 2, nil) do
+      offset when is_integer(offset) ->
+        offset
+
+      nil ->
+        count = byte_size(string) + 1
+        new_offset = :ets.update_counter(tid, :offset, {2, count})
+        offset = new_offset - count
+        :ets.insert(tid, {string, offset})
+        offset
+    end
+  end
+
+  # @matcher :ets.fun2ms(fn {string, offset} when is_binary(string) ->
+  #   {string, 0xFF + offset}
+  # end)
+
+  def __done() do
+    tid = Process.get(__MODULE__)
+    if is_nil(tid) do
+      raise "Must be called within a Orb.Constants scope."
+    end
+
+    Process.delete(__MODULE__)
+
+    # matcher = :ets.fun2ms(fn {string, offset} when is_binary(string) ->
+    #   {string, offset}
+    # end)
+
+    matcher = [{{:"$1", :"$2"}, [is_binary: :"$1"], [{{:"$1", :"$2"}}]}]
+    lookup_table = :ets.select(tid, matcher)
+    :ets.delete(tid)
+
+    # entries = :ets.match_object(__MODULE__, {:"$0", :"$1"})
+
+    %__MODULE__{offset: 0xFF, items: [], lookup_table: lookup_table}
+  end
+
   def from_attribute(items, offset \\ 0xFF) do
     items =
       items
@@ -36,9 +96,14 @@ defmodule Orb.Constants do
     end
   end
 
-  def lookup(constants, value) do
-    {_, memory_offset} = List.keyfind!(constants.lookup_table, value, 0)
-    %NulTerminatedString{memory_offset: memory_offset, string: value}
+  # def lookup(constants, value) do
+  #   {_, memory_offset} = List.keyfind!(constants.lookup_table, value, 0)
+  #   %NulTerminatedString{memory_offset: memory_offset, string: value}
+  # end
+
+  def __lookup(string) when is_binary(string) do
+    offset = lookup_offset(string)
+    %NulTerminatedString{memory_offset: offset, string: string}
   end
 
   defimpl Orb.ToWat do

@@ -10,9 +10,8 @@ defmodule Orb.ModuleDefinition do
             constants: %Orb.Constants{},
             body: []
 
-  def new(options) do
-    {body, options} = Keyword.pop(options, :body)
-
+  @doc false
+  def expand_body_func_refs(body) do
     {func_refs, other} = Enum.split_with(body, &match?({:mod_func_ref, _, _}, &1))
 
     func_refs =
@@ -23,17 +22,19 @@ defmodule Orb.ModuleDefinition do
       |> Enum.uniq_by(fn func -> {func.source_module, func.name} end)
 
     body = func_refs ++ other
+    body
+  end
 
-    fields = Keyword.put(options, :body, body)
-    struct!(__MODULE__, fields)
+  def new(options) do
+    struct!(__MODULE__, options)
   end
 
   defp resolve_func_ref({:mod_func_ref, visiblity, {mod, name}}) do
-    fetch_func!(mod.__wasm_module__(), visiblity, mod, name)
+    fetch_func!(mod.__wasm_module__(1), visiblity, mod, name)
   end
 
   defp resolve_func_ref({:mod_func_ref, visiblity, mod}) when is_atom(mod) do
-    fetch_func!(mod.__wasm_module__(), visiblity, mod)
+    fetch_func!(mod.__wasm_module__(1), visiblity, mod)
   end
 
   defmodule FetchFuncError do
