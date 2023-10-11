@@ -644,17 +644,12 @@ defmodule Orb do
           do: Orb.Table.Allocations.from_attribute(@wasm_table_allocations)
 
         def __wasm_module__() do
-          Orb.Compiler.begin()
+          Orb.Compiler.begin(global_types: __wasm_global_types__())
 
-          # I tried having this be a Macro.var but it’s not working.
-          # So resort to the ultimate hole puncher.
-          Process.put({Orb, :global_types}, __wasm_global_types__())
-
-          globals =
+          global_definitions =
             @wasm_globals |> Enum.reverse() |> List.flatten() |> Enum.map(&Orb.Global.expand/1)
 
           body = Orb.Compiler.get_body_of(__MODULE__)
-          Process.delete({Orb, :global_types})
 
           %{constants: constants} = Orb.Compiler.done()
 
@@ -663,7 +658,7 @@ defmodule Orb do
             types: @wasm_types |> Enum.reverse() |> List.flatten(),
             table_size: @wasm_table_allocations |> List.flatten() |> length(),
             imports: @wasm_imports |> Enum.reverse() |> List.flatten(),
-            globals: globals,
+            globals: global_definitions,
             memory: Memory.from(@wasm_memory),
             constants: constants,
             body: body
