@@ -649,13 +649,15 @@ defmodule Orb do
 
           constants = Orb.Constants.from_attribute(@wasm_constants)
 
-
           # I tried having this be a Macro.var but it’s not working.
           # So resort to the ultimate hole puncher.
           Process.put({Orb, :global_types}, get_global_type)
           Process.put({Orb, :constants}, constants)
           body = __wasm_body__(get_global_type)
-          globals = @wasm_globals |> Enum.reverse() |> List.flatten() |> Enum.map(&Orb.Global.expand/1)
+
+          globals =
+            @wasm_globals |> Enum.reverse() |> List.flatten() |> Enum.map(&Orb.Global.expand/1)
+
           Process.delete({Orb, :constants})
           Process.delete({Orb, :global_types})
 
@@ -699,13 +701,6 @@ defmodule Orb do
         @doc "Convert this module’s Orb definition to WebAssembly text (Wat) format."
         def to_wat(), do: Orb.to_wat(__wasm_module__())
       end
-    end
-  end
-
-  defmacro __data_for_constant(value) do
-    quote do
-      __wasm_constants__()
-      |> Orb.Constants.lookup(unquote(value))
     end
   end
 
@@ -1012,6 +1007,13 @@ defmodule Orb do
   end
 
   def __lookup_constant!(constant_value) when is_binary(constant_value) do
-    Orb.Constants.lookup(Process.get({Orb, :constants}), constant_value)
+    Process.get({Orb, :constants})
+    |> Orb.Constants.lookup(constant_value)
+  end
+
+  defmacro __data_for_constant(value) do
+    quote do
+      Orb.__lookup_constant!(unquote(value))
+    end
   end
 end
