@@ -174,7 +174,7 @@ defmodule DefwTest do
       end
     end
 
-    IO.puts(SharedStringConsumer.to_wat())
+    # IO.puts(SharedStringConsumer.to_wat())
     i = Instance.run(SharedStringConsumer)
     # assert Instance.read_memory(i, 0xFF, 20) == ""
     assert Instance.call_reading_string(i, :cdata_start2) == "<![CDATA["
