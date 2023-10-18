@@ -1,5 +1,6 @@
 defmodule I32ConveniencesTest do
   use ExUnit.Case, async: true
+  use OrbHelper
 
   alias OrbWasmtime.Wasm
 
@@ -70,5 +71,35 @@ defmodule I32ConveniencesTest do
     """
 
     assert Wasm.call(Attrs, :"first=", 9) == nil
+  end
+
+  test "I32.match output int" do
+    assert (OrbHelper.module_wat do
+      use Orb
+
+      defw get_path(), I32.String, state: I32 do
+        state = 0
+
+        I32.match state do
+          0 -> 100
+          1 -> 200
+        end
+      end
+    end) =~ "(i32.const 100)"
+  end
+
+  test "I32.match output string constant" do
+    assert (OrbHelper.module_wat do
+      use Orb
+
+      defw get_path(), I32.String, state: I32 do
+        state = 0
+
+        I32.match state do
+          0 -> ~S[/initial]
+          1 -> ~S[/disconnected]
+        end
+      end
+    end) =~ "/initial"
   end
 end

@@ -42,6 +42,13 @@ defmodule Orb.IfElse do
     }
   end
 
+  def expand(%__MODULE__{} = statement) do
+    when_true = statement.when_true |> Orb.Constants.expand_if_needed()
+    when_false = statement.when_false |> Orb.Constants.expand_if_needed()
+    %{statement | when_true: when_true, when_false: when_false}
+  end
+
+  # TODO: remove this, Orb.Instruction should do this for us.
   defp optimize_condition({:i32, :gt_u, {n, 0}}), do: n
   defp optimize_condition(condition), do: condition
 
