@@ -88,7 +88,7 @@ defmodule OrbTest do
         end
 
         defw mime_type_constant, I32.String do
-          ~S"text/html"
+          "text/html"
         end
 
         defw mime_type_global, I32.String do

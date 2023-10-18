@@ -520,7 +520,6 @@ defmodule Orb do
       Module.register_attribute(__MODULE__, :wasm_table_allocations, accumulate: true)
       Module.register_attribute(__MODULE__, :wasm_imports, accumulate: true)
       Module.register_attribute(__MODULE__, :wasm_body, accumulate: true)
-      Module.register_attribute(__MODULE__, :wasm_constants, accumulate: true)
     end
   end
 
@@ -585,33 +584,10 @@ defmodule Orb do
   defp do_module_body(block, env) do
     block = interpolate_external_values(block, env)
 
-    block_items =
-      case block do
-        {:__block__, _meta, block_items} -> block_items
-        single -> List.wrap(single)
-      end
-
-    # block_items = Macro.expand(block_items, env)
-    # block_items = block_items
-
-    {block_items, constants} =
-      Macro.postwalk(block_items, [], fn
-        # {:const, _, [str]}, constants when is_binary(str) ->
-        #   {quote(do: Orb.__lookup_constant!(unquote(str))), [str | constants]}
-
-        # {:const, _, [expression]}, constants ->
-        #   {quote(do: Orb.__lookup_constant!(unquote(expression))), [expression | constants]}
-
-        other, constants ->
-          {other, constants}
-      end)
-
-    constants = Enum.reverse(constants)
-
-    %{
-      body: block_items,
-      constants: constants
-    }
+    case block do
+      {:__block__, _meta, block_items} -> block_items
+      single -> List.wrap(single)
+    end
   end
 
   defmodule BeforeCompile do
@@ -619,8 +595,6 @@ defmodule Orb do
 
     defmacro __before_compile__(_env) do
       quote do
-        # def __wasm_constants__(), do: Orb.Constants.from_attribute(@wasm_constants)
-
         @wasm_global_types @wasm_globals
                            |> List.flatten()
                            |> Map.new(fn global -> {global.name, global.type} end)
@@ -794,15 +768,10 @@ defmodule Orb do
     pre = __mode_pre(mode)
     post = mode_post(mode)
 
-    %{body: body, constants: constants} = do_module_body(block, __CALLER__)
-
-    Module.register_attribute(__CALLER__.module, :wasm_constants, accumulate: true)
-    # Module.put_attribute(__CALLER__.module, :wasm_constants, constants)
+    body = do_module_body(block, __CALLER__)
 
     quote do
       with do
-        @wasm_constants unquote(constants)
-
         unquote(pre)
         import Orb, only: []
         import Orb.DSL

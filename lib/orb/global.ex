@@ -70,9 +70,6 @@ defmodule Orb.Global do
                          value
                        )
                      end)
-      @wasm_constants (for {_key, value} when is_binary(value) <- unquote(list) do
-                         value
-                       end)
     end
   end
 
