@@ -8,6 +8,7 @@ Orb is a DSL for WebAssembly with the full power of the Elixir language at compi
 - Break problems into smaller modules and compose them together
 - Macros
 - Inline code and for-comprehensions
+- Compile on-the-fly, and run dynamic code at compile time e.g. feature flags, talk to outside services
 - Publish via the Hex package manager
 
 ## Installation
@@ -17,7 +18,7 @@ The package can be installed via Hex by adding `orb` to your list of dependencie
 ```elixir
 def deps do
   [
-    {:orb, "~> 0.0.20"}
+    {:orb, "~> 0.0.21"}
   ]
 end
 ```
