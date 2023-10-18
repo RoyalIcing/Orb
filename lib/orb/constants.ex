@@ -108,10 +108,10 @@ defmodule Orb.Constants do
   # end
 
   def expand_if_needed(value)
-  def expand_if_needed(value) when is_binary(value), do: lookup_offset!(value)
+  def expand_if_needed(value) when is_binary(value), do: expand_string!(value)
   def expand_if_needed(value), do: value
 
-  defp lookup_offset!(string) when is_binary(string) do
+  defp expand_string!(string) when is_binary(string) do
     case lookup_offset(string) do
       {:ok, offset} ->
         %NulTerminatedString{memory_offset: offset, string: string}
