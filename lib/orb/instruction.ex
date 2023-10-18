@@ -1,8 +1,8 @@
 defmodule Orb.Instruction do
-  alias Orb.Constants
   defstruct [:type, :operation, :operands]
 
   require Orb.Ops, as: Ops
+  alias Orb.Constants
 
   def new(type, operation),
     do: %__MODULE__{type: type, operation: operation, operands: []}

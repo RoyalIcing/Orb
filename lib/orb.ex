@@ -834,6 +834,7 @@ defmodule Orb do
     end
   end
 
+  # TODO: remove
   defp interpolate_external_values(ast, _env) do
     Macro.postwalk(ast, fn
       {:^, _, [term]} ->

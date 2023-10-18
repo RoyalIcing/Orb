@@ -51,10 +51,11 @@ defmodule Orb.DSL do
   defp define_func(call, visibility, options, block, env) do
     call = Macro.expand_once(call, __ENV__)
 
-    line = case call do
-      {_, meta, _} -> meta[:line]
-      _ -> env.line
-    end
+    line =
+      case call do
+        {_, meta, _} -> meta[:line]
+        _ -> env.line
+      end
 
     {name, args} =
       case Macro.decompose_call(call) do
@@ -204,11 +205,13 @@ defmodule Orb.DSL do
       {:=, _, [{local, _, nil}, input]}
       when is_atom(local) and is_map_key(locals, local) and
              is_struct(:erlang.map_get(local, locals), Orb.VariableReference) ->
-        quote do: Orb.Instruction.local_set(unquote(locals[local]), unquote(local), unquote(input))
+        quote do:
+                Orb.Instruction.local_set(unquote(locals[local]), unquote(local), unquote(input))
 
       {:=, _, [{local, _, nil}, input]}
       when is_atom(local) and is_map_key(locals, local) ->
-        quote do: Orb.Instruction.local_set(unquote(locals[local]), unquote(local), unquote(input))
+        quote do:
+                Orb.Instruction.local_set(unquote(locals[local]), unquote(local), unquote(input))
 
       {local, _meta, nil} when is_atom(local) and is_map_key(locals, local) ->
         quote do: Orb.VariableReference.local(unquote(local), unquote(locals[local]))
@@ -216,7 +219,12 @@ defmodule Orb.DSL do
       # @some_global = input
       {:=, _, [{:@, _, [{global, _, nil}]}, input]} when is_atom(global) ->
         # quote do: Orb.Instruction.global_set(unquote(Macro.var(:wasm_global_type, nil)).(unquote(global)), unquote(global), unquote(input))
-        quote do: Orb.Instruction.global_set(Orb.__lookup_global_type!(unquote(global)), unquote(global), unquote(input))
+        quote do:
+                Orb.Instruction.global_set(
+                  Orb.__lookup_global_type!(unquote(global)),
+                  unquote(global),
+                  unquote(input)
+                )
 
       # @some_global
       #       node = {:@, meta, [{global, _, nil}]} when is_atom(global) ->
@@ -263,7 +271,8 @@ defmodule Orb.DSL do
   def push(n) when is_float(n), do: {:f32_const, n}
   def push(%Orb.VariableReference{} = ref), do: ref
 
-  def push(do: %Orb.Instruction{operation: {:local_set, identifier, type}, operands: [value]}), do: Orb.Instruction.local_tee(type, identifier, value)
+  def push(do: %Orb.Instruction{operation: {:local_set, identifier, type}, operands: [value]}),
+    do: Orb.Instruction.local_tee(type, identifier, value)
 
   @doc """
   Push value then run the block. Useful for when you mutate a variable but want its previous value.
@@ -502,20 +511,20 @@ defmodule Orb.DSL do
   @doc """
   Return from a function. You may wish to `push/1` values before returning.
   """
-  def return(), do: :return
+  def return(), do: Orb.Control.Return.new()
 
   @doc """
   Return from a function if a condition is true.
   """
   def return(value_or_condition)
 
-  def return(if: condition), do: Orb.IfElse.new(condition, :return)
-  def return(value), do: {:return, value}
+  def return(if: condition), do: Orb.IfElse.new(condition, Orb.Control.Return.new())
+  def return(value), do: Orb.Control.Return.new(value)
 
   @doc """
   Return from a function with the provided value only if a condition is true.
   """
-  def return(value, if: condition), do: Orb.IfElse.new(condition, {:return, value})
+  def return(value, if: condition), do: Orb.IfElse.new(condition, Orb.Control.Return.new(value))
 
   @doc """
   A no-op instruction.

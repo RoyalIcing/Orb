@@ -102,4 +102,25 @@ defmodule I32ConveniencesTest do
       end
     end) =~ "/initial"
   end
+
+  test "can return string constant" do
+    assert (OrbHelper.module_wat do
+      use Orb
+
+      global do
+        @method "GET"
+      end
+
+      defw text_html(), I32.String do
+        if not I32.String.streq(@method, "GET") do
+          return(~S"""
+          <!doctype html>
+          <h1>Method not allowed</h1>
+          """)
+        end
+
+        "<p>Hello</p>"
+      end
+    end) =~ "Method not allowed"
+  end
 end

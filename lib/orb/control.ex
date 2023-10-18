@@ -45,5 +45,5 @@ defmodule Orb.Control do
   def break(identifier, if: condition),
     do: %Orb.Block.Branch{identifier: __expand_identifier(identifier, __ENV__), if: condition}
 
-  def return(), do: :return
+  def return(), do: Orb.Control.Return.new()
 end

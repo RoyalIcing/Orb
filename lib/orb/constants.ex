@@ -111,8 +111,8 @@ defmodule Orb.Constants do
   def expand_if_needed(value) when is_binary(value), do: expand_string!(value)
   def expand_if_needed(value) when is_list(value), do: :lists.map(&expand_if_needed/1, value)
   def expand_if_needed(value) when is_struct(value, Orb.IfElse), do: Orb.IfElse.expand(value)
-  def expand_if_needed(%_{body: body} = struct) when is_list(body) do
-    body = expand_if_needed(body)
+  def expand_if_needed(%_{body: _} = struct) do
+    body = expand_if_needed(struct.body)
     %{struct | body: body}
   end
   def expand_if_needed(value), do: value
