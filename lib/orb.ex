@@ -957,18 +957,4 @@ defmodule Orb do
   def __lookup_global_type!(global_identifier) do
     Process.get({Orb, :global_types}) |> Map.fetch!(global_identifier)
   end
-
-  def __lookup_constant!(constant_value) when is_binary(constant_value) do
-    Orb.Constants.__lookup(constant_value)
-  end
-
-  def __lookup_constant!(%Orb.Constants.NulTerminatedString{} = input) do
-    input
-  end
-
-  defmacro __data_for_constant(value) do
-    quote do
-      Orb.__lookup_constant!(unquote(value))
-    end
-  end
 end

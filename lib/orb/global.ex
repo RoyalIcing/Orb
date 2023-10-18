@@ -74,7 +74,7 @@ defmodule Orb.Global do
   end
 
   def expand!(%Orb.Global{type: :i32_string, initial_value: string} = global) do
-    %Orb.Global{global | type: :i32, initial_value: Orb.__lookup_constant!(string)}
+    %Orb.Global{global | type: :i32, initial_value: Orb.Constants.expand_if_needed(string)}
   end
 
   def expand!(%Orb.Global{} = global) do

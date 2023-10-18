@@ -494,7 +494,7 @@ defmodule Orb.DSL do
   Declare a constant string, which will be extracted to the top of the module, and its address substituted in place.
   """
   def const(value) do
-    Orb.__lookup_constant!(value)
+    Orb.Constants.expand_if_needed(value)
   end
 
   # TODO: add a comptime keyword like Zig: https://kristoff.it/blog/what-is-zig-comptime/
