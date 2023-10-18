@@ -519,7 +519,6 @@ defmodule Orb do
       Module.register_attribute(__MODULE__, :wasm_types, accumulate: true)
       Module.register_attribute(__MODULE__, :wasm_table_allocations, accumulate: true)
       Module.register_attribute(__MODULE__, :wasm_imports, accumulate: true)
-      Module.register_attribute(__MODULE__, :wasm_body, accumulate: true)
     end
   end
 
