@@ -497,12 +497,6 @@ defmodule Orb.DSL do
     Orb.__lookup_constant!(value)
   end
 
-  # TODO: decide if this idea is dead.
-  @doc false
-  def const_set_insert(set_name, string) when is_atom(set_name) and is_binary(string) do
-    :todo
-  end
-
   # TODO: add a comptime keyword like Zig: https://kristoff.it/blog/what-is-zig-comptime/
 
   @doc """
