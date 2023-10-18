@@ -493,25 +493,8 @@ defmodule Orb.DSL do
   @doc """
   Declare a constant string, which will be extracted to the top of the module, and its address substituted in place.
   """
-  # def const(value) do
-  #   {:const_string, value}
-  # end
-  defmacro const(value) do
-    quote do
-      with do
-        # TODO: DRY this up
-        # use Orb.RestoreKernel
-        import Orb.Global.DSL, only: []
-        import Orb.IfElse.DSL, only: []
-        import Orb.I32.DSL, only: []
-        import Orb.U32.DSL, only: []
-        import Orb.S32.DSL, only: []
-        import Orb.F32.DSL, only: []
-        import Kernel
-
-        {:const_string, unquote(value)}
-      end
-    end
+  def const(value) do
+    Orb.__lookup_constant!(value)
   end
 
   # TODO: decide if this idea is dead.

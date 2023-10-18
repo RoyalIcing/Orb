@@ -117,7 +117,7 @@ defmodule Orb.Constants do
         %NulTerminatedString{memory_offset: offset, string: string}
 
       :not_compiling ->
-        string
+        raise "Can only lookup strings during compilation."
     end
   end
 

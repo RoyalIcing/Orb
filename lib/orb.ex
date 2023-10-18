@@ -596,11 +596,11 @@ defmodule Orb do
 
     {block_items, constants} =
       Macro.postwalk(block_items, [], fn
-        {:const, _, [str]}, constants when is_binary(str) ->
-          {quote(do: Orb.__lookup_constant!(unquote(str))), [str | constants]}
+        # {:const, _, [str]}, constants when is_binary(str) ->
+        #   {quote(do: Orb.__lookup_constant!(unquote(str))), [str | constants]}
 
-        {:const, _, [expression]}, constants ->
-          {quote(do: Orb.__lookup_constant!(unquote(expression))), [expression | constants]}
+        # {:const, _, [expression]}, constants ->
+        #   {quote(do: Orb.__lookup_constant!(unquote(expression))), [expression | constants]}
 
         other, constants ->
           {other, constants}
