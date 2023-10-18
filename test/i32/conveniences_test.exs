@@ -10,7 +10,8 @@ defmodule I32ConveniencesTest do
       (char >= ?a &&& char <= ?z) or
         (char >= ?A &&& char <= ?Z) or
         (char >= ?0 &&& char <= ?9) or
-        I32.in?(char, ~C{~_-.})
+        I32.in?(char, [?~, ?_, ?-, ?.])
+        # I32.in?(char, ~C{~_-.})
 
       # I32.in_inclusive_range?(char, ?a, ?z) or
       #   I32.in_inclusive_range?(char, ?A, ?Z) or

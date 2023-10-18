@@ -273,18 +273,18 @@ defmodule OrbTest do
     end
   end
 
-  describe "~S" do
+  describe "~S string constants" do
     test "assigns data" do
       defmodule HTMLTypes do
         use Orb
 
         wasm do
           func doctype(), I32 do
-            ~S"<!doctype html>"
+            "<!doctype html>"
           end
 
           func mime_type(), I32 do
-            ~S"text/html"
+            "text/html"
           end
         end
       end
@@ -340,14 +340,12 @@ defmodule OrbTest do
       defmodule ConstHTMLTypes do
         use Orb
 
-        wasm do
-          func doctype(), I32 do
-            const("<!doctype html>")
-          end
+        defw doctype(), I32 do
+          const("<!doctype html>")
+        end
 
-          func mime_type(), I32 do
-            const(Enum.join(["text", "/", "html"]))
-          end
+        defw mime_type(), I32 do
+          const(Enum.join(["text", "/", "html"]))
         end
       end
 
@@ -369,16 +367,12 @@ defmodule OrbTest do
       defmodule ConstHTMLTypes2 do
         use Orb
 
-        wasm do
-          func doctype(), I32 do
-            const(Enum.join(["<!doctype ", "html>"]))
-          end
+        defw doctype(), I32 do
+          const(Enum.join(["<!doctype ", "html>"]))
         end
 
-        wasm do
-          func mime_type(), I32 do
-            const(Enum.join(["text", "/", "html"]))
-          end
+        defw mime_type(), I32 do
+          const(Enum.join(["text", "/", "html"]))
         end
       end
 

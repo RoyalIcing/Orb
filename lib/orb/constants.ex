@@ -6,6 +6,7 @@ defmodule Orb.Constants do
 
   def __begin(start_offset \\ 0xFF) do
     tid = Process.get(__MODULE__)
+
     if not is_nil(tid) do
       raise "Must not nest Orb.Constants scopes."
     end
@@ -24,18 +25,22 @@ defmodule Orb.Constants do
   end
 
   defp lookup_offset(string) when is_binary(string) do
-    tid = Process.get(__MODULE__)
-
-    case :ets.lookup_element(tid, string, 2, nil) do
-      offset when is_integer(offset) ->
-        offset
-
+    case Process.get(__MODULE__) do
       nil ->
-        count = byte_size(string) + 1
-        new_offset = :ets.update_counter(tid, :offset, {2, count})
-        offset = new_offset - count
-        :ets.insert(tid, {string, offset})
-        offset
+        :not_compiling
+
+      tid ->
+        case :ets.lookup_element(tid, string, 2, nil) do
+          offset when is_integer(offset) ->
+            {:ok, offset}
+
+          nil ->
+            count = byte_size(string) + 1
+            new_offset = :ets.update_counter(tid, :offset, {2, count})
+            offset = new_offset - count
+            :ets.insert(tid, {string, offset})
+            {:ok, offset}
+        end
     end
   end
 
@@ -45,6 +50,7 @@ defmodule Orb.Constants do
 
   def __done() do
     tid = Process.get(__MODULE__)
+
     if is_nil(tid) do
       raise "Must be called within a Orb.Constants scope."
     end
@@ -101,9 +107,18 @@ defmodule Orb.Constants do
   #   %NulTerminatedString{memory_offset: memory_offset, string: value}
   # end
 
+  def expand_if_needed(value)
+  def expand_if_needed(value) when is_binary(value), do: __lookup(value)
+  def expand_if_needed(value), do: value
+
   def __lookup(string) when is_binary(string) do
-    offset = lookup_offset(string)
-    %NulTerminatedString{memory_offset: offset, string: string}
+    case lookup_offset(string) do
+      {:ok, offset} ->
+        %NulTerminatedString{memory_offset: offset, string: string}
+
+      :not_compiling ->
+        string
+    end
   end
 
   defimpl Orb.ToWat do

@@ -595,25 +595,12 @@ defmodule Orb do
     # block_items = block_items
 
     {block_items, constants} =
-      Macro.prewalk(block_items, [], fn
+      Macro.postwalk(block_items, [], fn
         {:const, _, [str]}, constants when is_binary(str) ->
           {quote(do: Orb.__lookup_constant!(unquote(str))), [str | constants]}
 
         {:const, _, [expression]}, constants ->
           {quote(do: Orb.__lookup_constant!(unquote(expression))), [expression | constants]}
-
-        {:sigil_S, _, [{:<<>>, _, [str]}, _]}, constants ->
-          {
-            quote(do: Orb.__lookup_constant!(unquote(str))),
-            [str | constants]
-          }
-
-        # FIXME: have to decide whether supporting ~s and interpolation is too hard.
-        {:sigil_s, _, [{:<<>>, _, [str]}, _]}, constants ->
-          {
-            quote(do: Orb.__lookup_constant!(unquote(str))),
-            [str | constants]
-          }
 
         other, constants ->
           {other, constants}
@@ -634,9 +621,9 @@ defmodule Orb do
       quote do
         # def __wasm_constants__(), do: Orb.Constants.from_attribute(@wasm_constants)
 
-        @wasm_global_types Map.new(List.flatten(@wasm_globals), fn global ->
-                             {global.name, global.type}
-                           end)
+        @wasm_global_types @wasm_globals
+                           |> List.flatten()
+                           |> Map.new(fn global -> {global.name, global.type} end)
                            |> Map.merge(%{__MODULE__: __MODULE__})
         def __wasm_global_types__(), do: @wasm_global_types
 
@@ -644,13 +631,19 @@ defmodule Orb do
           do: Orb.Table.Allocations.from_attribute(@wasm_table_allocations)
 
         def __wasm_module__() do
+          # Globals are defined by the current module.
+          # Including another module does _not_ include its globals.
+          # Instead you must declare the globals explicitly.
+          # Usually, this would be wrapped within a __using__/1 for you.
           Orb.Compiler.begin(global_types: __wasm_global_types__())
 
+          # Each global is expanded, possibly looking up with the current compiler context begun above.
           global_definitions =
-            @wasm_globals |> Enum.reverse() |> List.flatten() |> Enum.map(&Orb.Global.expand/1)
+            @wasm_globals |> Enum.reverse() |> List.flatten() |> Enum.map(&Orb.Global.expand!/1)
 
           body = Orb.Compiler.get_body_of(__MODULE__)
 
+          # We’re done. Get all the constant strings that were actually used.
           %{constants: constants} = Orb.Compiler.done()
 
           Orb.ModuleDefinition.new(
@@ -999,8 +992,10 @@ defmodule Orb do
 
   def __lookup_constant!(constant_value) when is_binary(constant_value) do
     Orb.Constants.__lookup(constant_value)
-    # Process.get({Orb, :constants})
-    # |> Orb.Constants.lookup(constant_value)
+  end
+
+  def __lookup_constant!(%Orb.Constants.NulTerminatedString{} = input) do
+    input
   end
 
   defmacro __data_for_constant(value) do

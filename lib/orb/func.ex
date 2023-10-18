@@ -1,5 +1,6 @@
 defmodule Orb.Func do
   @moduledoc false
+alias Orb.Constants
 
   defstruct name: nil,
             exported_names: [],
@@ -12,6 +13,11 @@ defmodule Orb.Func do
 
   def __add_table_elem(f = %__MODULE__{}, elem_index) do
     update_in(f.table_elem_indices, fn refs -> [elem_index | refs] end)
+  end
+
+  def expand(%__MODULE__{} = func) do
+    body = func.body |> Enum.map(&Constants.expand_if_needed/1)
+    %{func | body: body}
   end
 
   defimpl Orb.ToWat do

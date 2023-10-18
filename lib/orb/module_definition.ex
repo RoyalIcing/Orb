@@ -25,6 +25,17 @@ defmodule Orb.ModuleDefinition do
     body
   end
 
+  def expand_body_func_constants(body) do
+    body
+    |> Enum.map(fn
+      %Orb.Func{} = f ->
+        Orb.Func.expand(f)
+
+      other ->
+        other
+    end)
+  end
+
   def new(options) do
     struct!(__MODULE__, options)
   end

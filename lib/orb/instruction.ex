@@ -1,4 +1,5 @@
 defmodule Orb.Instruction do
+  alias Orb.Constants
   defstruct [:type, :operation, :operands]
 
   require Orb.Ops, as: Ops
@@ -39,12 +40,14 @@ defmodule Orb.Instruction do
     do: new(:global_effect, {:global_set, global_name, type}, [value])
 
   defp type_check_operands(type, operation, operands) do
+    operands = operands |> Enum.map(&Constants.expand_if_needed/1)
+
     Enum.with_index(operands, &type_check_operand!(type, operation, &1, &2))
+
     operands
   end
 
-  defp type_check_operand!(type, op, number, param_index)
-       when is_number(number) do
+  defp type_check_operand!(type, op, number, param_index) when is_number(number) do
     received_type =
       cond do
         is_integer(number) -> :i32
