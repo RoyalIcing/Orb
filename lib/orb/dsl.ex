@@ -170,6 +170,8 @@ defmodule Orb.DSL do
             Instruction.local_get(unquote(locals[local]), unquote(local))
           end
 
+        # TODO: remove, as should be handled by the custom type implementing
+        # the Access protocol.
         computed_offset =
           case {offset, bytes_factor} do
             {0, _} ->

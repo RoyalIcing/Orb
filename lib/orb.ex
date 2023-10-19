@@ -581,8 +581,6 @@ defmodule Orb do
   end
 
   defp do_module_body(block, env) do
-    block = interpolate_external_values(block, env)
-
     case block do
       {:__block__, _meta, block_items} -> block_items
       single -> List.wrap(single)
@@ -760,8 +758,6 @@ defmodule Orb do
   Enter WebAssembly.
   """
   defmacro wasm(mode \\ nil, do: block) do
-    # block = interpolate_external_values(block, __ENV__)
-
     mode = mode || Module.get_attribute(__CALLER__.module, :wasm_mode, Orb.S32)
     mode = Macro.expand_literals(mode, __CALLER__)
     pre = __mode_pre(mode)
@@ -801,8 +797,6 @@ defmodule Orb do
   Declare a snippet of Orb AST for reuse. Enables DSL, with additions from `mode`.
   """
   defmacro snippet(mode \\ Orb.S32, locals \\ [], do: block) do
-    block = interpolate_external_values(block, __CALLER__)
-
     mode = Macro.expand_literals(mode, __CALLER__)
     pre = __mode_pre(mode)
     post = mode_post(mode)
@@ -832,27 +826,6 @@ defmodule Orb do
         dsl_items
       end
     end
-  end
-
-  # TODO: remove
-  defp interpolate_external_values(ast, _env) do
-    Macro.postwalk(ast, fn
-      {:^, _, [term]} ->
-        quote do
-          with do
-            unquote(mode_post(:any))
-            import Kernel
-
-            unquote(term)
-          end
-        end
-
-      {:^, _, _other} ->
-        raise "Invalid ^. Expected single argument."
-
-      other ->
-        other
-    end)
   end
 
   defmacro types(modules) do
