@@ -711,49 +711,6 @@ defmodule Orb do
     end
   end
 
-  defp mode_post(mode) do
-    dsl =
-      case mode do
-        Orb.S32 ->
-          quote do
-            import Orb.I32.DSL, only: []
-            import Orb.S32.DSL, only: []
-            import Orb.Global.DSL, only: []
-          end
-
-        Orb.U32 ->
-          quote do
-            import Orb.I32.DSL, only: []
-            import Orb.U32.DSL, only: []
-            import Orb.Global.DSL, only: []
-          end
-
-        Orb.F32 ->
-          quote do
-            import Orb.F32.DSL, only: []
-            import Orb.Global.DSL, only: []
-          end
-
-        :any ->
-          quote do
-            import Orb.I32.DSL, only: []
-            import Orb.U32.DSL, only: []
-            import Orb.S32.DSL, only: []
-            import Orb.F32.DSL, only: []
-            import Orb.Global.DSL, only: []
-          end
-
-        :no_magic ->
-          []
-      end
-
-    quote do
-      import Kernel
-      import Orb.IfElse.DSL, only: []
-      unquote(dsl)
-    end
-  end
-
   @doc """
   Enter WebAssembly.
   """
@@ -761,7 +718,6 @@ defmodule Orb do
     mode = mode || Module.get_attribute(__CALLER__.module, :wasm_mode, Orb.S32)
     mode = Macro.expand_literals(mode, __CALLER__)
     pre = __mode_pre(mode)
-    post = mode_post(mode)
 
     body = do_module_body(block, __CALLER__)
 
@@ -788,8 +744,6 @@ defmodule Orb do
 
         defoverridable __wasm_body__: 1
       end
-
-      unquote(post)
     end
   end
 
@@ -799,7 +753,6 @@ defmodule Orb do
   defmacro snippet(mode \\ Orb.S32, locals \\ [], do: block) do
     mode = Macro.expand_literals(mode, __CALLER__)
     pre = __mode_pre(mode)
-    post = mode_post(mode)
 
     block_items =
       case block do
@@ -813,17 +766,12 @@ defmodule Orb do
       end
 
     quote do
-      # We want to import and un-import. so we use `with` as a finite scope.
+      # We want our imports to not pollute. so we use `with` as a finite scope.
       with do
         unquote(pre)
-
         import Orb.DSL
-        dsl_items = unquote(Orb.DSL.do_snippet(locals, block_items))
-        import Orb.DSL, only: []
 
-        unquote(post)
-
-        dsl_items
+        unquote(Orb.DSL.do_snippet(locals, block_items))
       end
     end
   end
