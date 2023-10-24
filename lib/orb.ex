@@ -144,8 +144,6 @@ defmodule Orb do
 
   Globals by default are internal: nothing outside the module can see them. They can be exported to expose them to the outside world.
 
-  When exporting a global you decide if it is `:readonly` or `:mutable`. Internal globals are mutable by default.
-
   ```elixir
   global do # :mutable by default
     @some_internal_global 99
@@ -171,7 +169,7 @@ defmodule Orb do
   end
   ```
 
-  You can read or write to a global using the `@` prefix:
+  You can read or write to a global within `Orb.defw/2` using the `@` prefix:
 
   ```elixir
   defmodule Counter do
@@ -183,6 +181,26 @@ defmodule Orb do
 
     defw increment() do
       @counter = @counter + 1
+    end
+  end
+  ```
+
+  When you use `Orb.global/1` an Elixir module attribute with the same name and initial value is also defined for you:application
+
+  ```elixir
+  defmodule DeepThought do
+    use Orb
+
+    global do
+      @meaning_of_life 42
+    end
+
+    def get_meaning_of_life_elixir() do
+      @meaning_of_life
+    end
+
+    defw get_meaning_of_life_wasm(), I32 do
+      @meaning_of_life
     end
   end
   ```
