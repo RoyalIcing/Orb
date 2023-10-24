@@ -20,7 +20,10 @@ defmodule Orb do
   defmodule CalculateMean do
     use Orb
 
-    I32.global(count: 0, tally: 0)
+    global do
+      @count 0
+      @tally 0
+    end
 
     defw insert(element: I32) do
       @count = @count + 1
@@ -144,16 +147,28 @@ defmodule Orb do
   When exporting a global you decide if it is `:readonly` or `:mutable`. Internal globals are mutable by default.
 
   ```elixir
-  I32.global(some_internal_global: 99)
+  global do # :mutable by default
+    @some_internal_global 99
+  end
 
-  I32.global(:readonly, some_internal_global: 99)
+  global :readonly do
+    @some_internal_constant 99
+  end
 
-  I32.export_global(:readonly, some_public_constant: 1001)
+  global :export_readonly do
+    @some_public_constant 1001
+  end
 
-  I32.export_global(:mutable, some_public_variable: 42)
+  global :export_mutable do
+    @some_public_variable 42
+  end
 
   # You can define multiple globals at once:
-  I32.global(magic_number_a: 99, magic_number_b: 12, magic_number_c: -5)
+  global do
+    @magic_number_a 99
+    @magic_number_b 12
+    @magic_number_c -5
+  end
   ```
 
   You can read or write to a global using the `@` prefix:
@@ -162,7 +177,9 @@ defmodule Orb do
   defmodule Counter do
     use Orb
 
-    I32.global(counter: 0)
+    global do
+      @counter 0
+    end
 
     defw increment() do
       @counter = @counter + 1
@@ -705,6 +722,8 @@ defmodule Orb do
           or: 2
         ]
 
+      import Orb.DSL
+      require Orb.Control, as: Control
       # TODO: should this be omitted if :no_magic is passed?
       import Orb.IfElse.DSL
       unquote(dsl)
@@ -723,20 +742,8 @@ defmodule Orb do
 
     quote do
       with do
-        unquote(pre)
         import Orb, only: []
-        import Orb.DSL
-        require Orb.Control, as: Control
-
-        # with do
-        #   # Process.put()
-        #   # import Orb.DefwDSL
-        #   # unquote(body)
-
-        #   Orb.DefwDSL.define_helpers(unquote(body)) |> IO.inspect()
-        # end
-
-        # @wasm_body unquote(body)
+        unquote(pre)
 
         def __wasm_body__(context) do
           super(context) ++ unquote(body)
@@ -769,7 +776,6 @@ defmodule Orb do
       # We want our imports to not pollute. so we use `with` as a finite scope.
       with do
         unquote(pre)
-        import Orb.DSL
 
         unquote(Orb.DSL.do_snippet(locals, block_items))
       end
@@ -826,6 +832,8 @@ defmodule Orb do
 
   @doc """
   Declare WebAssembly globals.
+
+  `mode` can be :readonly, :mutable, :export_readonly, or :export_mutable. The default is :mutable.
   """
   defmacro global(mode \\ :mutable, do: block) do
     quote do
