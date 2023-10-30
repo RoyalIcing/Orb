@@ -13,16 +13,9 @@ defmodule Examples.Arena do
     Orb.snippet Orb.S32, new_ptr: I32.UnsafePointer do
       new_ptr = Instruction.global_get(Orb.I32, offset_global_name)
 
-
-
-
       if new_ptr + byte_count > end_offset * Orb.Memory.page_byte_size() do
         unreachable!()
       end
-
-
-
-
 
       Instruction.global_set(Orb.I32, offset_global_name, new_ptr + byte_count)
 
@@ -40,6 +33,7 @@ defmodule Examples.Arena do
       module_name = Module.concat(__MODULE__, unquote(name))
       page_count = unquote(opts[:pages])
       page_offset = Orb.Memory.pages(page_count)
+
       offset_global_name =
         String.to_atom("#{Macro.inspect_atom(:literal, module_name)}.bump_offset")
 
@@ -52,7 +46,6 @@ defmodule Examples.Arena do
         end,
         unquote(Macro.Env.location(__CALLER__))
       )
-
 
       global(
         do: [
