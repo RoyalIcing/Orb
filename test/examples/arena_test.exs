@@ -13,10 +13,10 @@ defmodule Examples.ArenaTest do
     Arena.def(First, pages: 2)
     Arena.def(Second, pages: 3)
 
-    Orb.include(A.First)
+    Orb.include(First)
 
     defw test(), I32 do
-      A.First.alloc(16)
+      First.alloc(16)
     end
   end
 

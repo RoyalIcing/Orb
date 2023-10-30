@@ -57,7 +57,7 @@ defmodule Examples.Arena do
         end
       end, unquote(Macro.Env.location(__CALLER__)))
 
-      # alias module_name
+      alias __MODULE__.{unquote(name)}
       # require module_name, as: unquote(name)
     end
   end
