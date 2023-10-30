@@ -8,8 +8,12 @@ defmodule OperatorsTest do
       use Orb
 
       wasm do
-        func add(), I32 do
+        func add(a: I32) do
           1 + 2
+          :drop
+
+          a + 2
+          :drop
         end
 
         func multiply(a: I32, b: I32) do
@@ -48,8 +52,11 @@ defmodule OperatorsTest do
 
     assert to_wat(D1) == """
            (module $D1
-             (func $add (export "add") (result i32)
-               (i32.add (i32.const 1) (i32.const 2))
+             (func $add (export "add") (param $a i32)
+               (i32.const 3)
+               drop
+               (i32.add (local.get $a) (i32.const 2))
+               drop
              )
              (func $multiply (export "multiply") (param $a i32) (param $b i32)
                (i32.mul (local.get $a) (local.get $b))
@@ -83,8 +90,12 @@ defmodule OperatorsTest do
       use Orb
 
       wasm U32 do
-        func add(), I32 do
+        func add(a: I32) do
           1 + 2
+          :drop
+
+          a + 2
+          :drop
         end
 
         func multiply(a: I32, b: I32) do
@@ -118,8 +129,11 @@ defmodule OperatorsTest do
 
     assert to_wat(U1) == """
            (module $U1
-             (func $add (export "add") (result i32)
-               (i32.add (i32.const 1) (i32.const 2))
+             (func $add (export "add") (param $a i32)
+               (i32.const 3)
+               drop
+               (i32.add (local.get $a) (i32.const 2))
+               drop
              )
              (func $multiply (export "multiply") (param $a i32) (param $b i32)
                (i32.mul (local.get $a) (local.get $b))

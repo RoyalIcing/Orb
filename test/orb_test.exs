@@ -802,7 +802,7 @@ defmodule OrbTest do
     (module $SnippetUser
       (memory (export "memory") 1)
       (func $answer (export "answer") (result i32)
-        (i32.load (i32.add (i32.const #{0x100}) (i32.const 4)))
+        (i32.load (i32.const #{0x104}))
       )
     )
     """

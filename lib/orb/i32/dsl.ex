@@ -19,7 +19,6 @@ defmodule Orb.I32.DSL do
 
   def left * right do
     Orb.Numeric.Multiply.optimized(Orb.I32, left, right)
-    # Orb.I32.mul(left, right)
   end
 
   def _left == _right do

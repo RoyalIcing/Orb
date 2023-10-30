@@ -17,6 +17,6 @@ defmodule Orb.Numeric.Multiply do
   # Multiply anything by one is that same thing.
   def optimized(_type, a, 1), do: a
   def optimized(_type, 1, b), do: b
-  # Finally, spit out the instruction.
+  # Finally, spit out the runtime instruction.
   def optimized(type, a, b), do: Orb.Instruction.new(type.wasm_type(), :mul, [a, b])
 end
