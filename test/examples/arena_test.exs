@@ -20,21 +20,21 @@ defmodule Examples.ArenaTest do
     end
 
     defw just_enough(), I32, i: I32, final: I32 do
-      loop HereWeGo do
+      loop AllocManyTimes do
         final = First.alloc(16)
 
         i = i + 1
-        HereWeGo.continue(if: i < 2 * 64 * 1024 / 16)
+        AllocManyTimes.continue(if: i < 2 * 64 * 1024 / 16)
       end
       final
     end
 
     defw too_many(), i: I32 do
-      loop HereWeGo do
+      loop AllocManyTimes do
         _ = First.alloc(16)
 
         i = i + 1
-        HereWeGo.continue(if: i <= 2 * 64 * 1024 / 16)
+        AllocManyTimes.continue(if: i <= 2 * 64 * 1024 / 16)
       end
     end
   end
