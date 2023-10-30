@@ -21,6 +21,9 @@ defmodule Orb.Memory do
     end
   end
 
+  @page_byte_size 64 * 1024
+  def page_byte_size(), do: @page_byte_size
+
   @doc """
   Declare how many 64Kib pages of memory your module needs.
 
