@@ -15,7 +15,7 @@ defmodule Examples.ArenaTest do
 
     Orb.include(A.First)
 
-    defw test() do
+    defw test(), I32 do
       A.First.alloc(16)
     end
   end
@@ -24,12 +24,12 @@ defmodule Examples.ArenaTest do
     assert ~S"""
            (module $A
              (memory (export "memory") 5)
-             (global $First.bump_offset (mut i32) (i32.const 0))
-             (global $Second.bump_offset (mut i32) (i32.const 131072))
+             (global $Examples.ArenaTest.A.First.bump_offset (mut i32) (i32.const 0))
+             (global $Examples.ArenaTest.A.Second.bump_offset (mut i32) (i32.const 131072))
              (func $Examples.ArenaTest.A.First.alloc (param $byte_count i32) (result i32)
                (i32.const 0)
              )
-             (func $test (export "test")
+             (func $test (export "test") (result i32)
                (call $Examples.ArenaTest.A.First.alloc (i32.const 16))
              )
            )

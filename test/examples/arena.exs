@@ -11,8 +11,10 @@ defmodule Examples.Arena do
       require Orb.Memory
       page_offset = Orb.Memory.pages(unquote(opts[:pages]))
 
+      module_name = Module.concat(__MODULE__, unquote(name))
+
       offset_global_name =
-        String.to_atom("#{Macro.inspect_atom(:literal, unquote(name))}.bump_offset")
+        String.to_atom("#{Macro.inspect_atom(:literal, module_name)}.bump_offset")
 
       global(
         do: [
@@ -32,8 +34,6 @@ defmodule Examples.Arena do
       #     end
       #   end
       # end
-
-      module_name = Module.concat(__MODULE__, unquote(name))
 
       Module.create(module_name, quote do
         use Orb
