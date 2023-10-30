@@ -51,8 +51,6 @@ defmodule Examples.Arena do
       )
 
       with do
-        Orb.__mode_pre(Orb.S32)
-
         defmodule unquote(name) do
           use Orb
 
