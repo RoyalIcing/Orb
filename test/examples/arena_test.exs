@@ -13,8 +13,6 @@ defmodule Examples.ArenaTest do
     Arena.def(First, pages: 2)
     Arena.def(Second, pages: 3)
 
-    Orb.include(First)
-
     defw test(), I32 do
       First.alloc(16)
     end
@@ -27,6 +25,9 @@ defmodule Examples.ArenaTest do
              (global $Examples.ArenaTest.A.First.bump_offset (mut i32) (i32.const 0))
              (global $Examples.ArenaTest.A.Second.bump_offset (mut i32) (i32.const 131072))
              (func $Examples.ArenaTest.A.First.alloc (param $byte_count i32) (result i32)
+               (i32.const 0)
+             )
+             (func $Examples.ArenaTest.A.Second.alloc (param $byte_count i32) (result i32)
                (i32.const 0)
              )
              (func $test (export "test") (result i32)
