@@ -7,7 +7,6 @@ defmodule Examples.Arena do
 
   def alloc_impl(values_mod, byte_count) do
     offset_global_name = values_mod.offset_global_name()
-    start_offset = values_mod.start_offset()
     end_offset = values_mod.end_offset()
 
     Orb.snippet Orb.S32, new_ptr: I32.UnsafePointer do
@@ -20,6 +19,15 @@ defmodule Examples.Arena do
       Instruction.global_set(Orb.I32, offset_global_name, new_ptr + byte_count)
 
       new_ptr
+    end
+  end
+
+  def rewind_impl(values_mod) do
+    offset_global_name = values_mod.offset_global_name()
+    start_offset = values_mod.start_offset()
+
+    Orb.snippet Orb.S32 do
+      Instruction.global_set(Orb.I32, offset_global_name, start_offset * Orb.Memory.page_byte_size())
     end
   end
 
@@ -46,7 +54,7 @@ defmodule Examples.Arena do
 
       global(
         do: [
-          {offset_global_name, page_offset * 64 * 1024}
+          {offset_global_name, page_offset * Orb.Memory.page_byte_size()}
         ]
       )
 
@@ -61,6 +69,10 @@ defmodule Examples.Arena do
           # https://man7.org/linux/man-pages/man3/alloca.3.html
           defw alloc(byte_count: I32), I32.UnsafePointer, new_ptr: I32.UnsafePointer do
             Examples.Arena.alloc_impl(Values, Instruction.local_get(I32, :byte_count))
+          end
+
+          defw rewind() do
+            Examples.Arena.rewind_impl(Values)
           end
         end
       end

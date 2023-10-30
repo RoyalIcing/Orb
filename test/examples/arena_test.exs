@@ -13,10 +13,12 @@ defmodule Examples.ArenaTest do
     Arena.def(First, pages: 2)
     Arena.def(Second, pages: 3)
 
-    defw test(), {I32, I32, I32} do
+    defw test(), {I32, I32, I32, I32} do
       First.alloc(16)
       First.alloc(16)
       Second.alloc(16)
+      First.rewind()
+      First.alloc(16)
     end
 
     defw just_enough(), I32, i: I32, final: I32 do
@@ -26,6 +28,7 @@ defmodule Examples.ArenaTest do
         i = i + 1
         AllocManyTimes.continue(if: i < 2 * 64 * 1024 / 16)
       end
+
       final
     end
 
@@ -51,11 +54,25 @@ defmodule Examples.ArenaTest do
              (func $Examples.ArenaTest.A.First.alloc (param $byte_count i32) (result i32)
            """
 
+    assert A.to_wat() =~ ~s"""
+             (func $Examples.ArenaTest.A.First.rewind
+               (i32.const #{0 * Orb.Memory.page_byte_size()})
+               (global.set $Examples.ArenaTest.A.First.bump_offset)
+           """
+
+    assert A.to_wat() =~ ~s"""
+             (func $Examples.ArenaTest.A.Second.rewind
+               (i32.const #{2 * Orb.Memory.page_byte_size()})
+               (global.set $Examples.ArenaTest.A.Second.bump_offset)
+           """
+
     assert A.to_wat() =~ ~S"""
-             (func $test (export "test") (result i32 i32 i32)
+             (func $test (export "test") (result i32 i32 i32 i32)
                (call $Examples.ArenaTest.A.First.alloc (i32.const 16))
                (call $Examples.ArenaTest.A.First.alloc (i32.const 16))
                (call $Examples.ArenaTest.A.Second.alloc (i32.const 16))
+               (call $Examples.ArenaTest.A.First.rewind)
+               (call $Examples.ArenaTest.A.First.alloc (i32.const 16))
              )
            """
   end
@@ -64,13 +81,13 @@ defmodule Examples.ArenaTest do
     # IO.puts(A.to_wat())
     i = Instance.run(A)
     f = Instance.capture(i, :test, 0)
-    assert f.() === {0, 16, 131072}
+    assert f.() === {0, 16, 131_072, 0}
   end
 
   test "just enough allocations" do
     i = Instance.run(A)
     f = Instance.capture(i, :just_enough, 0)
-    assert 131056 = f.()
+    assert 131_056 = f.()
   end
 
   test "too many allocations" do
