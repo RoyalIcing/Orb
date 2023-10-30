@@ -24,9 +24,6 @@ defmodule Examples.Arena do
   end
 
   defmacro def(name, opts) do
-    # module_name = Module.concat(__MODULE__, Macro.expand_literals(name, __CALLER__))
-    # Module.put_attribute(module_name, :wasm_func_prefix, module_name)
-
     quote do
       require Orb.Memory
 
@@ -53,19 +50,6 @@ defmodule Examples.Arena do
         ]
       )
 
-      # defmodule unquote(name) do
-      #   use Orb
-
-      #   offset_global_name = unquote(offset_global_name)
-
-      #   # https://man7.org/linux/man-pages/man3/alloca.3.html
-      #   defw alloc(byte_count: I32), I32.UnsafePointer do
-      #     push(global_get(unquote(offset_global_name))) do
-      #       # @bump_offset = I32.add(@bump_offset, size)
-      #     end
-      #   end
-      # end
-
       with do
         Orb.__mode_pre(Orb.S32)
 
@@ -78,13 +62,11 @@ defmodule Examples.Arena do
 
           # https://man7.org/linux/man-pages/man3/alloca.3.html
           defw alloc(byte_count: I32), I32.UnsafePointer, new_ptr: I32.UnsafePointer do
-            # Examples.Arena.alloc_impl(Values, byte_count)
             Examples.Arena.alloc_impl(Values, Instruction.local_get(I32, :byte_count))
           end
         end
       end
 
-      # Orb.include(module_name)
       Orb.include(__MODULE__.unquote(name))
       alias __MODULE__.{unquote(name)}
 
