@@ -188,7 +188,7 @@ defmodule OrbTest do
              """
     end
 
-    test "3 x Memory.pages/1 takes the maximum" do
+    test "3 x Memory.pages/1 sums each value" do
       defmodule TwicePages2 do
         use Orb
 
@@ -199,7 +199,7 @@ defmodule OrbTest do
 
       assert to_wat(TwicePages2) == """
              (module $TwicePages2
-               (memory (export "memory") 3)
+               (memory (export "memory") 6)
              )
              """
     end

@@ -59,11 +59,15 @@ defmodule Orb.DSL do
 
     {name, args} =
       case Macro.decompose_call(call) do
-        :error -> {Orb.DSL.__expand_identifier(call, __ENV__), []}
+        :error -> {quote(do: Macro.inspect_atom(:literal, unquote(call))), []}
         other -> other
       end
 
-    name = name
+    # name = name
+    # name = case name_prefix do
+    #   nil -> name
+    #   prefix -> "#{prefix}.#{name}"
+    # end
 
     exported_names =
       case visibility do
@@ -124,7 +128,11 @@ defmodule Orb.DSL do
 
     quote do
       %Orb.Func{
-        name: unquote(name),
+        name:
+          case {@wasm_func_prefix, unquote(name)} do
+            {nil, name} -> name
+            {prefix, name} -> "#{prefix}.#{name}"
+          end,
         params: unquote(params),
         result: unquote(result_type),
         local_types: unquote(local_types),

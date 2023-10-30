@@ -1,5 +1,4 @@
 defmodule Orb.DefwDSL do
-
   defmacro wasm_mode(mode) do
     mode = Macro.expand_literals(mode, __CALLER__)
     Module.put_attribute(__CALLER__.module, :wasm_mode, mode)
@@ -54,19 +53,23 @@ defmodule Orb.DefwDSL do
   end
 
   defp define(call, visibility, result, locals, block, env) do
-    func_visibility = case visibility do
-      :internal -> :private
-      other -> other
-    end
+    func_visibility =
+      case visibility do
+        :internal -> :private
+        other -> other
+      end
 
-    def_kind = case visibility do
-      :public -> :def
-      :internal -> :def
-      :private -> :defp
-    end
+    def_kind =
+      case visibility do
+        :public -> :def
+        :internal -> :def
+        :private -> :defp
+      end
 
-    wasm = Orb.DSL.__define_func(call, func_visibility, [result: result, locals: locals], block, env)
     ex_def = define_elixir_def(call, def_kind, result, env)
+
+    wasm =
+      Orb.DSL.__define_func(call, func_visibility, [result: result, locals: locals], block, env)
 
     quote do
       unquote(ex_def)
@@ -82,20 +85,36 @@ defmodule Orb.DefwDSL do
     {_, meta, _} = call
     # arity = length(args)
 
-    def_args = case func_args do
-      [] -> []
-      [keywords] -> (for {keyword, _type} <- keywords do
-        Macro.var(keyword, nil)
-      end)
-      multiple when is_list(multiple) ->
-        raise CompileError, line: meta[:line], file: file, description: "Cannot define function with multiple arguments, use keyword list instead."
-    end
+    def_args =
+      case func_args do
+        [] ->
+          []
+
+        [keywords] ->
+          for {keyword, _type} <- keywords do
+            Macro.var(keyword, nil)
+          end
+
+        multiple when is_list(multiple) ->
+          raise CompileError,
+            line: meta[:line],
+            file: file,
+            description:
+              "Cannot define function with multiple arguments, use keyword list instead."
+      end
 
     def_call = {name, meta, def_args}
 
     quote do
       unquote(def_kind)(unquote(def_call)) do
-        Orb.Instruction.typed_call(unquote(result), unquote(name), unquote(def_args))
+        Orb.Instruction.typed_call(
+          unquote(result),
+          case {@wasm_func_prefix, unquote(name)} do
+            {nil, name} -> name
+            {prefix, name} -> "#{prefix}.#{name}"
+          end,
+          unquote(def_args)
+        )
       end
     end
   end

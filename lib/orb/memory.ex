@@ -12,7 +12,7 @@ defmodule Orb.Memory do
   def from([]), do: nil
 
   def from(list) when is_list(list) do
-    case Enum.max(list) do
+    case Enum.sum(list) do
       0 ->
         nil
 
@@ -24,11 +24,15 @@ defmodule Orb.Memory do
   @doc """
   Declare how many 64Kib pages of memory your module needs.
 
-  Can be called multiple times: the highest value is used.
+  Can be called multiple times, with each summed up.
+
+  Returns the previous page count, which can be used as a start offset.
   """
-  defmacro pages(min_count) do
+  defmacro pages(page_count) do
     quote do
-      @wasm_memory unquote(min_count)
+      start_offset = Enum.sum(@wasm_memory)
+      @wasm_memory unquote(page_count)
+      start_offset
     end
   end
 

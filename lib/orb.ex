@@ -547,6 +547,7 @@ defmodule Orb do
       # TODO: rename these to orb_ prefix instead of wasm_ ?
       Module.put_attribute(__MODULE__, :wasm_name, __MODULE__ |> Module.split() |> List.last())
 
+      Module.register_attribute(__MODULE__, :wasm_func_prefix, accumulate: false)
       Module.register_attribute(__MODULE__, :wasm_memory, accumulate: true)
 
       Module.register_attribute(__MODULE__, :wasm_globals, accumulate: true)
@@ -848,6 +849,12 @@ defmodule Orb do
     end
   end
 
+  defmacro set_func_prefix(func_prefix) do
+    quote do
+      @wasm_func_prefix unquote(func_prefix)
+    end
+  end
+
   @doc """
   Declare WebAssembly globals.
 
@@ -855,18 +862,46 @@ defmodule Orb do
   """
   defmacro global(mode \\ :mutable, do: block) do
     quote do
-      unquote(block)
+      unquote(__global_block(:elixir, block))
 
       with do
         import Kernel, except: [@: 1]
 
         require Orb.Global.Declare
-        Orb.Global.Declare.__import_mode(unquote(mode))
+        Orb.Global.Declare.__import_dsl(
+          unquote(__MODULE__).__global_mode_mutable(unquote(mode)),
+          unquote(__MODULE__).__global_mode_exported(unquote(mode))
+        )
 
-        unquote(block)
+        unquote(__global_block(:orb, block))
       end
     end
   end
+
+  def __global_mode_mutable(:readonly), do: :readonly
+  def __global_mode_mutable(:mutable), do: :mutable
+  def __global_mode_mutable(:export_readonly), do: :readonly
+  def __global_mode_mutable(:export_mutable), do: :mutable
+  def __global_mode_exported(:readonly), do: :internal
+  def __global_mode_exported(:mutable), do: :internal
+  def __global_mode_exported(:export_readonly), do: :exported
+  def __global_mode_exported(:export_mutable), do: :exported
+
+  def __global_block(:elixir, items) when is_list(items) do
+
+  end
+
+  def __global_block(:orb, items) when is_list(items) do
+    require Orb.Global.Declare.DeclareDSL
+
+    quote do
+      for {key, value} <- unquote(items) do
+        Orb.Global.Declare.DeclareDSL.register_global(key, value)
+      end
+    end
+  end
+
+  def __global_block(_, block), do: block
 
   @doc """
   Declare a WebAssembly import for a function or global.
