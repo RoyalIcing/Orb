@@ -616,7 +616,7 @@ defmodule Orb do
     end
   end
 
-  defp do_module_body(block, env) do
+  defp do_module_body(block) do
     case block do
       {:__block__, _meta, block_items} -> block_items
       single -> List.wrap(single)
@@ -757,7 +757,7 @@ defmodule Orb do
     mode = Macro.expand_literals(mode, __CALLER__)
     pre = __mode_pre(mode)
 
-    body = do_module_body(block, __CALLER__)
+    body = do_module_body(block)
 
     quote do
       with do
