@@ -59,8 +59,24 @@ defmodule Orb.DSL do
 
     {name, args} =
       case Macro.decompose_call(call) do
-        :error -> {quote(do: Macro.inspect_atom(:literal, unquote(call))), []}
-        other -> other
+        :error ->
+          {
+            quote do
+              with a = unquote(call), s = Atom.to_string(a) do
+                case Macro.inspect_atom(:literal, a) do
+                  ":" <> other ->
+                    other
+
+                  s ->
+                    s
+                end
+              end
+            end,
+            []
+          }
+
+        other ->
+          other
       end
 
     # name = name
