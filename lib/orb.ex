@@ -896,12 +896,12 @@ defmodule Orb do
       with do
         require Orb.Global
 
-        for {key, value} <- unquote(items) do
+        for {global_name, value} <- unquote(items) do
           Orb.Global.register32(
             Module.get_last_attribute(__MODULE__, :wasm_global_mutability),
             Module.get_last_attribute(__MODULE__, :wasm_global_exported),
             [
-              {key, value}
+              {global_name, value}
             ]
           )
         end
