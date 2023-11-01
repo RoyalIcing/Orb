@@ -868,6 +868,7 @@ defmodule Orb do
         import Kernel, except: [@: 1]
 
         require Orb.Global.Declare
+
         Orb.Global.Declare.__import_dsl(
           unquote(__MODULE__).__global_mode_mutable(unquote(mode)),
           unquote(__MODULE__).__global_mode_exported(unquote(mode))
@@ -888,15 +889,22 @@ defmodule Orb do
   def __global_mode_exported(:export_mutable), do: :exported
 
   def __global_block(:elixir, items) when is_list(items) do
-
   end
 
   def __global_block(:orb, items) when is_list(items) do
-    require Orb.Global.Declare.DeclareDSL
-
     quote do
-      for {key, value} <- unquote(items) do
-        Orb.Global.Declare.DeclareDSL.register_global(key, value)
+      with do
+        require Orb.Global
+
+        for {key, value} <- unquote(items) do
+          Orb.Global.register32(
+            Module.get_last_attribute(__MODULE__, :wasm_global_mutability),
+            Module.get_last_attribute(__MODULE__, :wasm_global_exported),
+            [
+              {key, value}
+            ]
+          )
+        end
       end
     end
   end
