@@ -169,7 +169,7 @@ defmodule Orb do
   end
   ```
 
-  You can read or write to a global within `Orb.defw/2` using the `@` prefix:
+  You can read or write to a global within `defw` using the `@` prefix:
 
   ```elixir
   defmodule Counter do
