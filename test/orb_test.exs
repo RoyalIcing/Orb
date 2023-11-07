@@ -293,7 +293,7 @@ defmodule OrbTest do
     end
   end
 
-  describe "~S string constants" do
+  describe "string constants" do
     test "assigns data" do
       defmodule HTMLTypes do
         use Orb
