@@ -25,7 +25,7 @@ defmodule Orb.DSL do
 
   def funcp(options) do
     name = Keyword.fetch!(options, :name)
-    Orb.Func.Type.imported_func(name, options[:params], options[:result])
+    Orb.Func.Type.new(name, options[:params], options[:result])
   end
 
   defmacro funcp(call, do: block) do

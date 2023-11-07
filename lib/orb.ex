@@ -841,6 +841,9 @@ defmodule Orb do
     end
   end
 
+  @doc """
+  Copy WebAssembly functions from another module.
+  """
   defmacro include(mod) do
     quote do
       wasm do
@@ -911,16 +914,35 @@ defmodule Orb do
 
   def __global_block(_, block), do: block
 
+  defmacro importw(mod, namespace) when is_atom(namespace) do
+    quote do
+      @wasm_imports (for imp <- unquote(mod).__wasm_imports__(nil) do
+        %{imp | module: unquote(namespace)}
+      end)
+    end
+  end
+
   @doc """
   Declare a WebAssembly import for a function or global.
   """
-  defmacro wasm_import(mod, entries) when is_atom(mod) and is_list(entries) do
+  defmacro importw(mod, entries) when is_atom(mod) and is_list(entries) do
     quote do
       @wasm_imports (for {name, type} <- unquote(entries) do
                        %Orb.Import{module: unquote(mod), name: name, type: type}
                      end)
     end
   end
+
+  @doc """
+  Declare WebAssembly imports for a block of functions.
+  """
+  # defmacro importw(namespace, do: block) do
+  #   quote do
+  #     @wasm_imports (for {name, type} <- unquote(block) do
+  #                      %Orb.Import{module: unquote(namespace), name: name, type: type}
+  #                    end)
+  #   end
+  # end
 
   @doc """
   Convert Orb AST into WebAssembly text format.

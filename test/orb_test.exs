@@ -236,7 +236,7 @@ defmodule OrbTest do
   end
 
   describe "imports" do
-    test "can declare import" do
+    test "importw/2" do
       defmodule ImportsLog32 do
         use Orb
         import Orb.DSL, only: [funcp: 1]
@@ -246,30 +246,50 @@ defmodule OrbTest do
         #   int32: funcp(log_i32(_: I32), I32)
         # )
 
-        wasm_import(:echo,
-          int32: funcp(name: :echo_i32, params: I32, result: I32),
-          int64: funcp(name: :echo_i64, params: I64, result: I64)
-        )
+        # importw :echo do
+        #   # defwp(int32(a: I32), I32, as: :echo_i32)
+        #   defwp(int32(a: I32), I32) |> as(:echo_i32)
+        # end
 
-        wasm_import(:log,
+        defmodule Echo do
+          use Orb.Import
+
+          defw(int32(a: I32), I32)
+          defw(int64(a: I64), I64)
+        end
+
+        importw(Echo, :echo)
+
+        importw(:log,
           int32: funcp(name: :log_i32, params: I32),
           int64: funcp(name: :log_i64, params: I64)
         )
 
-        wasm_import(:time,
+        importw(:time,
           seconds_since_unix_epoch: funcp(name: :unix_time, result: I64)
         )
+
+        defw test(), a: I32 do
+          a = Echo.int32(42)
+          :drop
+        end
       end
 
-      assert to_wat(ImportsLog32) == """
+      assert """
              (module $ImportsLog32
-               (import "echo" "int32" (func $echo_i32 (param i32) (result i32)))
-               (import "echo" "int64" (func $echo_i64 (param i64) (result i64)))
+               (import "echo" "int32" (func $OrbTest.ImportsLog32.Echo.int32 (param $a i32) (result i32)))
+               (import "echo" "int64" (func $OrbTest.ImportsLog32.Echo.int64 (param $a i64) (result i64)))
                (import "log" "int32" (func $log_i32 (param i32)))
                (import "log" "int64" (func $log_i64 (param i64)))
                (import "time" "seconds_since_unix_epoch" (func $unix_time (result i64)))
+               (func $test (export "test")
+                 (local $a i32)
+                 (call $OrbTest.ImportsLog32.Echo.int32 (i32.const 42))
+                 (local.set $a)
+                 drop
+               )
              )
-             """
+             """ = to_wat(ImportsLog32)
     end
   end
 

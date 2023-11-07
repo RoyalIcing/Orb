@@ -1,6 +1,6 @@
 defmodule Orb.Func do
   @moduledoc false
-alias Orb.Constants
+  alias Orb.Constants
 
   defstruct name: nil,
             exported_names: [],
@@ -32,7 +32,7 @@ alias Orb.Constants
             result: result,
             local_types: local_types,
             body: body,
-            table_elem_indices: table_elem_indices,
+            table_elem_indices: table_elem_indices
           },
           indent
         ) do
@@ -108,14 +108,33 @@ alias Orb.Constants
 
     defstruct [:name, :params, :result]
 
-    # TODO: should this be its own struct type?
-    def imported_func(name, params, result) do
+    def new(name, params, result) do
       # params = [:i32]
       %__MODULE__{
         name: name,
         params: params,
         result: result
       }
+    end
+
+    @doc false
+    def params_from_call_args(args, env, line) do
+      case args do
+        [args] when is_list(args) ->
+          for {name, type} <- args do
+            %Orb.Func.Param{name: name, type: Macro.expand_literals(type, env)}
+          end
+
+        [] ->
+          []
+
+        [_ | _] ->
+          raise CompileError,
+            line: line,
+            file: env.file,
+            description:
+              "Cannot define function with multiple arguments, use keyword list instead."
+      end
     end
 
     defimpl Orb.ToWat do
@@ -132,6 +151,9 @@ alias Orb.Constants
           case params do
             nil ->
               []
+
+            params when is_list(params) ->
+              for param <- params, do: [" ", Orb.ToWat.to_wat(param, "")]
 
             params ->
               [
