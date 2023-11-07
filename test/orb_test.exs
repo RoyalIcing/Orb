@@ -260,12 +260,12 @@ defmodule OrbTest do
 
         importw(Echo, :echo)
 
-        importw(:log,
+        wasm_import(:log,
           int32: funcp(name: :log_i32, params: I32),
           int64: funcp(name: :log_i64, params: I64)
         )
 
-        importw(:time,
+        wasm_import(:time,
           seconds_since_unix_epoch: funcp(name: :unix_time, result: I64)
         )
 

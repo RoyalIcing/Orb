@@ -925,7 +925,8 @@ defmodule Orb do
   @doc """
   Declare a WebAssembly import for a function or global.
   """
-  defmacro importw(mod, entries) when is_atom(mod) and is_list(entries) do
+  @deprecated "Use importw/2 instead"
+  defmacro wasm_import(mod, entries) when is_atom(mod) and is_list(entries) do
     quote do
       @wasm_imports (for {name, type} <- unquote(entries) do
                        %Orb.Import{module: unquote(mod), name: name, type: type}
