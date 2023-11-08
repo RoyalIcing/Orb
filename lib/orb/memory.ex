@@ -115,7 +115,9 @@ defmodule Orb.Memory do
   end
 
   @doc """
-  Load value of `type` from memory `address`.
+  Increases the size of the memory instance by a specified number of pages. Each page is 64KiB.
+
+  It returns the previous size of memory, in pages, if the operation was successful, or returns -1 if the operation failed.
 
   https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/Memory/Grow
 
