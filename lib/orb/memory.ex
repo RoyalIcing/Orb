@@ -114,6 +114,19 @@ defmodule Orb.Memory do
     Orb.Instruction.new(primitive_type, store_instruction, [address, value])
   end
 
+  @doc """
+  Load value of `type` from memory `address`.
+
+  https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/Memory/Grow
+
+  ```elixir
+  Memory.grow!(1)
+  ```
+  """
+  def grow!(delta) do
+    Orb.Instruction.memory_grow(delta)
+  end
+
   defimpl Orb.ToWat do
     def to_wat(%Orb.Memory{min: min}, indent) do
       [

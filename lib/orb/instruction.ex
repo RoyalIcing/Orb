@@ -39,6 +39,8 @@ defmodule Orb.Instruction do
   def global_set(type, global_name, value),
     do: new(:global_effect, {:global_set, global_name, type}, [value])
 
+  def memory_grow(value), do: new(:memory, :grow, [value])
+
   defp type_check_operands(type, operation, operands) do
     operands = operands |> Enum.map(&Constants.expand_if_needed/1)
 
