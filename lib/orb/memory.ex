@@ -115,9 +115,26 @@ defmodule Orb.Memory do
   end
 
   @doc """
+  Returns the number of pages the memory instance currently has. Each page is 64KiB.
+
+  To increase the number of pages call `grow!/1`.
+
+  https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/Memory/Size
+
+  ```elixir
+  Memory.size()
+  ```
+  """
+  def size() do
+    Orb.Instruction.memory_size()
+  end
+
+  @doc """
   Increases the size of the memory instance by a specified number of pages. Each page is 64KiB.
 
-  It returns the previous size of memory, in pages, if the operation was successful, or returns -1 if the operation failed.
+  Note: only `0` and `1` are supported in today’s runtimes.
+
+  It returns the previous size of memory in pages if the operation was successful, or returns -1 if the operation failed.
 
   https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/Memory/Grow
 

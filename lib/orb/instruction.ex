@@ -39,6 +39,7 @@ defmodule Orb.Instruction do
   def global_set(type, global_name, value),
     do: new(:global_effect, {:global_set, global_name, type}, [value])
 
+  def memory_size(), do: new(:memory, :size, [])
   def memory_grow(value), do: new(:memory, :grow, [value])
 
   defp type_check_operands(type, operation, operands) do
