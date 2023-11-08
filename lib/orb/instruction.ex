@@ -39,8 +39,8 @@ defmodule Orb.Instruction do
   def global_set(type, global_name, value),
     do: new(:global_effect, {:global_set, global_name, type}, [value])
 
-  def memory_size(), do: new(:memory, :size, [])
-  def memory_grow(value), do: new(:memory, :grow, [value])
+  def memory_size(), do: new(:i32, {:memory, :size}, [])
+  def memory_grow(value), do: new(:i32, {:memory, :grow}, [value])
 
   defp type_check_operands(type, operation, operands) do
     operands = operands |> Enum.map(&Constants.expand_if_needed/1)
@@ -191,6 +191,22 @@ defmodule Orb.Instruction do
         indent,
         "(global.set $",
         to_string(global_name),
+        ")"
+      ]
+    end
+
+    def to_wat(
+          %Orb.Instruction{
+            operation: {:memory, memory_op},
+            operands: operands
+          },
+          indent
+        ) do
+      [
+        indent,
+        "(memory.",
+        to_string(memory_op),
+        for(operand <- operands, do: [" ", Instructions.do_wat(operand)]),
         ")"
       ]
     end

@@ -55,28 +55,23 @@ defmodule MemoryTest do
     defmodule Grow do
       use Orb
 
-      defw grow() do
-        Memory.size()
-        :drop
+      defw grow(), a: I32 do
+        a = Memory.size()
 
-        Memory.grow!(1)
-        :drop
-
-        Memory.grow!(0)
-        :drop
-
-        Memory.grow!(2)
-        :drop
+        a = Memory.grow!(1)
+        _ = Memory.grow!(0)
+        _ = Memory.grow!(2)
       end
     end
 
     assert Orb.to_wat(Grow) == """
            (module $Grow
              (func $grow (export "grow")
+               (local $a i32)
                (memory.size)
-               drop
+               (local.set $a)
                (memory.grow (i32.const 1))
-               drop
+               (local.set $a)
                (memory.grow (i32.const 0))
                drop
                (memory.grow (i32.const 2))
