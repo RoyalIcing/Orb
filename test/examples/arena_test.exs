@@ -4,7 +4,7 @@ defmodule Examples.ArenaTest do
   Code.require_file("arena.exs", __DIR__)
   alias Examples.Arena
 
-  alias OrbWasmtime.{Instance, Wasm}
+  alias OrbWasmtime.Instance
 
   defmodule A do
     use Orb
