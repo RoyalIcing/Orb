@@ -4,13 +4,12 @@
 
 Orb lets you write WebAssembly with the power of Elixir as a compiler:
 
-- Use Elixir’s module system to break problems down and compose them together
-- `|>` Function piping
-- Powerful macros
-- Inline code and for-comprehensions
-- Run dynamic Elixir code at compile time e.g. feature flags, talk to outside services
-- Compile on-the-fly e.g. custom WebAssembly module per user
-- Publish reusable code with the Hex package manager
+- Use Elixir’s module system to break problems down and compose them together.
+- Chain functions together with the pipe `|>` operator.
+- Publish reusable code with the Hex package manager.
+- Reduce boilerplate with Elixir’s powerful macro system.
+- Run dynamic Elixir code at compile time e.g. talk to the rest of your Elixir application, make network requests.
+- Compile on-the-fly e.g. use feature flags, custom “tree shaken” WebAssembly module per user.
 
 ## Installation
 
@@ -19,7 +18,7 @@ The package can be installed via Hex by adding `orb` to your list of dependencie
 ```elixir
 def deps do
   [
-    {:orb, "~> 0.0.24"}
+    {:orb, "~> 0.0.25"}
   ]
 end
 ```
