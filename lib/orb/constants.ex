@@ -30,17 +30,31 @@ defmodule Orb.Constants do
         :not_compiling
 
       tid ->
-        case :ets.lookup_element(tid, string, 2, nil) do
-          offset when is_integer(offset) ->
-            {:ok, offset}
+        upsert_offset(tid, string)
+    end
+  end
 
-          nil ->
-            count = byte_size(string) + 1
-            new_offset = :ets.update_counter(tid, :offset, {2, count})
-            offset = new_offset - count
-            :ets.insert(tid, {string, offset})
-            {:ok, offset}
-        end
+  defp safe_ets_lookup(tid, key) do
+    # When OTP 26 is minimum version, can be replaced with:
+    # :ets.lookup_element(tid, key, 2, nil)
+
+    case :ets.lookup(tid, key) do
+      [{^key, value}] -> value
+      _ -> nil
+    end
+  end
+
+  defp upsert_offset(tid, string) do
+    case safe_ets_lookup(tid, string) do
+      offset when is_integer(offset) ->
+        {:ok, offset}
+
+      nil ->
+        count = byte_size(string) + 1
+        new_offset = :ets.update_counter(tid, :offset, {2, count})
+        offset = new_offset - count
+        :ets.insert(tid, {string, offset})
+        {:ok, offset}
     end
   end
 
