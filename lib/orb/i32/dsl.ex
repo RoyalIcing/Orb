@@ -30,7 +30,15 @@ defmodule Orb.I32.DSL do
   end
 
   def left === right do
-    Orb.I32.eq(left, right)
+    alias Orb.Ops
+
+    case Ops.extract_common_type(left, right) do
+      :i32 ->
+        Orb.I32.eq(left, right)
+
+      :i64 ->
+        Orb.I64.eq(left, right)
+    end
   end
 
   def left !== right do

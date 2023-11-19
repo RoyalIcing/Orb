@@ -11,13 +11,18 @@ defmodule Orb.Instruction do
     do: %__MODULE__{
       type: type,
       operation: operation,
-      operands: type_check_operands(type, operation, operands)
+      operands: type_check_operands!(type, operation, operands)
     }
 
   def i32(operation), do: new(:i32, operation)
   def i32(operation, a) when is_list(a), do: new(:i32, operation, a)
   def i32(operation, a), do: new(:i32, operation, [a])
   def i32(operation, a, b), do: new(:i32, operation, [a, b])
+
+  def i64(operation), do: new(:i64, operation)
+  def i64(operation, a) when is_list(a), do: new(:i64, operation, a)
+  def i64(operation, a), do: new(:i64, operation, [a])
+  def i64(operation, a, b), do: new(:i64, operation, [a, b])
 
   def f32(operation), do: new(:f32, operation)
   def f32(operation, a) when is_list(a), do: new(:f32, operation, a)
@@ -42,7 +47,7 @@ defmodule Orb.Instruction do
   def memory_size(), do: new(:i32, {:memory, :size}, [])
   def memory_grow(value), do: new(:i32, {:memory, :grow}, [value])
 
-  defp type_check_operands(type, operation, operands) do
+  defp type_check_operands!(type, operation, operands) do
     operands = operands |> Enum.map(&Constants.expand_if_needed/1)
 
     Enum.with_index(operands, &type_check_operand!(type, operation, &1, &2))
@@ -60,41 +65,65 @@ defmodule Orb.Instruction do
     type_check_operand!(type, op, %{type: received_type}, param_index)
   end
 
+  # defp type_check_operand!(:i32, :const, n, 0) when is_integer(n) do
+  #   nil
+  # end
+
+  # defp type_check_operand!(:i32, :const, _, param_index) do
+  #   raise ArgumentError,
+  #         "WebAssembly instruction i32.const/1 does not accept a #{nth(param_index)} argument."
+  # end
+
+  # defp type_check_operand!(:i32, :const, operand, 0) when is_integer(n) do
+  #   raise ArgumentError,
+  #         "WebAssembly instruction i32.#{op}/#{arity} does not accept a #{nth(param_index)} argument."
+  # end
+
   defp type_check_operand!(:i32, op, %{type: received_type}, param_index) when is_atom(op) do
     expected_type = Ops.i32_param_type!(op, param_index)
 
-    types_must_match!(expected_type, received_type)
-  end
-
-  defp type_check_operand!(
-         :local_effect,
-         {:local_set, _, expected_type},
-         %{type: received_type},
-         0
-       ) do
-    types_must_match!(expected_type, received_type)
-  end
-
-  defp type_check_operand!(
-         :global_effect,
-         {:global_set, _, expected_type},
-         %{type: received_type},
-         0
-       ) do
-    types_must_match!(expected_type, received_type)
+    types_must_match!(expected_type, received_type, "i32.#{op}")
   end
 
   defp type_check_operand!(:i32, op, _operand, param_index) when is_atom(op) do
     Ops.i32_param_type!(op, param_index)
   end
 
+  defp type_check_operand!(:i64, op, %{type: received_type}, param_index) when is_atom(op) do
+    expected_type = Ops.i64_param_type!(op, param_index)
+
+    types_must_match!(expected_type, received_type, "i64.#{op}")
+  end
+
+  defp type_check_operand!(:i64, op, _operand, param_index) when is_atom(op) do
+    Ops.i64_param_type!(op, param_index)
+  end
+
+  defp type_check_operand!(
+         :local_effect,
+         {:local_set, local_name, expected_type},
+         %{type: received_type},
+         0
+       ) do
+    types_must_match!(expected_type, received_type, "local.set $#{local_name}")
+  end
+
+  defp type_check_operand!(
+         :global_effect,
+         {:global_set, global_name, expected_type},
+         %{type: received_type},
+         0
+       ) do
+    types_must_match!(expected_type, received_type, "global.set $#{global_name}")
+  end
+
   defp type_check_operand!(_type, _operation, _operand, _index) do
     nil
   end
 
-  defp types_must_match!(same, same), do: nil
+  defp types_must_match!(same, same, _instruction_identifier), do: nil
 
-  defp types_must_match!(expected_type, received_type) do
+  defp types_must_match!(expected_type, received_type, instruction_identifier) do
     case received_type do
       :unknown ->
         # Ignore
@@ -104,7 +133,8 @@ defmodule Orb.Instruction do
         Ops.types_compatible?(type, expected_type) or
           raise Orb.TypeCheckError,
             expected_type: expected_type,
-            received_type: type
+            received_type: type,
+            instruction_identifier: instruction_identifier
     end
   end
 
@@ -207,6 +237,24 @@ defmodule Orb.Instruction do
         "(memory.",
         to_string(memory_op),
         for(operand <- operands, do: [" ", Instructions.do_wat(operand)]),
+        ")"
+      ]
+    end
+
+    def to_wat(
+          %Orb.Instruction{
+            type: type,
+            operation: :const,
+            operands: [number]
+          },
+          indent
+        ) do
+      [
+        indent,
+        "(",
+        to_string(type),
+        ".const ",
+        to_string(number),
         ")"
       ]
     end

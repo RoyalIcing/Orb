@@ -273,14 +273,12 @@ defmodule Orb.DSL do
     update_in(f.exported_names, fn names -> [name | names] end)
   end
 
-  # TODO: unused
-  def i32_const(value), do: {:i32_const, value}
-  def i32_boolean(0), do: {:i32_const, 0}
-  def i32_boolean(1), do: {:i32_const, 1}
-  def i32(n) when is_integer(n), do: {:i32_const, n}
+  def i32(n) when is_integer(n), do: Instruction.i32(:const, n)
   def i32(false), do: {:i32_const, 0}
   def i32(true), do: {:i32_const, 1}
   def i32(op) when op in Ops.i32(:all), do: {:i32, op}
+
+  def i64(n) when is_integer(n), do: Instruction.i64(:const, n)
 
   @doc """
   Pushes a value onto the current stack.

@@ -11,7 +11,7 @@ defmodule TypeCheckTest do
 
   test "passing F32 param to I32.add fails" do
     assert_raise Orb.TypeCheckError,
-                 "Expected type i32, found f32 via Orb.F32.",
+                 "Instruction i32.add expected type i32, found f32 via Orb.F32.",
                  &PassLocalF32ToI32Add.to_wat/0
   end
 
@@ -25,7 +25,7 @@ defmodule TypeCheckTest do
 
   test "passing F32 constant to I32.add fails" do
     assert_raise Orb.TypeCheckError,
-                 "Expected type i32, found f32.",
+                 "Instruction i32.add expected type i32, found f32.",
                  &PassConstantF32ToI32Add.to_wat/0
   end
 
@@ -39,7 +39,7 @@ defmodule TypeCheckTest do
 
   test "passing I32 param to I32.trunc_f32_s fails" do
     assert_raise Orb.TypeCheckError,
-                 "Expected type f32, found i32 via Orb.I32.",
+                 "Instruction i32.trunc_f32_s expected type f32, found i32 via Orb.I32.",
                  &PassLocalI32ToI32Trunc.to_wat/0
   end
 
@@ -53,7 +53,7 @@ defmodule TypeCheckTest do
 
   test "passing constant integer to I32.trunc_f32_s fails" do
     assert_raise Orb.TypeCheckError,
-                 "Expected type f32, found i32.",
+                 "Instruction i32.trunc_f32_s expected type f32, found i32.",
                  &PassConstantI32ToI32Trunc.to_wat/0
   end
 
@@ -81,7 +81,7 @@ defmodule TypeCheckTest do
 
   test "setting i32 local to f32 fails" do
     assert_raise Orb.TypeCheckError,
-                 "Expected type i32 via Orb.I32, found f32.",
+                 "Instruction local.set $a expected type i32 via Orb.I32, found f32.",
                  &LocalI32SetToF32.to_wat/0
   end
 
@@ -97,7 +97,7 @@ defmodule TypeCheckTest do
 
   test "setting i32 global to f32 fails" do
     assert_raise Orb.TypeCheckError,
-                 "Expected type i32, found f32.",
+                 "Instruction global.set $a expected type i32, found f32.",
                  &GlobalI32SetToF32.to_wat/0
   end
 end

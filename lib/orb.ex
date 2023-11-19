@@ -537,7 +537,7 @@ defmodule Orb do
       import Orb
       import Orb.DefwDSL
       alias Orb.{I32, I64, S32, U32, F32, Memory, Table}
-      require Orb.{I32, F32, Table, Memory}
+      require Orb.{I32, I64, F32, Table, Memory}
 
       @before_compile unquote(__MODULE__).BeforeCompile
 

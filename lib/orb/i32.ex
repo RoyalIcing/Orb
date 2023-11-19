@@ -5,7 +5,7 @@ defmodule Orb.I32 do
 
   import Kernel, except: [and: 2, or: 2]
 
-  require Orb.Ops, as: Ops
+  require alias Orb.Ops
   alias Orb.Instruction
 
   def wasm_type(), do: :i32
@@ -34,6 +34,9 @@ defmodule Orb.I32 do
   for op <- Ops.i32(2) do
     case op do
       :eq ->
+        # TODO: is this the best place for this optimization?
+        # Perhaps it should be done at `def a === b`
+        # Otherwise it would justify adding optimization for `0 AND 1 --> 0` etc too.
         def eq(0, n), do: Instruction.i32(:eqz, n)
         def eq(n, 0), do: Instruction.i32(:eqz, n)
         def eq(a, b), do: Instruction.i32(:eq, a, b)

@@ -3,6 +3,9 @@ defmodule Orb.I64 do
   Type for 64-bit integer.
   """
 
+  require alias Orb.Ops
+  alias Orb.Instruction
+
   @behaviour Orb.CustomType
 
   @impl Orb.CustomType
@@ -12,4 +15,24 @@ defmodule Orb.I64 do
   # I think this should actually be removed from Orb.CustomType
   @impl Orb.CustomType
   def byte_count(), do: 8
+
+  for op <- Ops.i64(1) do
+    def unquote(op)(a) do
+      Instruction.i64(unquote(op), a)
+    end
+  end
+
+  for op <- Ops.i64(2) do
+    case op do
+      :and ->
+        def band(a, b) do
+          Instruction.i64(:and, a, b)
+        end
+
+      _ ->
+        def unquote(op)(a, b) do
+          Instruction.i64(unquote(op), a, b)
+        end
+    end
+  end
 end
