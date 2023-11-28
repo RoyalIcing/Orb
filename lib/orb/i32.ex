@@ -65,8 +65,8 @@ defmodule Orb.I32 do
           eq(value, item)
 
         _ ->
-          # [eq(value, item), Instruction.i32(:or)]
-          Instruction.i32(:or, eq(value, item))
+          InstructionSequence.new(:i32, [eq(value, item), Instruction.i32(:or)])
+          # Instruction.i32(:or, eq(value, item))
       end
     end
     InstructionSequence.new(:i32, instructions)
