@@ -59,7 +59,6 @@ defmodule Orb.I32 do
   end
 
   def in?(value, list) when is_list(list) do
-    # TODO: Add %InstructionSequence{type: :i32, instructions: […]} for type checking.
     instructions = for {item, index} <- Enum.with_index(list) do
       case index do
         0 ->
