@@ -53,7 +53,7 @@ defmodule TypeCheckTest do
 
   test "passing constant integer to I32.trunc_f32_s fails" do
     assert_raise Orb.TypeCheckError,
-                 "Instruction i32.trunc_f32_s expected type f32, found i32.",
+                 "Instruction i32.trunc_f32_s expected type f32, found Elixir.Integer.",
                  &PassConstantI32ToI32Trunc.to_wat/0
   end
 
@@ -81,7 +81,7 @@ defmodule TypeCheckTest do
 
   test "setting i32 local to f32 fails" do
     assert_raise Orb.TypeCheckError,
-                 "Instruction local.set $a expected type i32 via Orb.I32, found f32.",
+                 "Instruction local.set $a expected type i32 via Orb.I32, found Elixir.Float.",
                  &LocalI32SetToF32.to_wat/0
   end
 
@@ -97,7 +97,7 @@ defmodule TypeCheckTest do
 
   test "setting i32 global to f32 fails" do
     assert_raise Orb.TypeCheckError,
-                 "Instruction global.set $a expected type i32, found f32.",
+                 "Instruction global.set $a expected type i32, found Elixir.Float.",
                  &GlobalI32SetToF32.to_wat/0
   end
 end

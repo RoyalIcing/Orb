@@ -261,6 +261,7 @@ defmodule Orb.DSL do
       #
       #         {:global_get, meta, [global]}
 
+      # e.g. `_ = some_function_returning_value()`
       {:=, _, [{:_, _, nil}, value]} ->
         quote do: [unquote(value), :drop]
 
@@ -274,8 +275,10 @@ defmodule Orb.DSL do
   end
 
   def i32(n) when is_integer(n), do: Instruction.i32(:const, n)
-  def i32(false), do: {:i32_const, 0}
-  def i32(true), do: {:i32_const, 1}
+  # TODO: should these be removed?
+  def i32(false), do: Instruction.i32(:const, 0)
+  def i32(true), do: Instruction.i32(:const, 1)
+  # TODO: should this be removed?
   def i32(op) when op in Ops.i32(:all), do: {:i32, op}
 
   def i64(n) when is_integer(n), do: Instruction.i64(:const, n)
@@ -313,6 +316,7 @@ defmodule Orb.DSL do
   def global_get(identifier), do: {:global_get, identifier}
   def global_set(identifier), do: {:global_set, identifier}
 
+  # TODO: remove
   def local_set(identifier), do: {:local_set, identifier}
 
   def typed_call(output_type, f, args) when is_list(args),
@@ -433,6 +437,8 @@ defmodule Orb.DSL do
 
     block_items = __get_block_items(block)
 
+    # TODO: is there some way to do this using normal Elixir modules?
+    # I think we can define a module inline.
     block_items =
       Macro.prewalk(block_items, fn
         {{:., _, [{:__aliases__, _, [identifier]}, :continue]}, _, []} ->

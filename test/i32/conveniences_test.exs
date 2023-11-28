@@ -52,10 +52,10 @@ defmodule I32ConveniencesTest do
   defmodule Attrs do
     use Orb
 
-    I32.global(first: 7)
+    Orb.I32.global(first: 7)
 
     wasm do
-      I32.attr_writer(:first)
+      Orb.I32.attr_writer(:first)
     end
   end
 

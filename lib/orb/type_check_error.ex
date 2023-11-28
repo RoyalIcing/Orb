@@ -9,6 +9,8 @@ defmodule Orb.TypeCheckError do
   end
 
   defp format_type(type) when Ops.is_primitive_type(type), do: to_string(type)
+  defp format_type(Elixir.Integer), do: "Elixir.Integer"
+  defp format_type(Elixir.Float), do: "Elixir.Float"
 
   defp format_type(type) when is_atom(type),
     do: "#{Ops.to_primitive_type(type)} via #{inspect(type)}"

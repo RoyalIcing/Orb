@@ -793,7 +793,7 @@ defmodule OrbTest do
     )
     """
 
-    assert to_wat(FileNameSafe) == wasm_source
+    assert wasm_source == to_wat(FileNameSafe)
     # assert Wasm.call(FileNameSafe, "body") == 100
   end
 

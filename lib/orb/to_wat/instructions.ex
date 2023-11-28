@@ -8,6 +8,8 @@ defmodule Orb.ToWat.Instructions do
     # Enum.map(list, &do_wat(&1, indent))
   end
 
+  def do_wat(true, indent), do: [indent, "OOPS"]
+
   def do_wat(:nop, indent), do: [indent, "nop"]
   def do_wat(:pop, _indent), do: []
   def do_wat(:drop, indent), do: [indent, "drop"]
@@ -21,6 +23,7 @@ defmodule Orb.ToWat.Instructions do
 
   def do_wat({:export, name}, indent), do: [indent, ~S/(export "/, to_string(name), ~S/")/]
 
+  # TODO: remove all of these
   def do_wat({:i32_const, value}, indent), do: "#{indent}(i32.const #{value})"
   def do_wat({:f32_const, value}, indent), do: "#{indent}(f32.const #{value})"
   def do_wat({:global_get, identifier}, indent), do: "#{indent}(global.get $#{identifier})"

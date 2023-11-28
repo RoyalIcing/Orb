@@ -1,0 +1,35 @@
+defmodule Orb.InstructionSequence do
+  defstruct type: :unknown_effect,
+            body: [],
+            contains: %{
+              locals_effected: %{},
+              globals_effected: %{},
+              unknown_effect: false,
+              i32: false,
+              i64: false,
+              f32: false,
+              f64: false
+            }
+
+  def new(instructions) when is_list(instructions) do
+    raise "Inference of result type via reduce is unimplemented for now."
+  end
+
+  def new(type, instructions) when is_list(instructions) do
+    %__MODULE__{
+      type: type,
+      body: instructions
+    }
+  end
+
+  defimpl Orb.ToWat do
+    def to_wat(
+          %Orb.InstructionSequence{body: instructions},
+          indent
+        ) do
+      for instruction <- instructions do
+        Orb.ToWat.to_wat(instruction, indent)
+      end
+    end
+  end
+end

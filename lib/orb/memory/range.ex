@@ -1,5 +1,4 @@
 defmodule Orb.Memory.Range do
-  require Orb
   require Orb.I64 |> alias
   require Orb.I32 |> alias
   # import Bitwise
@@ -11,11 +10,12 @@ defmodule Orb.Memory.Range do
   end
 
   def from(byte_offset = %{type: _}, byte_length = %{type: _}) do
-    Orb.snippet do
-      byte_length
-      |> I64.extend_i32_u()
-      |> I64.or(I64.shl(I64.extend_i32_u(byte_offset), i64(32)))
-    end
+    byte_length
+    |> I64.extend_i32_u()
+    |> I64.or(
+      I64.extend_i32_u(byte_offset)
+      |> I64.shl(32)
+    )
   end
 
   def get_byte_offset(
@@ -25,9 +25,7 @@ defmodule Orb.Memory.Range do
   end
 
   def get_byte_offset(range = %{type: _}) do
-    Orb.snippet do
-      I64.shr_u(range, i64(32)) |> I32.wrap_i64()
-    end
+    I64.shr_u(range, 32) |> I32.wrap_i64()
   end
 
   def get_byte_length(
@@ -37,8 +35,6 @@ defmodule Orb.Memory.Range do
   end
 
   def get_byte_length(range = %{type: _}) do
-    Orb.snippet do
-      I32.wrap_i64(range)
-    end
+    I32.wrap_i64(range)
   end
 end

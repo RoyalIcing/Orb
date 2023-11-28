@@ -7,6 +7,7 @@ defmodule Orb.I32 do
 
   require alias Orb.Ops
   alias Orb.Instruction
+  alias Orb.InstructionSequence
 
   def wasm_type(), do: :i32
 
@@ -58,15 +59,18 @@ defmodule Orb.I32 do
   end
 
   def in?(value, list) when is_list(list) do
-    for {item, index} <- Enum.with_index(list) do
+    # TODO: Add %InstructionSequence{type: :i32, instructions: […]} for type checking.
+    instructions = for {item, index} <- Enum.with_index(list) do
       case index do
         0 ->
           eq(value, item)
 
         _ ->
-          [eq(value, item), Instruction.i32(:or)]
+          # [eq(value, item), Instruction.i32(:or)]
+          Instruction.i32(:or, eq(value, item))
       end
     end
+    InstructionSequence.new(:i32, instructions)
   end
 
   defmacro when?(condition, do: when_true, else: when_false) do
@@ -189,11 +193,11 @@ defmodule Orb.I32 do
     end
   end
 
-  def __global_value(value) when is_integer(value), do: Orb.DSL.i32(value)
-  def __global_value(false), do: Orb.DSL.i32(false)
-  def __global_value(true), do: Orb.DSL.i32(true)
+  def __global_value(value) when is_integer(value), do: Instruction.wrap_constant!(:i32, value)
+  def __global_value(false), do: Instruction.wrap_constant!(:i32, 0)
+  def __global_value(true), do: Instruction.wrap_constant!(:i32, 1)
   # TODO: stash away which module so we can do smart stuff like with local types
-  def __global_value(mod) when is_atom(mod), do: mod.initial_i32() |> Orb.DSL.i32()
+  def __global_value(mod) when is_atom(mod), do: Instruction.wrap_constant!(:i32, mod.initial_i32())
 
   defmacro global(mutability \\ :mutable, list)
            when mutability in ~w{readonly mutable}a do
@@ -243,7 +247,7 @@ defmodule Orb.I32 do
   defmacro attr_writer(global_name) when is_atom(global_name) do
     quote do
       func unquote(String.to_atom("#{global_name}="))(new_value: Orb.I32) do
-        Orb.Instruction.local_get(I32, :new_value)
+        Orb.Instruction.local_get(Orb.I32, :new_value)
         global_set(unquote(global_name))
       end
     end
@@ -253,7 +257,7 @@ defmodule Orb.I32 do
            when is_atom(global_name) |> Kernel.and(is_atom(func_name)) do
     quote do
       func unquote(func_name)(new_value: Orb.I32) do
-        Orb.Instruction.local_get(I32, :new_value)
+        Orb.Instruction.local_get(Orb.I32, :new_value)
         global_set(unquote(global_name))
       end
     end

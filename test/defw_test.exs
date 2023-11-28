@@ -87,14 +87,17 @@ defmodule DefwTest do
 
     defw first() do
       1
+      :drop
     end
 
     defwi second() do
       2
+      :drop
     end
 
     defwp third() do
       3
+      :drop
     end
   end
 
@@ -102,12 +105,15 @@ defmodule DefwTest do
     assert Visibilities.to_wat() =~ """
              (func $first (export "first")
                (i32.const 1)
+               drop
              )
              (func $second
                (i32.const 2)
+               drop
              )
              (func $third
                (i32.const 3)
+               drop
              )
            """
 
@@ -116,13 +122,13 @@ defmodule DefwTest do
     refute {:third, 0} in Visibilities.__info__(:functions)
 
     assert Visibilities.first() == %Orb.Instruction{
-             type: nil,
+             type: :unknown_effect,
              operation: {:call, :first},
              operands: []
            }
 
     assert Visibilities.second() == %Orb.Instruction{
-             type: nil,
+             type: :unknown_effect,
              operation: {:call, :second},
              operands: []
            }

@@ -10,6 +10,8 @@ defmodule Orb.Control do
 
     block_items = __get_block_items(block)
 
+    # TODO: is there some way to do this using normal Elixir modules?
+    # I think we can define a module inline.
     block_items =
       Macro.prewalk(block_items, fn
         {{:., _, [{:__aliases__, _, [identifier]}, :break]}, _, []} ->

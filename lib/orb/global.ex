@@ -51,7 +51,7 @@ defmodule Orb.Global do
 
     %__MODULE__{
       name: name,
-      type: :i32_string,
+      type: Orb.I32.String,
       initial_value: value,
       mutability: mutability,
       exported: exported == :exported
@@ -75,13 +75,11 @@ defmodule Orb.Global do
     end
   end
 
-  def expand!(%Orb.Global{type: :i32_string, initial_value: string} = global) do
+  def expand!(%Orb.Global{type: Orb.I32.String, initial_value: string} = global) do
     %Orb.Global{global | type: :i32, initial_value: Orb.Constants.expand_if_needed(string)}
   end
 
-  def expand!(%Orb.Global{} = global) do
-    global
-  end
+  def expand!(%Orb.Global{} = global), do: global
 
   defimpl Orb.ToWat do
     def to_wat(

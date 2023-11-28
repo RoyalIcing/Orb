@@ -84,6 +84,7 @@ defmodule Orb.Constants do
     %__MODULE__{offset: 0xFF, items: [], lookup_table: lookup_table}
   end
 
+  # TODO: calculate offset based on how much memory we have used so far.
   def from_attribute(items, offset \\ 0xFF) do
     items =
       items

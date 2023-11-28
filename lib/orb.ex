@@ -712,6 +712,13 @@ defmodule Orb do
             import Orb.Global.DSL
           end
 
+        Orb.S64 ->
+          quote do
+            import Orb.I64.DSL
+            import Orb.I64.Signed.DSL
+            import Orb.Global.DSL
+          end
+
         Orb.F32 ->
           quote do
             import Orb.F32.DSL

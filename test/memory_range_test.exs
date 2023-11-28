@@ -44,12 +44,10 @@ defmodule MemoryRangeTest do
       c
       Memory.Range.get_byte_offset(c)
       Memory.Range.get_byte_length(c)
-      # assert! c === Orb.Instruction.i64(:const, 0x0F00000001000000)
     end
   end
 
   test "in WebAssembly" do
-    IO.puts(MemoryRangeSubject.to_wat())
     {c, a, b} = OrbWasmtime.Wasm.call(MemoryRangeSubject, :test)
     assert c === 0x0000000F00000002
     assert a === 0x0F
