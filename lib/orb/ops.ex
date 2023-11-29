@@ -36,15 +36,17 @@ defmodule Orb.Ops do
   @integer_types ~w(i64 i32)a
   @float_types ~w(f64 f32)a
   @primitive_types @integer_types ++ @float_types
-  defguard is_primitive_type(type) when type in [:i64, :i32, :i32_u8, :f32]
+  @effects [:unknown_effect, :global_effect, :local_effect]
+  @elixir_types [Elixir.Integer, Elixir.Float]
+  @base_types @primitive_types ++ @effects ++ @elixir_types
 
-  defp lowest_type(:i64), do: :i64
-  defp lowest_type(:i32), do: :i32
-  defp lowest_type(:i32_u8), do: :i32
-  defp lowest_type(:f32), do: :f32
+  defguard is_primitive_type(type) when type in @primitive_types
+  defguard is_effect(type) when type in @effects
 
   def to_primitive_type(type) when is_primitive_type(type), do: type
-  def to_primitive_type(:unknown_effect), do: :unknown_effect
+  def to_primitive_type(type) when is_effect(type), do: type
+  def to_primitive_type(type) when type in @elixir_types, do: type
+
   def to_primitive_type(mod) when is_atom(mod) do
     Code.ensure_loaded!(mod)
     to_primitive_type(mod.wasm_type())
@@ -63,12 +65,12 @@ defmodule Orb.Ops do
     do: to_primitive_type(a) in @float_types
 
   def types_compatible?(a, b),
-    do: lowest_type(to_primitive_type(a)) === lowest_type(to_primitive_type(b))
+    do: to_primitive_type(a) === to_primitive_type(b)
 
   def extract_type(n) when is_integer(n), do: Elixir.Integer
   def extract_type(n) when is_float(n), do: Elixir.Float
-  def extract_type(%{type: :i32}), do: :i32
   def extract_type(%{type: type}), do: to_primitive_type(type)
+  def extract_type(_), do: :unknown_effect
 
   def extract_common_type(a, b) do
     case {extract_type(a), extract_type(b)} do

@@ -1,9 +1,9 @@
 defmodule Orb.IfElse do
   @moduledoc false
 
-  defstruct [:result, :condition, :when_true, :when_false]
+  defstruct type: :unknown_effect, condition: nil, when_true: nil, when_false: nil
 
-  alias Orb.ToWat.Instructions
+  alias Orb.Ops
 
   # def new(:i32, condition, {:i32_const, a}, {:i32_const, b}) do
   #   [
@@ -15,28 +15,34 @@ defmodule Orb.IfElse do
   # end
 
   def new(condition, when_true) do
-    %__MODULE__{
-      result: nil,
-      condition: optimize_condition(condition),
-      when_true: when_true,
-      when_false: nil
-    }
+    type = Ops.extract_type(when_true)
+    new_unchecked(type, optimize_condition(condition), when_true, nil)
   end
 
   def new(condition, when_true, when_false) do
-    %__MODULE__{
-      result: nil,
-      condition: optimize_condition(condition),
-      when_true: when_true,
-      when_false: when_false
-    }
+    type = Ops.extract_common_type(when_true, when_false)
+
+    case type do
+      nil ->
+        raise Orb.TypeCheckError,
+          expected_type: Ops.extract_type(when_true),
+          received_type: Ops.extract_type(when_false),
+          instruction_identifier: "if/else"
+
+      type ->
+        new_unchecked(type, optimize_condition(condition), when_true, when_false)
+    end
   end
 
   def new(result, condition, when_true, when_false)
       when not is_nil(result) and not is_nil(when_false) do
+    new_unchecked(result, optimize_condition(condition), when_true, when_false)
+  end
+
+  defp new_unchecked(result, condition, when_true, when_false) when not is_nil(result) do
     %__MODULE__{
-      result: result,
-      condition: optimize_condition(condition),
+      type: result,
+      condition: condition,
       when_true: when_true,
       when_false: when_false
     }
@@ -48,32 +54,18 @@ defmodule Orb.IfElse do
     %{statement | when_true: when_true, when_false: when_false}
   end
 
-  # TODO: remove this, Orb.Instruction should do this for us.
+  # TODO: probably remove this.
   defp optimize_condition({:i32, :gt_u, {n, 0}}), do: n
   defp optimize_condition(condition), do: condition
 
-  def detecting_result_type(condition, when_true, when_false) do
-    result =
-      case when_true do
-        # TODO: detect actual type instead of assuming i32
-        # [{:return, _value}] -> :i32
-        _ -> nil
-      end
-
-    %__MODULE__{
-      result: result,
-      condition: condition,
-      when_true: when_true,
-      when_false: when_false
-    }
-  end
-
   defimpl Orb.ToWat do
     import Orb.ToWat.Helpers
+    alias Orb.ToWat.Instructions
+    require Orb.Ops |> alias
 
     def to_wat(
           %Orb.IfElse{
-            result: result,
+            type: result,
             condition: condition,
             when_true: when_true,
             when_false: when_false
@@ -86,11 +78,11 @@ defmodule Orb.IfElse do
         [
           "\n",
           indent,
-          "(if ",
-          if(result,
-            do: ["(result ", do_type(result), ")"],
-            else: ""
-          ),
+          "(if",
+          case result do
+            effect when Ops.is_effect(effect) -> ""
+            type -> [" (result ", do_type(type), ")"]
+          end,
           ?\n
         ],
         ["  ", indent, "(then", ?\n],
@@ -112,20 +104,25 @@ defmodule Orb.IfElse do
 
   defmodule DSL do
     @moduledoc false
+    alias Orb.InstructionSequence
 
     import Kernel, except: [if: 2]
 
+    require Orb.InstructionSequence |> alias
+
+    # Multi-line
     defmacro if(condition, [result: result], do: when_true, else: when_false) do
       quote do
         Orb.IfElse.new(
           unquote(result),
           unquote(condition),
-          unquote(Orb.__get_block_items(when_true)),
-          unquote(Orb.__get_block_items(when_false))
+          unquote(Orb.__get_block_items(when_true)) |> InstructionSequence.new(),
+          unquote(Orb.__get_block_items(when_false)) |> InstructionSequence.new()
         )
       end
     end
 
+    # Single-line
     defmacro if(condition, result: result, do: when_true, else: when_false) do
       quote do
         Orb.IfElse.new(
@@ -141,8 +138,8 @@ defmodule Orb.IfElse do
       quote do
         Orb.IfElse.new(
           unquote(condition),
-          unquote(Orb.__get_block_items(when_true)),
-          unquote(Orb.__get_block_items(when_false))
+          unquote(Orb.__get_block_items(when_true)) |> InstructionSequence.new(),
+          unquote(Orb.__get_block_items(when_false)) |> InstructionSequence.new()
         )
       end
     end
@@ -151,7 +148,7 @@ defmodule Orb.IfElse do
       quote do
         Orb.IfElse.new(
           unquote(condition),
-          unquote(Orb.__get_block_items(when_true))
+          unquote(Orb.__get_block_items(when_true)) |> InstructionSequence.new()
         )
       end
     end

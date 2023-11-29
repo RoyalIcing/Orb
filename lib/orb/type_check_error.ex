@@ -1,7 +1,11 @@
 defmodule Orb.TypeCheckError do
   defexception [:expected_type, :received_type, :instruction_identifier, :message]
 
-  require Orb.Ops, as: Ops
+  require Orb.Ops |> alias
+
+  defp make_message(type_a, type_b, "if/else") do
+    "If/else expected consistent case types, if: #{format_type(type_a)}, and else: #{format_type(type_b)}."
+  end
 
   defp make_message(expected_type, received_type, instruction_identifier)
        when is_binary(instruction_identifier) do
@@ -9,6 +13,7 @@ defmodule Orb.TypeCheckError do
   end
 
   defp format_type(type) when Ops.is_primitive_type(type), do: to_string(type)
+  defp format_type(:unknown_effect), do: "unknown_effect"
   defp format_type(Elixir.Integer), do: "Elixir.Integer"
   defp format_type(Elixir.Float), do: "Elixir.Float"
 

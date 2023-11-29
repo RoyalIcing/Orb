@@ -100,4 +100,18 @@ defmodule TypeCheckTest do
                  "Instruction global.set $a expected type i32, found Elixir.Float.",
                  &GlobalI32SetToF32.to_wat/0
   end
+
+  defmodule LocalI32SetToI32When do
+    use Orb
+
+    defw example(), a: F32 do
+      a = I32.when?(1, do: 1, else: 2)
+    end
+  end
+
+  test "setting f32 local to I32.when? fails" do
+    assert_raise Orb.TypeCheckError,
+                 "Instruction local.set $a expected type f32 via Orb.F32, found i32.",
+                 &LocalI32SetToI32When.to_wat/0
+  end
 end
