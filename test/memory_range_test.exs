@@ -22,8 +22,8 @@ defmodule MemoryRangeTest do
 
   test "get_byte_length/1" do
     assert Memory.Range.from(0, 0) |> Memory.Range.get_byte_length() == 0
-    assert Memory.Range.from(256, 0) |> Memory.Range.get_byte_length() == 0
-    assert Memory.Range.from(256, 512) |> Memory.Range.get_byte_length() == 512
+    assert Memory.Range.from(0, 256) |> Memory.Range.get_byte_length() == 256
+    assert Memory.Range.from(512, 256) |> Memory.Range.get_byte_length() == 256
     assert Memory.Range.from(0xFFFF, 0xEEEE) |> Memory.Range.get_byte_length() == 0xEEEE
   end
 
