@@ -18,7 +18,7 @@ The package can be installed via Hex by adding `orb` to your list of dependencie
 ```elixir
 def deps do
   [
-    {:orb, "~> 0.0.26"}
+    {:orb, "~> 0.0.27"}
   ]
 end
 ```
