@@ -57,6 +57,14 @@ defmodule IfElseTest do
       use Orb
 
       defw test(), I32 do
+        if 0, do: 1, else: 2
+      end
+    end
+
+    defmodule InferredI32_C do
+      use Orb
+
+      defw test(), I32 do
         if 0 do
           1
         else
@@ -65,7 +73,7 @@ defmodule IfElseTest do
       end
     end
 
-    defmodule InferredI32_C do
+    defmodule InferredI32_D do
       use Orb
 
       defw test(), I32 do
@@ -96,5 +104,6 @@ defmodule IfElseTest do
     assert to_wat(InferredI32_A) =~ wat
     assert to_wat(InferredI32_B) =~ wat
     assert to_wat(InferredI32_C) =~ wat
+    assert to_wat(InferredI32_D) =~ wat
   end
 end
