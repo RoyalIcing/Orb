@@ -1,13 +1,13 @@
 defmodule Orb.Func do
   @moduledoc false
-  alias Orb.Constants
+  alias Orb.InstructionSequence
 
   defstruct name: nil,
             exported_names: [],
             params: [],
             result: nil,
             local_types: [],
-            body: [],
+            body: %InstructionSequence{},
             source_module: nil,
             table_elem_indices: []
 
@@ -16,8 +16,7 @@ defmodule Orb.Func do
   end
 
   def expand(%__MODULE__{} = func) do
-    body = func.body |> Enum.map(&Constants.expand_if_needed/1)
-    %{func | body: body}
+    update_in(func.body, &Orb.InstructionSequence.expand/1)
   end
 
   defimpl Orb.ToWat do
@@ -64,7 +63,7 @@ defmodule Orb.Func do
             ")\n"
           ]
         end,
-        Enum.map(body, &[Instructions.do_wat(&1, "  " <> indent), "\n"]),
+        Orb.ToWat.to_wat(body, "  " <> indent),
         [indent, ")\n"],
         for elem_index <- table_elem_indices do
           [indent, "(elem (i32.const ", to_string(elem_index), ") $", to_string(name), ")\n"]

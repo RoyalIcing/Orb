@@ -152,7 +152,7 @@ defmodule Orb.DSL do
         params: unquote(params),
         result: unquote(result_type),
         local_types: unquote(local_types),
-        body: unquote(block_items),
+        body: unquote(block_items) |> Orb.InstructionSequence.new(),
         # body: fn ->
         #   if Process.get(Orb.DSL, false) do
         #     unquote(block_items)

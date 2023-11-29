@@ -86,12 +86,12 @@ defmodule Orb.IfElse do
           ?\n
         ],
         ["  ", indent, "(then", ?\n],
-        [Instructions.do_wat(when_true, "    " <> indent), ?\n],
+        Instructions.do_wat(when_true, "    " <> indent),
         ["  ", indent, ")", ?\n],
         if when_false do
           [
             ["  ", indent, "(else", ?\n],
-            [Instructions.do_wat(when_false, "    " <> indent), ?\n],
+            Instructions.do_wat(when_false, "    " <> indent),
             ["  ", indent, ")", ?\n]
           ]
         else

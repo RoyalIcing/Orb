@@ -12,6 +12,7 @@ defmodule Orb.InstructionSequence do
             }
 
   alias Orb.Ops
+  alias Orb.Constants
 
   def new([instruction]) do
     new(Ops.extract_type(instruction), [instruction])
@@ -29,6 +30,11 @@ defmodule Orb.InstructionSequence do
     }
   end
 
+  def expand(%__MODULE__{} = func) do
+    body = func.body |> Enum.map(&Constants.expand_if_needed/1)
+    %{func | body: body}
+  end
+
   defimpl Orb.ToWat do
     alias Orb.ToWat.Instructions
 
@@ -37,7 +43,7 @@ defmodule Orb.InstructionSequence do
           indent
         ) do
       for instruction <- instructions do
-        Instructions.do_wat(instruction, indent)
+        [Instructions.do_wat(instruction, indent), "\n"]
       end
     end
   end
