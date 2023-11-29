@@ -29,21 +29,6 @@ defmodule Orb.InstructionSequence do
     }
   end
 
-  defmacro from_block(block) do
-    alias __MODULE__
-
-    case block do
-      nil ->
-        nil |> Macro.escape()
-
-      {:__block__, _meta, block_items} ->
-        quote do: InstructionSequence.new(:unknown_effect, unquote(block_items))
-
-      single ->
-        quote do: InstructionSequence.new(Ops.extract_type(unquote(single)), [unquote(single)])
-    end
-  end
-
   defimpl Orb.ToWat do
     alias Orb.ToWat.Instructions
 
