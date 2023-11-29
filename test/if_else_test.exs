@@ -1,7 +1,7 @@
 defmodule IfElseTest do
   use ExUnit.Case, async: true
 
-  use Orb
+  import Orb, only: [to_wat: 1]
 
   test "no inferred type" do
     defmodule A do
