@@ -12,7 +12,7 @@ defmodule TypeCheckTest do
   test "passing F32 param to I32.add fails" do
     assert_raise Orb.TypeCheckError,
                  "Instruction i32.add expected type i32, found f32 via Orb.F32.",
-                 &PassLocalF32ToI32Add.to_wat/0
+                 fn -> Orb.to_wat(PassLocalF32ToI32Add) end
   end
 
   defmodule PassConstantF32ToI32Add do
@@ -26,7 +26,7 @@ defmodule TypeCheckTest do
   test "passing F32 constant to I32.add fails" do
     assert_raise Orb.TypeCheckError,
                  "Instruction i32.add expected type i32, found f32.",
-                 &PassConstantF32ToI32Add.to_wat/0
+                 fn -> Orb.to_wat(PassConstantF32ToI32Add) end
   end
 
   defmodule PassLocalI32ToI32Trunc do
@@ -40,7 +40,7 @@ defmodule TypeCheckTest do
   test "passing I32 param to I32.trunc_f32_s fails" do
     assert_raise Orb.TypeCheckError,
                  "Instruction i32.trunc_f32_s expected type f32, found i32 via Orb.I32.",
-                 &PassLocalI32ToI32Trunc.to_wat/0
+                 fn -> Orb.to_wat(PassLocalI32ToI32Trunc) end
   end
 
   defmodule PassConstantI32ToI32Trunc do
@@ -54,7 +54,7 @@ defmodule TypeCheckTest do
   test "passing constant integer to I32.trunc_f32_s fails" do
     assert_raise Orb.TypeCheckError,
                  "Instruction i32.trunc_f32_s expected type f32, found Elixir.Integer.",
-                 &PassConstantI32ToI32Trunc.to_wat/0
+                 fn -> Orb.to_wat(PassConstantI32ToI32Trunc) end
   end
 
   defmodule I32AddWithThreeArgs do
@@ -68,7 +68,7 @@ defmodule TypeCheckTest do
   test "passing 3rd argument to I32.add fails" do
     assert_raise ArgumentError,
                  "WebAssembly instruction i32.add/2 does not accept a 3rd argument.",
-                 &I32AddWithThreeArgs.to_wat/0
+                 fn -> Orb.to_wat(I32AddWithThreeArgs) end
   end
 
   defmodule LocalI32SetToF32 do
@@ -82,7 +82,7 @@ defmodule TypeCheckTest do
   test "setting i32 local to f32 fails" do
     assert_raise Orb.TypeCheckError,
                  "Instruction local.set $a expected type i32 via Orb.I32, found Elixir.Float.",
-                 &LocalI32SetToF32.to_wat/0
+                 fn -> Orb.to_wat(LocalI32SetToF32) end
   end
 
   defmodule GlobalI32SetToF32 do
@@ -98,7 +98,7 @@ defmodule TypeCheckTest do
   test "setting i32 global to f32 fails" do
     assert_raise Orb.TypeCheckError,
                  "Instruction global.set $a expected type i32, found Elixir.Float.",
-                 &GlobalI32SetToF32.to_wat/0
+                 fn -> Orb.to_wat(GlobalI32SetToF32) end
   end
 
   defmodule LocalI32SetToI32When do
@@ -112,6 +112,6 @@ defmodule TypeCheckTest do
   test "setting f32 local to I32.when? fails" do
     assert_raise Orb.TypeCheckError,
                  "Instruction local.set $a expected type f32 via Orb.F32, found i32.",
-                 &LocalI32SetToI32When.to_wat/0
+                 fn -> Orb.to_wat(LocalI32SetToI32When) end
   end
 end

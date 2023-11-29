@@ -50,10 +50,10 @@ defmodule Orb.InstructionSequence do
 
   defimpl Orb.TypeNarrowable do
     def type_narrow_to(
-          %Orb.InstructionSequence{type: Elixir.Integer, body: [single]} = seq,
+          %Orb.InstructionSequence{type: current_type, body: [single]} = seq,
           narrower_type
         ) do
-      case Ops.types_compatible?(Elixir.Integer, narrower_type) do
+      case Ops.types_compatible?(current_type, narrower_type) do
         true ->
           %{
             seq

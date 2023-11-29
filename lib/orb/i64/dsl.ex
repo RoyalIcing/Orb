@@ -33,11 +33,11 @@ defmodule Orb.I64.DSL do
     alias Orb.Ops
 
     case Ops.extract_common_type(left, right) do
-      :i32 ->
-        Orb.I32.eq(left, right)
-
       :i64 ->
         Orb.I64.eq(left, right)
+
+      :i32 ->
+        Orb.I32.eq(left, right)
     end
   end
 

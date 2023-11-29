@@ -15,8 +15,14 @@ end
 defmodule Orb.ToWat.Helpers do
   def do_type(type) do
     case type do
+      :i64 ->
+        "i64"
+
       :i32 ->
         "i32"
+
+      :f64 ->
+        "f64"
 
       :f32 ->
         "f32"

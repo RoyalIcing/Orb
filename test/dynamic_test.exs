@@ -64,8 +64,8 @@ defmodule DynamicTest do
     )
     """
 
-    assert DynamicA.to_wat() =~ expected
-    assert DynamicB.to_wat() =~ expected
+    assert Orb.to_wat(DynamicA) =~ expected
+    assert Orb.to_wat(DynamicB) =~ expected
   end
 
   test "admin user" do
@@ -79,7 +79,7 @@ defmodule DynamicTest do
     )
     """
 
-    assert DynamicA.to_wat() =~ expected
-    assert DynamicB.to_wat() =~ expected
+    assert Orb.to_wat(DynamicA) =~ expected
+    assert Orb.to_wat(DynamicB) =~ expected
   end
 end

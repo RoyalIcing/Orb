@@ -115,7 +115,6 @@ defmodule Orb.Func do
     defstruct [:name, :params, :result]
 
     def new(name, params, result) do
-      # params = [:i32]
       %__MODULE__{
         name: name,
         params: params,

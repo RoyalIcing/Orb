@@ -103,8 +103,8 @@ defmodule Orb.IfElse do
   end
 
   defimpl Orb.TypeNarrowable do
-    def type_narrow_to(%Orb.IfElse{type: Elixir.Integer} = if_else, narrower_type) do
-      case Ops.types_compatible?(Elixir.Integer, narrower_type) do
+    def type_narrow_to(%Orb.IfElse{type: current_type} = if_else, narrower_type) do
+      case Ops.types_compatible?(current_type, narrower_type) do
         true ->
           %{
             if_else

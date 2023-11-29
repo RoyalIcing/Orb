@@ -638,20 +638,8 @@ defmodule Orb do
           do: Orb.Table.Allocations.from_attribute(@wasm_table_allocations)
 
         def __wasm_module__() do
-          # Globals are defined by the current module.
-          # Including another module does _not_ include its globals.
-          # Instead you must declare the globals explicitly.
-          # Usually, this would be wrapped within a __using__/1 for you.
-          Orb.Compiler.begin(global_types: __wasm_global_types__())
-
-          # Each global is expanded, possibly looking up with the current compiler context begun above.
-          global_definitions =
-            @wasm_globals |> Enum.reverse() |> List.flatten() |> Enum.map(&Orb.Global.expand!/1)
-
-          body = Orb.Compiler.get_body_of(__MODULE__)
-
-          # We’re done. Get all the constant strings that were actually used.
-          %{constants: constants} = Orb.Compiler.done()
+          %{body: body, constants: constants, global_definitions: global_definitions} =
+            Orb.Compiler.run(__MODULE__, @wasm_globals)
 
           Orb.ModuleDefinition.new(
             name: @wasm_name,
@@ -690,7 +678,14 @@ defmodule Orb do
           do: Orb.ModuleDefinition.funcp_ref!(__MODULE__, name)
 
         @doc "Convert this module’s Orb definition to WebAssembly text (Wat) format."
-        def to_wat(), do: Orb.to_wat(__wasm_module__())
+        # def to_wat(), do: Orb.to_wat(__wasm_module__())
+        def to_wat() do
+          fn ->
+            Orb.to_wat(__wasm_module__())
+          end
+          |> Task.async()
+          |> Task.await()
+        end
       end
     end
   end
@@ -924,8 +919,8 @@ defmodule Orb do
   defmacro importw(mod, namespace) when is_atom(namespace) do
     quote do
       @wasm_imports (for imp <- unquote(mod).__wasm_imports__(nil) do
-        %{imp | module: unquote(namespace)}
-      end)
+                       %{imp | module: unquote(namespace)}
+                     end)
     end
   end
 
@@ -942,29 +937,16 @@ defmodule Orb do
   end
 
   @doc """
-  Declare WebAssembly imports for a block of functions.
-  """
-  # defmacro importw(namespace, do: block) do
-  #   quote do
-  #     @wasm_imports (for {name, type} <- unquote(block) do
-  #                      %Orb.Import{module: unquote(namespace), name: name, type: type}
-  #                    end)
-  #   end
-  # end
-
-  @doc """
   Convert Orb AST into WebAssembly text format.
   """
-  def to_wat(term) when is_atom(term) do
-    Process.put(Orb.DSL, true)
+  def to_wat(term)
 
-    term.__wasm_module__() |> Orb.ToWat.to_wat("") |> IO.chardata_to_string()
+  def to_wat(term) when is_atom(term) do
+    term.__wasm_module__() |> to_wat()
   end
 
-  def to_wat(term) do
-    Process.put(Orb.DSL, true)
-
-    term |> Orb.ToWat.to_wat("") |> IO.chardata_to_string()
+  def to_wat(term) when is_struct(term) do
+    Orb.ToWat.to_wat(term, "") |> IO.chardata_to_string()
   end
 
   def __get_block_items(block) do

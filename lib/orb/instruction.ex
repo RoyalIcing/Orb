@@ -4,7 +4,7 @@ defmodule Orb.Instruction do
   require Orb.Ops, as: Ops
   alias Orb.Constants
 
-  @types [:i32, :i64, :f32, :local_effect, :global_effect, :unknown_effect]
+  @types [:i32, :i64, :f64, :f32, :local_effect, :global_effect, :unknown_effect]
 
   def new(type, operation, operands \\ [])
 
@@ -28,6 +28,8 @@ defmodule Orb.Instruction do
   end
 
   def new(type, operation, operands) when is_list(operands) and is_atom(type) do
+    Code.ensure_loaded!(type)
+
     # TODO: check that this implements custom type.
     # _ = type.wasm_type()
     if function_exported?(type, :wasm_type, 0) do

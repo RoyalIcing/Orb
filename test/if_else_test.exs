@@ -69,7 +69,7 @@ defmodule IfElseTest do
           1
         else
           i32(2)
-        end
+        end |> IO.inspect()
       end
     end
 
@@ -105,5 +105,72 @@ defmodule IfElseTest do
     assert to_wat(InferredI32_B) =~ wat
     assert to_wat(InferredI32_C) =~ wat
     assert to_wat(InferredI32_D) =~ wat
+  end
+
+  test "inferred i64" do
+    defmodule InferredI64_A do
+      use Orb
+
+      defw test(), I64 do
+        if 0 do
+          1
+        else
+          2
+        end
+      end
+    end
+
+    defmodule InferredI64_B do
+      use Orb
+
+      defw test(), I64 do
+        if 0, do: 1, else: 2
+      end
+    end
+
+    defmodule InferredI64_C do
+      use Orb
+
+      defw test(), I64 do
+        if 0 do
+          i64(1)
+        else
+          2
+        end |> IO.inspect()
+      end
+    end
+
+    defmodule InferredI64_D do
+      use Orb
+
+      defw test(), I64 do
+        if 0 do
+          i64(1)
+        else
+          i64(2)
+        end
+      end
+    end
+
+    wat =
+      """
+        (func $test (export "test") (result i64)
+          (i32.const 0)
+          (if (result i64)
+            (then
+              (i64.const 1)
+            )
+            (else
+              (i64.const 2)
+            )
+          )
+        )
+      )
+      """
+
+    assert to_wat(InferredI64_A) =~ wat
+    assert to_wat(InferredI64_B) =~ wat
+    assert to_wat(InferredI64_C) =~ wat
+    assert to_wat(InferredI64_D) =~ wat
   end
 end
