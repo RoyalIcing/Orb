@@ -1,12 +1,6 @@
 defmodule Orb.Compiler do
   @moduledoc false
 
-  def get_body_of(mod) do
-    mod.__wasm_body__(nil)
-    |> Orb.ModuleDefinition.expand_body_func_refs()
-    |> Orb.ModuleDefinition.expand_body_func_constants()
-  end
-
   def run(mod, globals) do
     global_types =
       globals
@@ -21,7 +15,7 @@ defmodule Orb.Compiler do
     global_definitions =
       globals |> Enum.reverse() |> List.flatten() |> Enum.map(&Orb.Global.expand!/1)
 
-    body = get_body_of(mod)
+    body = Orb.ModuleDefinition.get_body_of(mod)
 
     Process.delete({Orb, :global_types})
 

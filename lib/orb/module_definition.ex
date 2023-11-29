@@ -40,12 +40,18 @@ defmodule Orb.ModuleDefinition do
     struct!(__MODULE__, options)
   end
 
+  def get_body_of(mod) do
+    mod.__wasm_body__(nil)
+    |> expand_body_func_refs()
+    |> expand_body_func_constants()
+  end
+
   defp resolve_func_ref({:mod_func_ref, visiblity, {mod, name}}) do
-    fetch_func!(Orb.Compiler.get_body_of(mod), visiblity, mod, name)
+    fetch_func!(get_body_of(mod), visiblity, mod, name)
   end
 
   defp resolve_func_ref({:mod_func_ref, visiblity, mod}) when is_atom(mod) do
-    fetch_func!(Orb.Compiler.get_body_of(mod), visiblity, mod)
+    fetch_func!(get_body_of(mod), visiblity, mod)
   end
 
   defmodule FetchFuncError do
