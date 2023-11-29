@@ -414,10 +414,8 @@ defmodule OrbTest do
   defmodule SingleFunc do
     use Orb
 
-    wasm do
-      func answer(), I32 do
-        42
-      end
+    defw answer(), I32 do
+      42
     end
   end
 
