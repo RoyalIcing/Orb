@@ -8,15 +8,16 @@ defmodule Orb.Numeric.Multiply do
 
   [MDN reference](https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/Numeric/Multiplication)
   """
+  alias Orb.CustomType
 
   # Perform at comptime.
   def optimized(_type, a, b) when is_integer(a) and is_integer(b), do: a * b
   # Multiply anything by zero equals zero.
   def optimized(type, _, 0), do: Orb.Instruction.wrap_constant!(type, 0)
   def optimized(type, 0, _), do: Orb.Instruction.wrap_constant!(type, 0)
-  # Multiply anything by one is that same thing.
+  # Multiply one by anything is that same thing.
   def optimized(_type, a, 1), do: a
   def optimized(_type, 1, b), do: b
   # Finally, spit out the runtime instruction.
-  def optimized(type, a, b), do: Orb.Instruction.new(type.wasm_type(), :mul, [a, b])
+  def optimized(type, a, b), do: Orb.Instruction.new(CustomType.resolve!(type), :mul, [a, b])
 end

@@ -528,6 +528,7 @@ defmodule Orb do
   ## Running your module
   """
 
+  alias Orb.CustomType
   alias Orb.Ops
   alias Orb.Memory
   require Ops
@@ -802,7 +803,7 @@ defmodule Orb do
       @wasm_types (for mod <- unquote(modules) do
                      %Orb.TypeDefinition{
                        name: mod.type_name(),
-                       inner_type: mod.wasm_type()
+                       inner_type: CustomType.resolve!(mod)
                      }
                    end)
     end
@@ -860,7 +861,7 @@ defmodule Orb do
   `mode` can be :readonly, :mutable, :export_readonly, or :export_mutable. The default is :mutable.
   """
   defmacro global(mode \\ :mutable, do: block) do
-    quote do
+    quote generated: true do
       unquote(__global_block(:elixir, block))
 
       with do
@@ -908,7 +909,7 @@ defmodule Orb do
     end
   end
 
-  def __global_block(_, block), do: block
+  def __global_block(_, block), do: quote([generated: true], do: unquote(block))
 
   defmacro importw(mod, namespace) when is_atom(namespace) do
     quote do

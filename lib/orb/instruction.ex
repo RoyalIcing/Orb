@@ -4,39 +4,34 @@ defmodule Orb.Instruction do
   require Orb.Ops, as: Ops
   alias Orb.Constants
 
-  @types [:i32, :i64, :f64, :f32, :local_effect, :global_effect, :unknown_effect]
+  @types [:i64, :i32, :f64, :f32, :local_effect, :global_effect, :unknown_effect]
 
-  def new(type, operation, operands \\ [])
+  # def new(type, operation, operands \\ [])
+  def new(type, operation), do: new(type, operation, [])
 
-  def new(type, operation, operands) when is_list(operands) and type in @types,
+  def new(type, operation, operands)
+
+  def new(type, operation, operands) when type in @types,
     do: %__MODULE__{
       type: type,
       operation: operation,
       operands: type_check_operands!(type, operation, operands)
     }
 
-  def new(Elixir.Integer, operation, operands) do
-    raise "Can’t create an instruction for Elixir.Integer, need concrete type like Orb.I32."
+  def new(Elixir.Integer, _, _) do
+    raise "Can’t create an instruction for Elixir.Integer, need concrete type like Orb.I64."
   end
 
-  def new(Elixir.Float, operation, operands) do
-    raise "Can’t create an instruction for Elixir.Float, need concrete type like Orb.F32."
+  def new(Elixir.Float, _, _) do
+    raise "Can’t create an instruction for Elixir.Float, need concrete type like Orb.F64."
   end
 
-  def new(nil, operation, operands) do
-    raise "Can’t create an instruction for nil, need :unknown instead. #{inspect(operation)} #{inspect(operands)}"
+  def new(nil, operation, operands) when is_list(operands) do
+    raise "Can’t create an instruction for nil, need :unknown_effect instead. #{inspect(operation)} #{inspect(operands)}"
   end
 
-  def new(type, operation, operands) when is_list(operands) and is_atom(type) do
-    Code.ensure_loaded!(type)
-
-    # TODO: check that this implements custom type.
-    # _ = type.wasm_type()
-    if function_exported?(type, :wasm_type, 0) do
-      type.wasm_type()
-    else
-      raise "You passed a Orb type module #{type} that does not implement wasm_type/0. #{inspect(operation)} #{inspect(operands)}"
-    end
+  def new(type, operation, operands) when is_atom(type) and is_list(operands) do
+    type = Orb.CustomType.resolve!(type)
 
     %__MODULE__{
       type: type,
@@ -125,7 +120,7 @@ defmodule Orb.Instruction do
   end
 
   defp type_check_operand!(type, op, number, param_index)
-       when is_number(number) and type in [:i32, :i64, :f32] and is_atom(op) do
+       when type in [:i64, :i32, :f64, :f32] and is_atom(op) and is_number(number) do
     expected_type = Ops.param_type!(type, op, param_index)
 
     received_type =

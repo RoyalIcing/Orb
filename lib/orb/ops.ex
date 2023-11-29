@@ -36,9 +36,9 @@ defmodule Orb.Ops do
   @integer_types ~w(i64 i32)a
   @float_types ~w(f64 f32)a
   @primitive_types @integer_types ++ @float_types
-  @effects [:unknown_effect, :global_effect, :local_effect]
+  @effects ~w(unknown_effect global_effect local_effect)a
   @elixir_types [Elixir.Integer, Elixir.Float]
-  @base_types @primitive_types ++ @effects ++ @elixir_types
+  # @base_types @primitive_types ++ @effects ++ @elixir_types
 
   defguard is_primitive_type(type) when type in @primitive_types
   defguard is_effect(type) when type in @effects
@@ -48,8 +48,7 @@ defmodule Orb.Ops do
   def to_primitive_type(type) when type in @elixir_types, do: type
 
   def to_primitive_type(mod) when is_atom(mod) do
-    Code.ensure_loaded!(mod)
-    to_primitive_type(mod.wasm_type())
+    Orb.CustomType.resolve!(mod) |> to_primitive_type()
   end
 
   def types_compatible?(Elixir.Integer, b),

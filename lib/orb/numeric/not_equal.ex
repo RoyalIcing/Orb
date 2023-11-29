@@ -8,6 +8,7 @@ defmodule Orb.Numeric.NotEqual do
 
   [MDN reference](https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/Numeric/Not_equal)
   """
+  alias Orb.CustomType
 
-  def optimized(type, a, b), do: Orb.Instruction.new(type.wasm_type(), :ne, [a, b])
+  def optimized(type, a, b), do: Orb.Instruction.new(CustomType.resolve!(type), :ne, [a, b])
 end

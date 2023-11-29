@@ -42,6 +42,9 @@ defmodule Orb.I32.String do
     @impl Orb.CustomType
     def wasm_type(), do: :i32
 
+    @impl Orb.CustomType
+    def byte_count(), do: 1
+
     @behaviour Access
 
     @impl Access
