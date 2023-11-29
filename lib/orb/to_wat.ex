@@ -3,6 +3,7 @@ defprotocol Orb.ToWat do
   def to_wat(data, indent)
 end
 
+# TODO: remove this.
 # A lot of the instruction are implemented as tuples.
 # They might all become structs in the future, which means this could be removed.
 defimpl Orb.ToWat, for: Tuple do
@@ -14,7 +15,7 @@ end
 defmodule Orb.ToWat.Helpers do
   def do_type(type) do
     case type do
-      type when type in [:i32, :i32_u8] ->
+      :i32 ->
         "i32"
 
       :f32 ->
