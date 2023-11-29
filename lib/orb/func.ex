@@ -19,8 +19,15 @@ defmodule Orb.Func do
     update_in(func.body, &Orb.InstructionSequence.expand/1)
   end
 
+  def narrow_if_needed(func)
+
+  def narrow_if_needed(%__MODULE__{result: nil} = func), do: func
+
+  def narrow_if_needed(%__MODULE__{} = func) do
+    update_in(func.body, &Orb.TypeNarrowable.type_narrow_to(&1, func.result))
+  end
+
   defimpl Orb.ToWat do
-    alias Orb.ToWat.Instructions
     import Orb.ToWat.Helpers
 
     def to_wat(

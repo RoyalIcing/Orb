@@ -15,7 +15,7 @@ defmodule Orb.IfElse do
   # end
 
   def new(condition, when_true) do
-    type = Ops.extract_type(when_true)
+    type = Ops.typeof(when_true)
     new_unchecked(type, optimize_condition(condition), when_true, nil)
   end
 
@@ -25,8 +25,8 @@ defmodule Orb.IfElse do
     case type do
       nil ->
         raise Orb.TypeCheckError,
-          expected_type: Ops.extract_type(when_true),
-          received_type: Ops.extract_type(when_false),
+          expected_type: Ops.typeof(when_true),
+          received_type: Ops.typeof(when_false),
           instruction_identifier: "if/else"
 
       type ->
@@ -100,6 +100,26 @@ defmodule Orb.IfElse do
         [indent, ")"]
       ]
     end
+  end
+
+  defimpl Orb.TypeNarrowable do
+    def type_narrow_to(%Orb.IfElse{type: Elixir.Integer} = if_else, narrower_type) do
+      case Ops.types_compatible?(Elixir.Integer, narrower_type) do
+        true ->
+          %{
+            if_else
+            | type: narrower_type,
+              when_true: Orb.TypeNarrowable.type_narrow_to(if_else.when_true, narrower_type),
+              when_false: Orb.TypeNarrowable.type_narrow_to(if_else.when_false, narrower_type)
+          }
+
+        false ->
+          # raise "Incompatible types Elixir.Integer and #{inspect(narrower_type)}."
+          if_else
+      end
+    end
+
+    def type_narrow_to(%Orb.IfElse{} = if_else, _), do: if_else
   end
 
   defmodule DSL do

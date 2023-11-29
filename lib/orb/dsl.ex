@@ -161,7 +161,7 @@ defmodule Orb.DSL do
         #   end
         # end,
         exported_names: unquote(exported_names)
-      }
+      } |> Orb.Func.narrow_if_needed()
     end
   end
 

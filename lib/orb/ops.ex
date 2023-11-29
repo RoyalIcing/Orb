@@ -67,13 +67,15 @@ defmodule Orb.Ops do
   def types_compatible?(a, b),
     do: to_primitive_type(a) === to_primitive_type(b)
 
-  def extract_type(n) when is_integer(n), do: Elixir.Integer
-  def extract_type(n) when is_float(n), do: Elixir.Float
-  def extract_type(%{type: type}), do: to_primitive_type(type)
-  def extract_type(_), do: :unknown_effect
+  def typeof(n) when is_integer(n), do: Elixir.Integer
+  def typeof(n) when is_float(n), do: Elixir.Float
+  def typeof(%{type: type}), do: type
+  def typeof(_), do: :unknown_effect
+
+  def typeof(value, :primitive), do: typeof(value) |> to_primitive_type()
 
   def extract_common_type(a, b) do
-    case {extract_type(a), extract_type(b)} do
+    case {typeof(a, :primitive), typeof(b, :primitive)} do
       {same, same} -> same
       {type, Elixir.Integer} when type in @integer_types -> type
       {Elixir.Integer, type} when type in @integer_types -> type

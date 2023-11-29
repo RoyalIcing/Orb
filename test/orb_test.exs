@@ -432,7 +432,7 @@ defmodule OrbTest do
                  params: [],
                  result: Orb.I32,
                  local_types: [],
-                 body: %Orb.InstructionSequence{type: Elixir.Integer, body: [42]},
+                 body: %Orb.InstructionSequence{type: Orb.I32, body: [42]},
                  exported_names: ["answer"]
                }
              ]
