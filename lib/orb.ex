@@ -811,7 +811,7 @@ defmodule Orb do
   defmacro types(modules) do
     quote do
       @wasm_types (for mod <- unquote(modules) do
-                     %Orb.Type{
+                     %Orb.TypeDefinition{
                        name: mod.type_name(),
                        inner_type: mod.wasm_type()
                      }

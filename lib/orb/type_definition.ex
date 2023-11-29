@@ -1,9 +1,9 @@
-defmodule Orb.Type do
+defmodule Orb.TypeDefinition do
   defstruct name: nil, inner_type: nil
 
   defimpl Orb.ToWat do
     def to_wat(
-          %Orb.Type{
+          %Orb.TypeDefinition{
             name: name,
             inner_type: inner_type
           },
