@@ -69,7 +69,7 @@ defmodule IfElseTest do
           1
         else
           i32(2)
-        end |> IO.inspect()
+        end
       end
     end
 
@@ -136,7 +136,7 @@ defmodule IfElseTest do
           i64(1)
         else
           2
-        end |> IO.inspect()
+        end
       end
     end
 
