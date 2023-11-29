@@ -628,12 +628,6 @@ defmodule Orb do
 
     defmacro __before_compile__(_env) do
       quote do
-        @wasm_global_types @wasm_globals
-                           |> List.flatten()
-                           |> Map.new(fn global -> {global.name, global.type} end)
-                           |> Map.merge(%{__MODULE__: __MODULE__})
-        def __wasm_global_types__(), do: @wasm_global_types
-
         def __wasm_table_allocations__(),
           do: Orb.Table.Allocations.from_attribute(@wasm_table_allocations)
 
