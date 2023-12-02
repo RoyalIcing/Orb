@@ -58,6 +58,11 @@ defmodule Orb.Ops do
     Orb.CustomType.resolve!(mod) |> to_primitive_type()
   end
 
+  def type_stack_count(type) when is_primitive_type(type), do: 1
+  def type_stack_count(type) when is_effect(type), do: 0
+  def type_stack_count(type) when is_atom(type), do: 1
+  def type_stack_count(type) when is_tuple(type), do: tuple_size(type)
+
   def types_compatible?(Elixir.Integer, b),
     do: to_primitive_type(b) in @integer_types
 
