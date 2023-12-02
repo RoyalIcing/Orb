@@ -8,9 +8,22 @@ defmodule Orb.I32.DSL do
   """
 
   import Kernel, except: [+: 2, -: 2, *: 2, ===: 2, !==: 2, not: 1, or: 2]
+  alias Orb.Ops
 
   def left + right do
-    Orb.Numeric.Add.optimized(Orb.I32, left, right)
+    case Ops.extract_common_type(left, right) do
+      Integer ->
+        Kernel.+(left, right)
+
+      :i64 ->
+        Orb.Numeric.Add.optimized(Orb.I64, left, right)
+
+      :i32 ->
+        Orb.Numeric.Add.optimized(Orb.I32, left, right)
+
+      :f32 ->
+        Orb.F32.add(left, right)
+    end
   end
 
   def left - right do
@@ -30,8 +43,6 @@ defmodule Orb.I32.DSL do
   end
 
   def left === right do
-    alias Orb.Ops
-
     case Ops.extract_common_type(left, right) do
       :i64 ->
         Orb.I64.eq(left, right)

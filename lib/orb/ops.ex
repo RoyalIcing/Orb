@@ -47,6 +47,13 @@ defmodule Orb.Ops do
   def to_primitive_type(type) when is_effect(type), do: type
   def to_primitive_type(type) when type in @elixir_types, do: type
 
+  def to_primitive_type(type) when is_tuple(type) do
+    for nested <- Tuple.to_list(type) do
+      to_primitive_type(nested)
+    end
+    |> List.to_tuple()
+  end
+
   def to_primitive_type(mod) when is_atom(mod) do
     Orb.CustomType.resolve!(mod) |> to_primitive_type()
   end

@@ -7,9 +7,24 @@ defmodule Orb.S32 do
     """
 
     import Kernel, except: [/: 2, <: 2, >: 2, <=: 2, >=: 2]
+    alias Orb.{Ops, F32}
 
     def left / right do
-      Orb.I32.div_s(left, right)
+      # Orb.I32.div_s(left, right)
+      case Ops.extract_common_type(left, right) do
+        Integer ->
+          Orb.I32.div_s(left, right)
+          # Kernel.div(left, right)
+
+        :i64 ->
+          Orb.I64.div_s(left, right)
+
+        :i32 ->
+          Orb.I32.div_s(left, right)
+
+        :f32 ->
+          Orb.F32.div(left, right)
+      end
     end
 
     def left >>> right do

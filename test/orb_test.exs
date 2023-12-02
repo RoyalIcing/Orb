@@ -738,35 +738,61 @@ defmodule OrbTest do
     assert Instance.call(inst, :calculate_mean_and_count) == {5, 3}
   end
 
-  defmodule FileNameSafe do
-    use Orb
+  test "tuple types" do
+    defmodule TupleTypes do
+      use Orb
 
-    Memory.pages(2)
+      defw rgb_reverse(r: F32, g: F32, b: F32), {F32, F32, F32} do
+        b
+        g
+        r
+      end
 
-    wasm do
-      func get_is_valid(), I32, str: I32.U8.UnsafePointer, char: I32 do
-        str = 1024
+      defw rgb_average(r: F32, g: F32, b: F32), F32 do
+        (b + g + r) / 3.0
+      end
 
-        loop Loop, result: I32 do
-          Control.block Outer do
-            Control.block :inner do
-              char = str[at!: 0]
-              Control.break(:inner, if: I32.eq(char, ?/))
-              Outer.break(if: char)
-              return(1)
-            end
-
-            return(0)
-          end
-
-          str = str + 1
-          Loop.continue()
-        end
+      def main do
+        rgb_reverse(1.0, 0.5, 0.0)
+        :drop
+        :drop
+        :drop
       end
     end
+
+    alias OrbWasmtime.Wasm
+    assert {0.0, 0.5, 1.0} === Wasm.call(TupleTypes, :rgb_reverse, 1.0, 0.5, 0.0)
   end
 
   test "loop" do
+    defmodule FileNameSafe do
+      use Orb
+
+      Memory.pages(2)
+
+      wasm do
+        func get_is_valid(), I32, str: I32.U8.UnsafePointer, char: I32 do
+          str = 1024
+
+          loop Loop, result: I32 do
+            Control.block Outer do
+              Control.block :inner do
+                char = str[at!: 0]
+                Control.break(:inner, if: I32.eq(char, ?/))
+                Outer.break(if: char)
+                return(1)
+              end
+
+              return(0)
+            end
+
+            str = str + 1
+            Loop.continue()
+          end
+        end
+      end
+    end
+
     wasm_source = """
     (module $FileNameSafe
       (memory (export "memory") 2)
