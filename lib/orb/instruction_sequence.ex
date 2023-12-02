@@ -19,7 +19,8 @@ defmodule Orb.InstructionSequence do
   end
 
   def new(instructions) when is_list(instructions) do
-    new(:unknown_effect, instructions)
+    type = do_get_type(nil, instructions)
+    new(type, instructions)
     # raise "Inference of result type via reduce is unimplemented for now."
   end
 
@@ -28,6 +29,22 @@ defmodule Orb.InstructionSequence do
       type: type,
       body: instructions
     }
+  end
+
+  def do_get_type(type, instructions)
+  def do_get_type(nil, []), do: :nop
+  def do_get_type(type, []), do: type
+  def do_get_type(nil, [head | rest]), do: Ops.typeof(head) |> do_get_type(rest)
+  def do_get_type(type, [head | rest]) do
+    type = cond do
+       head |> Ops.typeof() |> Ops.types_compatible?(type) ->
+        type
+
+        true ->
+          :unknown_effect
+    end
+
+    do_get_type(type, rest)
   end
 
   def expand(%__MODULE__{} = func) do
