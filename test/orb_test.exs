@@ -752,11 +752,8 @@ defmodule OrbTest do
         (b + g + r) / 3.0
       end
 
-      def main do
-        rgb_reverse(1.0, 0.5, 0.0)
-        :drop
-        :drop
-        :drop
+      defw main do
+        rgb_reverse(1.0, 0.5, 0.0) |> Orb.Stack.drop()
       end
     end
 

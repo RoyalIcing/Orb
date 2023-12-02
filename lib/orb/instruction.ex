@@ -41,6 +41,15 @@ defmodule Orb.Instruction do
     }
   end
 
+  def new(type, operation, operands) when is_tuple(type) and is_list(operands) do
+    %__MODULE__{
+      type: type,
+      operation: operation,
+      # TODO: type check function.
+      operands: operands |> Enum.map(&Constants.expand_if_needed/1)
+    }
+  end
+
   def wrap_constant!(type, value)
 
   def wrap_constant!(Elixir.Integer, value) when is_number(value),
