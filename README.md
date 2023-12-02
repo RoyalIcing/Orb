@@ -2,14 +2,14 @@
 
 # Orb: Write WebAssembly with Elixir
 
-Orb lets you write WebAssembly with the power of Elixir as a compiler:
+Orb lets you write WebAssembly with Elixir as your compiler:
 
-- Use Elixir’s module system to break problems down and compose them together.
-- Chain functions together with the pipe `|>` operator.
-- Publish reusable code with the Hex package manager.
-- Reduce boilerplate with Elixir’s powerful macro system.
-- Run dynamic Elixir code at compile time e.g. talk to the rest of your Elixir application, make network requests.
-- Compile on-the-fly e.g. use feature flags, custom “tree shaken” WebAssembly module per user.
+- Use Elixir’s **module system** to break problems down and then compose them together.
+- Chain function calls together with the **pipe `|>` operator**.
+- Publish reusable code with the **Hex package manager**.
+- Reduce boilerplate with Elixir’s **powerful macro system**.
+- **Run dynamic Elixir code at compile time** e.g. talk to the rest of your Elixir application, or make network requests.
+- **Compile modules on-the-fly** e.g. use feature flags to conditional compile code or enable particular instructions, or create a custom “tree shaken” WebAssembly module per user.
 
 ## Installation
 
