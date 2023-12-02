@@ -2,7 +2,7 @@
 
 # Orb: Write WebAssembly with Elixir
 
-Orb lets you write WebAssembly with Elixir as your compiler:
+Write WebAssembly with the power of Elixir as your compiler:
 
 - Use Elixir’s **module system** to break problems down and then compose them together.
 - Chain function calls together with the **pipe `|>` operator**.
