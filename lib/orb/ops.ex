@@ -76,6 +76,7 @@ defmodule Orb.Ops do
   def extract_common_type(a, b) do
     case {typeof(a, :primitive), typeof(b, :primitive)} do
       {same, same} -> same
+      {a, b} when is_effect(a) and is_effect(b) -> :unknown_effect
       {type, Elixir.Integer} when type in @integer_types -> type
       {Elixir.Integer, type} when type in @integer_types -> type
       {type, Elixir.Float} when type in @float_types -> type

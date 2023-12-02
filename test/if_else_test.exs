@@ -225,4 +225,67 @@ defmodule IfElseTest do
     Instance.write_string_nul_terminated(inst, 0x00100, "&a=1&&&b=2")
     assert count.(0x00100) == 2
   end
+
+  test "local and unknown effect" do
+    defmodule URLSearchParams2 do
+      use Orb
+
+      Memory.pages(1)
+
+      defmodule Log do
+        use Orb.Import
+
+        defw(found_alphanumeric(), nil)
+      end
+
+      importw(Log, :log)
+
+      defw url_search_params_count(url_params: I32.U8.UnsafePointer), I32,
+        char: I32.U8,
+        count: I32,
+        pair_char_len: I32 do
+        loop EachByte do
+          char = url_params[at!: 0]
+
+          if I32.in?(char, [?&, ?\0]) do
+            count = count + (pair_char_len > 0)
+            pair_char_len = 0
+          else
+            pair_char_len = pair_char_len + 1
+            Log.found_alphanumeric()
+          end
+
+          url_params = url_params + 1
+
+          EachByte.continue(if: char)
+        end
+
+        count
+      end
+    end
+
+    alias OrbWasmtime.Instance
+    inst = Instance.run(URLSearchParams2, [
+      {:log, :found_alphanumeric, fn -> nil end}
+    ])
+    count = Instance.capture(inst, :url_search_params_count, 1)
+
+    Instance.write_string_nul_terminated(inst, 0x00100, "")
+    assert count.(0x00100) == 0
+
+    Instance.write_string_nul_terminated(inst, 0x00100, "a=1")
+    assert count.(0x00100) == 1
+
+    Instance.write_string_nul_terminated(inst, 0x00100, "a=1&b=1")
+    assert count.(0x00100) == 2
+
+    Instance.write_string_nul_terminated(inst, 0x00100, "a=1&")
+    assert count.(0x00100) == 1
+
+    Instance.write_string_nul_terminated(inst, 0x00100, "&a=1&")
+    assert count.(0x00100) == 1
+
+    Instance.write_string_nul_terminated(inst, 0x00100, "&a=1&&&b=2")
+    assert count.(0x00100) == 2
+  end
 end
