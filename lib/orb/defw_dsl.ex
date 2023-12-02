@@ -112,7 +112,7 @@ defmodule Orb.DefwDSL do
     quote do
       unquote(def_kind)(unquote(def_call)) do
         Orb.Instruction.typed_call(
-          unquote(result) || :unknown_effect,
+          unquote(result || :unknown_effect),
           case {@wasm_func_prefix, unquote(name)} do
             {nil, name} -> name
             {prefix, name} -> "#{prefix}.#{name}"
