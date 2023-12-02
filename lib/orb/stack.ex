@@ -38,5 +38,25 @@ defmodule Orb.Stack do
     end
   end
 
+  defmodule Pop do
+    defstruct type: nil, count: 0
+
+    require alias Orb.Ops
+
+    def new(type) do
+      count = type |> Ops.type_stack_count()
+
+      %__MODULE__{
+        type: type,
+        count: count
+      }
+    end
+
+    defimpl Orb.ToWat do
+      def to_wat(%Orb.Stack.Pop{}, _), do: []
+    end
+  end
+
   def drop(instruction), do: Drop.new(instruction)
+  def pop(type), do: Pop.new(type)
 end
