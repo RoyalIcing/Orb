@@ -93,13 +93,14 @@ defmodule Orb.DSL do
 
     params =
       case args do
+        [] ->
+          []
+
+        # Keywords
         [args] when is_list(args) ->
           for {name, type} <- args do
             Macro.escape(%Orb.Func.Param{name: name, type: Macro.expand_literals(type, env)})
           end
-
-        [] ->
-          []
 
         [_ | _] ->
           raise CompileError,
@@ -109,15 +110,14 @@ defmodule Orb.DSL do
               "Cannot define function with multiple arguments, use keyword list instead."
       end
 
-    arg_types =
+    param_types =
       case args do
+        [] ->
+          []
+
+        # Keywords
         [args] when is_list(args) ->
           for {name, type} <- args do
-            {name, Macro.expand_literals(type, env)}
-          end
-
-        args ->
-          for {name, _meta, [type]} <- args do
             {name, Macro.expand_literals(type, env)}
           end
       end
@@ -129,7 +129,7 @@ defmodule Orb.DSL do
         {key, Macro.expand_literals(type, env)}
       end
 
-    locals = Map.new(arg_types ++ local_types)
+    locals = Map.new(param_types ++ local_types)
 
     # block = Macro.expand_once(block, __ENV__)
 
@@ -153,15 +153,9 @@ defmodule Orb.DSL do
         result: unquote(result_type),
         local_types: unquote(local_types),
         body: unquote(block_items) |> Orb.InstructionSequence.new(),
-        # body: fn ->
-        #   if Process.get(Orb.DSL, false) do
-        #     unquote(block_items)
-        #   else
-        #     []
-        #   end
-        # end,
         exported_names: unquote(exported_names)
-      } |> Orb.Func.narrow_if_needed()
+      }
+      |> Orb.Func.narrow_if_needed()
     end
   end
 
