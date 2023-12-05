@@ -767,33 +767,34 @@ defmodule OrbTest do
 
       # defw two_to_five(a: 2.0 < F32 < 5.0), I32 do
       # defw two_to_five(a: 2 <= I32 <= 5), I32 do
-      defw two_to_five(a: 2..5), I32 do
-        # guard when a >= 2 and a <= 5, else: unreachable()
-        # unreachable! unless a >= 2 and a <= 5
-        # assert!(a >= 2 &&& a <= 5)
-        # assert!(a in 2..5)
-        # assert! do
-        #   a in 2..5
-        #   b in 2..5
-        # end
 
+      defw declare_defcon(a: 1..5), I32 do
+        # guard when a >= 1 and a <= 5, else: unreachable()
+        # unreachable! unless a >= 1 and a <= 5
+        # assert!(a >= 1 &&& a <= 5)
+        # assert!(a in 1..5)
+        # assert! do
+        #   a in 1..5
+        #   b in 1..5
+        # end
         a
       end
     end
 
     wat = RangeBounded.to_wat()
     assert wat =~ "unreachable"
-    assert wat =~ "(i32.ge_s (local.get $a) (i32.const 2))"
+    assert wat =~ "(i32.ge_s (local.get $a) (i32.const 1))"
     assert wat =~ "(i32.le_s (local.get $a) (i32.const 5))"
 
     alias OrbWasmtime.Wasm
-    assert 2 = Wasm.call(RangeBounded, :two_to_five, 2)
-    assert 3 = Wasm.call(RangeBounded, :two_to_five, 3)
-    assert 4 = Wasm.call(RangeBounded, :two_to_five, 4)
-    assert 5 = Wasm.call(RangeBounded, :two_to_five, 5)
-    assert {:error, _} = Wasm.call(RangeBounded, :two_to_five, 0)
-    assert {:error, _} = Wasm.call(RangeBounded, :two_to_five, 1)
-    assert {:error, _} = Wasm.call(RangeBounded, :two_to_five, 6)
+    assert 1 = Wasm.call(RangeBounded, :declare_defcon, 1)
+    assert 2 = Wasm.call(RangeBounded, :declare_defcon, 2)
+    assert 3 = Wasm.call(RangeBounded, :declare_defcon, 3)
+    assert 4 = Wasm.call(RangeBounded, :declare_defcon, 4)
+    assert 5 = Wasm.call(RangeBounded, :declare_defcon, 5)
+    assert {:error, _} = Wasm.call(RangeBounded, :declare_defcon, 0)
+    assert {:error, _} = Wasm.call(RangeBounded, :declare_defcon, 6)
+    assert {:error, _} = Wasm.call(RangeBounded, :declare_defcon, 10)
   end
 
   test "loop" do
