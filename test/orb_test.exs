@@ -765,6 +765,8 @@ defmodule OrbTest do
     defmodule RangeBounded do
       use Orb
 
+      # defw two_to_five(a: 2.0 < F32 < 5.0), I32 do
+      # defw two_to_five(a: 2 <= I32 <= 5), I32 do
       defw two_to_five(a: 2..5), I32 do
         # guard when a >= 2 and a <= 5, else: unreachable()
         # unreachable! unless a >= 2 and a <= 5
