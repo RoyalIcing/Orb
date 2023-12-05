@@ -91,42 +91,71 @@ defmodule Orb.DSL do
         :private -> []
       end
 
-    params =
+    # update_in(args.foo, fn a -> a + 1 end)
+
+    {param_types, runtime_checks} =
       case args do
         [] ->
-          []
+          {[], []}
 
         # Keywords
         [args] when is_list(args) ->
-          for {name, type} <- args do
-            Macro.escape(%Orb.Func.Param{name: name, type: Macro.expand_literals(type, env)})
-          end
+          alias Orb.I32
+
+          %{types: types, checks: checks} =
+            for {name, type} <- args, reduce: %{types: [], checks: []} do
+              %{types: types, checks: checks} ->
+                {type, check} =
+                  case Macro.expand_literals(type, env) do
+                    # Range
+                    {:.., _, [min, max]} when min <= max ->
+                      {I32,
+                       Orb.DSL.assert!(
+                         I32.band(
+                           Orb.Instruction.local_get(I32, name) |> I32.ge_s(min),
+                           Orb.Instruction.local_get(I32, name) |> I32.le_s(max)
+                         )
+                       )
+                       |> Macro.escape()}
+
+                    type when is_atom(type) ->
+                      {type, nil}
+                  end
+
+                types = [{name, type} | types]
+
+                checks =
+                  case check do
+                    nil ->
+                      checks
+
+                    check ->
+                      [check | checks]
+                  end
+
+                %{types: types, checks: checks}
+            end
+
+          {Enum.reverse(types), Enum.reverse(checks)}
 
         [_ | _] ->
           raise CompileError,
             line: line,
             file: env.file,
-            description:
-              "Cannot define function with multiple arguments, use keyword list instead."
+            description: "Function params must use keyword list."
       end
 
-    param_types =
-      case args do
-        [] ->
-          []
-
-        # Keywords
-        [args] when is_list(args) ->
-          for {name, type} <- args do
-            {name, Macro.expand_literals(type, env)}
-          end
+    params =
+      for {name, type} <- param_types do
+        Macro.escape(%Orb.Func.Param{name: name, type: type})
       end
 
     result_type = Keyword.get(options, :result, nil) |> Macro.expand_literals(env)
 
     local_types =
       for {key, type} <- Keyword.get(options, :locals, []) do
-        {key, Macro.expand_literals(type, env)}
+        type = Macro.expand_literals(type, env)
+        {key, type}
       end
 
     locals = Map.new(param_types ++ local_types)
@@ -141,6 +170,8 @@ defmodule Orb.DSL do
 
     block_items = Macro.expand(block_items, env)
     block_items = do_snippet(locals, block_items)
+
+    block_items = runtime_checks ++ block_items
 
     quote do
       %Orb.Func{

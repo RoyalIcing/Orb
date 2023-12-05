@@ -761,6 +761,39 @@ defmodule OrbTest do
     assert {0.0, 0.5, 1.0} === Wasm.call(TupleTypes, :rgb_reverse, 1.0, 0.5, 0.0)
   end
 
+  test "range-bounded params" do
+    defmodule RangeBounded do
+      use Orb
+
+      defw two_to_five(a: 2..5), I32 do
+        # guard when a >= 2 and a <= 5, else: unreachable()
+        # unreachable! unless a >= 2 and a <= 5
+        # assert!(a >= 2 &&& a <= 5)
+        # assert!(a in 2..5)
+        # assert! do
+        #   a in 2..5
+        #   b in 2..5
+        # end
+
+        a
+      end
+    end
+
+    wat = RangeBounded.to_wat()
+    assert wat =~ "unreachable"
+    assert wat =~ "(i32.ge_s (local.get $a) (i32.const 2))"
+    assert wat =~ "(i32.le_s (local.get $a) (i32.const 5))"
+
+    alias OrbWasmtime.Wasm
+    assert 2 = Wasm.call(RangeBounded, :two_to_five, 2)
+    assert 3 = Wasm.call(RangeBounded, :two_to_five, 3)
+    assert 4 = Wasm.call(RangeBounded, :two_to_five, 4)
+    assert 5 = Wasm.call(RangeBounded, :two_to_five, 5)
+    assert {:error, _} = Wasm.call(RangeBounded, :two_to_five, 0)
+    assert {:error, _} = Wasm.call(RangeBounded, :two_to_five, 1)
+    assert {:error, _} = Wasm.call(RangeBounded, :two_to_five, 6)
+  end
+
   test "loop" do
     defmodule FileNameSafe do
       use Orb
