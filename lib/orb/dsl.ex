@@ -247,10 +247,11 @@ defmodule Orb.DSL do
           end
 
         quote do:
-                Orb.Instruction.i32(
+                Orb.Instruction.memory_store(
+                  :i32,
                   unquote(store_instruction),
-                  unquote(computed_offset),
-                  unquote(value)
+                  offset: unquote(computed_offset),
+                  value: unquote(value)
                 )
 
       {:=, _, [{local, _, nil}, input]}

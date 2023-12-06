@@ -36,7 +36,7 @@ defmodule Orb.Ops do
   @integer_types ~w(i64 i32)a
   @float_types ~w(f64 f32)a
   @primitive_types @integer_types ++ @float_types
-  @effects ~w(unknown_effect global_effect local_effect)a
+  @effects ~w(unknown_effect memory_effect global_effect local_effect)a
   @elixir_types [Elixir.Integer, Elixir.Float]
   # @base_types @primitive_types ++ @effects ++ @elixir_types
 

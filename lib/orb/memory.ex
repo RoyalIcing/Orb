@@ -80,7 +80,8 @@ defmodule Orb.Memory do
   Memory.store!(I32.U8, 0x100, ?a)
   ```
   """
-  def store!(type, address, value) do
+  def store!(type, offset, value) do
+    # TODO: add `align` arg https://webassembly.github.io/spec/core/bikeshed/#syntax-instr-memory
     primitive_type = Orb.CustomType.resolve!(type)
 
     load_instruction =
@@ -97,7 +98,7 @@ defmodule Orb.Memory do
         :load -> :store
       end
 
-    Orb.Instruction.new(primitive_type, store_instruction, [address, value])
+    Orb.Instruction.memory_store(primitive_type, store_instruction, offset: offset, value: value)
   end
 
   @doc """

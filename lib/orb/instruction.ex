@@ -4,7 +4,7 @@ defmodule Orb.Instruction do
   require Orb.Ops, as: Ops
   alias Orb.Constants
 
-  @types [:i64, :i32, :f64, :f32, :local_effect, :global_effect, :unknown_effect]
+  @types [:i64, :i32, :f64, :f32, :local_effect, :global_effect, :memory_effect, :unknown_effect]
 
   # def new(type, operation, operands \\ [])
   def new(type, operation), do: new(type, operation, [])
@@ -110,7 +110,26 @@ defmodule Orb.Instruction do
   def global_set(type, global_name, value),
     do: new(:global_effect, {:global_set, global_name, type}, [value])
 
+  @types_to_stores %{
+    i32: %{store: true, store8: true, store16: true},
+    i64: %{store: true, store8: true, store16: true, store32: true},
+    f32: %{store: true},
+    f64: %{store: true}
+  }
+
+  def memory_store(type, store, opts)
+      when is_map_key(@types_to_stores, type) and
+             is_map_key(:erlang.map_get(type, @types_to_stores), store) do
+    offset = Keyword.fetch!(opts, :offset)
+    value = Keyword.fetch!(opts, :value)
+    new(:memory_effect, {type, store}, [offset, value])
+  end
+
   def memory_size(), do: new(:i32, {:memory, :size}, [])
+  # This is really a memory_effect but we don’t have a way to have
+  # both a function returning i32 and performing a memory effect.
+  # Which we should because any function can do both!
+  # TODO: add effects map. See InstructionSequence for a sketch.
   def memory_grow(value), do: new(:i32, {:memory, :grow}, [value])
 
   defp type_check_operands!(type, operation, operands) do
@@ -206,6 +225,19 @@ defmodule Orb.Instruction do
     received_type = get_operand_type(operand)
 
     types_must_match!(expected_type, received_type, "global.set $#{global_name}")
+
+    operand
+  end
+
+  defp type_check_operand!(
+         :memory_effect,
+         {:i32, :store},
+         operand,
+         1
+       ) do
+    received_type = get_operand_type(operand)
+
+    types_must_match!(:i32, received_type, "i32.store")
 
     operand
   end
@@ -326,6 +358,26 @@ defmodule Orb.Instruction do
 
     def to_wat(
           %Orb.Instruction{
+            type: :memory_effect,
+            operation: {type, store},
+            operands: operands
+          },
+          indent
+        ) do
+          [
+            indent,
+            "(",
+            to_string(type),
+            ".",
+            to_string(store),
+            for(operand <- operands, do: [" ", Instructions.do_wat(operand)]),
+            ")"
+          ]
+    end
+
+    def to_wat(
+          %Orb.Instruction{
+            type: :i32,
             operation: {:memory, memory_op},
             operands: operands
           },

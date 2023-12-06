@@ -765,6 +765,8 @@ defmodule OrbTest do
     defmodule RangeBounded do
       use Orb
 
+      @orb_experimental %{range_params: true}
+
       # defw two_to_five(a: 2.0 < F32 < 5.0), I32 do
       # defw two_to_five(a: 2 <= I32 <= 5), I32 do
 
@@ -787,14 +789,14 @@ defmodule OrbTest do
     assert wat =~ "(i32.le_s (local.get $a) (i32.const 5))"
 
     alias OrbWasmtime.Wasm
-    assert 1 = Wasm.call(RangeBounded, :declare_defcon, 1)
-    assert 2 = Wasm.call(RangeBounded, :declare_defcon, 2)
-    assert 3 = Wasm.call(RangeBounded, :declare_defcon, 3)
-    assert 4 = Wasm.call(RangeBounded, :declare_defcon, 4)
-    assert 5 = Wasm.call(RangeBounded, :declare_defcon, 5)
-    assert {:error, _} = Wasm.call(RangeBounded, :declare_defcon, 0)
-    assert {:error, _} = Wasm.call(RangeBounded, :declare_defcon, 6)
-    assert {:error, _} = Wasm.call(RangeBounded, :declare_defcon, 10)
+    assert 1 = Wasm.call(wat, :declare_defcon, 1)
+    assert 2 = Wasm.call(wat, :declare_defcon, 2)
+    assert 3 = Wasm.call(wat, :declare_defcon, 3)
+    assert 4 = Wasm.call(wat, :declare_defcon, 4)
+    assert 5 = Wasm.call(wat, :declare_defcon, 5)
+    assert {:error, _} = Wasm.call(wat, :declare_defcon, 0)
+    assert {:error, _} = Wasm.call(wat, :declare_defcon, 6)
+    assert {:error, _} = Wasm.call(wat, :declare_defcon, 10)
   end
 
   test "loop" do

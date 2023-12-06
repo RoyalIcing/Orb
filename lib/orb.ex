@@ -542,6 +542,8 @@ defmodule Orb do
 
       @before_compile unquote(__MODULE__).BeforeCompile
 
+      @orb_experimental %{}
+
       def __wasm_body__(_), do: []
       defoverridable __wasm_body__: 1
 
@@ -556,6 +558,8 @@ defmodule Orb do
       Module.register_attribute(__MODULE__, :wasm_types, accumulate: true)
       Module.register_attribute(__MODULE__, :wasm_table_allocations, accumulate: true)
       Module.register_attribute(__MODULE__, :wasm_imports, accumulate: true)
+
+      # Module.register_attribute(__MODULE__, :orb_experimental, accumulate: false)
     end
   end
 
