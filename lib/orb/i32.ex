@@ -55,20 +55,24 @@ defmodule Orb.I32 do
   end
 
   def sum!(items) when is_list(items) do
-    Enum.reduce(items, &add/2)
+    items
+    |> Enum.map(&Orb.TypeNarrowable.type_narrow_to(&1, Orb.I32))
+    |> Enum.reduce(&add/2)
   end
 
   def in?(value, list) when is_list(list) do
-    instructions = for {item, index} <- Enum.with_index(list) do
-      case index do
-        0 ->
-          eq(value, item)
+    instructions =
+      for {item, index} <- Enum.with_index(list) do
+        case index do
+          0 ->
+            eq(value, item)
 
-        _ ->
-          InstructionSequence.new(:i32, [eq(value, item), Instruction.i32(:or)])
-          # Instruction.i32(:or, eq(value, item))
+          _ ->
+            InstructionSequence.new(:i32, [eq(value, item), Instruction.i32(:or)])
+            # Instruction.i32(:or, eq(value, item))
+        end
       end
-    end
+
     InstructionSequence.new(:i32, instructions)
   end
 
@@ -196,7 +200,8 @@ defmodule Orb.I32 do
   def __global_value(false), do: Instruction.wrap_constant!(:i32, 0)
   def __global_value(true), do: Instruction.wrap_constant!(:i32, 1)
   # TODO: stash away which module so we can do smart stuff like with local types
-  def __global_value(mod) when is_atom(mod), do: Instruction.wrap_constant!(:i32, mod.initial_i32())
+  def __global_value(mod) when is_atom(mod),
+    do: Instruction.wrap_constant!(:i32, mod.initial_i32())
 
   defmacro global(mutability \\ :mutable, list)
            when mutability in ~w{readonly mutable}a do

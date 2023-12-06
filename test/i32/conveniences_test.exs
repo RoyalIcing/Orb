@@ -12,7 +12,8 @@ defmodule I32ConveniencesTest do
         (char >= ?A &&& char <= ?Z) or
         (char >= ?0 &&& char <= ?9) or
         I32.in?(char, [?~, ?_, ?-, ?.])
-        # I32.in?(char, ~C{~_-.})
+
+      # I32.in?(char, ~C{~_-.})
 
       # I32.in_inclusive_range?(char, ?a, ?z) or
       #   I32.in_inclusive_range?(char, ?A, ?Z) or
@@ -61,66 +62,86 @@ defmodule I32ConveniencesTest do
 
   test "attr_writer works" do
     assert Attrs.to_wat() === """
-    (module $Attrs
-      (global $first (mut i32) (i32.const 7))
-      (func $first= (export "first=") (param $new_value i32)
-        (local.get $new_value)
-        (global.set $first)
-      )
-    )
-    """
+           (module $Attrs
+             (global $first (mut i32) (i32.const 7))
+             (func $first= (export "first=") (param $new_value i32)
+               (local.get $new_value)
+               (global.set $first)
+             )
+           )
+           """
 
     assert Wasm.call(Attrs, :"first=", 9) == nil
   end
 
   test "I32.match output int" do
     assert (OrbHelper.module_wat do
-      use Orb
+              use Orb
 
-      defw get_path(), I32.String, state: I32 do
-        state = 0
+              defw get_path(), I32.String, state: I32 do
+                state = 0
 
-        I32.match state do
-          0 -> 100
-          1 -> 200
-        end
-      end
-    end) =~ "(i32.const 100)"
+                I32.match state do
+                  0 -> 100
+                  1 -> 200
+                end
+              end
+            end) =~ "(i32.const 100)"
   end
 
   test "I32.match output string constant" do
     assert (OrbHelper.module_wat do
-      use Orb
+              use Orb
 
-      defw get_path(), I32.String, state: I32 do
-        state = 0
+              defw get_path(), I32.String, state: I32 do
+                state = 0
 
-        I32.match state do
-          0 -> ~S[/initial]
-          1 -> ~S[/disconnected]
-        end
-      end
-    end) =~ "/initial"
+                I32.match state do
+                  0 -> ~S[/initial]
+                  1 -> ~S[/disconnected]
+                end
+              end
+            end) =~ "/initial"
   end
 
   test "can return string constant" do
     assert (OrbHelper.module_wat do
-      use Orb
+              use Orb
 
-      global do
-        @method "GET"
-      end
+              global do
+                @method "GET"
+              end
 
-      defw text_html(), I32.String do
-        if not I32.String.streq(@method, "GET") do
-          return(~S"""
-          <!doctype html>
-          <h1>Method not allowed</h1>
-          """)
-        end
+              defw text_html(), I32.String do
+                if not I32.String.streq(@method, "GET") do
+                  return(~S"""
+                  <!doctype html>
+                  <h1>Method not allowed</h1>
+                  """)
+                end
 
-        "<p>Hello</p>"
-      end
-    end) =~ "Method not allowed"
+                "<p>Hello</p>"
+              end
+            end) =~ "Method not allowed"
+  end
+
+  test "I32.sum!" do
+    assert 30 =
+             (OrbHelper.module_wat do
+                use Orb
+
+                defwp(ten(), I32, do: 10)
+
+                defw sum(), I32 do
+                  I32.sum!([
+                    byte_size("hello"),
+                    byte_size("beautiful"),
+                    byte_size("world"),
+                    if(ten(), do: 1, else: 200),
+                    ten()
+                  ])
+                end
+              end)
+             |> Wasm.call(:sum)
   end
 end
