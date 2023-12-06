@@ -11,6 +11,8 @@ defmodule Orb.I32 do
 
   def wasm_type(), do: :i32
 
+  def const(n) when is_integer(n), do: Instruction.wrap_constant!(:i32, n)
+
   def add(a, b)
   def sub(a, b)
   def mul(a, b)
@@ -53,6 +55,8 @@ defmodule Orb.I32 do
         end
     end
   end
+
+  def sum!([]), do: const(0)
 
   def sum!(items) when is_list(items) do
     items
@@ -196,12 +200,12 @@ defmodule Orb.I32 do
     end
   end
 
-  def __global_value(value) when is_integer(value), do: Instruction.wrap_constant!(:i32, value)
-  def __global_value(false), do: Instruction.wrap_constant!(:i32, 0)
-  def __global_value(true), do: Instruction.wrap_constant!(:i32, 1)
+  def __global_value(value) when is_integer(value), do: const(value)
+  def __global_value(false), do: const(0)
+  def __global_value(true), do: const(1)
   # TODO: stash away which module so we can do smart stuff like with local types
   def __global_value(mod) when is_atom(mod),
-    do: Instruction.wrap_constant!(:i32, mod.initial_i32())
+    do: const(mod.initial_i32())
 
   defmacro global(mutability \\ :mutable, list)
            when mutability in ~w{readonly mutable}a do
