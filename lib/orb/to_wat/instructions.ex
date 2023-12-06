@@ -31,7 +31,7 @@ defmodule Orb.ToWat.Instructions do
   # def do_wat({:local_get, identifier}, indent), do: "#{indent}(local.get $#{identifier})"
   # def do_wat({:local_tee, identifier}, indent), do: "#{indent}(local.tee $#{identifier})"
   def do_wat({:local_set, identifier}, indent), do: "#{indent}(local.set $#{identifier})"
-  # TODO: how do we support 64-bit integers?
+  # TODO: change default to i64
   def do_wat(value, indent) when is_integer(value), do: "#{indent}(i32.const #{value})"
   # TODO: how do we support 64-bit floats?
   # Note that Rust defaults to 64-bit floats: https://doc.rust-lang.org/book/ch03-02-data-types.html
