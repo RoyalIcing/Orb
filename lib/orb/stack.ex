@@ -6,7 +6,7 @@ defmodule Orb.Stack do
 
     require alias Orb.Ops
 
-    def new(%{type: type} = instruction) do
+    def new(%{type: _type} = instruction) do
       count = Ops.typeof(instruction) |> Ops.type_stack_count()
 
       %__MODULE__{
