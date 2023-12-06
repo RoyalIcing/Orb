@@ -289,7 +289,7 @@ defmodule Orb.DSL do
 
       # e.g. `_ = some_function_returning_value()`
       {:=, _, [{:_, _, nil}, value]} ->
-        quote do: [unquote(value), :drop]
+        quote do: Orb.Stack.drop(unquote(value))
 
       other ->
         other
