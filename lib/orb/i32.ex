@@ -56,7 +56,7 @@ defmodule Orb.I32 do
 
   def sum!(items) when is_list(items) do
     items
-    |> Enum.map(&Orb.TypeNarrowable.type_narrow_to(&1, Orb.I32))
+    |> Enum.map(&Orb.TypeNarrowable.type_narrow_to(&1, __MODULE__))
     |> Enum.reduce(&add/2)
   end
 
