@@ -6,7 +6,7 @@ defmodule Orb.Stack do
 
     require alias Orb.Ops
 
-    def new(%{type: _type} = instruction) do
+    def new(instruction) do
       count = Ops.typeof(instruction) |> Ops.type_stack_count()
 
       # if count === 0 do
@@ -19,13 +19,6 @@ defmodule Orb.Stack do
       %__MODULE__{
         instruction: instruction,
         count: count
-      }
-    end
-
-    def new(value) when is_number(value) do
-      %__MODULE__{
-        instruction: value,
-        count: 1
       }
     end
 
