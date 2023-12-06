@@ -75,13 +75,23 @@ defmodule Orb.Global do
     end
   end
 
+  def expand!(%Orb.Global{type: Orb.I32.String, initial_value: ""} = global) do
+    %Orb.Global{global | type: Orb.I32.String, initial_value: Orb.Constants.NulTerminatedString.empty()}
+  end
+
   def expand!(%Orb.Global{type: Orb.I32.String, initial_value: string} = global) do
-    %Orb.Global{global | type: :i32, initial_value: Orb.Constants.expand_if_needed(string)}
+    %Orb.Global{
+      global
+      | type: Orb.I32.String,
+        initial_value: Orb.Constants.expand_if_needed(string)
+    }
   end
 
   def expand!(%Orb.Global{} = global), do: global
 
   defimpl Orb.ToWat do
+    import Orb.ToWat.Helpers
+
     def to_wat(
           %Orb.Global{
             name: name,
@@ -101,8 +111,8 @@ defmodule Orb.Global do
         end,
         " ",
         case mutability do
-          :readonly -> to_string(type)
-          :mutable -> ["(mut ", to_string(type), ?)]
+          :readonly -> do_type(type)
+          :mutable -> ["(mut ", do_type(type), ?)]
         end,
         " ",
         Orb.ToWat.to_wat(initial_value, ""),

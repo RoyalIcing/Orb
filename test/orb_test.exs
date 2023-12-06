@@ -85,6 +85,7 @@ defmodule OrbTest do
         global :mutable do
           @language "en"
           @mime_type "text/html"
+          @empty ""
         end
 
         defw mime_type_constant, I32.String do
@@ -109,6 +110,7 @@ defmodule OrbTest do
                (global $five_quarters f32 (f32.const 1.25))
                (global $language (mut i32) (i32.const 255))
                (global $mime_type (mut i32) (i32.const 258))
+               (global $empty (mut i32) (i32.const 0))
                (data (i32.const 258) \"text/html\")
                (data (i32.const 255) \"en\")
                (func $mime_type_constant (export \"mime_type_constant\") (result i32)

@@ -105,6 +105,13 @@ defmodule Orb.Constants do
   defmodule NulTerminatedString do
     defstruct memory_offset: nil, string: nil, type: Orb.I32.String
 
+    def empty() do
+      %__MODULE__{
+        memory_offset: 0x0,
+        string: ""
+      }
+    end
+
     defimpl Orb.ToWat do
       def to_wat(%Orb.Constants.NulTerminatedString{memory_offset: memory_offset}, indent) do
         [
@@ -126,10 +133,12 @@ defmodule Orb.Constants do
   def expand_if_needed(value) when is_binary(value), do: expand_string!(value)
   def expand_if_needed(value) when is_list(value), do: :lists.map(&expand_if_needed/1, value)
   def expand_if_needed(value) when is_struct(value, Orb.IfElse), do: Orb.IfElse.expand(value)
+
   def expand_if_needed(%_{body: _} = struct) do
     body = expand_if_needed(struct.body)
     %{struct | body: body}
   end
+
   def expand_if_needed(value), do: value
 
   defp expand_string!(string) when is_binary(string) do
