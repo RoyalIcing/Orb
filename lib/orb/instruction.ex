@@ -31,7 +31,7 @@ defmodule Orb.Instruction do
   end
 
   def new(type, operation, operands) when is_atom(type) and is_list(operands) do
-    type = Orb.CustomType.resolve!(type)
+    # type = Orb.CustomType.resolve!(type)
 
     %__MODULE__{
       type: type,
