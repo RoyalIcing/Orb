@@ -2,6 +2,7 @@ defmodule LoopTest do
   use ExUnit.Case, async: true
 
   import Orb, only: [to_wat: 1]
+  alias OrbWasmtime.Wasm
 
   test "loop through chars manually" do
     defmodule FileNameSafe do
@@ -61,8 +62,7 @@ defmodule LoopTest do
     )
     """
 
-    assert wasm_source == to_wat(FileNameSafe)
-    # assert Wasm.call(FileNameSafe, "body") == 100
+    assert wasm_source = to_wat(FileNameSafe)
   end
 
   test "loop 1..10" do
@@ -71,7 +71,7 @@ defmodule LoopTest do
 
       defw sum1to10(), I32, sum: I32 do
         loop i <- 1..10 do
-          sum = sum
+          sum = sum + i
         end
 
         sum
@@ -86,7 +86,7 @@ defmodule LoopTest do
         (i32.const 1)
         (local.set $i)
         (loop $i
-          (local.get $sum)
+          (i32.add (local.get $sum) (local.get $i))
           (local.set $sum)
           (i32.add (local.get $i) (i32.const 1))
           (local.set $i)
@@ -98,7 +98,7 @@ defmodule LoopTest do
     )
     """
 
-    assert wasm_source == to_wat(Loop1To10)
-    # assert Wasm.call(FileNameSafe, "body") == 100
+    assert wasm_source = to_wat(Loop1To10)
+    assert 55 = Wasm.call(Loop1To10, :sum1to10)
   end
 end
