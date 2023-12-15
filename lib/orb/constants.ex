@@ -134,6 +134,7 @@ defmodule Orb.Constants do
   def expand_if_needed(value) when is_list(value), do: :lists.map(&expand_if_needed/1, value)
   def expand_if_needed(value) when is_struct(value, Orb.IfElse), do: Orb.IfElse.expand(value)
 
+  # Handles Orb.InstructionSequence or anything with a `body`
   def expand_if_needed(%_{body: _} = struct) do
     body = expand_if_needed(struct.body)
     %{struct | body: body}
