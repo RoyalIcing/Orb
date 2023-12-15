@@ -9,7 +9,8 @@ defmodule Orb.InstructionSequence do
               i64: false,
               f32: false,
               f64: false
-            }
+            },
+            locals: []
 
   alias Orb.Ops
   alias Orb.Constants
@@ -24,10 +25,11 @@ defmodule Orb.InstructionSequence do
     # raise "Inference of result type via reduce is unimplemented for now."
   end
 
-  def new(type, instructions) when is_list(instructions) do
+  def new(type, instructions, opts \\ []) when is_list(instructions) do
     %__MODULE__{
       type: type,
-      body: instructions
+      body: instructions,
+      locals: Keyword.get(opts, :locals, [])
     }
   end
 
@@ -35,14 +37,16 @@ defmodule Orb.InstructionSequence do
   def do_get_type(nil, []), do: :nop
   def do_get_type(type, []), do: type
   def do_get_type(nil, [head | rest]), do: Ops.typeof(head) |> do_get_type(rest)
+
   def do_get_type(type, [head | rest]) do
-    type = cond do
-       head |> Ops.typeof() |> Ops.types_compatible?(type) ->
-        type
+    type =
+      cond do
+        head |> Ops.typeof() |> Ops.types_compatible?(type) ->
+          type
 
         true ->
           :unknown_effect
-    end
+      end
 
     do_get_type(type, rest)
   end
@@ -60,7 +64,13 @@ defmodule Orb.InstructionSequence do
           indent
         ) do
       for instruction <- instructions do
-        [Instructions.do_wat(instruction, indent), "\n"]
+        case instruction do
+          %Orb.InstructionSequence{} ->
+            to_wat(instruction, indent)
+
+          _ ->
+            [Instructions.do_wat(instruction, indent), "\n"]
+        end
       end
     end
   end

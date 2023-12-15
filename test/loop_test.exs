@@ -3,7 +3,7 @@ defmodule LoopTest do
 
   import Orb, only: [to_wat: 1]
 
-  test "loop" do
+  test "loop through chars manually" do
     defmodule FileNameSafe do
       use Orb
 
@@ -62,6 +62,43 @@ defmodule LoopTest do
     """
 
     assert wasm_source == to_wat(FileNameSafe)
+    # assert Wasm.call(FileNameSafe, "body") == 100
+  end
+
+  test "loop 1..10" do
+    defmodule Loop1To10 do
+      use Orb
+
+      defw sum1to10(), I32, sum: I32 do
+        loop i <- 1..10 do
+          sum = sum
+        end
+
+        sum
+      end
+    end
+
+    wasm_source = """
+    (module $Loop1To10
+      (func $sum1to10 (export "sum1to10") (result i32)
+        (local $sum i32)
+        (local $i i32)
+        (i32.const 1)
+        (local.set $i)
+        (loop $i
+          (local.get $sum)
+          (local.set $sum)
+          (i32.add (local.get $i) (i32.const 1))
+          (local.set $i)
+          (i32.le_u (local.get $i) (i32.const 10))
+          (br_if $i)
+        )
+        (local.get $sum)
+      )
+    )
+    """
+
+    assert wasm_source == to_wat(Loop1To10)
     # assert Wasm.call(FileNameSafe, "body") == 100
   end
 end

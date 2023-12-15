@@ -579,8 +579,9 @@ defmodule Orb do
       %__MODULE__{global_or_local: :local, identifier: identifier, type: type}
     end
 
-    def as_set(%__MODULE__{global_or_local: :local, identifier: identifier}) do
-      {:local_set, identifier}
+    def as_set(%__MODULE__{global_or_local: :local, identifier: identifier, type: type}) do
+      Orb.Instruction.local_set(type, identifier, :pop)
+      # {:local_set, identifier}
     end
 
     @behaviour Access

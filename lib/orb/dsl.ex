@@ -174,19 +174,32 @@ defmodule Orb.DSL do
     block_items = runtime_checks ++ block_items
 
     quote do
-      %Orb.Func{
-        name:
-          case {@wasm_func_prefix, unquote(name)} do
-            {nil, name} -> name
-            {prefix, name} -> "#{prefix}.#{name}"
-          end,
-        params: unquote(params),
-        result: unquote(result_type),
-        local_types: unquote(local_types),
-        body: unquote(block_items) |> Orb.InstructionSequence.new(),
-        exported_names: unquote(exported_names)
-      }
-      |> Orb.Func.narrow_if_needed()
+      with do
+        block_items = unquote(block_items)
+
+        body_local_types =
+          for %{locals: statement_locals} <- block_items do
+            statement_locals |> IO.inspect(label: "statement_locals")
+          end
+          |> List.flatten()
+
+        # |> Keyword.new()
+        local_types = unquote(local_types) ++ body_local_types
+
+        %Orb.Func{
+          name:
+            case {@wasm_func_prefix, unquote(name)} do
+              {nil, name} -> name
+              {prefix, name} -> "#{prefix}.#{name}"
+            end,
+          params: unquote(params),
+          result: unquote(result_type),
+          local_types: local_types,
+          body: block_items |> Orb.InstructionSequence.new(),
+          exported_names: unquote(exported_names)
+        }
+        |> Orb.Func.narrow_if_needed()
+      end
     end
   end
 
@@ -408,6 +421,43 @@ defmodule Orb.DSL do
   @doc """
   Declare a loop that iterates through a source.
   """
+  defmacro loop({:<-, _, [{identifier, _, nil} = var, source]}, do: block)
+           when is_atom(identifier) do
+    alias Orb.I32
+
+    quote do
+      with do
+        var!(unquote(var)) = Orb.VariableReference.local(unquote(identifier), Orb.I32)
+        %Range{first: first, last: last, step: 1} = unquote(source)
+
+        Orb.InstructionSequence.new(
+          :unknown_effect,
+          [
+            Orb.Instruction.local_set(Orb.I32, unquote(identifier), first),
+            %Orb.Loop{
+              identifier: unquote(identifier),
+              body:
+                Orb.InstructionSequence.new(:unknown_effect, [
+                  unquote(__get_block_items(block)),
+                  Orb.Instruction.local_set(
+                    Orb.I32,
+                    unquote(identifier),
+                    Orb.I32.add(Orb.Instruction.local_get(Orb.I32, unquote(identifier)), 1)
+                  ),
+                  %Orb.Loop.Branch{
+                    identifier: unquote(identifier),
+                    if:
+                      Orb.I32.le_u(Orb.Instruction.local_get(Orb.I32, unquote(identifier)), last)
+                  }
+                ])
+            }
+          ],
+          locals: [{unquote(identifier), Orb.I32}]
+        )
+      end
+    end
+  end
+
   defmacro loop({:<-, _, [item, source]}, do: block) do
     result_type = nil
 
@@ -425,7 +475,7 @@ defmodule Orb.DSL do
            ), quote(do: unquote(item).identifier)}
       end
 
-    block_items =
+    body =
       quote(
         do:
           Orb.IfElse.new(
@@ -445,7 +495,7 @@ defmodule Orb.DSL do
       %Orb.Loop{
         identifier: unquote(identifier),
         result: unquote(result_type),
-        body: unquote(block_items)
+        body: unquote(body)
       }
     end
   end
@@ -483,7 +533,7 @@ defmodule Orb.DSL do
     block_items =
       case while do
         nil ->
-          block_items
+          quote do: Orb.InstructionSequence.new(unquote(block_items))
 
         condition ->
           quote do:
