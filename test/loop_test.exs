@@ -74,7 +74,9 @@ defmodule LoopTest do
         # sum = 0
         # let sum: i32(0)
         # i32 sum: 0
-        # I32.def sum: I32
+        # let sum <- I32 do
+        # let sum(I32) do
+        # I32.def sum: 0
         # local sum: I32
         # sum :: I32 = 0
         # f32(r: 0.0)
@@ -84,6 +86,14 @@ defmodule LoopTest do
         end
 
         sum
+
+        # let sum: I32, mean: I32 do
+        #   loop i <- 1..10 do
+        #     sum = sum + i
+        #   end
+
+        #   sum
+        # end
       end
     end
 
