@@ -163,10 +163,12 @@ defmodule Orb.DSL do
     # block = Macro.expand_once(block, __ENV__)
 
     block_items =
-      case block do
-        {:__block__, _meta, block_items} -> block_items
-        single -> [single]
-      end
+      List.wrap(
+        case block do
+          {:__block__, _, items} -> items
+          single -> single
+        end
+      )
 
     block_items = Macro.expand(block_items, env)
     block_items = do_snippet(locals, block_items)
@@ -178,13 +180,12 @@ defmodule Orb.DSL do
         block_items = unquote(block_items)
 
         body_local_types =
-          for %{locals: statement_locals} <- block_items do
-            statement_locals |> IO.inspect(label: "statement_locals")
-          end
+          for(%{locals: locals} <- block_items, do: locals)
           |> List.flatten()
 
-        # |> Keyword.new()
-        local_types = unquote(local_types) ++ body_local_types
+        local_types =
+          (unquote(local_types) ++ body_local_types)
+          |> Keyword.new()
 
         %Orb.Func{
           name:
@@ -195,7 +196,7 @@ defmodule Orb.DSL do
           params: unquote(params),
           result: unquote(result_type),
           local_types: local_types,
-          body: block_items |> Orb.InstructionSequence.new(),
+          body: Orb.InstructionSequence.new(block_items),
           exported_names: unquote(exported_names)
         }
         |> Orb.Func.narrow_if_needed()
@@ -319,6 +320,16 @@ defmodule Orb.DSL do
   def i32(true), do: Instruction.i32(:const, 1)
   # TODO: should this be removed?
   def i32(op) when op in Ops.i32(:all), do: {:i32, op}
+
+  def i32(locals) when is_list(locals) do
+    Orb.InstructionSequence.new(
+      :local_effect,
+      for {local, initial_value} when initial_value !== 0 <- locals do
+        Orb.Instruction.local_set(Orb.I32, local, initial_value)
+      end,
+      locals: for({local, _} <- locals, do: {local, Orb.I32})
+    )
+  end
 
   def i64(n) when is_integer(n), do: Instruction.i64(:const, n)
 

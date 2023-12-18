@@ -70,6 +70,13 @@ defmodule LoopTest do
       use Orb
 
       defw sum1to10(), I32, sum: I32 do
+        # sum = 0
+        # let sum: i32(0)
+        # i32 sum: 0
+        # I32.def sum: 0
+        # sum :: I32 = 0
+        # f32(r: 0.0)
+
         loop i <- 1..10 do
           sum = sum + i
         end
@@ -98,7 +105,7 @@ defmodule LoopTest do
     )
     """
 
-    assert wasm_source = to_wat(Loop1To10)
+    assert wasm_source == to_wat(Loop1To10)
     assert 55 = Wasm.call(Loop1To10, :sum1to10)
   end
 end
