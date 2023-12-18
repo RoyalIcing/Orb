@@ -70,10 +70,12 @@ defmodule LoopTest do
       use Orb
 
       defw sum1to10(), I32, sum: I32 do
+        # let(I32, sum: 0)
         # sum = 0
         # let sum: i32(0)
         # i32 sum: 0
-        # I32.def sum: 0
+        # I32.def sum: I32
+        # local sum: I32
         # sum :: I32 = 0
         # f32(r: 0.0)
 
