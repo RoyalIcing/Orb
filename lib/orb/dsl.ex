@@ -480,24 +480,28 @@ defmodule Orb.DSL do
           {[], "_"}
 
         _ ->
-          {quote(do: Orb.VariableReference.set(unquote(item), unquote(source)[:value])),
-           quote(do: unquote(item).identifier)}
+          {quote bind_quoted: [source: source, item: item] do
+             Orb.VariableReference.set(item, source.type.value(source))
+           end, quote(do: unquote(item).identifier)}
       end
 
     body =
-      quote(
-        do:
-          Orb.IfElse.new(
-            # unquote(source),
-            unquote(source)[:valid?],
-            [
-              unquote(set_item),
-              unquote(__get_block_items(block)),
-              Orb.VariableReference.set(unquote(source), unquote(source)[:next]),
-              %Orb.Loop.Branch{identifier: unquote(identifier)}
-            ]
-          )
-      )
+      quote bind_quoted: [
+              source: source,
+              identifier: identifier,
+              set_item: set_item,
+              block_items: __get_block_items(block)
+            ] do
+        Orb.IfElse.new(
+          source.type.valid?(source),
+          [
+            set_item,
+            block_items,
+            Orb.VariableReference.set(source, source.type.next(source)),
+            %Orb.Loop.Branch{identifier: identifier}
+          ]
+        )
+      end
 
     quote do
       %Orb.Loop{

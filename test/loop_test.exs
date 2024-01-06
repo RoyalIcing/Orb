@@ -129,18 +129,12 @@ defmodule LoopTest do
 
       def new(), do: ?a
 
-      @impl Access
-      def fetch(%Orb.VariableReference{} = var, :valid?), do: {:ok, Orb.I32.le_u(var, ?z)}
-      def fetch(%Orb.VariableReference{} = var, :value), do: {:ok, var}
-      def fetch(%Orb.VariableReference{} = var, :next), do: {:ok, Orb.I32.add(var, 1)}
-
-      @impl Access
-      def get_and_update(_data, _key, _function),
-        do: raise(UndefinedFunctionError, module: __MODULE__, function: :get_and_update, arity: 3)
-
-      @impl Access
-      def pop(_data, _key),
-        do: raise(UndefinedFunctionError, module: __MODULE__, function: :pop, arity: 2)
+      @impl Orb.Iterator
+      def valid?(var), do: Orb.I32.le_u(var, ?z)
+      @impl Orb.Iterator
+      def value(var), do: var
+      @impl Orb.Iterator
+      def next(var), do: Orb.I32.add(var, 1)
     end
 
     defmodule IteratorConsumer do
