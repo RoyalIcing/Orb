@@ -2,6 +2,8 @@
 
 # Orb: Write WebAssembly with Elixir
 
+[Docs](https://hexdocs.pm/orb)
+
 Write WebAssembly with the power of Elixir as your compiler:
 
 - Use Elixir’s **module system** to break problems down and then compose them together.
@@ -79,23 +81,24 @@ Note there is [another excellent Elixir Wasmtime wrapper out there called Wasmex
 
 ## Use cases
 
+- Parsers
+- State machines
+- Formatters & string builders
+- HTTP endpoint that can be deployed agnostically to the server or edge.
+- Interactive UI controls
 - Write a HTML component and run it in:
     - Phoenix LiveView & dead views
     - In the browser using `<wasm-html>` custom element
 - LiveView and its server rendering is a fantastic default, but the latency can be noticeable for certain UI interactions. With Orb you could use Elixir to write a WebAssembly module that then runs in the user’s browser.
-- State machines
-- Parsers
-- Formatters & string builders
-- Interactive color picker controls
-- Animation that runs fast in the browser, and works on the server
+- Animation that runs fast in the browser and also works on the server
 - Code generators
 
 ## Why WebAssembly?
 
 - It runs on all of today’s major platforms: browser, server, edge, mobile, laptop, tablet, desktop.
 - Universal/isomorphic components (ones that run on the server and browser) are possible in React and Next.js, but they have many different flavours and can get pretty complex for a system that was meant to be declarative.
-- Like HTML and CSS it’s backwards compatible, which means WebAssembly you author today will be guaranteed to still work in a decade or more.
-- It’s memory-safe and sandboxed. It can’t read memory outside of itself, plus only what has been explicitly passed into it. It can be timeboxed to run only for a certain duration.
+- Like HTML and CSS it’s backwards compatible, which means WebAssembly you author today will be guaranteed to still work in a decade or longer.
+- It’s memory-safe and sandboxed. It can’t read memory outside of itself, only what has been explicitly passed into it. It can even be timeboxed to run for a maximum duration.
 - It’s fast.
 
 ## Why develop Orb in Elixir?
@@ -117,14 +120,8 @@ Here are the reasons I chose to write Orb in Elixir.
     - Can integrate with Phoenix LiveView.
     - Can connect to cloud, databases.
     - Can integrate with Rust.
-- Community that is friendly.
+- Community that is friendly and collaborative.
 - Can be extended with additional functions and macros:
   - Unlike say C’s basic string-inserting preprocessor, Elixir is a full programming language without constraints.
   - We can read files or the network and then generate code.
-  - You can create your own DSL. Want to enforce immutable-style programming? Want to add pattern matching? Design a DSL for it.
-
-----
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/orb>.
+  - You can create your own DSL. Want to enforce immutable-style programming? Want to add pattern matching? Design your own DSL on top of Orb for it.
