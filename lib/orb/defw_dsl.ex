@@ -80,11 +80,15 @@ defmodule Orb.DefwDSL do
     end
   end
 
-  def __define_elixir_def(call, def_kind, result, env) do
-    define_elixir_def(call, def_kind, result, env)
+  def __define_elixir_def(call, def_kind, result_type, env) do
+    define_elixir_def(call, def_kind, result_type, env)
   end
 
-  defp define_elixir_def(call, def_kind, result, %Macro.Env{file: file}) do
+  def __define_elixir_def(call, def_kind, result_type, param_types, env) do
+    define_elixir_def(call, def_kind, result_type, param_types, env)
+  end
+
+  defp define_elixir_def(call, def_kind, result_type, param_types \\ nil, %Macro.Env{file: file}) do
     {name, func_args} = Macro.decompose_call(call)
     {_, meta, _} = call
     # arity = length(args)
@@ -109,17 +113,35 @@ defmodule Orb.DefwDSL do
 
     def_call = {name, meta, def_args}
 
-    quote do
-      unquote(def_kind)(unquote(def_call)) do
-        Orb.Instruction.typed_call(
-          unquote(result || :unknown_effect),
-          case {@wasm_func_prefix, unquote(name)} do
-            {nil, name} -> name
-            {prefix, name} -> "#{prefix}.#{name}"
-          end,
-          unquote(def_args)
-        )
-      end
+    case param_types do
+      nil ->
+        quote do
+          unquote(def_kind)(unquote(def_call)) do
+            Orb.Instruction.typed_call(
+              unquote(result_type || :unknown_effect),
+              case {@wasm_func_prefix, unquote(name)} do
+                {nil, name} -> name
+                {prefix, name} -> "#{prefix}.#{name}"
+              end,
+              unquote(def_args)
+            )
+          end
+        end
+
+      param_types ->
+        quote do
+          unquote(def_kind)(unquote(def_call)) do
+            Orb.Instruction.typed_call(
+              unquote(result_type || :unknown_effect),
+              unquote(param_types),
+              case {@wasm_func_prefix, unquote(name)} do
+                {nil, name} -> name
+                {prefix, name} -> "#{prefix}.#{name}"
+              end,
+              unquote(def_args)
+            )
+          end
+        end
     end
   end
 end

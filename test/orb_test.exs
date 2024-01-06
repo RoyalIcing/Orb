@@ -273,9 +273,9 @@ defmodule OrbTest do
         Orb.importw(Log, :log)
         Orb.importw(Time, :time)
 
-        defw test(), a: I32 do
-          a = Echo.int32(42)
-          :drop
+        defw test() do
+          Echo.int32(42) |> Orb.Stack.drop()
+          Echo.int64(42) |> Orb.Stack.drop()
         end
       end
 
@@ -287,9 +287,9 @@ defmodule OrbTest do
                (import "log" "int64" (func $OrbTest.ImportsTest.Log.int64 (param $a i64)))
                (import "time" "unix_time" (func $OrbTest.ImportsTest.Time.unix_time (result i64)))
                (func $test (export "test")
-                 (local $a i32)
                  (call $OrbTest.ImportsTest.Echo.int32 (i32.const 42))
-                 (local.set $a)
+                 drop
+                 (call $OrbTest.ImportsTest.Echo.int64 (i64.const 42))
                  drop
                )
              )

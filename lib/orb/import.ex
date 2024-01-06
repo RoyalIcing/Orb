@@ -51,8 +51,9 @@ defmodule Orb.Import do
 
       params = Func.Type.params_from_call_args(args, env, line)
       result_type = result_type |> Macro.expand_literals(env)
+      param_types = for %{type: type} <- params, do: type
 
-      ex_def = DefwDSL.__define_elixir_def(call, :def, result_type, env)
+      ex_def = DefwDSL.__define_elixir_def(call, :def, result_type, param_types, env)
 
       quote do
         unquote(ex_def)

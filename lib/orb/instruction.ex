@@ -11,12 +11,20 @@ defmodule Orb.Instruction do
 
   def new(type, operation, operands)
 
-  def new(type, operation, operands) when type in @types,
+  def new(type, {:call, param_types, name} = operation, params),
     do: %__MODULE__{
+      type: type,
+      operation: operation,
+      operands: type_check_call!(param_types, name, params)
+    }
+
+  def new(type, operation, operands) when type in @types do
+    %__MODULE__{
       type: type,
       operation: operation,
       operands: type_check_operands!(type, operation, operands)
     }
+  end
 
   def new(Elixir.Integer, _, _) do
     raise "Can’t create an instruction for Elixir.Integer, need concrete type like Orb.I64."
@@ -97,6 +105,10 @@ defmodule Orb.Instruction do
 
   def call(f), do: new(:unknown_effect, {:call, f})
   def call(f, args) when is_list(args), do: new(:unknown_effect, {:call, f}, args)
+
+  def typed_call(result_type, param_types, f, args) when is_list(args),
+    do: new(result_type, {:call, param_types, f}, args)
+
   def typed_call(output_type, f, args) when is_list(args), do: new(output_type, {:call, f}, args)
 
   def local_get(type, local_name), do: new(type, {:local_get, local_name})
@@ -131,6 +143,26 @@ defmodule Orb.Instruction do
   # Which we should because any function can do both!
   # TODO: add effects map. See InstructionSequence for a sketch.
   def memory_grow(value), do: new(:i32, {:memory, :grow}, [value])
+
+  defp type_check_call!(param_types, name, params) do
+    params
+    |> Enum.with_index(fn param, index ->
+      param = Constants.expand_if_needed(param)
+
+      expected_type = Enum.at(param_types, index)
+
+      received_type =
+        cond do
+          is_integer(param) -> Elixir.Integer
+          is_float(param) -> :f32
+          %{type: type} = param -> type
+        end
+
+      types_must_match!(expected_type, received_type, "call #{name} param #{index}")
+
+      wrap_constant!(expected_type, param)
+    end)
+  end
 
   defp type_check_operands!(type, operation, operands) do
     operands
@@ -182,6 +214,7 @@ defmodule Orb.Instruction do
     wrap_constant!(expected_type, operand)
   end
 
+  # TODO: can this be removed? I believe it is handled by clause above.
   defp type_check_operand!(:i32, op, operand, param_index) when is_atom(op) do
     expected_type = Ops.i32_param_type!(op, param_index)
 
@@ -197,6 +230,7 @@ defmodule Orb.Instruction do
     wrap_constant!(expected_type, operand)
   end
 
+  # TODO: can this be removed?
   defp type_check_operand!(:i64, op, operand, param_index) when is_atom(op) do
     expected_type = Ops.i64_param_type!(op, param_index)
 
@@ -271,6 +305,22 @@ defmodule Orb.Instruction do
 
   defimpl Orb.ToWat do
     alias Orb.ToWat.Instructions
+
+    def to_wat(
+          %Orb.Instruction{
+            operation: {:call, _param_types, f},
+            operands: operands
+          },
+          indent
+        ) do
+      [
+        indent,
+        "(call $",
+        to_string(f),
+        for(operand <- operands, do: [" ", Instructions.do_wat(operand)]),
+        ")"
+      ]
+    end
 
     def to_wat(
           %Orb.Instruction{
@@ -364,15 +414,15 @@ defmodule Orb.Instruction do
           },
           indent
         ) do
-          [
-            indent,
-            "(",
-            to_string(type),
-            ".",
-            to_string(store),
-            for(operand <- operands, do: [" ", Instructions.do_wat(operand)]),
-            ")"
-          ]
+      [
+        indent,
+        "(",
+        to_string(type),
+        ".",
+        to_string(store),
+        for(operand <- operands, do: [" ", Instructions.do_wat(operand)]),
+        ")"
+      ]
     end
 
     def to_wat(
