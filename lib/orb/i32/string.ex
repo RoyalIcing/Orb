@@ -32,58 +32,12 @@ defmodule Orb.I32.String do
     raise UndefinedFunctionError, module: __MODULE__, function: :pop, arity: 2
   end
 
-  # TODO: extract to SilverOrb
-  defmodule CharIterator do
-    @moduledoc """
-    Custom `Orb.CustomType`. Iterate over each byte character in an ASCII string.
-    """
-
-    @behaviour Orb.CustomType
-    @impl Orb.CustomType
-    def wasm_type(), do: :i32
-
-    @impl Orb.CustomType
-    def byte_count(), do: 1
-
-    @behaviour Access
-
-    @impl Access
-    def fetch(%Orb.VariableReference{} = var_ref, :value) do
-      ast = Orb.Memory.load!(I32.U8, var_ref)
-      {:ok, ast}
-    end
-
-    def fetch(%Orb.VariableReference{} = var_ref, :next) do
-      require Orb
-      require Orb.I32
-
-      ast =
-        Orb.snippet do
-          Orb.I32.when? Orb.Memory.load!(I32.U8, Orb.Numeric.Add.optimized(Orb.I32, var_ref, 1)) do
-            Orb.Numeric.Add.optimized(Orb.I32, var_ref, 1)
-          else
-            0x0
-          end
-        end
-
-      {:ok, ast}
-    end
-
-    @impl Access
-    def get_and_update(_data, _key, _function) do
-      raise UndefinedFunctionError, module: __MODULE__, function: :get_and_update, arity: 3
-    end
-
-    @impl Access
-    def pop(_data, _key) do
-      raise UndefinedFunctionError, module: __MODULE__, function: :pop, arity: 2
-    end
-  end
-
   use Orb
 
   Memory.pages(1)
 
+  # TODO: remove all of these funcs. It will live in SilverOrb instead.
+  # Plus strings will likely become a Memory.Range instead, so we know the length statically.
   wasm do
     func streq(address_a: I32, address_b: I32),
          I32,
