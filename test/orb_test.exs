@@ -253,8 +253,8 @@ defmodule OrbTest do
         defmodule Log do
           use Orb.Import
 
-          defw(int32(a: I32), nil)
-          defw(int64(a: I64), nil)
+          defw(int32(a: I32))
+          defw(int64(a: I64))
         end
 
         defmodule Time do

@@ -35,7 +35,7 @@ defmodule Orb.Import do
   end
 
   defmodule DSL do
-    defmacro defw(call, result_type) do
+    defmacro defw(call, result_type \\ nil) do
       alias Elixir.Orb.{DefwDSL, Func, Import}
 
       env = __CALLER__
