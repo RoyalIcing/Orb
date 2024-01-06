@@ -20,6 +20,7 @@ defmodule Orb.DefwDSL do
     define(call, :public, result, locals, block, __CALLER__)
   end
 
+  # TODO: I don’t think defwi is needed. Removing it will clear up the API surface area.
   defmacro defwi(call, do: block) do
     define(call, :internal, nil, [], block, __CALLER__)
   end

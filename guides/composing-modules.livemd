@@ -10,10 +10,7 @@ Mix.install([{:orb, "~> 0.0.18"}, :orb_wasmtime])
 defmodule BumpAllocator do
   use Orb
 
-  I32.global(
-    bump_offset: 0xFF,
-    bump_mark: 0
-  )
+  I32.global(bump_offset: 0xFF)
 
   Memory.pages(1)
 
