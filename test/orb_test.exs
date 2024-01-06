@@ -263,6 +263,8 @@ defmodule OrbTest do
           defw(unix_time(), I64)
         end
 
+        # TODO:
+        # use Orb.Import, name: :echo
         # Echo.import()
         # Log.import()
         # Time.import()
