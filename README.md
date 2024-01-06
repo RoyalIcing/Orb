@@ -15,7 +15,7 @@ Write WebAssembly with the power of Elixir as your compiler:
 
 ## Installation
 
-The package can be installed via Hex by adding `orb` to your list of dependencies in `mix.exs`:
+Add `orb` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
