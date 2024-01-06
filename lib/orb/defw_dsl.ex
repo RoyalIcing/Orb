@@ -80,15 +80,14 @@ defmodule Orb.DefwDSL do
     end
   end
 
-  def __define_elixir_def(call, def_kind, result_type, param_types, env) do
-    define_elixir_def(call, def_kind, result_type, param_types, env)
+  def __define_elixir_def(call, def_kind, result_type, env) do
+    define_elixir_def(call, def_kind, result_type, env)
   end
 
   defp define_elixir_def(
          call,
          def_kind,
          result_type,
-         param_types \\ nil,
          %Macro.Env{file: file} = env
        ) do
     {name, func_args} = Macro.decompose_call(call)
