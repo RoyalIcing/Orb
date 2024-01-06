@@ -7,19 +7,24 @@ defmodule Orb.Import do
     quote do
       import Orb.DefwDSL, only: []
       import Orb.Import.DSL
+      alias Orb.{I32, I64, F32}
 
       # Module.register_attribute(__MODULE__, :wasm_imports, accumulate: true, persist: true)
 
-      def __wasm_imports__(context), do: []
+      def __wasm_imports__(_context), do: []
       defoverridable __wasm_imports__: 1
 
-      Orb.set_func_prefix(inspect(__MODULE__))
+      with do
+        require Orb
+        Orb.set_func_prefix(inspect(__MODULE__))
+      end
     end
   end
 
   defimpl Orb.ToWat do
     alias Orb.ToWat.Instructions
 
+    @spec to_wat(%Orb.Import{}, any()) :: <<_::64, _::_*8>>
     def to_wat(%Orb.Import{module: nil, name: name, type: type}, indent) do
       ~s[#{indent}(import "#{name}" #{Instructions.do_wat(type)})]
     end
