@@ -10,25 +10,23 @@ defmodule LoopTest do
 
       Memory.pages(2)
 
-      wasm do
-        func get_is_valid(), I32, str: I32.U8.UnsafePointer, char: I32 do
-          str = 1024
+      defw get_is_valid(), I32, str: I32.U8.UnsafePointer, char: I32 do
+        str = 1024
 
-          loop Loop, result: I32 do
-            Control.block Outer do
-              Control.block :inner do
-                char = str[at!: 0]
-                Control.break(:inner, if: I32.eq(char, ?/))
-                Outer.break(if: char)
-                return(1)
-              end
-
-              return(0)
+        loop Loop, result: I32 do
+          Control.block Outer do
+            Control.block :inner do
+              char = str[at!: 0]
+              Control.break(:inner, if: I32.eq(char, ?/))
+              Outer.break(if: char)
+              return(1)
             end
 
-            str = str + 1
-            Loop.continue()
+            return(0)
           end
+
+          str = str + 1
+          Loop.continue()
         end
       end
     end
@@ -119,5 +117,47 @@ defmodule LoopTest do
 
     assert wasm_source == to_wat(Loop1To10)
     assert 55 = Wasm.call(Loop1To10, :sum1to10)
+  end
+
+  test "iterators" do
+    defmodule AlphabetIterator do
+      @behaviour Orb.CustomType
+      @behaviour Access
+
+      @impl Orb.CustomType
+      defdelegate wasm_type, to: Orb.I32
+
+      def new(), do: ?a
+
+      @impl Access
+      def fetch(%Orb.VariableReference{} = var, :valid?), do: {:ok, Orb.I32.le_u(var, ?z)}
+      def fetch(%Orb.VariableReference{} = var, :value), do: {:ok, var}
+      def fetch(%Orb.VariableReference{} = var, :next), do: {:ok, Orb.I32.add(var, 1)}
+
+      @impl Access
+      def get_and_update(_data, _key, _function),
+        do: raise(UndefinedFunctionError, module: __MODULE__, function: :get_and_update, arity: 3)
+
+      @impl Access
+      def pop(_data, _key),
+        do: raise(UndefinedFunctionError, module: __MODULE__, function: :pop, arity: 2)
+    end
+
+    defmodule IteratorConsumer do
+      use Orb
+
+      defw test, {I32, I32}, i: I32, char: I32, alpha: AlphabetIterator do
+        alpha = AlphabetIterator.new()
+
+        loop char <- alpha do
+          i = i + 1
+        end
+
+        i
+        char
+      end
+    end
+
+    assert {26, ?z} = Wasm.call(IteratorConsumer, :test)
   end
 end

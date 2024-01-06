@@ -114,6 +114,9 @@ defmodule Orb.Instruction do
   def local_get(type, local_name), do: new(type, {:local_get, local_name})
   def local_tee(type, local_name, value), do: new(type, {:local_tee, local_name}, [value])
 
+  def local_set(type, local_name),
+    do: new(:local_effect, {:local_set, local_name, type}, [])
+
   def local_set(type, local_name, value),
     do: new(:local_effect, {:local_set, local_name, type}, [value])
 

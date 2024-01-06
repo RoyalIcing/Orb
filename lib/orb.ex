@@ -539,14 +539,21 @@ defmodule Orb do
       %__MODULE__{global_or_local: :local, identifier: identifier, type: type}
     end
 
+    def set(
+          %__MODULE__{global_or_local: :local, identifier: identifier, type: type},
+          new_value
+        ) do
+      Orb.Instruction.local_set(type, identifier, new_value)
+    end
+
     def as_set(%__MODULE__{global_or_local: :local, identifier: identifier, type: type}) do
-      Orb.Instruction.local_set(type, identifier, :pop)
-      # {:local_set, identifier}
+      Orb.Instruction.local_set(type, identifier)
     end
 
     @behaviour Access
 
     @impl Access
+    # TODO: I think this should only live on custom types like UnsafePointer
     def fetch(%__MODULE__{global_or_local: :local, identifier: _identifier, type: :i32} = ref,
           at: offset
         ) do

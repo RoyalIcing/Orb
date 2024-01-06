@@ -469,7 +469,9 @@ defmodule Orb.DSL do
     end
   end
 
-  defmacro loop({:<-, _, [item, source]}, do: block) do
+  defmacro loop({:<-, _, [item, source]},
+             do: block
+           ) do
     result_type = nil
 
     {set_item, identifier} =
@@ -478,12 +480,8 @@ defmodule Orb.DSL do
           {[], "_"}
 
         _ ->
-          {quote(
-             do: [
-               unquote(source)[:value],
-               Orb.VariableReference.as_set(unquote(item))
-             ]
-           ), quote(do: unquote(item).identifier)}
+          {quote(do: Orb.VariableReference.set(unquote(item), unquote(source)[:value])),
+           quote(do: unquote(item).identifier)}
       end
 
     body =
@@ -495,8 +493,7 @@ defmodule Orb.DSL do
             [
               unquote(set_item),
               unquote(__get_block_items(block)),
-              unquote(source)[:next],
-              Orb.VariableReference.as_set(unquote(source)),
+              Orb.VariableReference.set(unquote(source), unquote(source)[:next]),
               %Orb.Loop.Branch{identifier: unquote(identifier)}
             ]
           )
