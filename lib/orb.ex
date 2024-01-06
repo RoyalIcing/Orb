@@ -430,75 +430,35 @@ defmodule Orb do
   char = typed_call(I32, :encode_html_char, char)
   ```
 
-  ## Composing modules together
+  ## Composing modules with `Orb.include/1`
 
-  Any functions from one module can be included into another to allow code reuse.
+  The WebAssembly functions from one module reused in another using `Orb.include/1`.
 
-  When you `use Orb`, `funcp` and `func` functions are defined on your Elixir module for you. Calling these from another module will copy any functions across.
-
-  ```elixir
-  defmodule A do
-    use Orb
-
-    defwi square(n: I32), I32 do
-      n * n
-    end
-  end
-  ```
-
-  The `defwi` means that that WebAssembly function remains _internal_ but a public Elixir function is defined.
-
-  ```elixir
-  defmodule B do
-    use Orb
-
-    # Copies all functions defined in A as private functions into this module.
-    wasm do
-      A.funcp()
-    end
-
-    # Allows square to be called by Elixir.
-    import A
-
-    defw example(n: I32), I32 do
-      square(42)
-    end
-  end
-  ```
-
-  You can pass a name to `YourSourceModule.funcp(name)` to only copy that particular function across.
+  Here’s an example of module A’s square function being included by module B:
 
   ```elixir
   defmodule A do
     use Orb
 
-    defwi square(n: I32), I32 do
+    defw square(n: I32), I32 do
       n * n
     end
-
-    defwi double(n: I32), I32 do
-      2 * n
-    end
   end
-  ```
 
-  ```elixir
   defmodule B do
     use Orb
 
-    wasm do
-      A.funcp(:square)
-    end
-
-    import A, only: [square: 1]
+    # Copies all WebAssembly functions defined in A into this module.
+    Orb.include(A)
 
     defw example(n: I32), I32 do
-      square(42)
+      # Now we can call functions on A.
+      A.square(42)
     end
   end
   ```
 
-  ## Importing
+  ## Importing with `Orb.importw/2`
 
   Your running WebAssembly module can interact with the outside world by importing globals and functions.
 

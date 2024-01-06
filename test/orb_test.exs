@@ -802,27 +802,49 @@ defmodule OrbTest do
     assert {:error, _} = Wasm.call(wat, :declare_defcon, 10)
   end
 
-  defmodule SnippetDefiner do
-    def hd!(ptr) do
-      Orb.snippet U32 do
-        Memory.load!(I32, ptr + 4)
+  test "Orb.include/1 copies all functions" do
+    defmodule MathUtils do
+      use Orb
+
+      defw(square(n: I32), I32, do: n * n)
+    end
+
+    defmodule Includer do
+      use Orb
+
+      Orb.include(MathUtils)
+
+      defw magic(), I32 do
+        MathUtils.square(3)
       end
     end
-  end
 
-  defmodule SnippetUser do
-    use Orb
-
-    Memory.pages(1)
-
-    wasm do
-      func answer(), I32 do
-        SnippetDefiner.hd!(0x100)
-      end
-    end
+    alias OrbWasmtime.Wasm
+    assert 9 = Wasm.call(Includer, :magic)
+    assert [{:func, "magic"}] = Wasm.list_exports(Includer)
   end
 
   test "snippet works" do
+    defmodule SnippetDefiner do
+      def hd!(ptr) do
+        Orb.snippet U32 do
+          Memory.load!(I32, ptr + 4)
+        end
+      end
+    end
+
+    defmodule SnippetUser do
+      use Orb
+
+      Memory.pages(1)
+
+      wasm do
+        func answer(), I32 do
+          SnippetDefiner.hd!(0x100)
+        end
+      end
+    end
+
     wasm_source = """
     (module $SnippetUser
       (memory (export "memory") 1)
