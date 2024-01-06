@@ -4,7 +4,6 @@ defmodule Orb.Loop do
   defstruct identifier: nil, result: nil, body: nil
 
   defimpl Orb.ToWat do
-    alias Orb.ToWat.Instructions
     import Orb.ToWat.Helpers
 
     def to_wat(

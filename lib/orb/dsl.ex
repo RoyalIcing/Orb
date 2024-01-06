@@ -434,8 +434,6 @@ defmodule Orb.DSL do
   """
   defmacro loop({:<-, _, [{identifier, _, nil} = var, source]}, do: block)
            when is_atom(identifier) do
-    alias Orb.I32
-
     quote do
       with do
         var!(unquote(var)) = Orb.VariableReference.local(unquote(identifier), Orb.I32)
