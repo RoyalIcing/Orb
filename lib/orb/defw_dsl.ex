@@ -84,10 +84,15 @@ defmodule Orb.DefwDSL do
     define_elixir_def(call, def_kind, result_type, param_types, env)
   end
 
-  defp define_elixir_def(call, def_kind, result_type, param_types \\ nil, %Macro.Env{file: file}) do
+  defp define_elixir_def(
+         call,
+         def_kind,
+         result_type,
+         param_types \\ nil,
+         %Macro.Env{file: file} = env
+       ) do
     {name, func_args} = Macro.decompose_call(call)
     {_, meta, _} = call
-    # arity = length(args)
 
     def_args =
       case func_args do
@@ -109,35 +114,21 @@ defmodule Orb.DefwDSL do
 
     def_call = {name, meta, def_args}
 
-    case param_types do
-      nil ->
-        quote do
-          unquote(def_kind)(unquote(def_call)) do
-            Orb.Instruction.typed_call(
-              unquote(result_type || :unknown_effect),
-              case {@wasm_func_prefix, unquote(name)} do
-                {nil, name} -> name
-                {prefix, name} -> "#{prefix}.#{name}"
-              end,
-              unquote(def_args)
-            )
-          end
-        end
+    params = Orb.Func.Type.params_from_call_args(func_args, env, meta[:line])
+    param_types = for %{type: type} <- params, do: type
 
-      param_types ->
-        quote do
-          unquote(def_kind)(unquote(def_call)) do
-            Orb.Instruction.typed_call(
-              unquote(result_type || :unknown_effect),
-              unquote(param_types),
-              case {@wasm_func_prefix, unquote(name)} do
-                {nil, name} -> name
-                {prefix, name} -> "#{prefix}.#{name}"
-              end,
-              unquote(def_args)
-            )
-          end
-        end
+    quote do
+      unquote(def_kind)(unquote(def_call)) do
+        Orb.Instruction.typed_call(
+          unquote(result_type || :unknown_effect),
+          unquote(param_types),
+          case {@wasm_func_prefix, unquote(name)} do
+            {nil, name} -> name
+            {prefix, name} -> "#{prefix}.#{name}"
+          end,
+          unquote(def_args)
+        )
+      end
     end
   end
 end

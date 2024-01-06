@@ -123,13 +123,13 @@ defmodule DefwTest do
 
     assert Visibilities.first() == %Orb.Instruction{
              type: :unknown_effect,
-             operation: {:call, :first},
+             operation: {:call, [], :first},
              operands: []
            }
 
     assert Visibilities.second() == %Orb.Instruction{
              type: :unknown_effect,
-             operation: {:call, :second},
+             operation: {:call, [], :second},
              operands: []
            }
 
