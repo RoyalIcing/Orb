@@ -80,10 +80,6 @@ defmodule Orb.DefwDSL do
     end
   end
 
-  def __define_elixir_def(call, def_kind, result_type, env) do
-    define_elixir_def(call, def_kind, result_type, env)
-  end
-
   def __define_elixir_def(call, def_kind, result_type, param_types, env) do
     define_elixir_def(call, def_kind, result_type, param_types, env)
   end
