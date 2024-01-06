@@ -143,6 +143,8 @@ defmodule LoopTest do
       defw test, {I32, I32}, i: I32, char: I32, alpha: AlphabetIterator do
         alpha = AlphabetIterator.new()
 
+        # TODO: allow char local to be defined by the loop, removing the need to explicitly declare it above.
+        # TODO: loop char <- AlphabetIterator.new() do
         loop char <- alpha do
           i = i + 1
         end
