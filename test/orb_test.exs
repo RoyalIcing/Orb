@@ -240,19 +240,8 @@ defmodule OrbTest do
 
   describe "imports" do
     test "importw/2" do
-      defmodule ImportsLog32 do
+      defmodule ImportsTest do
         use Orb
-        import Orb.DSL, only: [funcp: 1]
-
-        # Import.funcp(:log, :int32, as: :log_i32, params: I32, result: I32)
-        # wasm_import(:log,
-        #   int32: funcp(log_i32(_: I32), I32)
-        # )
-
-        # importw :echo do
-        #   # defwp(int32(a: I32), I32, as: :echo_i32)
-        #   defwp(int32(a: I32), I32) |> as(:echo_i32)
-        # end
 
         defmodule Echo do
           use Orb.Import
@@ -261,16 +250,26 @@ defmodule OrbTest do
           defw(int64(a: I64), I64)
         end
 
-        importw(Echo, :echo)
+        defmodule Log do
+          use Orb.Import
 
-        wasm_import(:log,
-          int32: funcp(name: :log_i32, params: I32),
-          int64: funcp(name: :log_i64, params: I64)
-        )
+          defw(int32(a: I32), nil)
+          defw(int64(a: I64), nil)
+        end
 
-        wasm_import(:time,
-          seconds_since_unix_epoch: funcp(name: :unix_time, result: I64)
-        )
+        defmodule Time do
+          use Orb.Import
+
+          defw(unix_time(), I64)
+        end
+
+        # Echo.import()
+        # Log.import()
+        # Time.import()
+
+        Orb.importw(Echo, :echo)
+        Orb.importw(Log, :log)
+        Orb.importw(Time, :time)
 
         defw test(), a: I32 do
           a = Echo.int32(42)
@@ -279,20 +278,20 @@ defmodule OrbTest do
       end
 
       assert """
-             (module $ImportsLog32
-               (import "echo" "int32" (func $OrbTest.ImportsLog32.Echo.int32 (param $a i32) (result i32)))
-               (import "echo" "int64" (func $OrbTest.ImportsLog32.Echo.int64 (param $a i64) (result i64)))
-               (import "log" "int32" (func $log_i32 (param i32)))
-               (import "log" "int64" (func $log_i64 (param i64)))
-               (import "time" "seconds_since_unix_epoch" (func $unix_time (result i64)))
+             (module $ImportsTest
+               (import "echo" "int32" (func $OrbTest.ImportsTest.Echo.int32 (param $a i32) (result i32)))
+               (import "echo" "int64" (func $OrbTest.ImportsTest.Echo.int64 (param $a i64) (result i64)))
+               (import "log" "int32" (func $OrbTest.ImportsTest.Log.int32 (param $a i32)))
+               (import "log" "int64" (func $OrbTest.ImportsTest.Log.int64 (param $a i64)))
+               (import "time" "unix_time" (func $OrbTest.ImportsTest.Time.unix_time (result i64)))
                (func $test (export "test")
                  (local $a i32)
-                 (call $OrbTest.ImportsLog32.Echo.int32 (i32.const 42))
+                 (call $OrbTest.ImportsTest.Echo.int32 (i32.const 42))
                  (local.set $a)
                  drop
                )
              )
-             """ = to_wat(ImportsLog32)
+             """ = to_wat(ImportsTest)
     end
   end
 
