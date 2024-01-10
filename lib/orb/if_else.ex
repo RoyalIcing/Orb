@@ -132,43 +132,55 @@ defmodule Orb.IfElse do
 
     # Multi-line
     defmacro if(condition, [result: result], do: when_true, else: when_false) do
-      quote do
+      quote bind_quoted: [
+              condition: condition,
+              result: result,
+              when_true: Orb.__get_block_items(when_true),
+              when_false: Orb.__get_block_items(when_false)
+            ] do
         Orb.IfElse.new(
-          unquote(result),
-          unquote(condition),
-          unquote(Orb.__get_block_items(when_true)) |> InstructionSequence.new(),
-          unquote(Orb.__get_block_items(when_false)) |> InstructionSequence.new()
+          result,
+          condition,
+          InstructionSequence.new(when_true),
+          InstructionSequence.new(when_false)
         )
       end
     end
 
     # Single-line
     defmacro if(condition, result: result, do: when_true, else: when_false) do
-      quote do
-        Orb.IfElse.new(
-          unquote(result),
-          unquote(condition),
-          unquote(when_true),
-          unquote(when_false)
-        )
+      quote bind_quoted: [
+              result: result,
+              condition: condition,
+              when_true: when_true,
+              when_false: when_false
+            ] do
+        Orb.IfElse.new(result, condition, when_true, when_false)
       end
     end
 
     defmacro if(condition, do: when_true, else: when_false) do
-      quote do
+      quote bind_quoted: [
+              condition: condition,
+              when_true: Orb.__get_block_items(when_true),
+              when_false: Orb.__get_block_items(when_false)
+            ] do
         Orb.IfElse.new(
-          unquote(condition),
-          unquote(Orb.__get_block_items(when_true)) |> InstructionSequence.new(),
-          unquote(Orb.__get_block_items(when_false)) |> InstructionSequence.new()
+          condition,
+          InstructionSequence.new(when_true),
+          InstructionSequence.new(when_false)
         )
       end
     end
 
     defmacro if(condition, do: when_true) do
-      quote do
+      quote bind_quoted: [
+              condition: condition,
+              when_true: Orb.__get_block_items(when_true)
+            ] do
         Orb.IfElse.new(
-          unquote(condition),
-          unquote(Orb.__get_block_items(when_true)) |> InstructionSequence.new()
+          condition,
+          InstructionSequence.new(when_true)
         )
       end
     end
