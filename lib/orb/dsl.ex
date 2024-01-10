@@ -64,6 +64,7 @@ defmodule Orb.DSL do
             quote do
               with a = unquote(call), s = Atom.to_string(a) do
                 case Macro.inspect_atom(:literal, a) do
+                  # Strip : prefix from atom
                   ":" <> other ->
                     other
 
