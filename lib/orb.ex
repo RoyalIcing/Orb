@@ -543,11 +543,11 @@ defmodule Orb do
           %__MODULE__{global_or_local: :local, identifier: identifier, type: type},
           new_value
         ) do
-      Orb.Instruction.local_set(type, identifier, new_value)
+      Instruction.local_set(type, identifier, new_value)
     end
 
     def as_set(%__MODULE__{global_or_local: :local, identifier: identifier, type: type}) do
-      Orb.Instruction.local_set(type, identifier)
+      Instruction.local_set(type, identifier)
     end
 
     @behaviour Access
