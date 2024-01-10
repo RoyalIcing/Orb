@@ -495,7 +495,7 @@ defmodule Orb do
 
   defmacro __using__(_opts) do
     quote do
-      import Orb
+      import Orb, only: [wasm: 1, wasm: 2, global: 1, global: 2, importw: 2, types: 1]
       import Orb.DefwDSL
       alias Orb.{I32, I64, S32, U32, F32, Memory, Table}
       require Orb.{I32, I64, F32, Table, Memory}

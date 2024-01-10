@@ -50,7 +50,7 @@ defmodule OperatorsTest do
       end
     end
 
-    assert to_wat(D1) == """
+    assert Orb.to_wat(D1) == """
            (module $D1
              (func $add (export "add") (param $a i32)
                (i32.const 3)
@@ -155,7 +155,7 @@ defmodule OperatorsTest do
                (i32.div_u (i32.const 4) (i32.const 2))
              )
            )
-           """ === to_wat(U1)
+           """ === Orb.to_wat(U1)
   end
 
   test "64-bit signed mode" do
@@ -229,7 +229,7 @@ defmodule OperatorsTest do
                (i64.div_s (i64.const 4) (i64.const 2))
              )
            )
-           """ === to_wat(ExampleS64)
+           """ === Orb.to_wat(ExampleS64)
   end
 
   test "float 32-bit mode" do
@@ -275,6 +275,6 @@ defmodule OperatorsTest do
                (f32.const 0.0)
              )
            )
-           """ === to_wat(F1)
+           """ === Orb.to_wat(F1)
   end
 end

@@ -27,7 +27,11 @@ defmodule Examples.Arena do
     start_offset = values_mod.start_offset()
 
     Orb.snippet Orb.S32 do
-      Instruction.global_set(Orb.I32, offset_global_name, start_offset * Orb.Memory.page_byte_size())
+      Instruction.global_set(
+        Orb.I32,
+        offset_global_name,
+        start_offset * Orb.Memory.page_byte_size()
+      )
     end
   end
 
@@ -64,7 +68,7 @@ defmodule Examples.Arena do
 
           alias __MODULE__.Values
 
-          set_func_prefix(inspect(__MODULE__))
+          Orb.set_func_prefix(inspect(__MODULE__))
 
           # https://man7.org/linux/man-pages/man3/alloca.3.html
           defw alloc(byte_count: I32), I32.UnsafePointer, new_ptr: I32.UnsafePointer do
