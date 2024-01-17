@@ -31,10 +31,10 @@ end
 defmodule CalculateMean do
   use Orb
 
-  I32.global(
-    count: 0,
-    tally: 0
-  )
+  global do
+    @count 0
+    @tally 0
+  end
 
   defw insert(element: I32) do
     @count = @count + 1
