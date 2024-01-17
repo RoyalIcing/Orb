@@ -36,8 +36,8 @@ defmodule CalculateMean do
     @count 0
   end
 
-  defw insert(element: I32) do
-    @tally = @tally + element
+  defw insert(n: I32) do
+    @tally = @tally + n
     @count = @count + 1
   end
 
