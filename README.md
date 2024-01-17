@@ -32,13 +32,13 @@ defmodule CalculateMean do
   use Orb
 
   global do
-    @count 0
     @tally 0
+    @count 0
   end
 
   defw insert(element: I32) do
-    @count = @count + 1
     @tally = @tally + element
+    @count = @count + 1
   end
 
   defw calculate_mean(), I32 do
