@@ -46,7 +46,11 @@ defmodule CalculateMean do
     @tally / @count
   end
 end
+```
 
+This can be converted to WebAssembly text format (wat):
+
+```elixir
 Orb.to_wat(CalculateMean)
 # """
 # (module $CalculateMean
@@ -65,7 +69,7 @@ Orb.to_wat(CalculateMean)
 # """
 ```
 
-Run with [OrbWasmtime](https://github.com/RoyalIcing/OrbWasmtime):
+You can then execute it in Elixir with [OrbWasmtime](https://github.com/RoyalIcing/OrbWasmtime):
 
 ```elixir
 alias OrbWasmtime.Instance
@@ -82,7 +86,27 @@ Note there is [another excellent Elixir Wasmtime wrapper out there called Wasmex
 
 ## Composing modules
 
-TODO
+You can compose modules together using `Orb.include/1`:
+
+```elixir
+defmodule Math do
+  use Orb
+
+  defw square(n: I32), I32 do
+    n * n
+  end
+end
+
+defmodule SomeOtherModule do
+  use Orb
+
+  Orb.include(Math)
+
+  defw magic(), I32 do
+    Math.square(3)
+  end
+end
+```
 
 ## Macros
 
