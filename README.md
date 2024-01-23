@@ -8,7 +8,8 @@ Write WebAssembly with the power of Elixir as your compiler:
 
 - Use Elixir’s **module system** to break problems down and then compose them together.
 - Chain function calls together with the **pipe `|>` operator**.
-- Publish reusable code with the **Hex package manager**.
+- Publish reusable code with the [**Hex package manager**](https://hex.pm).
+- Write unit tests using [Elixir’s built-in **ExUnit**](https://hexdocs.pm/ex_unit/ExUnit.html).
 - Reduce boilerplate with Elixir’s **powerful macro system**.
 - **Run dynamic Elixir code at compile time** e.g. talk to the rest of your Elixir application, or make network requests.
 - **Compile modules on-the-fly** e.g. use feature flags to conditionally compile code paths or enable particular WebAssembly instructions, creating a custom “tree shaken” WebAssembly module per user.
