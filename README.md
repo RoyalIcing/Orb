@@ -80,6 +80,14 @@ assert Instance.call(inst, :calculate_mean) == 5
 
 Note there is [another excellent Elixir Wasmtime wrapper out there called Wasmex](https://github.com/tessi/wasmex), you may want to check that out too.
 
+## Composing modules
+
+TODO
+
+## Macros
+
+TODO
+
 ## Use cases
 
 - Parsers

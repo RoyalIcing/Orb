@@ -145,27 +145,31 @@ defmodule Orb do
   Globals by default are internal: nothing outside the module can see them. They can be exported to expose them to the outside world.
 
   ```elixir
-  global do # :mutable by default
-    @some_internal_global 99
-  end
+  defmodule GlobalExample do
+    use Orb
 
-  global :readonly do
-    @some_internal_constant 99
-  end
+    global do # :mutable by default
+      @some_internal_global 99
+    end
 
-  global :export_readonly do
-    @some_public_constant 1001
-  end
+    global :readonly do
+      @some_internal_constant 99
+    end
 
-  global :export_mutable do
-    @some_public_variable 42
-  end
+    global :export_readonly do
+      @some_public_constant 1001
+    end
 
-  # You can define multiple globals at once:
-  global do
-    @magic_number_a 99
-    @magic_number_b 12
-    @magic_number_c -5
+    global :export_mutable do
+      @some_public_variable 42
+    end
+
+    # You can define multiple globals at once:
+    global do
+      @magic_number_a 99
+      @magic_number_b 12
+      @magic_number_c -5
+    end
   end
   ```
 
@@ -811,7 +815,29 @@ defmodule Orb do
   end
 
   @doc """
-  Copy WebAssembly functions from another module.
+  Copy WebAssembly functions from one module into the current module.
+
+  ## Examples
+
+  ```elixir
+  defmodule Math do
+    use Orb
+
+    defw square(n: I32), I32 do
+      n * n
+    end
+  end
+
+  defmodule SomeOtherModule do
+    use Orb
+
+    Orb.include(Math)
+
+    defw magic(), I32 do
+      Math.square(3)
+    end
+  end
+  ```
   """
   defmacro include(mod) do
     quote do
@@ -831,6 +857,37 @@ defmodule Orb do
   Declare WebAssembly globals.
 
   `mode` can be :readonly, :mutable, :export_readonly, or :export_mutable. The default is :mutable.
+
+  ## Examples
+
+  ```elixir
+  defmodule GlobalExample do
+    use Orb
+
+    global do # :mutable by default
+      @some_internal_global 99
+    end
+
+    global :readonly do
+      @some_internal_constant 99
+    end
+
+    global :export_readonly do
+      @some_public_constant 1001
+    end
+
+    global :export_mutable do
+      @some_public_variable 42
+    end
+
+    # You can define multiple globals at once:
+    global do
+      @magic_number_a 99
+      @magic_number_b 12
+      @magic_number_c -5
+    end
+  end
+  ```
   """
   defmacro global(mode \\ :mutable, do: block) do
     quote generated: true do
