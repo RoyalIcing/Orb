@@ -1,23 +1,26 @@
 # Orb
 
+## Write once, install everywhere you are
+## Write once, add everywhere
+## Write once, deploy everywhere
 ## Elixir at compile time, WebAssembly at runtime
 
-Orb is a fresh way to write WebAssembly. Instead of choosing an existing language, and having it spit out WebAssembly, Orb starts with WebAssembly and asks "how can we make it more convenient to write".
+Orb is a fresh way to write WebAssembly. Instead of choosing an existing language like C and having it contort itself into WebAssembly, Orb starts with the raw ingredients of WebAssembly and asks "how can we make it way more convenient to write".
 
 It does this by leaning on Elixir's existing ecosystem:
 
-- Composable module system
-- Powerful macros
-- Hex package manager
+- Elixir’s composable module system
+- Elixir’s powerful macros
+- Elixir’s Hex package manager
 - ExUnit testing library
 - Extensive ecosystem of libraries that can be run at compile time
-- Integration with IDEs like Visual Studio Code and Zed
+- Language servers in IDEs like Visual Studio Code and Zed
 
 ## Platform agnostic
 
-Orb is also unlike other WebAssembly libraries in that it's not trying to take an existing model like Lambda and make it WebAssembly flavoured.
+Orb is unlike other WebAssembly systems in that it's not trying to take an existing model like Lambda and make it WebAssembly flavoured.
 
-The strength of WebAssembly is that it can run anywhere, including most importantly on users’ devices in their browsers.
+The strength of WebAssembly is that it can run anywhere, including essentially on users’ devices in their browsers.
 
 Orb aims to let you target wherever WebAssembly can run:
 
@@ -26,9 +29,9 @@ Orb aims to let you target wherever WebAssembly can run:
 - Mobile
 - Desktop
 
-So Orb doesn't generate boilerplate JavaScript code or bindings to a hosted service.
+So Orb doesn't generate boilerplate JavaScript bindings or plug into a hosted service.
 
-Instead it uses light weight conventions that can integrate into any platform.
+Instead it uses lightweight conventions that let it integrate into any platform.
 
-That way you can write once, and install anywhere.
+That way you can write once, and deploy anywhere.
 
