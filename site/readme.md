@@ -10,6 +10,7 @@ It does this by leaning on Elixir's existing ecosystem:
 - Powerful macros
 - Hex package manager
 - ExUnit testing library
+- Extensive ecosystem of libraries that can be run at compile time
 - Integration with IDEs like Visual Studio Code and Zed
 
 ## Platform agnostic
