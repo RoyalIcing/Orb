@@ -2,6 +2,7 @@
 
 ## Write once, install everywhere you are
 ## Write once, add everywhere
+## Write once, sprinkle everywhere
 ## Write once, deploy everywhere
 ## Elixir at compile time, WebAssembly at runtime
 
