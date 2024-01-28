@@ -847,6 +847,9 @@ defmodule Orb do
     end
   end
 
+  @doc """
+  Adds a prefix to all functions within this module. This namespacing helps avoid names from clashing.
+  """
   defmacro set_func_prefix(func_prefix) do
     quote do
       @wasm_func_prefix unquote(func_prefix)
@@ -944,18 +947,6 @@ defmodule Orb do
     quote do
       @wasm_imports (for imp <- unquote(mod).__wasm_imports__(nil) do
                        %{imp | module: unquote(namespace)}
-                     end)
-    end
-  end
-
-  @doc """
-  Declare a WebAssembly import for a function or global.
-  """
-  @deprecated "Use importw/2 instead"
-  defmacro wasm_import(mod, entries) when is_atom(mod) and is_list(entries) do
-    quote do
-      @wasm_imports (for {name, type} <- unquote(entries) do
-                       %Orb.Import{module: unquote(mod), name: name, type: type}
                      end)
     end
   end
