@@ -54,7 +54,7 @@ defmodule Orb do
     end
 
     defw calculate_mean(), I32 do
-      I32.div_u(global_get(:tally), global_get(:count))
+      I32.div_s(global_get(:tally), global_get(:count))
     end
   end
   ```
