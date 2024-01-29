@@ -7,46 +7,44 @@ defmodule OperatorsTest do
     defmodule D1 do
       use Orb
 
-      wasm do
-        func add(a: I32) do
-          1 + 2
-          :drop
+      defw add(a: I32) do
+        1 + 2
+        :drop
 
-          a + 2
-          :drop
-        end
+        a + 2
+        :drop
+      end
 
-        func multiply(a: I32, b: I32) do
-          a * b
-          :drop
+      defw multiply(a: I32, b: I32) do
+        a * b
+        :drop
 
-          2 * a
-          :drop
+        2 * a
+        :drop
 
-          1 * a
-          :drop
+        1 * a
+        :drop
 
-          b * 1
-          :drop
+        b * 1
+        :drop
 
-          0 * a
-          :drop
+        0 * a
+        :drop
 
-          b * 0
-          :drop
+        b * 0
+        :drop
 
-          2 * 3
-          :drop
-        end
+        2 * 3
+        :drop
+      end
 
-        func divide(), I32 do
-          4 / 2
-        end
+      defw divide(), I32 do
+        4 / 2
+      end
 
-        func swap(a: I32, b: I32), {I32, I32} do
-          b
-          a
-        end
+      defw swap(a: I32, b: I32), {I32, I32} do
+        b
+        a
       end
     end
 
@@ -89,41 +87,41 @@ defmodule OperatorsTest do
     defmodule U1 do
       use Orb
 
-      wasm U32 do
-        func add(a: I32) do
-          1 + 2
-          :drop
+      wasm_mode(U32)
 
-          a + 2
-          :drop
-        end
+      defw add(a: I32) do
+        1 + 2
+        :drop
 
-        func multiply(a: I32, b: I32) do
-          a * b
-          :drop
+        a + 2
+        :drop
+      end
 
-          2 * a
-          :drop
+      defw multiply(a: I32, b: I32) do
+        a * b
+        :drop
 
-          1 * a
-          :drop
+        2 * a
+        :drop
 
-          b * 1
-          :drop
+        1 * a
+        :drop
 
-          0 * a
-          :drop
+        b * 1
+        :drop
 
-          b * 0
-          :drop
+        0 * a
+        :drop
 
-          2 * 3
-          :drop
-        end
+        b * 0
+        :drop
 
-        func divide(), I32 do
-          4 / 2
-        end
+        2 * 3
+        :drop
+      end
+
+      defw divide(), I32 do
+        4 / 2
       end
     end
 
@@ -236,25 +234,25 @@ defmodule OperatorsTest do
     defmodule F1 do
       use Orb
 
-      wasm F32 do
-        func add(), F32 do
-          1.0 + 2.0
-        end
+      wasm_mode(F32)
 
-        func multiply(a: F32, b: F32), F32 do
-          a * b
-        end
+      defw add(), F32 do
+        1.0 + 2.0
+      end
 
-        func divide(), F32 do
-          # f32 do: 4.0 / 2.0
-          4.0 / 2.0
-        end
+      defw multiply(a: F32, b: F32), F32 do
+        a * b
+      end
 
-        func lab_to_xyz(l: F32, a: F32, b: F32), {F32, F32, F32} do
-          0.0
-          push(0.0)
-          0.0
-        end
+      defw divide(), F32 do
+        # f32 do: 4.0 / 2.0
+        4.0 / 2.0
+      end
+
+      defw lab_to_xyz(l: F32, a: F32, b: F32), {F32, F32, F32} do
+        0.0
+        push(0.0)
+        0.0
       end
     end
 

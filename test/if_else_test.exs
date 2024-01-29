@@ -265,9 +265,12 @@ defmodule IfElseTest do
     end
 
     alias OrbWasmtime.Instance
-    inst = Instance.run(URLSearchParams2, [
-      {:log, :found_alphanumeric, fn -> nil end}
-    ])
+
+    inst =
+      Instance.run(URLSearchParams2, [
+        {:log, :found_alphanumeric, fn -> nil end}
+      ])
+
     count = Instance.capture(inst, :url_search_params_count, 1)
 
     Instance.write_string_nul_terminated(inst, 0x00100, "")

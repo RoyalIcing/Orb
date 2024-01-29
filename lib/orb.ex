@@ -261,14 +261,12 @@ defmodule Orb do
 
     Memory.pages(1)
 
-    wasm do
-      Memory.initial_data(offset: 0x100, string: "text/html")
-      Memory.initial_data(offset: 0x200, string: \"""
-        <!doctype html>
-        <meta charset=utf-8>
-        <h1>Hello world</h1>
-        \""")
-    end
+    Memory.initial_data!(0x100, "text/html")
+    Memory.initial_data!(0x200, \"""
+      <!doctype html>
+      <meta charset=utf-8>
+      <h1>Hello world</h1>
+      \""")
 
     defw get_mime_type(), I32 do
       0x100

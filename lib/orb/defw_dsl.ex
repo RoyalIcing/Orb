@@ -75,6 +75,7 @@ defmodule Orb.DefwDSL do
     quote do
       unquote(ex_def)
 
+      # TODO: remove wasm do
       Orb.wasm do
         unquote(wasm)
       end

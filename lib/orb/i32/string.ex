@@ -38,59 +38,57 @@ defmodule Orb.I32.String do
 
   # TODO: remove all of these funcs. It will live in SilverOrb instead.
   # Plus strings will likely become a Memory.Range instead, so we know the length statically.
-  wasm do
-    func streq(address_a: I32, address_b: I32),
-         I32,
-         i: I32,
-         byte_a: I32,
-         byte_b: I32 do
-      loop EachByte, result: I32 do
-        byte_a = Memory.load!(I32.U8, I32.add(address_a, i))
-        byte_b = Memory.load!(I32.U8, I32.add(address_b, i))
+  defw streq(address_a: I32, address_b: I32),
+       I32,
+       i: I32,
+       byte_a: I32,
+       byte_b: I32 do
+    loop EachByte, result: I32 do
+      byte_a = Memory.load!(I32.U8, I32.add(address_a, i))
+      byte_b = Memory.load!(I32.U8, I32.add(address_b, i))
 
-        # I32.match byte_a do
-        #   0 ->
-        #     return(byte_b === 0)
+      # I32.match byte_a do
+      #   0 ->
+      #     return(byte_b === 0)
 
-        #   byte_b ->
-        #     i = i + 1
-        #     EachByte.continue()
+      #   byte_b ->
+      #     i = i + 1
+      #     EachByte.continue()
 
-        #   _ ->
-        #     return(0x0)
-        # end
+      #   _ ->
+      #     return(0x0)
+      # end
 
-        if I32.eqz(byte_a) do
-          return(I32.eqz(byte_b))
-        end
+      if I32.eqz(byte_a) do
+        return(I32.eqz(byte_b))
+      end
 
-        if I32.eq(byte_a, byte_b) do
-          i = I32.add(i, 1)
-          EachByte.continue()
-        end
+      if I32.eq(byte_a, byte_b) do
+        i = I32.add(i, 1)
+        EachByte.continue()
+      end
 
-        return(0x0)
+      return(0x0)
+    end
+  end
+
+  defw strlen(string_ptr: I32.String), I32, count: I32 do
+    # while (string_ptr[count] != 0) {
+    #   count++;
+    # }
+
+    # loop EachChar, while: memory32_8![count] do
+
+    loop EachChar do
+      if Memory.load!(I32.U8, I32.add(string_ptr, count)) do
+        # FIXME: remove memory32_8!
+        # if Memory.load!(I32.U8, I32.add(string_ptr, count)) do
+        count = I32.add(count, 1)
+        EachChar.continue()
       end
     end
 
-    func strlen(string_ptr: I32.String), I32, count: I32 do
-      # while (string_ptr[count] != 0) {
-      #   count++;
-      # }
-
-      # loop EachChar, while: memory32_8![count] do
-
-      loop EachChar do
-        if Memory.load!(I32.U8, I32.add(string_ptr, count)) do
-          # FIXME: remove memory32_8!
-          # if Memory.load!(I32.U8, I32.add(string_ptr, count)) do
-          count = I32.add(count, 1)
-          EachChar.continue()
-        end
-      end
-
-      count
-    end
+    count
   end
 
   defmacro __using__(_opts) do
@@ -99,12 +97,7 @@ defmodule Orb.I32.String do
 
       import Orb
 
-      # unquote(__MODULE__).include()
-      Orb.wasm do
-        unquote(__MODULE__).funcp()
-        # unquote(__MODULE__).funcp(:streq)
-        # unquote(__MODULE__).funcp(:strlen)
-      end
+      Orb.include(unquote(__MODULE__))
     end
   end
 

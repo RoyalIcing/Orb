@@ -35,11 +35,11 @@ defmodule MemoryRangeTest do
       b = 2
       c = Memory.Range.from(a, b)
 
-      assert! c === i64(0x0000000F00000002)
+      assert!(c === i64(0x0000000F00000002))
       a = Memory.Range.get_byte_offset(c)
-      assert! a === i32(0x0F)
+      assert!(a === i32(0x0F))
       b = Memory.Range.get_byte_length(c)
-      assert! b === i32(2)
+      assert!(b === i32(2))
 
       c
       Memory.Range.get_byte_offset(c)

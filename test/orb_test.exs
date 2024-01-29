@@ -213,15 +213,13 @@ defmodule OrbTest do
 
         Memory.pages(1)
 
-        wasm do
-          func get_int32(), I32 do
+          defw get_int32(), I32 do
             Memory.load!(I32, 0x100)
           end
 
-          func set_int32(value: I32) do
+          defw set_int32(value: I32) do
             Memory.store!(I32, 0x100, value)
           end
-        end
       end
 
       assert to_wat(MemoryLoadStore) == """
@@ -302,50 +300,17 @@ defmodule OrbTest do
       defmodule HTMLTypes do
         use Orb
 
-        wasm do
-          func doctype(), I32 do
-            "<!doctype html>"
-          end
+        defw doctype(), I32 do
+          "<!doctype html>"
+        end
 
-          func mime_type(), I32 do
-            "text/html"
-          end
+        defw mime_type(), I32 do
+          "text/html"
         end
       end
 
       assert to_wat(HTMLTypes) == """
              (module $HTMLTypes
-               (data (i32.const 255) "<!doctype html>")
-               (data (i32.const 271) "text/html")
-               (func $doctype (export "doctype") (result i32)
-                 (i32.const 255)
-               )
-               (func $mime_type (export "mime_type") (result i32)
-                 (i32.const 271)
-               )
-             )
-             """
-    end
-
-    test "works with multiple wasm blocks" do
-      defmodule HTMLTypes2 do
-        use Orb
-
-        wasm do
-          func doctype(), I32 do
-            ~S"<!doctype html>"
-          end
-        end
-
-        wasm do
-          func mime_type(), I32 do
-            ~S"text/html"
-          end
-        end
-      end
-
-      assert to_wat(HTMLTypes2) == """
-             (module $HTMLTypes2
                (data (i32.const 255) "<!doctype html>")
                (data (i32.const 271) "text/html")
                (func $doctype (export "doctype") (result i32)
@@ -828,10 +793,8 @@ defmodule OrbTest do
 
       Memory.pages(1)
 
-      wasm do
-        func answer(), I32 do
-          SnippetDefiner.hd!(0x100)
-        end
+      defw answer(), I32 do
+        SnippetDefiner.hd!(0x100)
       end
     end
 
