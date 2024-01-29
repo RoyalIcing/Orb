@@ -425,52 +425,6 @@ defmodule OrbTest do
     assert to_wat(SingleFunc) == wasm_source
   end
 
-  defmodule ManyFuncs do
-    use Orb
-
-    wasm do
-      func answer(), I32 do
-        I32.mul(2, 21)
-      end
-
-      func get_pi(), :f32 do
-        3.14
-      end
-      |> export("get_pi_a")
-
-      funcp internal(), :f32 do
-        99.0
-      end
-
-      funcp secret(), :f32 do
-        42.0
-      end
-      |> export("exposed_secret")
-      |> export("tell_everyone")
-    end
-  end
-
-  test "to_wat/1 wasm many funcs" do
-    wasm_source = """
-    (module $ManyFuncs
-      (func $answer (export "answer") (result i32)
-        (i32.mul (i32.const 2) (i32.const 21))
-      )
-      (func $get_pi (export "get_pi") (export "get_pi_a") (result f32)
-        (f32.const 3.14)
-      )
-      (func $internal (result f32)
-        (f32.const 99.0)
-      )
-      (func $secret (export "exposed_secret") (export "tell_everyone") (result f32)
-        (f32.const 42.0)
-      )
-    )
-    """
-
-    assert to_wat(ManyFuncs) == wasm_source
-  end
-
   defmodule CallSiblingFunc do
     use Orb
 
@@ -904,7 +858,7 @@ defmodule OrbTest do
     #   f32 t(0.0)
     # end
 
-    wasm do
+    Orb.__append_body do
       func good_answer(), I32 do
         42
       end

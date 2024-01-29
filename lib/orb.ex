@@ -725,7 +725,7 @@ defmodule Orb do
   @doc """
   Enter WebAssembly.
   """
-  defmacro wasm(mode \\ nil, do: block) do
+  defmacro __append_body(mode \\ nil, do: block) do
     mode = mode || Module.get_attribute(__CALLER__.module, :wasm_mode, Orb.S32)
     mode = Macro.expand_literals(mode, __CALLER__)
     pre = __mode_pre(mode)
@@ -841,7 +841,7 @@ defmodule Orb do
   """
   defmacro include(mod) do
     quote do
-      wasm do
+      Orb.__append_body do
         Orb.ModuleDefinition.funcp_ref_all!(unquote(mod))
       end
     end

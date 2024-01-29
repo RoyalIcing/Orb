@@ -64,11 +64,9 @@ defmodule I32StringTest do
 
     Memory.pages(1)
 
-    wasm do
-      func read_first_char(str_ptr: I32.String), I32, char: I32.U8 do
-        char = str_ptr[at!: 0]
-        char
-      end
+    defw read_first_char(str_ptr: I32.String), I32, char: I32.U8 do
+      char = str_ptr[at!: 0]
+      char
     end
   end
 

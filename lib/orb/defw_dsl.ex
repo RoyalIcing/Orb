@@ -52,7 +52,7 @@ defmodule Orb.DefwDSL do
       unquote(ex_def)
 
       # TODO: remove wasm do
-      Orb.wasm do
+      Orb.__append_body do
         unquote(wasm)
       end
     end
