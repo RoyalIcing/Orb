@@ -63,9 +63,9 @@ defmodule Orb do
 
   ## Functions
 
-  In Elixir you define functions publicly available outside the module with `def/1`, and functions private to the module with `defp/1`. Orb follows the same suffix convention with `func/2` and `funcp/2`.
+  In Elixir you define functions publicly available outside the module with `def/1`, and functions private to the module with `defp/1`. Orb follows the same suffix convention with `defw/2` and `defwp/2`.
 
-  Consumers of your WebAssembly module will only be able to call exported functions defined using `func/2`. Making a function public in WebAssembly is known as “exporting”.
+  Consumers of your WebAssembly module will only be able to call exported functions defined using `defw/2`. Making a function public in WebAssembly is known as “exporting”.
 
   ## Stack based
 
