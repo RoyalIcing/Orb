@@ -516,6 +516,7 @@ defmodule Orb do
 
       Module.register_attribute(__MODULE__, :wasm_func_prefix, accumulate: false)
       Module.register_attribute(__MODULE__, :wasm_memory, accumulate: true)
+      Module.register_attribute(__MODULE__, :wasm_section_data, accumulate: true)
 
       Module.register_attribute(__MODULE__, :wasm_globals, accumulate: true)
 
@@ -620,7 +621,8 @@ defmodule Orb do
             globals: global_definitions,
             memory: Memory.from(@wasm_memory),
             constants: constants,
-            body: body
+            body: body,
+            data: @wasm_section_data |> Enum.reverse()
           )
         end
 

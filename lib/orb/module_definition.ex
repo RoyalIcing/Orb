@@ -8,7 +8,8 @@ defmodule Orb.ModuleDefinition do
             globals: [],
             memory: nil,
             constants: %Orb.Constants{},
-            body: []
+            body: [],
+            data: []
 
   @doc false
   def expand_body_func_refs(body) do
@@ -135,7 +136,8 @@ defmodule Orb.ModuleDefinition do
             globals: globals,
             memory: memory,
             constants: constants,
-            body: body
+            body: body,
+            data: data
           },
           indent
         ) do
@@ -160,6 +162,9 @@ defmodule Orb.ModuleDefinition do
           Orb.ToWat.to_wat(global, next_indent)
         end,
         Orb.ToWat.to_wat(constants, next_indent),
+        for data_item = %Orb.Data{} <- data do
+          Orb.ToWat.to_wat(data_item, next_indent)
+        end,
         for statement <- List.flatten(body) do
           Orb.ToWat.to_wat(statement, next_indent)
         end,
