@@ -172,4 +172,47 @@ defmodule Orb.ModuleDefinition do
       ]
     end
   end
+
+  defimpl Orb.ToWasm do
+    def to_wasm(
+          %Orb.ModuleDefinition{
+            name: name,
+            types: types,
+            table_size: table_size,
+            imports: imports,
+            globals: globals,
+            memory: memory,
+            constants: constants,
+            body: body,
+            data: data
+          },
+          _
+        ) do
+      [
+        <<"\0asm", 0x01000000::32>>,
+        section(:type, <<0x01, 0x60, 0x00, 0x01, 0x7F>>),
+        section(:function, <<0x01, 0x00>>),
+        section(:export, <<0x01, 0x06, 0x61, 0x6E, 0x73, 0x77, 0x65, 0x72, 0x00, 0x00>>),
+        section(:code, <<0x01, 0x04, 0x00, 0x41, 0x2A, 0x0B>>)
+      ]
+    end
+
+    defp section(:custom, bytes), do: section(0x00, bytes)
+    defp section(:type, bytes), do: section(0x01, bytes)
+    defp section(:import, bytes), do: section(0x02, bytes)
+    defp section(:function, bytes), do: section(0x03, bytes)
+    defp section(:table, bytes), do: section(0x04, bytes)
+    defp section(:memory, bytes), do: section(0x05, bytes)
+    defp section(:global, bytes), do: section(0x06, bytes)
+    defp section(:export, bytes), do: section(0x07, bytes)
+    defp section(:start, bytes), do: section(0x08, bytes)
+    defp section(:element, bytes), do: section(0x09, bytes)
+    defp section(:code, bytes), do: section(0x0A, bytes)
+    defp section(:data, bytes), do: section(0x0B, bytes)
+    defp section(:data_count, bytes), do: section(0x0C, bytes)
+
+    defp section(id, bytes) do
+      <<id, byte_size(bytes)>> <> bytes
+    end
+  end
 end

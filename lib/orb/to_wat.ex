@@ -1,5 +1,5 @@
 defprotocol Orb.ToWat do
-  @doc "Protocol for converting to WebAssembly text format (Wat)"
+  @doc "Protocol for converting to WebAssembly text format (.wat)"
   def to_wat(data, indent)
 end
 
@@ -14,6 +14,7 @@ end
 
 defmodule Orb.ToWat.Helpers do
   alias Orb.CustomType
+
   def do_type(type) do
     case type do
       :i64 ->
