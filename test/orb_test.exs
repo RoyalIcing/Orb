@@ -213,13 +213,13 @@ defmodule OrbTest do
 
         Memory.pages(1)
 
-          defw get_int32(), I32 do
-            Memory.load!(I32, 0x100)
-          end
+        defw get_int32(), I32 do
+          Memory.load!(I32, 0x100)
+        end
 
-          defw set_int32(value: I32) do
-            Memory.store!(I32, 0x100, value)
-          end
+        defw set_int32(value: I32) do
+          Memory.store!(I32, 0x100, value)
+        end
       end
 
       assert to_wat(MemoryLoadStore) == """

@@ -99,7 +99,7 @@ defmodule Examples.MemoryTest do
 
     test "wasm size" do
       wasm = Wasm.to_wasm(LinkedLists)
-      assert byte_size(wasm) == 326
+      assert byte_size(wasm) == 347
     end
 
     test "multiple allocations" do

@@ -115,20 +115,14 @@ defmodule Examples.Memory do
             @wasm_use_bump_allocator true
         end
 
-        Orb.wasm do
-          unquote(__MODULE__).funcp(:bump_alloc)
-        end
-
+        Orb.include(unquote(__MODULE__))
         import unquote(__MODULE__)
       end
     end
 
     defmacro export_alloc() do
       quote do
-        Orb.wasm do
-          unquote(__MODULE__)._func(:alloc)
-          unquote(__MODULE__)._func(:free_all)
-        end
+        Orb.include(unquote(__MODULE__))
       end
     end
 
@@ -139,27 +133,25 @@ defmodule Examples.Memory do
       bump_mark: 0
     )
 
-    wasm do
-      funcp bump_alloc(size: I32), I32, [] do
-        # TODO: check if we have allocated too much
-        # and if so, either err or increase the available memory.
-        # TODO: Need better maths than this to round up to aligned memory?
+    defwp bump_alloc(size: I32), I32, [] do
+      # TODO: check if we have allocated too much
+      # and if so, either err or increase the available memory.
+      # TODO: Need better maths than this to round up to aligned memory?
 
-        push(@bump_offset) do
-          @bump_offset = I32.add(@bump_offset, size)
-        end
-
-        # Better syntax?
-        # pop(push: @bump_offset) do
-        #   @bump_offset = I32.add(@bump_offset, size)
-        # end
+      push(@bump_offset) do
+        @bump_offset = I32.add(@bump_offset, size)
       end
 
-      func(alloc(size: I32), I32, do: typed_call(I32, :bump_alloc, [size]))
+      # Better syntax?
+      # pop(push: @bump_offset) do
+      #   @bump_offset = I32.add(@bump_offset, size)
+      # end
+    end
 
-      func free_all() do
-        @bump_offset = Constants.bump_init_offset()
-      end
+    defw(alloc(size: I32), I32, do: typed_call(I32, :bump_alloc, [size]))
+
+    defw free_all() do
+      @bump_offset = Constants.bump_init_offset()
     end
 
     # def alloc(byte_count) do
@@ -191,95 +183,93 @@ defmodule Examples.Memory do
     # increase_memory pages: 2
     # @wasm_memory 2
 
-    wasm do
-      func cons(hd: I32.UnsafePointer, tl: I32.UnsafePointer), I32.UnsafePointer,
-        ptr: I32.UnsafePointer do
-        ptr = typed_call(I32.UnsafePointer, :bump_alloc, [8])
-        ptr[at!: 0] = hd
-        ptr[at!: 1] = tl
-        ptr
+    defw cons(hd: I32.UnsafePointer, tl: I32.UnsafePointer), I32.UnsafePointer,
+      ptr: I32.UnsafePointer do
+      ptr = typed_call(I32.UnsafePointer, :bump_alloc, [8])
+      ptr[at!: 0] = hd
+      ptr[at!: 1] = tl
+      ptr
+    end
+
+    defw hd(ptr: I32.UnsafePointer), I32.UnsafePointer do
+      # Zig: https://godbolt.org/z/bG5zj6bzx
+      # ptr[at: 0, fallback: 0x0]
+      # ptr |> I32.eqz?(do: 0x0, else: ptr[at!: 0])
+      I32.eqz(ptr) |> I32.when?(do: 0x0, else: ptr[at!: 0])
+      # ptr &&& ptr[at!: 0]
+      # ptr[at!: 0]
+    end
+
+    defw tl(ptr: I32.UnsafePointer), I32.UnsafePointer do
+      # ptr.unwrap[at!: 1]
+      # ptr |> I32.eqz?(do: :unreachable, else: ptr[at!: 1])
+      I32.eqz(ptr) |> I32.when?(do: 0x0, else: ptr[at!: 1])
+      # ptr[at!: 1]
+    end
+
+    defw reverse_in_place(node: I32.UnsafePointer), I32.UnsafePointer,
+      prev: I32.UnsafePointer,
+      current: I32.UnsafePointer,
+      next: I32.UnsafePointer do
+      current = node
+
+      # loop current, result: I32 do
+      #   0 ->
+      #     {:halt, prev}
+      #
+      #   current ->
+      #     next = current[at!: 1]
+      #     current[at!: 1] = prev
+      #     prev = current
+      #     {:cont, next}
+      # end
+
+      loop Iterate, result: I32 do
+        # return(prev, if: I32.eqz(current))
+        if I32.eqz(current), do: return(prev)
+
+        next = current[at!: 1]
+        current[at!: 1] = prev
+        prev = current
+        current = next
+        Iterate.continue()
       end
+    end
 
-      func hd(ptr: I32.UnsafePointer), I32.UnsafePointer do
-        # Zig: https://godbolt.org/z/bG5zj6bzx
-        # ptr[at: 0, fallback: 0x0]
-        # ptr |> I32.eqz?(do: 0x0, else: ptr[at!: 0])
-        I32.eqz(ptr) |> I32.when?(do: 0x0, else: ptr[at!: 0])
-        # ptr &&& ptr[at!: 0]
-        # ptr[at!: 0]
-      end
-
-      func tl(ptr: I32.UnsafePointer), I32.UnsafePointer do
-        # ptr.unwrap[at!: 1]
-        # ptr |> I32.eqz?(do: :unreachable, else: ptr[at!: 1])
-        I32.eqz(ptr) |> I32.when?(do: 0x0, else: ptr[at!: 1])
-        # ptr[at!: 1]
-      end
-
-      func reverse_in_place(node: I32.UnsafePointer), I32.UnsafePointer,
-        prev: I32.UnsafePointer,
-        current: I32.UnsafePointer,
-        next: I32.UnsafePointer do
-        current = node
-
-        # loop current, result: I32 do
-        #   0 ->
-        #     {:halt, prev}
+    defw list_count(ptr: I32.UnsafePointer), I32, count: I32 do
+      loop Iterate, result: I32 do
+        #           I32.match ptr do
+        #             0 ->
+        #               return(count)
         #
-        #   current ->
-        #     next = current[at!: 1]
-        #     current[at!: 1] = prev
-        #     prev = current
-        #     {:cont, next}
-        # end
+        #             _ ->
+        #               ptr = call(:tl, ptr)
+        #               count = I32.add(count, 1)
+        #               Iterate.continue()
+        #           end
 
-        loop Iterate, result: I32 do
-          # return(prev, if: I32.eqz(current))
-          if I32.eqz(current), do: return(prev)
+        if I32.eqz(ptr), do: return(count)
+        # if I32.eqz(ptr), return: count
+        # return(count, if: I32.eqz(ptr))
+        # guard ptr, else_return: count
+        # I32.unless ptr, return: count
+        # I32.when? ptr, else_return: count
+        # I32.when? ptr, else: return(count)
 
-          next = current[at!: 1]
-          current[at!: 1] = prev
-          prev = current
-          current = next
-          Iterate.continue()
-        end
+        ptr = typed_call(I32.UnsafePointer, :tl, [ptr])
+        count = count + 1
+        Iterate.continue()
       end
+    end
 
-      func list_count(ptr: I32.UnsafePointer), I32, count: I32 do
-        loop Iterate, result: I32 do
-          #           I32.match ptr do
-          #             0 ->
-          #               return(count)
-          #
-          #             _ ->
-          #               ptr = call(:tl, ptr)
-          #               count = I32.add(count, 1)
-          #               Iterate.continue()
-          #           end
+    defw list32_sum(ptr: I32), I32, sum: I32 do
+      loop Iterate, result: I32 do
+        if I32.eqz(ptr), do: return(sum)
 
-          if I32.eqz(ptr), do: return(count)
-          # if I32.eqz(ptr), return: count
-          # return(count, if: I32.eqz(ptr))
-          # guard ptr, else_return: count
-          # I32.unless ptr, return: count
-          # I32.when? ptr, else_return: count
-          # I32.when? ptr, else: return(count)
+        sum = sum + typed_call(I32.UnsafePointer, :hd, [ptr])
+        ptr = typed_call(I32.UnsafePointer, :tl, [ptr])
 
-          ptr = typed_call(I32.UnsafePointer, :tl, [ptr])
-          count = count + 1
-          Iterate.continue()
-        end
-      end
-
-      func list32_sum(ptr: I32), I32, sum: I32 do
-        loop Iterate, result: I32 do
-          if I32.eqz(ptr), do: return(sum)
-
-          sum = sum + typed_call(I32.UnsafePointer, :hd, [ptr])
-          ptr = typed_call(I32.UnsafePointer, :tl, [ptr])
-
-          Iterate.continue()
-        end
+        Iterate.continue()
       end
     end
 
