@@ -877,9 +877,17 @@ defmodule OrbTest do
       # use Orb.Type, :answer, %Orb.Func.Type{result: I32}
       # use Orb.TableEntries, result: I32
 
-      def type_name, do: :answer
+      @behaviour Orb.CustomType
+      @behaviour Orb.Table.Type
+
+      @impl Orb.CustomType
       def wasm_type, do: %Orb.Func.Type{result: I32}
-      def table_func_keys(), do: [:good, :bad]
+
+      @impl Orb.Table.Type
+      def type_name, do: :answer
+
+      @impl Orb.Table.Type
+      def table_func_keys, do: [:good, :bad]
 
       def call(elem_index) do
         Table.call_indirect(type_name(), elem_index)

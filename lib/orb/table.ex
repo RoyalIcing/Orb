@@ -1,4 +1,9 @@
 defmodule Orb.Table do
+  defmodule Type do
+    @callback type_name() :: atom()
+    @callback table_func_keys() :: list(atom())
+  end
+
   defmacro allocate(entries) do
     quote do
       @wasm_table_allocations unquote(__MODULE__).__do_allocate(unquote(entries))
