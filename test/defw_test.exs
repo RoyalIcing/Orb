@@ -90,36 +90,26 @@ defmodule DefwTest do
       :drop
     end
 
-    defwi second() do
-      2
-      :drop
-    end
-
-    defwp third() do
+    defwp second() do
       3
       :drop
     end
   end
 
-  test "defwi does not export from wasm but makes a public Elixir function" do
+  test "function visiblity" do
     assert Visibilities.to_wat() =~ """
              (func $first (export "first")
                (i32.const 1)
                drop
              )
              (func $second
-               (i32.const 2)
-               drop
-             )
-             (func $third
                (i32.const 3)
                drop
              )
            """
 
     assert {:first, 0} in Visibilities.__info__(:functions)
-    assert {:second, 0} in Visibilities.__info__(:functions)
-    refute {:third, 0} in Visibilities.__info__(:functions)
+    refute {:second, 0} in Visibilities.__info__(:functions)
 
     assert Visibilities.first() == %Orb.Instruction{
              type: :unknown_effect,
@@ -127,13 +117,7 @@ defmodule DefwTest do
              operands: []
            }
 
-    assert Visibilities.second() == %Orb.Instruction{
-             type: :unknown_effect,
-             operation: {:call, [], :second},
-             operands: []
-           }
-
-    assert_raise UndefinedFunctionError, &Visibilities.third/0
+    assert_raise UndefinedFunctionError, &Visibilities.second/0
   end
 
   test "multiple args errs" do
@@ -154,11 +138,11 @@ defmodule DefwTest do
     defmodule SharedStringConstants do
       use Orb
 
-      defwi foo(), I32.String do
+      defw foo(), I32.String do
         ~S"foo"
       end
 
-      defwi cdata_start(), I32.String do
+      defw cdata_start(), I32.String do
         ~S"<![CDATA["
       end
     end

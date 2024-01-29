@@ -20,23 +20,6 @@ defmodule Orb.DefwDSL do
     define(call, :public, result, locals, block, __CALLER__)
   end
 
-  # TODO: I don’t think defwi is needed. Removing it will clear up the API surface area.
-  defmacro defwi(call, do: block) do
-    define(call, :internal, nil, [], block, __CALLER__)
-  end
-
-  defmacro defwi(call, locals, do: block) when is_list(locals) do
-    define(call, :internal, nil, locals, block, __CALLER__)
-  end
-
-  defmacro defwi(call, result, do: block) do
-    define(call, :internal, result, [], block, __CALLER__)
-  end
-
-  defmacro defwi(call, result, locals, do: block) when is_list(locals) do
-    define(call, :internal, result, locals, block, __CALLER__)
-  end
-
   defmacro defwp(call, do: block) do
     define(call, :private, nil, [], block, __CALLER__)
   end
@@ -54,23 +37,16 @@ defmodule Orb.DefwDSL do
   end
 
   defp define(call, visibility, result, locals, block, env) do
-    func_visibility =
-      case visibility do
-        :internal -> :private
-        other -> other
-      end
-
     def_kind =
       case visibility do
         :public -> :def
-        :internal -> :def
         :private -> :defp
       end
 
     ex_def = define_elixir_def(call, def_kind, result, env)
 
     wasm =
-      Orb.DSL.__define_func(call, func_visibility, [result: result, locals: locals], block, env)
+      Orb.DSL.__define_func(call, visibility, [result: result, locals: locals], block, env)
 
     quote do
       unquote(ex_def)
