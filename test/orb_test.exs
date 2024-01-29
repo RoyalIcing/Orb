@@ -4,38 +4,26 @@ defmodule OrbTest do
   import Orb, only: [to_wat: 1]
   alias Orb.{I32, U32, Memory}
 
-  test "func" do
+  test "basic module" do
     import Orb.DSL
 
-    wasm =
-      func answer(), I32 do
+    defmodule Basic do
+      use Orb
+
+      defw answer(), I32 do
         42
       end
+    end
 
     wasm_source = """
-    (func $answer (export "answer") (result i32)
-      (i32.const 42)
+    (module $Basic
+      (func $answer (export "answer") (result i32)
+        (i32.const 42)
+      )
     )
     """
 
-    assert to_wat(wasm) == wasm_source
-  end
-
-  test "funcp" do
-    import Orb.DSL
-
-    wasm =
-      funcp answer(), I32 do
-        42
-      end
-
-    wasm_source = """
-    (func $answer (result i32)
-      (i32.const 42)
-    )
-    """
-
-    assert to_wat(wasm) == wasm_source
+    assert to_wat(Basic) == wasm_source
   end
 
   describe "globals" do
