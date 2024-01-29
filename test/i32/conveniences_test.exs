@@ -55,9 +55,7 @@ defmodule I32ConveniencesTest do
 
     Orb.I32.global(first: 7)
 
-    wasm do
-      Orb.I32.attr_writer(:first)
-    end
+    Orb.I32.attr_writer(:first)
   end
 
   test "attr_writer works" do
