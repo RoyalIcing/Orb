@@ -253,7 +253,7 @@ defmodule Orb do
 
   ### Initializing memory with data
 
-  You can populate the initial memory of your module using `Orb.Memory.initial_data/1`. This accepts an memory offset and the string to write there.
+  You can populate the initial memory of your module using `Orb.Memory.initial_data!/2`. This accepts an memory offset and the string to write there.
 
   ```elixir
   defmodule MimeTypeDataExample do
