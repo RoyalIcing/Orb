@@ -44,13 +44,6 @@ defmodule Orb.Memory do
     %Orb.Data{offset: offset, value: value, nul_terminated: false}
   end
 
-  @doc "Initializes data in memory from a packed `Map`. In Wat is `(data …)`"
-  def initial_data_prepacked(packed_map) when is_map(packed_map) do
-    for {_key, %{offset: offset, string: string}} <- packed_map do
-      initial_data(offset: offset, string: string)
-    end
-  end
-
   @doc """
   Load value of `type` from memory `address`.
 
