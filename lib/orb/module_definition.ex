@@ -190,10 +190,42 @@ defmodule Orb.ModuleDefinition do
         ) do
       [
         <<"\0asm", 0x01000000::32>>,
-        section(:type, <<0x01, 0x60, 0x00, 0x01, 0x7F>>),
-        section(:function, <<0x01, 0x00>>),
-        section(:export, <<0x01, 0x06, 0x61, 0x6E, 0x73, 0x77, 0x65, 0x72, 0x00, 0x00>>),
+        section(:type, vec([func_type({}, {:i32})])),
+        section(:function, vec([0x00])),
+        section(:export, vec([export_func("answer", 0x00)])),
         section(:code, <<0x01, 0x04, 0x00, 0x41, 0x2A, 0x0B>>)
+      ]
+    end
+
+    defp vec(items) when is_list(items) do
+      [
+        length(items),
+        items
+      ]
+      |> IO.iodata_to_binary()
+    end
+
+    defp func_type(params, results) do
+      [
+        0x60,
+        for types <- [params, results] do
+          vec(
+            for type <- Tuple.to_list(types) do
+              case type do
+                :i32 -> 0x7F
+              end
+            end
+          )
+        end
+      ]
+    end
+
+    defp export_func(name, func_index) do
+      [
+        byte_size(name),
+        name,
+        0x00,
+        func_index
       ]
     end
 
@@ -212,7 +244,11 @@ defmodule Orb.ModuleDefinition do
     defp section(:data_count, bytes), do: section(0x0C, bytes)
 
     defp section(id, bytes) do
-      <<id, byte_size(bytes)>> <> bytes
+      [
+        id,
+        byte_size(bytes),
+        bytes
+      ]
     end
   end
 end

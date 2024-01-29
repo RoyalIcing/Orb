@@ -14,14 +14,6 @@ defmodule WasmOutputTest do
       end
     end
 
-    wasm_source = """
-    (module $Basic
-      (func $answer (export "answer") (result i32)
-        (i32.const 42)
-      )
-    )
-    """
-
     assert <<"\0asm", 0x01000000::32>> <>
              <<0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7F>> <>
              <<0x03, 0x02, 0x01, 0x00>> <>
