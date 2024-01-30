@@ -484,6 +484,8 @@ defmodule Orb.Instruction do
   end
 
   defimpl Orb.ToWasm do
+    import Orb.Leb
+
     @wasm_prefix <<"\0asm", 0x01000000::32>>
 
     def encode_type(:i32), do: 0x7F
@@ -501,7 +503,7 @@ defmodule Orb.Instruction do
           },
           _
         ) do
-      [type_const(type), number]
+      [type_const(type), uleb128(number)]
     end
   end
 end
