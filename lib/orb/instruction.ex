@@ -482,4 +482,26 @@ defmodule Orb.Instruction do
       ]
     end
   end
+
+  defimpl Orb.ToWasm do
+    @wasm_prefix <<"\0asm", 0x01000000::32>>
+
+    def encode_type(:i32), do: 0x7F
+
+    def type_const(:i32), do: 0x41
+    def type_const(:i64), do: 0x42
+    def type_const(:f32), do: 0x43
+    def type_const(:f64), do: 0x44
+
+    def to_wasm(
+          %Orb.Instruction{
+            type: type,
+            operation: :const,
+            operands: [number]
+          },
+          _
+        ) do
+      [type_const(type), number]
+    end
+  end
 end

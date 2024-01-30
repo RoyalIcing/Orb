@@ -174,9 +174,10 @@ defmodule Orb.ModuleDefinition do
   end
 
   defimpl Orb.ToWasm do
+    @wasm_prefix <<"\0asm", 0x01000000::32>>
+
     def to_wasm(
           %Orb.ModuleDefinition{
-            name: name,
             types: types,
             table_size: table_size,
             imports: imports,
@@ -189,12 +190,16 @@ defmodule Orb.ModuleDefinition do
           _
         ) do
       [
-        <<"\0asm", 0x01000000::32>>,
+        @wasm_prefix,
         section(:type, vec([func_type({}, {:i32})])),
         section(:function, vec([0x00])),
         section(:export, vec([export_func("answer", 0x00)])),
-        section(:code, <<0x01, 0x04, 0x00, 0x41, 0x2A, 0x0B>>)
+        section(:code, vec([func_code([], Orb.Instruction.wrap_constant!(:i32, 42))]))
       ]
+    end
+
+    defp sized(bytes) when is_binary(bytes) do
+      [byte_size(bytes), bytes]
     end
 
     defp vec(items) when is_list(items) do
@@ -213,6 +218,10 @@ defmodule Orb.ModuleDefinition do
             for type <- Tuple.to_list(types) do
               case type do
                 :i32 -> 0x7F
+                :i64 -> 0x7E
+                :f32 -> 0x7D
+                :f64 -> 0x7C
+                :v128 -> 0x7B
               end
             end
           )
@@ -222,11 +231,22 @@ defmodule Orb.ModuleDefinition do
 
     defp export_func(name, func_index) do
       [
-        byte_size(name),
-        name,
+        sized(name),
         0x00,
         func_index
       ]
+    end
+
+    defp func_code(locals = [], expr) when is_binary(expr) do
+      sized(vec(locals) <> expr <> <<0x0B>>)
+    end
+
+    defp func_code(locals = [], expr) when is_list(expr) do
+      func_code(locals, IO.iodata_to_binary(expr))
+    end
+
+    defp func_code(locals = [], expr) when is_struct(expr) do
+      func_code(locals, Orb.ToWasm.to_wasm(expr, nil))
     end
 
     defp section(:custom, bytes), do: section(0x00, bytes)
@@ -246,8 +266,7 @@ defmodule Orb.ModuleDefinition do
     defp section(id, bytes) do
       [
         id,
-        byte_size(bytes),
-        bytes
+        sized(bytes)
       ]
     end
   end
