@@ -192,13 +192,14 @@ defmodule Orb.ModuleDefinition do
       [
         @wasm_prefix,
         section(:type, vec([func_type({}, {:i32})])),
-        section(:function, vec([0x00])),
-        section(:export, vec([export_func("answer", 0x00)])),
+        section(:function, vec([0])),
+        section(:export, vec([export_func("answer", 0)])),
         section(:code, vec([func_code([], Orb.Instruction.wrap_constant!(:i32, 42))]))
       ]
     end
 
-    defp sized(bytes) when is_binary(bytes) do
+    defp sized(bytes) do
+      bytes = IO.iodata_to_binary(bytes)
       [byte_size(bytes), bytes]
     end
 
@@ -207,7 +208,6 @@ defmodule Orb.ModuleDefinition do
         length(items),
         items
       ]
-      |> IO.iodata_to_binary()
     end
 
     defp func_type(params, results) do
@@ -237,12 +237,8 @@ defmodule Orb.ModuleDefinition do
       ]
     end
 
-    defp func_code(locals = [], expr) when is_binary(expr) do
-      sized(vec(locals) <> expr <> <<0x0B>>)
-    end
-
-    defp func_code(locals = [], expr) when is_list(expr) do
-      func_code(locals, IO.iodata_to_binary(expr))
+    defp func_code(locals = [], expr) when is_binary(expr) or is_list(expr) do
+      sized([vec(locals), expr, <<0x0B>>])
     end
 
     defp func_code(locals = [], expr) when is_struct(expr) do
@@ -266,7 +262,7 @@ defmodule Orb.ModuleDefinition do
     defp section(id, bytes) do
       [
         id,
-        sized(bytes)
+        sized(IO.iodata_to_binary(bytes))
       ]
     end
   end
