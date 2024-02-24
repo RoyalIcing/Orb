@@ -505,5 +505,35 @@ defmodule Orb.Instruction do
         ) do
       [type_const(type), uleb128(number)]
     end
+
+    # def to_wasm(
+    #       %Orb.Instruction{
+    #         operation: {:local_get, local_name},
+    #         operands: []
+    #       },
+    #       _
+    #     ) do
+    #   [0x20, Orb.ToWasm.Context.local_index(local_name)]
+    # end
+
+    # def to_wasm(
+    #       %Orb.Instruction{
+    #         operation: {:local_set, local_name, _},
+    #         operands: []
+    #       },
+    #       _
+    #     ) do
+    #   [0x21, Orb.ToWasm.Context.local_index(local_name)]
+    # end
+
+    # def to_wasm(
+    #       %Orb.Instruction{
+    #         operation: {:local_tee, local_name},
+    #         operands: []
+    #       },
+    #       _
+    #     ) do
+    #   [0x22, Orb.ToWasm.Context.local_index(local_name)]
+    # end
   end
 end
