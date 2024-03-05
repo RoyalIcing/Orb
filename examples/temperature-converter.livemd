@@ -2,11 +2,12 @@
 
 ```elixir
 Mix.install([
-  {:orb, "~> 0.0.33"}
+  {:orb, "~> 0.0.33"},
+  {:wasmex, "~> 0.8.3"}
 ])
 ```
 
-## Section
+## Define our temperate converter module using Orb
 
 ```elixir
 defmodule Example do
@@ -20,6 +21,15 @@ defmodule Example do
 end
 ```
 
+## We can compile this module to the WebAssembly text format
+
 ```elixir
 Orb.to_wat(Example)
+```
+
+## We can run the WebAssembly module in Elixir using Wasmex
+
+```elixir
+{:ok, pid} = Wasmex.start_link(%{bytes: Orb.to_wat(Example)})
+Wasmex.call_function(pid, :fahrenheit_to_celsius, [72.0])
 ```
