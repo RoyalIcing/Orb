@@ -1,42 +1,43 @@
-# Orb Introduction
+# Introduction to Orb
 
 ```elixir
 Mix.install([
   {:jason, "~> 1.0"},
   :orb,
-  :orb_wasmtime
+  {:wasmex, "~> 0.8.3"}
 ])
 ```
 
-## Section
+## Define WebAssembly module using Orb
 
 ```elixir
-alias OrbWasmtime.Instance, as: Wasmtime
-```
-
-```elixir
-defmodule Mean do
+defmodule CalculateMean do
   use Orb
 
-  I32.global(sum: 0, count: 0)
+  global do
+    @tally 0
+    @count 0
+  end
 
   defw insert(n: I32) do
+    @tally = @tally + n
     @count = @count + 1
-    @sum = @sum + n
   end
 
   defw calculate_mean(), I32 do
-    @sum / @count
+    @tally / @count
   end
 end
 ```
 
+## Run WebAssembly module using Wasmex
+
 ```elixir
-a = Wasmtime.run(Mean)
-Wasmtime.call(a, :insert, 3)
-Wasmtime.call(a, :insert, 4)
-Wasmtime.call(a, :insert, 5)
-Wasmtime.call(a, :insert, 6)
-Wasmtime.call(a, :insert, 7)
-Wasmtime.call(a, :calculate_mean)
+{:ok, pid} = Wasmex.start_link(%{bytes: Orb.to_wat(CalculateMean)})
+Wasmex.call_function(pid, :insert, [3])
+Wasmex.call_function(pid, :insert, [4])
+Wasmex.call_function(pid, :insert, [5])
+Wasmex.call_function(pid, :insert, [6])
+Wasmex.call_function(pid, :insert, [7])
+{:ok, [5]} = Wasmex.call_function(pid, :calculate_mean, [])
 ```
