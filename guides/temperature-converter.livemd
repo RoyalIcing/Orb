@@ -1,0 +1,25 @@
+# Orb Temperature Converter
+
+```elixir
+Mix.install([
+  {:orb, "~> 0.0.33"}
+])
+```
+
+## Section
+
+```elixir
+defmodule Example do
+  use Orb
+
+  wasm_mode(Orb.F32)
+
+  defw fahrenheit_to_celsius(fahrenheit: F32), F32 do
+    (fahrenheit - 32.0) * 5.0 / 9.0
+  end
+end
+```
+
+```elixir
+Orb.to_wat(Example)
+```
