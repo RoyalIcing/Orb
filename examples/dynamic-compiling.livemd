@@ -1,7 +1,7 @@
 # Dynamic Orb module
 
 ```elixir
-Mix.install([{:orb, "~> 0.0.18"}, :orb_wasmtime])
+Mix.install([:orb, :orb_wasmtime])
 ```
 
 ## Section
@@ -49,15 +49,16 @@ end
 Process.put(:user_type, :viewer)
 Process.put(:user_id, 1234)
 
-DynamicExample.to_wat() |> IO.puts()
+wat = Orb.to_wat(DynamicExample)
+IO.puts(wat)
 
-OrbWasmtime.Wasm.call(DynamicExample, :can_edit?, 42, 1234)
+OrbWasmtime.Wasm.call(wat, :can_edit?, 42, 1234)
 |> IO.inspect(label: "can edit post by user 1234")
 
-OrbWasmtime.Wasm.call(DynamicExample, :can_edit?, 42, 1235)
+OrbWasmtime.Wasm.call(wat, :can_edit?, 42, 1235)
 |> IO.inspect(label: "can edit post by user 1235")
 
-OrbWasmtime.Wasm.call(DynamicExample, :can_edit?, 42, 876)
+OrbWasmtime.Wasm.call(wat, :can_edit?, 42, 876)
 |> IO.inspect(label: "can edit post by user 876")
 
 :ok
@@ -67,15 +68,16 @@ OrbWasmtime.Wasm.call(DynamicExample, :can_edit?, 42, 876)
 Process.put(:user_type, :admin)
 Process.put(:user_id, 1)
 
-DynamicExample.to_wat() |> IO.puts()
+wat = Orb.to_wat(DynamicExample)
+IO.puts(wat)
 
-OrbWasmtime.Wasm.call(DynamicExample, :can_edit?, 42, 1234)
+OrbWasmtime.Wasm.call(wat, :can_edit?, 42, 1234)
 |> IO.inspect(label: "can edit post by user 1234")
 
-OrbWasmtime.Wasm.call(DynamicExample, :can_edit?, 42, 1235)
+OrbWasmtime.Wasm.call(wat, :can_edit?, 42, 1235)
 |> IO.inspect(label: "can edit post by user 1235")
 
-OrbWasmtime.Wasm.call(DynamicExample, :can_edit?, 42, 876)
+OrbWasmtime.Wasm.call(wat, :can_edit?, 42, 876)
 |> IO.inspect(label: "can edit post by user 876")
 
 :ok
