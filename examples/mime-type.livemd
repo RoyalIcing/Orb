@@ -40,11 +40,9 @@ end
 file_extension = "atom"
 
 {:ok, pid} = Wasmex.start_link(%{bytes: Orb.to_wat(MimeType)})
-
 {:ok, memory} = Wasmex.memory(pid)
 {:ok, store} = Wasmex.store(pid)
 byte_count = Wasmex.Memory.size(store, memory)
-
 bytes = Wasmex.Memory.read_binary(store, memory, 0, byte_count)
 
 case Wasmex.call_function(pid, file_extension, []) do
