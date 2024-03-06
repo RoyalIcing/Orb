@@ -890,6 +890,7 @@ defmodule OrbTest do
   end
 
   test "compiler errors reset state" do
+    # https://github.com/RoyalIcing/Orb/issues/18
     defmodule ExampleWithError do
       use Orb
 
