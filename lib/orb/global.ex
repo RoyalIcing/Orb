@@ -76,7 +76,11 @@ defmodule Orb.Global do
   end
 
   def expand!(%Orb.Global{type: Orb.I32.String, initial_value: ""} = global) do
-    %Orb.Global{global | type: Orb.I32.String, initial_value: Orb.Constants.NulTerminatedString.empty()}
+    %Orb.Global{
+      global
+      | type: Orb.I32.String,
+        initial_value: Orb.Constants.NulTerminatedString.empty()
+    }
   end
 
   def expand!(%Orb.Global{type: Orb.I32.String, initial_value: string} = global) do
