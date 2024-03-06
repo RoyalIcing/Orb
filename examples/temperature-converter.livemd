@@ -7,16 +7,38 @@ Mix.install([
 ])
 ```
 
-## Define our temperate converter module using Orb
+## Define our temperature converter module using Orb
 
 ```elixir
-defmodule Example do
+defmodule TemperatureConverter do
   use Orb
 
   wasm_mode(Orb.F32)
 
+  Orb.I32.export_enum([:celsius, :fahrenheit])
+
+  global do
+    @mode 0
+  end
+
+  defw celsius_to_fahrenheit(celsius: F32), F32 do
+    celsius * (9.0 / 5.0) + 32.0
+  end
+
   defw fahrenheit_to_celsius(fahrenheit: F32), F32 do
-    (fahrenheit - 32.0) * 5.0 / 9.0
+    (fahrenheit - 32.0) * (5.0 / 9.0)
+  end
+
+  defw convert_temperature(temperature: F32), F32 do
+    if Orb.I32.eq(@mode, @celsius) do
+      celsius_to_fahrenheit(temperature)
+    else
+      fahrenheit_to_celsius(temperature)
+    end
+  end
+
+  defw set_mode(mode: I32) do
+    @mode = mode
   end
 end
 ```
@@ -24,12 +46,22 @@ end
 ## We can compile this module to the WebAssembly text format
 
 ```elixir
-Orb.to_wat(Example)
+Orb.to_wat(TemperatureConverter)
+|> IO.puts()
 ```
 
 ## We can run the WebAssembly module in Elixir using Wasmex
 
 ```elixir
-{:ok, pid} = Wasmex.start_link(%{bytes: Orb.to_wat(Example)})
-Wasmex.call_function(pid, :fahrenheit_to_celsius, [72.0])
+{:ok, pid} = Wasmex.start_link(%{bytes: Orb.to_wat(TemperatureConverter)})
+
+# Wasmex.call_function(pid, :fahrenheit_to_celsius, [72.0])
+
+Wasmex.call_function(pid, :convert_temperature, [72.0])
+|> IO.inspect()
+
+Wasmex.call_function(pid, :set_mode, [1])
+
+Wasmex.call_function(pid, :convert_temperature, [72.0])
+|> IO.inspect()
 ```
