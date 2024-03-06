@@ -49,8 +49,8 @@ bytes = Wasmex.Memory.read_binary(store, memory, 0, byte_count)
 
 case Wasmex.call_function(pid, file_extension, []) do
   {:ok, [str_ptr]} ->
-    <<_::binary-size(str_ptr), slice::binary>> = bytes
-    # slice = binary_slice(bytes, str_ptr..-1//1)
+    slice = binary_slice(bytes, str_ptr..-1//1)
+
     for(<<chunk::size(8) <- slice>>, do: chunk)
     |> Enum.take_while(fn c -> c != 0 end)
     |> List.to_string()
