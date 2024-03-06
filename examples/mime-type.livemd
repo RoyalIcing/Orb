@@ -37,7 +37,7 @@ end
 ## We can run the WebAssembly module in Elixir using Wasmex
 
 ```elixir
-file_extension = "atom"
+file_extension = "html"
 
 {:ok, pid} = Wasmex.start_link(%{bytes: Orb.to_wat(MimeType)})
 {:ok, memory} = Wasmex.memory(pid)
