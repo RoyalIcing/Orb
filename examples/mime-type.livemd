@@ -4,6 +4,7 @@
 Mix.install([
   :orb,
   {:wasmex, "~> 0.8.3"},
+  {:mime, "~> 2.0.5"},
   {:kino, "~> 0.12.0"}
 ])
 ```
@@ -16,12 +17,19 @@ defmodule MimeType do
 
   Memory.pages(1)
 
-  defw(txt, I32.UnsafePointer, do: "text/plain")
-  defw(html, I32.UnsafePointer, do: "text/html")
-  defw(css, I32.UnsafePointer, do: "text/css")
-  defw(json, I32.UnsafePointer, do: "application/json")
+  defw(txt, I32.UnsafePointer, do: MIME.type("txt"))
+  defw(json, I32.UnsafePointer, do: MIME.type("json"))
+  defw(html, I32.UnsafePointer, do: MIME.type("html"))
+  defw(css, I32.UnsafePointer, do: MIME.type("css"))
+  defw(wasm, I32.UnsafePointer, do: MIME.type("wasm"))
+  defw(epub, I32.UnsafePointer, do: MIME.type("epub"))
+  defw(rss, I32.UnsafePointer, do: MIME.type("rss"))
+  defw(atom, I32.UnsafePointer, do: MIME.type("atom"))
+  defw(csv, I32.UnsafePointer, do: MIME.type("csv"))
+  defw(woff2, I32.UnsafePointer, do: MIME.type("woff2"))
+  defw(pdf, I32.UnsafePointer, do: MIME.type("pdf"))
   defw(js, I32.UnsafePointer, do: "application/javascript")
-  defw(csv, I32.UnsafePointer, do: "text/csv")
+  defw(xml, I32.UnsafePointer, do: "application/xml")
   defw(sqlite, I32.UnsafePointer, do: "application/vnd.sqlite3")
 end
 ```
@@ -29,7 +37,7 @@ end
 ## We can run the WebAssembly module in Elixir using Wasmex
 
 ```elixir
-file_extension = "csv"
+file_extension = "atom"
 
 {:ok, pid} = Wasmex.start_link(%{bytes: Orb.to_wat(MimeType)})
 
