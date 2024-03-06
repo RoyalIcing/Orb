@@ -62,14 +62,12 @@ defmodule Orb.Constants do
   #   {string, 0xFF + offset}
   # end)
 
-  def __done() do
+  def __read() do
     tid = Process.get(__MODULE__)
 
     if is_nil(tid) do
       raise "Must be called within a Orb.Constants scope."
     end
-
-    Process.delete(__MODULE__)
 
     # matcher = :ets.fun2ms(fn {string, offset} when is_binary(string) ->
     #   {string, offset}
@@ -77,11 +75,16 @@ defmodule Orb.Constants do
 
     matcher = [{{:"$1", :"$2"}, [is_binary: :"$1"], [{{:"$1", :"$2"}}]}]
     lookup_table = :ets.select(tid, matcher)
-    :ets.delete(tid)
 
     # entries = :ets.match_object(__MODULE__, {:"$0", :"$1"})
 
     %__MODULE__{offset: 0xFF, items: [], lookup_table: lookup_table}
+  end
+
+  def __cleanup() do
+    if tid = Process.delete(__MODULE__) do
+      :ets.delete(tid)
+    end
   end
 
   # TODO: calculate offset based on how much memory we have used so far.

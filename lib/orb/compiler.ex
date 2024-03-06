@@ -20,8 +20,10 @@ defmodule Orb.Compiler do
     Process.delete({Orb, :global_types})
 
     # We’re done. Get all the constant strings that were actually used.
-    constants = Orb.Constants.__done()
+    constants = Orb.Constants.__read()
 
     %{body: body, constants: constants, global_definitions: global_definitions}
+  after
+    Orb.Constants.__cleanup()
   end
 end

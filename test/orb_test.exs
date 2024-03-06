@@ -888,4 +888,17 @@ defmodule OrbTest do
 
     assert Wasm.call(TableExample, :answer) === 42
   end
+
+  test "compiler errors reset state" do
+    defmodule ExampleWithError do
+      use Orb
+
+      defw fahrenheit_to_celsius(fahrenheit: F32), F32 do
+        (fahrenheit - 32.0) * 5.0 / 9.0
+      end
+    end
+
+    assert_raise(Orb.TypeCheckError, fn -> Orb.to_wat(ExampleWithError) end)
+    assert_raise(Orb.TypeCheckError, fn -> Orb.to_wat(ExampleWithError) end)
+  end
 end
