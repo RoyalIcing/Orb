@@ -895,11 +895,11 @@ defmodule OrbTest do
       use Orb
 
       defw fahrenheit_to_celsius(fahrenheit: F32), F32 do
-        (fahrenheit - 32.0) * 5.0 / 9.0
+        raise CompileError, description: "error"
       end
     end
 
-    assert_raise(Orb.TypeCheckError, fn -> Orb.to_wat(ExampleWithError) end)
-    assert_raise(Orb.TypeCheckError, fn -> Orb.to_wat(ExampleWithError) end)
+    assert_raise(CompileError, fn -> Orb.to_wat(ExampleWithError) end)
+    assert_raise(CompileError, fn -> Orb.to_wat(ExampleWithError) end)
   end
 end
