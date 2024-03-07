@@ -2,7 +2,6 @@ defmodule OrbTest do
   use ExUnit.Case, async: true
 
   import Orb, only: [to_wat: 1]
-  alias Orb.{I32, U32, Memory}
 
   test "basic module" do
     import Orb.DSL
@@ -724,6 +723,8 @@ defmodule OrbTest do
   test "snippet works" do
     defmodule SnippetDefiner do
       def hd!(ptr) do
+        alias Orb.{I32, U32, Memory}
+
         Orb.snippet U32 do
           Memory.load!(I32, ptr + 4)
         end
