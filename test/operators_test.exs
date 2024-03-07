@@ -289,13 +289,21 @@ defmodule OperatorsTest do
 
       wasm_mode(Orb.Numeric)
 
-      defw add_i32(), I32 do
-        1 + 2
+      defw add_i32(n: I32), I32 do
+        1 + 2 + n
       end
 
-      defw add_f32(), F32 do
-        1.0 + 2.0
+      defw add_i64(n: I64), I64 do
+        1 + 2 + n
       end
+
+      defw add_f32(n: F32), F32 do
+        1.0 + 2.0 + n
+      end
+
+      # defw add_f64(n: F64), F64 do
+      #   1.0 + 2.0 + n
+      # end
 
       defw multiply(a: F32, b: F32), F32 do
         a * b
@@ -326,11 +334,14 @@ defmodule OperatorsTest do
 
     assert """
            (module $N1
-             (func $add_i32 (export "add_i32") (result i32)
-               (i32.const 3)
+             (func $add_i32 (export "add_i32") (param $n i32) (result i32)
+               (i32.add (i32.const 3) (local.get $n))
              )
-             (func $add_f32 (export "add_f32") (result f32)
-               (f32.const 3.0)
+             (func $add_i64 (export "add_i64") (param $n i64) (result i64)
+               (i64.add (i64.const 3) (local.get $n))
+             )
+             (func $add_f32 (export "add_f32") (param $n f32) (result f32)
+               (f32.add (f32.const 3.0) (local.get $n))
              )
              (func $multiply (export "multiply") (param $a f32) (param $b f32) (result f32)
                (f32.mul (local.get $a) (local.get $b))
