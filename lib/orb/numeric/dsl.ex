@@ -53,8 +53,8 @@ defmodule Orb.Numeric.DSL do
 
   def left / right do
     case Ops.extract_common_type(left, right) do
-      # Elixir.Integer ->
-      #   Orb.Instruction.new(type, :div_s, [left, right])
+      Elixir.Integer ->
+        Kernel.div(left, right)
 
       Elixir.Float ->
         Kernel./(left, right)
@@ -64,6 +64,12 @@ defmodule Orb.Numeric.DSL do
 
       type when Ops.is_primitive_float_type(type) ->
         Orb.Instruction.new(type, :div, [left, right])
+
+      _ ->
+        raise Orb.TypeCheckError,
+          expected_type: Ops.typeof(left),
+          received_type: Ops.typeof(right),
+          instruction_identifier: "div"
     end
   end
 
@@ -87,6 +93,46 @@ defmodule Orb.Numeric.DSL do
     case Ops.extract_common_type(left, right) do
       type when Ops.is_primitive_type(type) ->
         Orb.Instruction.new(type, :ne, [left, right])
+    end
+  end
+
+  def left < right do
+    case Ops.extract_common_type(left, right) do
+      type when Ops.is_primitive_integer_type(type) ->
+        Orb.Instruction.new(type, :lt_s, [left, right])
+
+      type when Ops.is_primitive_float_type(type) ->
+        Orb.Instruction.new(type, :lt, [left, right])
+    end
+  end
+
+  def left > right do
+    case Ops.extract_common_type(left, right) do
+      type when Ops.is_primitive_integer_type(type) ->
+        Orb.Instruction.new(type, :gt_s, [left, right])
+
+      type when Ops.is_primitive_float_type(type) ->
+        Orb.Instruction.new(type, :gt, [left, right])
+    end
+  end
+
+  def left <= right do
+    case Ops.extract_common_type(left, right) do
+      type when Ops.is_primitive_integer_type(type) ->
+        Orb.Instruction.new(type, :le_s, [left, right])
+
+      type when Ops.is_primitive_float_type(type) ->
+        Orb.Instruction.new(type, :le, [left, right])
+    end
+  end
+
+  def left >= right do
+    case Ops.extract_common_type(left, right) do
+      type when Ops.is_primitive_integer_type(type) ->
+        Orb.Instruction.new(type, :ge_s, [left, right])
+
+      type when Ops.is_primitive_float_type(type) ->
+        Orb.Instruction.new(type, :ge, [left, right])
     end
   end
 

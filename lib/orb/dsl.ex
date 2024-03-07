@@ -600,7 +600,7 @@ defmodule Orb.DSL do
   @doc """
   Used to bring back wasm-mode when inside `inline/1`.
   """
-  defmacro wasm(mode \\ Orb.S32, do: block) do
+  defmacro wasm(mode \\ Orb.Numeric, do: block) do
     mode = Macro.expand_literals(mode, __CALLER__)
     pre = Orb.__mode_pre(mode)
 

@@ -733,7 +733,7 @@ defmodule Orb do
   Enter WebAssembly.
   """
   defmacro __append_body(mode \\ nil, do: block) do
-    mode = mode || Module.get_attribute(__CALLER__.module, :wasm_mode, Orb.S32)
+    mode = mode || Module.get_attribute(__CALLER__.module, :wasm_mode, Orb.Numeric)
     mode = Macro.expand_literals(mode, __CALLER__)
     pre = __mode_pre(mode)
 
