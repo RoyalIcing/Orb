@@ -5,7 +5,7 @@ defmodule Orb.U32 do
     @moduledoc """
     Unsigned 32-bit integer operators.
 
-    Some operators like division have two variations in WebAssembly: signed and unsigned. By default math perform signed operations, but if you want unsigned math you can pass `U32` to `Orb.wasm/2` like so: `wasm U32 do`.
+    Some operators like division have two variations in WebAssembly: signed and unsigned. By default math perform signed operations, but if you want unsigned math you can pass `U32` to `Orb.DefwDSL.wasm_mode/1` like so: `wasm_mode(Orb.U32)`.
     """
 
     import Kernel, except: [/: 2, ===: 2, !==: 2, <=: 2, >=: 2]

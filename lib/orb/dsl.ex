@@ -1,6 +1,6 @@
 defmodule Orb.DSL do
   @moduledoc """
-  The main DSL which is imported automatically when you call `Orb.wasm/2`.
+  The main DSL which is imported automatically when you call `defw`.
   """
 
   alias Orb.Instruction
