@@ -41,6 +41,8 @@ defmodule Orb.Ops do
   # @base_types @primitive_types ++ @effects ++ @elixir_types
 
   defguard is_primitive_type(type) when type in @primitive_types
+  defguard is_primitive_integer_type(type) when type in @integer_types
+  defguard is_primitive_float_type(type) when type in @float_types
   defguard is_effect(type) when type in @effects
 
   def to_primitive_type(type) when is_primitive_type(type), do: type

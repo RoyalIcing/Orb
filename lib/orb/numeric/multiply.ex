@@ -10,6 +10,8 @@ defmodule Orb.Numeric.Multiply do
   """
   alias Orb.CustomType
 
+  require alias Orb.Ops
+
   # Perform at comptime.
   def optimized(_type, a, b) when is_integer(a) and is_integer(b), do: a * b
   # Multiply anything by zero equals zero.
@@ -18,6 +20,10 @@ defmodule Orb.Numeric.Multiply do
   # Multiply one by anything is that same thing.
   def optimized(_type, a, 1), do: a
   def optimized(_type, 1, b), do: b
+
   # Finally, spit out the runtime instruction.
+  def optimized(type, a, b) when Ops.is_primitive_type(type),
+    do: Orb.Instruction.new(type, :mul, [a, b])
+
   def optimized(type, a, b), do: Orb.Instruction.new(CustomType.resolve!(type), :mul, [a, b])
 end

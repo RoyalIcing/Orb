@@ -254,6 +254,10 @@ defmodule OperatorsTest do
         push(0.0)
         0.0
       end
+
+      defw fahrenheit_to_celsius(fahrenheit: F32), F32 do
+        (fahrenheit - 32.0) * 5.0 / 9.0
+      end
     end
 
     assert """
@@ -272,7 +276,83 @@ defmodule OperatorsTest do
                (f32.const 0.0)
                (f32.const 0.0)
              )
+             (func $fahrenheit_to_celsius (export "fahrenheit_to_celsius") (param $fahrenheit f32) (result f32)
+               (f32.div (f32.mul (f32.sub (local.get $fahrenheit) (f32.const 32.0)) (f32.const 5.0)) (f32.const 9.0))
+             )
            )
            """ === Orb.to_wat(F1)
+  end
+
+  test "numeric mode" do
+    defmodule N1 do
+      use Orb
+
+      wasm_mode(Orb.Numeric)
+
+      defw add_i32(), I32 do
+        1 + 2
+      end
+
+      defw add_f32(), F32 do
+        1.0 + 2.0
+      end
+
+      defw multiply(a: F32, b: F32), F32 do
+        a * b
+      end
+
+      defw divide(), F32 do
+        4.0 / 2.0
+      end
+
+      defw lab_to_xyz(l: F32, a: F32, b: F32), {F32, F32, F32} do
+        0.0
+        push(0.0)
+        0.0
+      end
+
+      defw double_i32(n: I32), I32 do
+        n * 2
+      end
+
+      defw double_f32(n: F32), F32 do
+        n * 2.0
+      end
+
+      defw fahrenheit_to_celsius(fahrenheit: F32), F32 do
+        (fahrenheit - 32.0) * 5.0 / 9.0
+      end
+    end
+
+    assert """
+           (module $N1
+             (func $add_i32 (export "add_i32") (result i32)
+               (i32.const 3)
+             )
+             (func $add_f32 (export "add_f32") (result f32)
+               (f32.const 3.0)
+             )
+             (func $multiply (export "multiply") (param $a f32) (param $b f32) (result f32)
+               (f32.mul (local.get $a) (local.get $b))
+             )
+             (func $divide (export "divide") (result f32)
+               (f32.const 2.0)
+             )
+             (func $lab_to_xyz (export "lab_to_xyz") (param $l f32) (param $a f32) (param $b f32) (result f32 f32 f32)
+               (f32.const 0.0)
+               (f32.const 0.0)
+               (f32.const 0.0)
+             )
+             (func $double_i32 (export "double_i32") (param $n i32) (result i32)
+               (i32.mul (local.get $n) (i32.const 2))
+             )
+             (func $double_f32 (export "double_f32") (param $n f32) (result f32)
+               (f32.mul (local.get $n) (f32.const 2.0))
+             )
+             (func $fahrenheit_to_celsius (export "fahrenheit_to_celsius") (param $fahrenheit f32) (result f32)
+               (f32.div (f32.mul (f32.sub (local.get $fahrenheit) (f32.const 32.0)) (f32.const 5.0)) (f32.const 9.0))
+             )
+           )
+           """ === Orb.to_wat(N1)
   end
 end

@@ -665,6 +665,12 @@ defmodule Orb do
   def __mode_pre(mode) do
     dsl =
       case mode do
+        Orb.Numeric ->
+          quote do
+            import Orb.Numeric.DSL
+            import Orb.Global.DSL
+          end
+
         Orb.S32 ->
           quote do
             import Orb.I32.DSL
