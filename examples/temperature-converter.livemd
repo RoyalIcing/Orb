@@ -28,7 +28,7 @@ defmodule TemperatureConverter do
   end
 
   defw convert_temperature(temperature: F32), F32 do
-    if Orb.I32.eq(@mode, @celsius) do
+    if @mode === @celsius do
       celsius_to_fahrenheit(temperature)
     else
       fahrenheit_to_celsius(temperature)
