@@ -33,7 +33,7 @@ defmodule Orb.F32 do
                          key,
                          unquote(mutability),
                          :internal,
-                         {:f32_const, value}
+                         value
                        )
                      end)
     end
@@ -48,7 +48,7 @@ defmodule Orb.F32 do
                          key,
                          unquote(mutability),
                          :exported,
-                         {:f32_const, value}
+                         value
                        )
                      end)
     end

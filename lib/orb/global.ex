@@ -24,7 +24,7 @@ defmodule Orb.Global do
     %__MODULE__{
       name: name,
       type: :i32,
-      initial_value: {:i32_const, value},
+      initial_value: value,
       mutability: mutability,
       exported: exported == :exported
     }
@@ -37,7 +37,7 @@ defmodule Orb.Global do
     %__MODULE__{
       name: name,
       type: :f32,
-      initial_value: {:f32_const, value},
+      initial_value: value,
       mutability: mutability,
       exported: exported == :exported
     }
@@ -119,7 +119,13 @@ defmodule Orb.Global do
           :mutable -> ["(mut ", do_type(type), ?)]
         end,
         " ",
-        Orb.ToWat.to_wat(initial_value, ""),
+        cond do
+          is_number(initial_value) ->
+            ["(", do_type(type), ".const ", to_string(initial_value), ")"]
+
+          true ->
+            Orb.ToWat.to_wat(initial_value, "")
+        end,
         ")\n"
       ]
     end

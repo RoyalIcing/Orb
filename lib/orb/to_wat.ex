@@ -3,15 +3,6 @@ defprotocol Orb.ToWat do
   def to_wat(data, indent)
 end
 
-# TODO: remove this.
-# A lot of the instruction are implemented as tuples.
-# They might all become structs in the future, which means this could be removed.
-defimpl Orb.ToWat, for: Tuple do
-  def to_wat(tuple, indent) do
-    Orb.ToWat.Instructions.do_wat(tuple, indent)
-  end
-end
-
 defmodule Orb.ToWat.Helpers do
   alias Orb.CustomType
 

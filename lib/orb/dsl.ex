@@ -344,9 +344,9 @@ defmodule Orb.DSL do
       do: tuple
 
   # FIXME: assumes only 32-bit integer, doesn’t work with 64-bit or float
-  def push(n) when is_integer(n), do: {:i32_const, n}
+  def push(n) when is_integer(n), do: Orb.Instruction.wrap_constant!(:i32, n)
   # FIXME: assumes only 32-bit float, doesn’t work with 64-bit float
-  def push(n) when is_float(n), do: {:f32_const, n}
+  def push(n) when is_float(n), do: Orb.Instruction.wrap_constant!(:f32, n)
   def push(%Orb.VariableReference{} = ref), do: ref
 
   def push(do: %Orb.Instruction{operation: {:local_set, identifier, type}, operands: [value]}),
@@ -362,13 +362,6 @@ defmodule Orb.DSL do
       # :pop
     ]
   end
-
-  # def global_get(identifier), do: Orb.Instruction.global_get(Orb.__lookup_global_type!(identifier), identifier)
-  def global_get(identifier), do: {:global_get, identifier}
-  def global_set(identifier), do: {:global_set, identifier}
-
-  # TODO: remove
-  def local_set(identifier), do: {:local_set, identifier}
 
   def typed_call(output_type, f, args) when is_list(args),
     do: Instruction.typed_call(output_type, f, args)
@@ -625,11 +618,13 @@ defmodule Orb.DSL do
 
   # TODO: add a comptime keyword like Zig: https://kristoff.it/blog/what-is-zig-comptime/
 
+  # TODO: remove, requiring users to use Orb.Control.return() instead.
   @doc """
   Return from a function. You may wish to `push/1` values before returning.
   """
   def return(), do: Orb.Control.Return.new()
 
+  # TODO: remove, requiring users to use Orb.Control.return(value) instead.
   @doc """
   Return from a function if a condition is true.
   """
@@ -668,7 +663,7 @@ defmodule Orb.DSL do
   def unreachable!(), do: :unreachable
 
   @doc """
-  Asserts a condition that _must_ be true, otherwise traps.
+  Asserts a condition that _must_ be true, otherwise traps with unreachable.
   """
   def assert!(condition) do
     Orb.IfElse.new(
@@ -679,11 +674,6 @@ defmodule Orb.DSL do
   end
 
   def mut!(term), do: Orb.MutRef.from(term)
-
-  @doc """
-  For when there’s a language feature of WebAssembly that Orb doesn’t provide. Please file an issue if there’s something you wish existed. https://github.com/RoyalIcing/Orb/issues
-  """
-  def raw_wat(source), do: {:raw_wat, String.trim(source)}
 
   def __get_block_items(block) do
     case block do

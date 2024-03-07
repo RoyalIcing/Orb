@@ -14,23 +14,10 @@ defmodule Orb.ToWat.Instructions do
   def do_wat(:pop, _indent), do: []
   def do_wat(:drop, indent), do: [indent, "drop"]
 
-  def do_wat(:select, indent), do: [indent, "select"]
-
-  def do_wat(:return, indent), do: [indent, "return"]
-  def do_wat({:return, value}, indent), do: [indent, "(return ", do_wat(value), ?)]
+  # def do_wat(:select, indent), do: [indent, "select"]
 
   def do_wat(:unreachable, indent), do: [indent, "unreachable"]
 
-  def do_wat({:export, name}, indent), do: [indent, ~S/(export "/, to_string(name), ~S/")/]
-
-  # TODO: remove all of these
-  def do_wat({:i32_const, value}, indent), do: "#{indent}(i32.const #{value})"
-  def do_wat({:f32_const, value}, indent), do: "#{indent}(f32.const #{value})"
-  def do_wat({:global_get, identifier}, indent), do: "#{indent}(global.get $#{identifier})"
-  def do_wat({:global_set, identifier}, indent), do: "#{indent}(global.set $#{identifier})"
-  # def do_wat({:local_get, identifier}, indent), do: "#{indent}(local.get $#{identifier})"
-  # def do_wat({:local_tee, identifier}, indent), do: "#{indent}(local.tee $#{identifier})"
-  def do_wat({:local_set, identifier}, indent), do: "#{indent}(local.set $#{identifier})"
   # TODO: change default to i64
   def do_wat(value, indent) when is_integer(value), do: "#{indent}(i32.const #{value})"
   # TODO: how do we support 64-bit floats?
