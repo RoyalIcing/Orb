@@ -2,7 +2,7 @@
 
 ```elixir
 Mix.install([
-  {:orb, "~> 0.0.33"},
+  {:orb, "~> 0.0.34"},
   {:wasmex, "~> 0.8.3"}
 ])
 ```
@@ -12,8 +12,6 @@ Mix.install([
 ```elixir
 defmodule TemperatureConverter do
   use Orb
-
-  wasm_mode(Orb.F32)
 
   Orb.I32.export_enum([:celsius, :fahrenheit])
 
