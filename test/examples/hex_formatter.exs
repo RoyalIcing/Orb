@@ -3,8 +3,6 @@ defmodule Examples.HexFormatter do
 
   Memory.pages(1)
 
-  wasm_mode(U32)
-
   defw u32_to_hex_lower(value: I32, write_ptr: I32.U8.UnsafePointer),
     i: I32,
     digit: I32 do
@@ -15,7 +13,7 @@ defmodule Examples.HexFormatter do
       i = i - 1
 
       digit = I32.rem_u(value, 16)
-      value = value / 16
+      value = I32.div_u(value, 16)
 
       if digit > 9 do
         write_ptr[at!: i] = ?a + digit - 10
