@@ -1,4 +1,6 @@
-![Orb logo](orb-logo-orange.svg)
+<p align="center">
+  <img src="orb-logo-orange.svg" alt="Orb logo">
+</p>
 
 # Orb: Write WebAssembly with Elixir
 
