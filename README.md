@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="orb-logo-orange.svg" alt="Orb logo">
+  <img src="orb-logo-blue-orange.svg" alt="Orb logo">
 </p>
 
 # Orb: Write WebAssembly with Elixir
