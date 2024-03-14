@@ -2,11 +2,11 @@
   <img src="orb-logo-blue-orange.svg" alt="Orb logo" width="384" height="384">
 </p>
 
-# Orb: Write WebAssembly with Elixir
+<h1 align="center">Orb: Write WebAssembly with Elixir</h1>
 
-[Docs](https://hexdocs.pm/orb) | [Examples](https://github.com/RoyalIcing/Orb/tree/main/examples)
+<p dir="ltr" align="center"><a href="https://hexdocs.pm/orb" rel="nofollow">Docs</a> | <a href="https://github.com/RoyalIcing/Orb/tree/main/examples">Examples</a></p>
 
-[![Livebook: Temperature Converter](https://livebook.dev/badge/v1/black.svg)](https://livebook.dev/run?url=https%3A%2F%2Fgithub.com%2FRoyalIcing%2FOrb%2Fblob%2Fmain%2Fexamples%2Ftemperature-converter.livemd)
+<p dir="ltr" align="center"><a href="https://livebook.dev/run?url=https%3A%2F%2Fgithub.com%2FRoyalIcing%2FOrb%2Fblob%2Fmain%2Fexamples%2Ftemperature-converter.livemd" rel="nofollow"><img src="https://livebook.dev/badge/v1/black.svg" alt="Livebook: Temperature Converter"></a></p>
 
 Write WebAssembly with the power of Elixir as your compiler:
 
