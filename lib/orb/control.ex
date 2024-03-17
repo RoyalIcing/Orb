@@ -3,6 +3,20 @@ defmodule Orb.Control do
 
   @doc """
   Declare a block, useful for structured control flow.
+
+  ```elixir
+  defmodule Example do
+    use Orb
+
+    defw example do
+      Control.block Validate do
+        Validate.break(if: i < 0)
+
+        # Do something with i
+      end
+    end
+  end
+  ```
   """
   defmacro block(identifier, result_type \\ nil, do: block) do
     identifier = __expand_identifier(identifier, __CALLER__)
@@ -38,11 +52,40 @@ defmodule Orb.Control do
 
   @doc """
   Break from a block.
+
+  ```elixir
+  defmodule Example do
+    use Orb
+
+    defw example do
+      Control.block Validate do
+        # Other code…
+
+        Control.break(Validate)
+      end
+    end
+  end
+  ```
   """
-  def break(identifier), do: %Orb.Block.Branch{identifier: __expand_identifier(identifier, __ENV__)}
+  def break(identifier),
+    do: %Orb.Block.Branch{identifier: __expand_identifier(identifier, __ENV__)}
 
   @doc """
   Break from a block if a condition is true.
+
+  ```elixir
+  defmodule Example do
+    use Orb
+
+    defw example do
+      Control.block Validate do
+        Validate.break(if: i < 0)
+
+        # Do something with i
+      end
+    end
+  end
+  ```
   """
   def break(identifier, if: condition),
     do: %Orb.Block.Branch{identifier: __expand_identifier(identifier, __ENV__), if: condition}
