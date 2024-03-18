@@ -62,13 +62,13 @@ defmodule CharParser do
   end
 
   # Future API?
-  # CharParser.seq(mut!(input_offset), return(i64(0)), must: ~c|http|, may: ~c|s|, must: ~c|:|, may: ~c|//|)
+  # CharParser.seq(mut!(input_offset), return(0), must: ~c|http|, may: ~c|s|, must: ~c|:|, may: ~c|//|)
 
   # Future API?
   # CharParser.one_of([
   #   [may: ~c|www.|, must: ~c|youtube.com|], must: ~c|/watch?v=|,
   #   [must: ~c|youtu.be/|]
-  # ], mut!(input_offset))
+  # ], mut!(input_offset), return(0))
 
   def print(ast) do
     IO.puts(Orb.ToWat.to_wat(ast, "") |> IO.iodata_to_binary())
@@ -147,7 +147,7 @@ end
   "//www.youtube.com/watch?v=hello",
   "//youtu.be/hello",
   "www.youtube.com/watch?v=hello",
-  # Should fail
+  # These should fail
   "www.youtu.be/watch?v=hello",
   "https://www.youtube.com/watch",
   "https://www.youtube.com/watch?v=",
