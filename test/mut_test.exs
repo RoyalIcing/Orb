@@ -1,8 +1,6 @@
 defmodule MutTest do
   use ExUnit.Case, async: true
 
-  import Orb, only: [to_wat: 1]
-
   test "with func parameter" do
     import Orb.DSL
 
@@ -30,7 +28,7 @@ defmodule MutTest do
     )
     """
 
-    assert to_wat(FuncParam) == wasm_source
+    assert Orb.to_wat(FuncParam) == wasm_source
   end
 
   test "with local variable" do
@@ -65,6 +63,6 @@ defmodule MutTest do
     )
     """
 
-    assert to_wat(LocalVar) == wasm_source
+    assert Orb.to_wat(LocalVar) == wasm_source
   end
 end
