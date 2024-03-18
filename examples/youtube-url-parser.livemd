@@ -16,47 +16,32 @@ Mix.install([
 defmodule CharParser do
   use Orb
 
-  def advance(chars, offset_var, success_instruction) when is_list(chars) do
+  def must(chars, offset_mut_ref, fail_instruction) when is_list(chars) do
     Orb.snippet do
       chars
       |> Enum.with_index(fn char, index ->
-        Memory.load!(I32.U8, offset_var.read + index) === char
+        Memory.load!(I32.U8, offset_mut_ref.read + index) === char
       end)
       |> Enum.reduce(&I32.band/2)
       |> if do
-        offset_var.read + length(chars)
-        offset_var.write
-        success_instruction
-      end
-    end
-  end
-
-  def must(chars, offset_var, fail_instruction) when is_list(chars) do
-    Orb.snippet do
-      chars
-      |> Enum.with_index(fn char, index ->
-        Memory.load!(I32.U8, offset_var.read + index) === char
-      end)
-      |> Enum.reduce(&I32.band/2)
-      |> if do
-        offset_var.read + length(chars)
-        offset_var.write
+        offset_mut_ref.read + length(chars)
+        offset_mut_ref.write
       else
         fail_instruction
       end
     end
   end
 
-  def may(chars, offset_var) when is_list(chars) do
+  def may(chars, offset_mut_ref) when is_list(chars) do
     Orb.snippet do
       chars
       |> Enum.with_index(fn char, index ->
-        Memory.load!(I32.U8, offset_var.read + index) === char
+        Memory.load!(I32.U8, offset_mut_ref.read + index) === char
       end)
       |> Enum.reduce(&I32.band/2)
       |> if do
-        offset_var.read + length(chars)
-        offset_var.write
+        offset_mut_ref.read + length(chars)
+        offset_mut_ref.write
       end
     end
   end
@@ -66,7 +51,7 @@ defmodule CharParser do
 
   # Future API?
   # CharParser.one_of([
-  #   [may: ~c|www.|, must: ~c|youtube.com|], must: ~c|/watch?v=|,
+  #   [may: ~c|www.|, must: ~c|youtube.com|], must: ~c|/watch?v=|],
   #   [must: ~c|youtu.be/|]
   # ], mut!(input_offset), return(0))
 
@@ -154,4 +139,7 @@ end
   "hello"
 ]
 |> Enum.map(&YouTubeURLParser.run/1)
+
+source = Orb.to_wat(YouTubeURLParser)
+File.write!(Path.join([File.cwd!(), "Desktop", "youtube.wat"]), source)
 ```
