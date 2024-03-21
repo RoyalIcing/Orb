@@ -5,14 +5,11 @@ defmodule Orb.IfElse do
 
   alias Orb.Ops
 
-  # def new(:i32, condition, {:i32_const, a}, {:i32_const, b}) do
-  #   [
-  #     a,
-  #     b,
-  #     condition,
-  #     :select!
-  #   ]
-  # end
+  def new(if_else = %__MODULE__{}, concat_true) when is_struct(concat_true) do
+    when_true = Orb.InstructionSequence.concat(if_else.when_true, concat_true)
+    type = Ops.typeof(when_true)
+    new_unchecked(type, if_else.condition, when_true, if_else.when_false)
+  end
 
   def new(condition, when_true) when is_struct(when_true) do
     type = Ops.typeof(when_true)
@@ -123,7 +120,6 @@ defmodule Orb.IfElse do
 
   defmodule DSL do
     @moduledoc false
-    alias Orb.InstructionSequence
 
     import Kernel, except: [if: 2]
 

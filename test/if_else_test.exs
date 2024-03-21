@@ -291,4 +291,51 @@ defmodule IfElseTest do
     Instance.write_string_nul_terminated(inst, 0x00100, "&a=1&&&b=2")
     assert count.(0x00100) == 2
   end
+
+  test "chain onto existing if/else" do
+    defmodule Chain do
+      use Orb
+
+      global :mutable do
+        @a 0
+      end
+
+      defw test() do
+        if i32(0) do
+          @a = i32(1)
+        else
+          @a = i32(2)
+        end
+        |> if do
+          @a = i32(7)
+        end
+        |> if do
+          @a = i32(42)
+        end
+      end
+    end
+
+    assert """
+           (module $Chain
+             (global $a (mut i32) (i32.const 0))
+             (func $test (export "test")
+               (i32.const 0)
+               (if
+                 (then
+                   (i32.const 1)
+                   (global.set $a)
+                   (i32.const 7)
+                   (global.set $a)
+                   (i32.const 42)
+                   (global.set $a)
+                 )
+                 (else
+                   (i32.const 2)
+                   (global.set $a)
+                 )
+               )
+             )
+           )
+           """ === to_wat(Chain)
+  end
 end
