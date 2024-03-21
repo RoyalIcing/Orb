@@ -1,15 +1,16 @@
 defmodule Orb.InstructionSequence do
   defstruct type: :unknown_effect,
             body: [],
-            contains: %{
-              locals_effected: %{},
-              globals_effected: %{},
-              unknown_effect: false,
-              i32: false,
-              i64: false,
-              f32: false,
-              f64: false
-            },
+            contains:
+              %{
+                # locals_effected: %{},
+                # globals_effected: %{},
+                # unknown_effect: false,
+                # i32: false,
+                # i64: false,
+                # f32: false,
+                # f64: false
+              },
             locals: []
 
   alias Orb.Ops
@@ -53,6 +54,28 @@ defmodule Orb.InstructionSequence do
       end
 
     do_get_type(type, rest)
+  end
+
+  @doc ~S"""
+  Concatenates instructions in the `second` with those in `first`.
+
+  ## Examples
+
+      iex> Orb.InstructionSequence.concat(Orb.InstructionSequence.empty(), Orb.InstructionSequence.empty())
+      %Orb.InstructionSequence{type: :nop, body: []}
+
+      iex> Orb.InstructionSequence.concat(Orb.InstructionSequence.new([Orb.Instruction.i32(:const, 1)]), Orb.InstructionSequence.new([Orb.Instruction.f32(:const, 2.0)]))
+      %Orb.InstructionSequence{type: :f32, body: [
+        Orb.Instruction.i32(:const, 1),
+        Orb.Instruction.f32(:const, 2.0)
+      ]}
+
+  """
+  def concat(first, second) do
+    %__MODULE__{
+      type: second.type,
+      body: first.body ++ second.body
+    }
   end
 
   def expand(%__MODULE__{} = func) do
