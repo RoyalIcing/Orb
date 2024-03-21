@@ -12,7 +12,7 @@ defmodule IfElseTest do
       end
 
       defw test() do
-        if 0 do
+        if i32(0) do
           @a = 1
         else
           @a = 2
@@ -45,7 +45,7 @@ defmodule IfElseTest do
       use Orb
 
       defw test(), I32 do
-        if 0 do
+        if i32(0) do
           1
         else
           2
@@ -57,7 +57,7 @@ defmodule IfElseTest do
       use Orb
 
       defw test(), I32 do
-        if 0, do: 1, else: 2
+        if i32(0), do: 1, else: 2
       end
     end
 
@@ -65,7 +65,7 @@ defmodule IfElseTest do
       use Orb
 
       defw test(), I32 do
-        if 0 do
+        if i32(0) do
           1
         else
           i32(2)
@@ -77,7 +77,7 @@ defmodule IfElseTest do
       use Orb
 
       defw test(), I32 do
-        if 0 do
+        if i32(0) do
           i32(1)
         else
           i32(2)
@@ -112,7 +112,7 @@ defmodule IfElseTest do
       use Orb
 
       defw test(), I64 do
-        if 0 do
+        if i64(0) do
           1
         else
           2
@@ -124,7 +124,7 @@ defmodule IfElseTest do
       use Orb
 
       defw test(), I64 do
-        if 0, do: 1, else: 2
+        if i64(0), do: 1, else: 2
       end
     end
 
@@ -132,7 +132,7 @@ defmodule IfElseTest do
       use Orb
 
       defw test(), I64 do
-        if 0 do
+        if i64(0) do
           i64(1)
         else
           2
@@ -144,7 +144,7 @@ defmodule IfElseTest do
       use Orb
 
       defw test(), I64 do
-        if 0 do
+        if i64(0) do
           i64(1)
         else
           i64(2)
@@ -155,7 +155,7 @@ defmodule IfElseTest do
     wat =
       """
         (func $test (export "test") (result i64)
-          (i32.const 0)
+          (i64.const 0)
           (if (result i64)
             (then
               (i64.const 1)

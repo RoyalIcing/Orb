@@ -60,7 +60,6 @@ defmodule Orb.IfElse do
 
   defimpl Orb.ToWat do
     import Orb.ToWat.Helpers
-    alias Orb.ToWat.Instructions
     require Orb.Ops |> alias
 
     def to_wat(
@@ -74,7 +73,7 @@ defmodule Orb.IfElse do
         )
         when not is_nil(condition) do
       [
-        Instructions.do_wat(condition, indent),
+        Orb.ToWat.to_wat(condition, indent),
         [
           "\n",
           indent,
