@@ -300,7 +300,7 @@ defmodule IfElseTest do
         @a 0
       end
 
-      defw test() do
+      defw test_if() do
         if i32(0) do
           @a = i32(1)
         else
@@ -313,12 +313,26 @@ defmodule IfElseTest do
           @a = i32(42)
         end
       end
+
+      defw test_unless() do
+        unless i32(0) do
+          @a = i32(1)
+        else
+          @a = i32(2)
+        end
+        |> if do
+          @a = i32(7)
+        end
+        |> unless do
+          @a = i32(42)
+        end
+      end
     end
 
     assert """
            (module $Chain
              (global $a (mut i32) (i32.const 0))
-             (func $test (export "test")
+             (func $test_if (export "test_if")
                (i32.const 0)
                (if
                  (then
@@ -331,6 +345,23 @@ defmodule IfElseTest do
                  )
                  (else
                    (i32.const 2)
+                   (global.set $a)
+                 )
+               )
+             )
+             (func $test_unless (export "test_unless")
+               (i32.const 0)
+               (if
+                 (then
+                   (i32.const 2)
+                   (global.set $a)
+                   (i32.const 7)
+                   (global.set $a)
+                 )
+                 (else
+                   (i32.const 1)
+                   (global.set $a)
+                   (i32.const 42)
                    (global.set $a)
                  )
                )

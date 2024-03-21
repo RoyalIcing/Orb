@@ -706,6 +706,7 @@ defmodule Orb do
       import Kernel,
         except: [
           if: 2,
+          unless: 2,
           @: 1,
           +: 2,
           -: 2,

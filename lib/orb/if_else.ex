@@ -7,13 +7,19 @@ defmodule Orb.IfElse do
 
   def new(if_else = %__MODULE__{}, concat_true) when is_struct(concat_true) do
     when_true = Orb.InstructionSequence.concat(if_else.when_true, concat_true)
-    type = Ops.typeof(when_true)
-    new_unchecked(type, if_else.condition, when_true, if_else.when_false)
+    new(if_else.type, if_else.condition, when_true, if_else.when_false)
   end
 
   def new(condition, when_true) when is_struct(when_true) do
     type = Ops.typeof(when_true)
-    new_unchecked(type, optimize_condition(condition), when_true, nil)
+    new(type, condition, when_true, nil)
+  end
+
+  def new(if_else = %__MODULE__{}, concat_true, concat_false)
+      when is_struct(concat_true) and is_struct(concat_false) do
+    when_true = Orb.InstructionSequence.concat(if_else.when_true, concat_true)
+    when_false = Orb.InstructionSequence.concat(if_else.when_false, concat_false)
+    new(if_else.type, if_else.condition, when_true, when_false)
   end
 
   def new(condition, when_true, when_false) when is_struct(when_true) and is_struct(when_false) do
@@ -27,16 +33,12 @@ defmodule Orb.IfElse do
           instruction_identifier: "if/else"
 
       type ->
-        new_unchecked(type, optimize_condition(condition), when_true, when_false)
+        new(type, condition, when_true, when_false)
     end
   end
 
   def new(result, condition, when_true, when_false)
-      when not is_nil(result) and is_struct(when_false) do
-    new_unchecked(result, optimize_condition(condition), when_true, when_false)
-  end
-
-  defp new_unchecked(result, condition, when_true, when_false) when not is_nil(result) do
+      when not is_nil(result) and (is_struct(when_false) or is_nil(when_false)) do
     %__MODULE__{
       type: result,
       condition: condition,
@@ -50,10 +52,6 @@ defmodule Orb.IfElse do
     when_false = statement.when_false |> Orb.Constants.expand_if_needed()
     %{statement | when_true: when_true, when_false: when_false}
   end
-
-  # TODO: probably remove this.
-  defp optimize_condition({:i32, :gt_u, {n, 0}}), do: n
-  defp optimize_condition(condition), do: condition
 
   defimpl Orb.ToWat do
     import Orb.ToWat.Helpers
@@ -121,7 +119,7 @@ defmodule Orb.IfElse do
   defmodule DSL do
     @moduledoc false
 
-    import Kernel, except: [if: 2]
+    import Kernel, except: [if: 2, unless: 2]
 
     require Orb.InstructionSequence |> alias
 
@@ -176,6 +174,37 @@ defmodule Orb.IfElse do
         Orb.IfElse.new(
           condition,
           InstructionSequence.new(when_true)
+        )
+      end
+    end
+
+    defmacro unless(condition, clauses) do
+      build_unless(condition, clauses)
+    end
+
+    defp build_unless(condition, do: when_false) do
+      quote bind_quoted: [
+              condition: condition,
+              when_false: Orb.__get_block_items(when_false)
+            ] do
+        Orb.IfElse.new(
+          condition,
+          InstructionSequence.empty(),
+          InstructionSequence.new(when_false)
+        )
+      end
+    end
+
+    defp build_unless(condition, do: when_false, else: when_true) do
+      quote bind_quoted: [
+              condition: condition,
+              when_true: Orb.__get_block_items(when_true),
+              when_false: Orb.__get_block_items(when_false)
+            ] do
+        Orb.IfElse.new(
+          condition,
+          InstructionSequence.new(when_true),
+          InstructionSequence.new(when_false)
         )
       end
     end
