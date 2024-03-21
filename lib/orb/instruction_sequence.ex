@@ -15,6 +15,8 @@ defmodule Orb.InstructionSequence do
   alias Orb.Ops
   alias Orb.Constants
 
+  def new([instruction_sequence = %__MODULE__{}]), do: instruction_sequence
+
   def new([instruction]) do
     new(Ops.typeof(instruction, :primitive), [instruction])
   end
@@ -32,6 +34,8 @@ defmodule Orb.InstructionSequence do
       locals: Keyword.get(opts, :locals, [])
     }
   end
+
+  def empty(), do: %__MODULE__{type: :nop, body: []}
 
   def do_get_type(type, instructions)
   def do_get_type(nil, []), do: :nop

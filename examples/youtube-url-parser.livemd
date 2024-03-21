@@ -140,6 +140,6 @@ end
 ]
 |> Enum.map(&YouTubeURLParser.run/1)
 
-source = Orb.to_wat(YouTubeURLParser)
-File.write!(Path.join([File.cwd!(), "Desktop", "youtube.wat"]), source)
+# source = Orb.to_wat(YouTubeURLParser)
+# File.write!(Path.join([File.cwd!(), "Desktop", "youtube.wat"]), source)
 ```

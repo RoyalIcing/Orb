@@ -304,7 +304,7 @@ defmodule Orb.DSL do
 
       # e.g. `_ = some_function_returning_value()`
       {:=, _, [{:_, _, nil}, value]} ->
-        quote do: Orb.Stack.drop(unquote(value))
+        quote do: Orb.Stack.Drop.new(unquote(value))
 
       other ->
         other
@@ -486,12 +486,12 @@ defmodule Orb.DSL do
             ] do
         Orb.IfElse.new(
           source.type.valid?(source),
-          [
+          Orb.InstructionSequence.new([
             set_item,
             block_items,
             Orb.VariableReference.set(source, source.type.next(source)),
             %Orb.Loop.Branch{identifier: identifier}
-          ]
+          ])
         )
       end
 
@@ -543,10 +543,10 @@ defmodule Orb.DSL do
           quote do:
                   Orb.IfElse.new(
                     unquote(condition),
-                    [
+                    Orb.InstructionSequence.new([
                       unquote(block_items),
                       %Orb.Loop.Branch{identifier: unquote(identifier)}
-                    ]
+                    ])
                   )
       end
 
@@ -643,24 +643,14 @@ defmodule Orb.DSL do
 
   See https://en.wikipedia.org/wiki/NOP_(code)
   """
-  def nop(), do: :nop
-
-  @doc """
-  Drop the last pushed value from the stack.
-  """
-  def drop(), do: :drop
-
-  @doc """
-  Execute the passed expression, but ignore its result by immediately dropping its value.
-  """
-  def drop(expression), do: [expression, :drop]
+  def nop(), do: %Orb.Nop{}
 
   @doc """
   Denote a point in code that should not be reachable. Traps.
 
   Useful for exhaustive conditionals or code you know will not execute.
   """
-  def unreachable!(), do: :unreachable
+  def unreachable!(), do: %Orb.Unreachable{}
 
   @doc """
   Asserts a condition that _must_ be true, otherwise traps with unreachable.

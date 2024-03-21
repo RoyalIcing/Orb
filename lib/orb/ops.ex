@@ -48,6 +48,7 @@ defmodule Orb.Ops do
   def to_primitive_type(type) when is_primitive_type(type), do: type
   def to_primitive_type(type) when is_effect(type), do: type
   def to_primitive_type(type) when type in @elixir_types, do: type
+  def to_primitive_type(:nop), do: :nop
 
   def to_primitive_type(type) when is_tuple(type) do
     for nested <- Tuple.to_list(type) do

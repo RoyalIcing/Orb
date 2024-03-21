@@ -85,8 +85,8 @@ defmodule Orb.I32 do
       Orb.IfElse.new(
         :i32,
         unquote(condition),
-        unquote(__get_block_items(when_true)),
-        unquote(__get_block_items(when_false))
+        Orb.InstructionSequence.new(unquote(__get_block_items(when_true))),
+        Orb.InstructionSequence.new(unquote(__get_block_items(when_false)))
       )
     end
   end
@@ -116,29 +116,32 @@ defmodule Orb.I32 do
 
           [match] ->
             quote do
-              %Orb.IfElse{
-                condition: Orb.I32.eq(unquote(value), unquote(match)),
-                when_true: [unquote(__get_block_items(result)), Orb.Control.break(:i32_match)]
-              }
+              Orb.IfElse.new(
+                Orb.I32.eq(unquote(value), unquote(match)),
+                Orb.InstructionSequence.new(
+                  unquote(__get_block_items(result)) ++ [Orb.Control.break(:i32_match)]
+                )
+              )
             end
 
           matches ->
             quote do
-              %Orb.IfElse{
-                condition: Orb.I32.in?(unquote(value), unquote(matches)),
-                when_true: [unquote(__get_block_items(result)), Orb.Control.break(:i32_match)]
-              }
+              Orb.IfElse.new(
+                Orb.I32.in?(unquote(value), unquote(matches)),
+                Orb.InstructionSequence.new(
+                  unquote(__get_block_items(result)) ++ [Orb.Control.break(:i32_match)]
+                )
+              )
             end
         end
       end
 
-    # catchall = for {:->, _, [[{:_, _, _}], _]} <- transform, do: true
     has_catchall? = Enum.any?(transform, &match?({:->, _, [[{:_, _, _}], _]}, &1))
 
     final_instruction =
       case has_catchall? do
-        false -> :unreachable
-        true -> []
+        false -> quote do: %Orb.Unreachable{debug_reason: "Orb.I32.match/2 catchall"}
+        true -> quote do: Orb.InstructionSequence.empty()
       end
 
     quote do
@@ -164,20 +167,22 @@ defmodule Orb.I32 do
 
           [match] ->
             quote do
-              %Orb.IfElse{
-                condition: unquote(match),
-                when_true: [unquote(__get_block_items(target)), Orb.Control.break(:i32_map)]
-              }
+              Orb.IfElse.new(
+                unquote(match),
+                Orb.InstructionSequence.new(
+                  unquote(__get_block_items(target)) ++ [Orb.Control.break(:i32_map)]
+                )
+              )
             end
         end
       end
 
-    catchall = for {:->, _, [[true], _]} <- transform, do: true
+    has_catchall? = Enum.any?(transform, &match?({:->, _, [[{:_, _, _}], _]}, &1))
 
     final_instruction =
-      case catchall do
-        [] -> :unreachable
-        [true] -> []
+      case has_catchall? do
+        false -> quote do: %Orb.Unreachable{debug_reason: "Orb.I32.cond/1 catchall"}
+        true -> quote do: Orb.InstructionSequence.empty()
       end
 
     quote do

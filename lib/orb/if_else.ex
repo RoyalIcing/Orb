@@ -14,12 +14,12 @@ defmodule Orb.IfElse do
   #   ]
   # end
 
-  def new(condition, when_true) do
+  def new(condition, when_true) when is_struct(when_true) do
     type = Ops.typeof(when_true)
     new_unchecked(type, optimize_condition(condition), when_true, nil)
   end
 
-  def new(condition, when_true, when_false) do
+  def new(condition, when_true, when_false) when is_struct(when_true) and is_struct(when_false) do
     type = Ops.extract_common_type(when_true, when_false)
 
     case type do
@@ -35,7 +35,7 @@ defmodule Orb.IfElse do
   end
 
   def new(result, condition, when_true, when_false)
-      when not is_nil(result) and not is_nil(when_false) do
+      when not is_nil(result) and is_struct(when_false) do
     new_unchecked(result, optimize_condition(condition), when_true, when_false)
   end
 
@@ -86,12 +86,12 @@ defmodule Orb.IfElse do
           ?\n
         ],
         ["  ", indent, "(then", ?\n],
-        Instructions.do_wat(when_true, "    " <> indent),
+        Orb.ToWat.to_wat(when_true, "    " <> indent),
         ["  ", indent, ")", ?\n],
         if when_false do
           [
             ["  ", indent, "(else", ?\n],
-            Instructions.do_wat(when_false, "    " <> indent),
+            Orb.ToWat.to_wat(when_false, "    " <> indent),
             ["  ", indent, ")", ?\n]
           ]
         else
