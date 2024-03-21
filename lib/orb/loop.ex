@@ -45,8 +45,7 @@ defmodule Orb.Loop do
             indent
           ) do
         [
-          indent,
-          Orb.ToWat.Instructions.do_wat(condition),
+          Orb.ToWat.to_wat(condition, indent),
           "\n",
           indent,
           "(br_if $",

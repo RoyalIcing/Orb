@@ -12,6 +12,7 @@ defmodule Orb.Table do
 
   def __do_allocate(mod) when is_atom(mod) do
     type_name = mod.type_name()
+
     for key <- mod.table_func_keys() do
       {{mod, key}, type_name}
     end
@@ -30,12 +31,13 @@ defmodule Orb.Table do
     defstruct lookup_table: []
 
     def from_attribute(accumulated_value) do
-      lookup_table = accumulated_value
-      |> List.flatten()
-      |> Enum.with_index(fn {key, type}, index ->
-        {key, {index, type}}
-      end)
-      |> Map.new()
+      lookup_table =
+        accumulated_value
+        |> List.flatten()
+        |> Enum.with_index(fn {key, type}, index ->
+          {key, {index, type}}
+        end)
+        |> Map.new()
 
       %__MODULE__{lookup_table: lookup_table}
     end
@@ -63,7 +65,10 @@ defmodule Orb.Table do
   def do_elem(caller_mod, f, mod, key) do
     # if Process.put(Orb.DSL, false) do
     if function_exported?(caller_mod, :__wasm_table_allocations__, 0) do
-      Orb.Func.__add_table_elem(f, Allocations.fetch_index!(caller_mod.__wasm_table_allocations__(), {mod, key}))
+      Orb.Func.__add_table_elem(
+        f,
+        Allocations.fetch_index!(caller_mod.__wasm_table_allocations__(), {mod, key})
+      )
     else
       f
     end
@@ -74,6 +79,7 @@ defmodule Orb.Table do
 
     quote do
       unquote(__MODULE__).do_elem(unquote(caller_mod), unquote(f), unquote(mod), unquote(key))
+
       # Orb.Func.__add_table_elem(unquote(f), Allocations.fetch_index!(unquote(caller_mod).__wasm_table_allocations__(), {unquote(mod), unquote(key)}))
     end
   end
@@ -96,7 +102,10 @@ defmodule Orb.Table do
     caller_mod = __CALLER__.module
 
     quote do
-      Allocations.fetch_index!(unquote(caller_mod).__wasm_table_allocations__(), {unquote(mod), unquote(key)})
+      Allocations.fetch_index!(
+        unquote(caller_mod).__wasm_table_allocations__(),
+        {unquote(mod), unquote(key)}
+      )
     end
   end
 
@@ -110,8 +119,6 @@ defmodule Orb.Table do
               arguments: []
 
     defimpl Orb.ToWat do
-      alias Orb.ToWat.Instructions
-
       def to_wat(
             %Orb.Table.CallIndirect{
               type_signature: type_signature,
@@ -124,10 +131,11 @@ defmodule Orb.Table do
           indent,
           "(call_indirect (type $",
           to_string(type_signature),
-          ") ",
-          Instructions.do_wat(table_index),
-          for(arg <- arguments, do: [" ", Instructions.do_wat(arg)]),
-          ")"
+          ") (i32.const ",
+          to_string(table_index),
+          ?),
+          for(arg <- arguments, do: [" ", Orb.ToWat.to_wat(arg, "")]),
+          ?)
         ]
       end
     end

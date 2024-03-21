@@ -22,15 +22,21 @@ defmodule Orb.Import do
   end
 
   defimpl Orb.ToWat do
-    alias Orb.ToWat.Instructions
-
-    @spec to_wat(%Orb.Import{}, any()) :: <<_::64, _::_*8>>
     def to_wat(%Orb.Import{module: nil, name: name, type: type}, indent) do
-      ~s[#{indent}(import "#{name}" #{Instructions.do_wat(type)})]
+      [indent, ~S|(import "|, to_string(name), ~S|" |, Orb.ToWat.to_wat(type, ""), ?)]
     end
 
     def to_wat(%Orb.Import{module: module, name: name, type: type}, indent) do
-      ~s[#{indent}(import "#{module}" "#{name}" #{Instructions.do_wat(type)})]
+      [
+        indent,
+        ~S|(import "|,
+        to_string(module),
+        ~S|" "|,
+        to_string(name),
+        ~S|" |,
+        Orb.ToWat.to_wat(type, ""),
+        ?)
+      ]
     end
   end
 

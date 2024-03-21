@@ -31,36 +31,34 @@ defmodule LoopTest do
       end
     end
 
-    wasm_source = """
-    (module $FileNameSafe
-      (memory (export "memory") 2)
-      (func $get_is_valid (export "get_is_valid") (result i32)
-        (local $str i32)
-        (local $char i32)
-        (i32.const 1024)
-        (local.set $str)
-        (loop $Loop (result i32)
-          (block $Outer
-            (block $inner
-              (i32.load8_u (local.get $str))
-              (local.set $char)
-              (i32.eq (local.get $char) (i32.const 47))
-              (br_if $inner)
-              (local.get $char)
-              (br_if $Outer)
-              (return (i32.const 1))
-            )
-            (return (i32.const 0))
-          )
-          (i32.add (local.get $str) (i32.const 1))
-          (local.set $str)
-          (br $Loop)
-        )
-      )
-    )
-    """
-
-    assert wasm_source = to_wat(FileNameSafe)
+    assert """
+           (module $FileNameSafe
+             (memory (export "memory") 2)
+             (func $get_is_valid (export "get_is_valid") (result i32)
+               (local $str i32)
+               (local $char i32)
+               (i32.const 1024)
+               (local.set $str)
+               (loop $Loop (result i32)
+                 (block $Outer
+                   (block $inner
+                     (i32.load8_u (local.get $str))
+                     (local.set $char)
+                     (i32.eq (local.get $char) (i32.const 47))
+                     (br_if $inner)
+                     (local.get $char)
+                     (br_if $Outer)
+                     (return (i32.const 1))
+                   )
+                   (return (i32.const 0))
+                 )
+                 (i32.add (local.get $str) (i32.const 1))
+                 (local.set $str)
+                 (br $Loop)
+               )
+             )
+           )
+           """ === Orb.to_wat(FileNameSafe)
   end
 
   test "loop 1..10" do

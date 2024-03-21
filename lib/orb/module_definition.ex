@@ -146,7 +146,7 @@ defmodule Orb.ModuleDefinition do
       [
         [indent, "(module $#{name}", "\n"],
         [for(type <- types, do: [Orb.ToWat.to_wat(type, next_indent), "\n"])],
-        [for(import_def <- imports, do: [Instructions.do_wat(import_def, next_indent), "\n"])],
+        [for(import_def <- imports, do: [Orb.ToWat.to_wat(import_def, next_indent), "\n"])],
         case table_size do
           0 -> []
           n -> [next_indent, "(table ", to_string(n), " funcref)\n"]

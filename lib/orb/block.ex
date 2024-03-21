@@ -18,8 +18,7 @@ defmodule Orb.Block do
           if(result, do: [" (result ", Helpers.do_type(result), ")"], else: []),
           "\n"
         ],
-        Orb.ToWat.to_wat(body, "    " <> indent),
-        "\n",
+        Orb.ToWat.to_wat(body, "  " <> indent),
         [indent, ")"]
       ]
     end
@@ -46,8 +45,7 @@ defmodule Orb.Block do
             indent
           ) do
         [
-          indent,
-          Orb.ToWat.Instructions.do_wat(condition),
+          Orb.ToWat.to_wat(condition, indent),
           "\n",
           indent,
           "(br_if $",
