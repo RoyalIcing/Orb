@@ -25,7 +25,7 @@ Add `orb` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:orb, "~> 0.0.35"}
+    {:orb, "~> 0.0.36"}
   ]
 end
 ```
