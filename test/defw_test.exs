@@ -86,13 +86,13 @@ defmodule DefwTest do
     use Orb
 
     defw first() do
-      1
-      :drop
+      i32(1)
+      |> Orb.Stack.drop()
     end
 
     defwp second() do
-      3
-      :drop
+      i32(3)
+      |> Orb.Stack.drop()
     end
   end
 

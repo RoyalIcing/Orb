@@ -424,7 +424,7 @@ defmodule OrbTest do
     end
 
     defw meaning_of_life(), I32 do
-      if 1, result: I32 do
+      if i32(1), result: I32 do
         forty_two_plus(9)
       else
         forty_two()

@@ -38,8 +38,8 @@ defmodule OperatorsTest do
         (b * 0)
         |> Orb.Stack.drop()
 
-        2 * 3
-        :drop
+        i32(2 * 3)
+        |> Orb.Stack.drop()
       end
 
       defw divide(), I32 do
@@ -104,34 +104,34 @@ defmodule OperatorsTest do
       wasm_mode(U32)
 
       defw add(a: I32) do
-        1 + 2
-        :drop
+        i32(1 + 2)
+        |> Orb.Stack.drop()
 
-        a + 2
-        :drop
+        (a + 2)
+        |> Orb.Stack.drop()
       end
 
       defw multiply(a: I32, b: I32) do
-        a * b
-        :drop
+        (a * b)
+        |> Orb.Stack.drop()
 
-        2 * a
-        :drop
+        (2 * a)
+        |> Orb.Stack.drop()
 
-        1 * a
-        :drop
+        (1 * a)
+        |> Orb.Stack.drop()
 
-        b * 1
-        :drop
+        (b * 1)
+        |> Orb.Stack.drop()
 
-        0 * a
-        :drop
+        (0 * a)
+        |> Orb.Stack.drop()
 
-        b * 0
-        :drop
+        (b * 0)
+        |> Orb.Stack.drop()
 
-        2 * 3
-        :drop
+        i32(2 * 3)
+        |> Orb.Stack.drop()
       end
 
       defw divide(), I32 do
@@ -178,34 +178,34 @@ defmodule OperatorsTest do
       wasm_mode(Orb.S64)
 
       defw add(a: I64) do
-        1 + 2
-        :drop
+        i64(1 + 2)
+        |> Orb.Stack.drop()
 
-        a + 2
-        :drop
+        (a + 2)
+        |> Orb.Stack.drop()
       end
 
       defw multiply(a: I64, b: I64) do
-        a * b
-        :drop
+        (a * b)
+        |> Orb.Stack.drop()
 
-        2 * a
-        :drop
+        (2 * a)
+        |> Orb.Stack.drop()
 
-        1 * a
-        :drop
+        (1 * a)
+        |> Orb.Stack.drop()
 
-        b * 1
-        :drop
+        (b * 1)
+        |> Orb.Stack.drop()
 
-        0 * a
-        :drop
+        (0 * a)
+        |> Orb.Stack.drop()
 
-        b * 0
-        :drop
+        (b * 0)
+        |> Orb.Stack.drop()
 
-        2 * 3
-        :drop
+        i64(2 * 3)
+        |> Orb.Stack.drop()
       end
 
       defw divide(), I64 do
@@ -216,7 +216,7 @@ defmodule OperatorsTest do
     assert """
            (module $ExampleS64
              (func $add (export "add") (param $a i64)
-               (i32.const 3)
+               (i64.const 3)
                drop
                (i64.add (local.get $a) (i64.const 2))
                drop
@@ -234,7 +234,7 @@ defmodule OperatorsTest do
                drop
                (i64.const 0)
                drop
-               (i32.const 6)
+               (i64.const 6)
                drop
              )
              (func $divide (export "divide") (result i64)

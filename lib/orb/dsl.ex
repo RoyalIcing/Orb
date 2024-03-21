@@ -334,6 +334,7 @@ defmodule Orb.DSL do
 
   def i64(n) when is_integer(n), do: Instruction.i64(:const, n)
 
+  # TODO: move all of these to Orb.Stack
   @doc """
   Pushes a value onto the current stack.
   """

@@ -7,14 +7,13 @@ defmodule Orb.Stack do
     require alias Orb.Ops
 
     def new(instruction) do
-      count = Ops.typeof(instruction) |> Ops.type_stack_count()
+      type = Ops.typeof(instruction)
+      count = Ops.type_stack_count(type)
 
-      # if count === 0 do
-      #   raise CompileError,
-      #       line: line,
-      #       file: env.file,
-      #       description: "Function params must use keyword list."
-      # end
+      if count === 0 do
+        raise ArgumentError,
+          message: "Cannot drop #{type}."
+      end
 
       %__MODULE__{
         instruction: instruction,
