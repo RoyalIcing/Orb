@@ -133,7 +133,7 @@ defmodule Orb.I32.String do
 
     final_instruction =
       case has_catchall? do
-        false -> :unreachable
+        false -> %Orb.Unreachable{}
         true -> []
       end
 

@@ -10,13 +10,10 @@ defmodule Orb.ToWat.Instructions do
 
   def do_wat(true, indent), do: [indent, "OOPS"]
 
-  def do_wat(:nop, indent), do: [indent, "nop"]
   def do_wat(:pop, _indent), do: []
   def do_wat(:drop, indent), do: [indent, "drop"]
 
   # def do_wat(:select, indent), do: [indent, "select"]
-
-  def do_wat(:unreachable, indent), do: [indent, "unreachable"]
 
   # TODO: change default to i64
   def do_wat(value, indent) when is_integer(value), do: "#{indent}(i32.const #{value})"
