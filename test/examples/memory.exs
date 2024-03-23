@@ -148,7 +148,7 @@ defmodule Examples.Memory do
       # end
     end
 
-    defw(alloc(size: I32), I32, do: typed_call(I32, :bump_alloc, [size]))
+    defw(alloc(size: I32), I32, do: bump_alloc(size))
 
     defw free_all() do
       @bump_offset = Constants.bump_init_offset()

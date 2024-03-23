@@ -10,12 +10,12 @@ defmodule Examples.WasiTest do
     inst =
       Instance.run(ClockConsumer, [
         {:wasi_unstable, :clock_res_get,
-         fn caller, clockid, address ->
+         fn _caller, _clockid, _address ->
            # Instance.Caller.write_string_nul_terminated(caller, address, )
            WasiUnstable.esuccess()
          end},
         {:wasi_unstable, :clock_time_get,
-         fn caller, clockid, precision, address ->
+         fn _caller, _clockid, _precision, _address ->
            WasiUnstable.esuccess()
          end}
       ])
