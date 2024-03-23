@@ -18,6 +18,12 @@ Write WebAssembly with the power of Elixir as your compiler:
 - **Run dynamic Elixir code at compile time** e.g. talk to the rest of your Elixir application, call out to an Elixir library, or make network requests.
 - **Compile modules on-the-fly** e.g. use feature flags to conditionally compile code paths or enable particular WebAssembly instructions, creating a custom “tree shaken” WebAssembly module per user.
 
+## Libraries
+
+- Orb (alpha): Write WebAssembly 1.0 in Elixir
+- SilverOrb (work-in-progress): Batteries-included standard library for Orb
+- OrbExtismPDK (coming soon): Write Extism plugins in Elixir with Orb
+
 ## Installation
 
 Add `orb` to your list of dependencies in `mix.exs`:
