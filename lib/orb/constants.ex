@@ -106,7 +106,7 @@ defmodule Orb.Constants do
   end
 
   defmodule NulTerminatedString do
-    defstruct memory_offset: nil, string: nil, type: Orb.I32.String
+    defstruct memory_offset: nil, string: nil, push_type: Orb.I32.String
 
     def empty() do
       %__MODULE__{

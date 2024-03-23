@@ -105,7 +105,7 @@ defmodule TypeCheckTest do
     use Orb
 
     defw example(), a: F32 do
-      a = I32.when?(1, do: 1, else: 2)
+      a = I32.when?(i32(1), do: 1, else: 2)
     end
   end
 

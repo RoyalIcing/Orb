@@ -1,5 +1,6 @@
 defmodule Orb.InstructionSequence do
-  defstruct type: :unknown_effect,
+  defstruct pop_type: nil,
+            push_type: nil,
             body: [],
             contains:
               %{
@@ -13,47 +14,97 @@ defmodule Orb.InstructionSequence do
               },
             locals: []
 
+  require Orb.Ops
   alias Orb.Ops
   alias Orb.Constants
 
+  @doc ~S"""
+  Creates a sequence of instructions from a list.
+
+  ## Examples
+
+      iex> Orb.InstructionSequence.new([Orb.InstructionSequence.empty()])
+      Orb.InstructionSequence.empty()
+
+      iex> Orb.InstructionSequence.new([Orb.Instruction.i32(:const, 1)])
+      %Orb.InstructionSequence{push_type: :i32, body: [
+        Orb.Instruction.i32(:const, 1)
+      ]}
+
+      iex> Orb.InstructionSequence.new([%Orb.Nop{}])
+      %Orb.InstructionSequence{push_type: nil, body: [
+        %Orb.Nop{}
+      ]}
+
+      iex> Orb.InstructionSequence.new([Orb.Instruction.i32(:const, 1), Orb.Instruction.f32(:const, 2.0)])
+      %Orb.InstructionSequence{push_type: {:i32, :f32}, body: [
+        Orb.Instruction.i32(:const, 1),
+        Orb.Instruction.f32(:const, 2.0),
+      ]}
+
+      iex> Orb.InstructionSequence.new([Orb.Control.Return.new(Orb.Instruction.i32(:const, 1))])
+      %Orb.InstructionSequence{push_type: nil, body: [
+        Orb.Control.Return.new(Orb.Instruction.i32(:const, 1))
+      ]}
+
+  """
+
   def new([instruction_sequence = %__MODULE__{}]), do: instruction_sequence
 
-  def new([instruction]) do
-    new(Ops.typeof(instruction, :primitive), [instruction])
-  end
-
   def new(instructions) when is_list(instructions) do
-    type = do_get_type(nil, instructions)
-    new(type, instructions)
-    # raise "Inference of result type via reduce is unimplemented for now."
+    push_type = do_pop_push_type([], instructions)
+    new(push_type, instructions)
   end
 
-  def new(type, instructions, opts \\ []) when is_list(instructions) do
+  def new(push_type, instructions, opts \\ []) when is_list(instructions) do
     %__MODULE__{
-      type: type,
+      push_type: push_type,
       body: instructions,
       locals: Keyword.get(opts, :locals, [])
     }
   end
 
-  def empty(), do: %__MODULE__{type: :nop, body: []}
+  def empty(), do: %__MODULE__{}
 
-  def do_get_type(type, instructions)
-  def do_get_type(nil, []), do: :nop
-  def do_get_type(type, []), do: type
-  def do_get_type(nil, [head | rest]), do: Ops.typeof(head) |> do_get_type(rest)
+  defp type_to_list(type)
+  defp type_to_list(nil), do: []
+  defp type_to_list(:nop), do: []
+  defp type_to_list(:trap), do: []
+  defp type_to_list(type) when is_atom(type), do: [type]
+  defp type_to_list(type) when is_tuple(type), do: Tuple.to_list(type) |> Enum.reverse()
 
-  def do_get_type(type, [head | rest]) do
-    type =
-      cond do
-        head |> Ops.typeof() |> Ops.types_compatible?(type) ->
-          type
+  defp do_pop_push_type(stack, instructions)
+  defp do_pop_push_type([], []), do: nil
+  defp do_pop_push_type([single], []), do: single
+  defp do_pop_push_type(stack, []), do: stack |> Enum.reverse() |> List.to_tuple()
 
-        true ->
-          :unknown_effect
-      end
+  # If there’s a (return …), then nothing becomes pushed to the stack.
+  # TODO: check returned stack type against surrounding func’s type.
+  # This might have to be comapred again the one stored
+  # under Process dict’s Orb.Func.ReturnType entry.
+  defp do_pop_push_type(_, [%Orb.Control.Return{} | _]), do: nil
 
-    do_get_type(type, rest)
+  defp do_pop_push_type([], [head | rest]) do
+    case Ops.pop_push_of(head) do
+      {nil, push} ->
+        do_pop_push_type(type_to_list(push), rest)
+
+      {pop, _push} ->
+        raise "Cannot pop #{pop} from empty stack."
+    end
+  end
+
+  defp do_pop_push_type(stack, [head | rest]) do
+    case {Ops.pop_push_of(head), stack} do
+      {{pop, push}, [pop | stack]} ->
+        do_pop_push_type(type_to_list(push) ++ stack, rest)
+
+      {{nil, push}, stack} ->
+        do_pop_push_type(type_to_list(push) ++ stack, rest)
+
+      {{pop, _push}, [expected_type | _]} ->
+        raise "Cannot pop #{pop} from stack, expected type #{expected_type}."
+    end
   end
 
   @doc ~S"""
@@ -62,10 +113,10 @@ defmodule Orb.InstructionSequence do
   ## Examples
 
       iex> Orb.InstructionSequence.concat(Orb.InstructionSequence.empty(), Orb.InstructionSequence.empty())
-      %Orb.InstructionSequence{type: :nop, body: []}
+      Orb.InstructionSequence.empty()
 
       iex> Orb.InstructionSequence.concat(Orb.InstructionSequence.new([Orb.Instruction.i32(:const, 1)]), Orb.InstructionSequence.new([Orb.Instruction.f32(:const, 2.0)]))
-      %Orb.InstructionSequence{type: :f32, body: [
+      %Orb.InstructionSequence{push_type: :f32, body: [
         Orb.Instruction.i32(:const, 1),
         Orb.Instruction.f32(:const, 2.0)
       ]}
@@ -73,7 +124,7 @@ defmodule Orb.InstructionSequence do
   """
   def concat(first, second) do
     %__MODULE__{
-      type: second.type,
+      push_type: second.push_type,
       body: first.body ++ second.body
     }
   end
@@ -104,14 +155,14 @@ defmodule Orb.InstructionSequence do
 
   defimpl Orb.TypeNarrowable do
     def type_narrow_to(
-          %Orb.InstructionSequence{type: current_type, body: [single]} = seq,
+          %Orb.InstructionSequence{push_type: current_type, body: [single]} = seq,
           narrower_type
         ) do
       case Ops.types_compatible?(current_type, narrower_type) do
         true ->
           %{
             seq
-            | type: narrower_type,
+            | push_type: narrower_type,
               body: [Orb.TypeNarrowable.type_narrow_to(single, narrower_type)]
           }
 

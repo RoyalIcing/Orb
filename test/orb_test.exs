@@ -380,7 +380,7 @@ defmodule OrbTest do
 
     wasm = SingleFunc.__wasm_module__()
 
-    assert wasm == %Orb.ModuleDefinition{
+    assert wasm === %Orb.ModuleDefinition{
              name: "SingleFunc",
              body: [
                %Orb.Func{
@@ -389,9 +389,9 @@ defmodule OrbTest do
                  result: Orb.I32,
                  local_types: [],
                  body: %Orb.InstructionSequence{
-                   type: Orb.I32,
+                   push_type: Orb.I32,
                    body: [
-                     %Orb.Instruction{type: :i32, operation: :const, operands: [42]}
+                     %Orb.Instruction{push_type: :i32, operation: :const, operands: [42]}
                    ]
                  },
                  exported_names: ["answer"]
@@ -833,7 +833,7 @@ defmodule OrbTest do
       def table_func_keys, do: [:good, :bad]
 
       def call(elem_index) do
-        Table.call_indirect(type_name(), elem_index)
+        Table.call_indirect(wasm_type(), type_name(), elem_index)
       end
     end
 

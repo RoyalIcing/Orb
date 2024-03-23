@@ -531,26 +531,26 @@ defmodule Orb do
   defmodule VariableReference do
     @moduledoc false
 
-    defstruct [:global_or_local, :identifier, :type]
+    defstruct [:global_or_local, :identifier, :push_type]
 
     alias Orb.Instruction
 
     def global(identifier, type) do
-      %__MODULE__{global_or_local: :global, identifier: identifier, type: type}
+      %__MODULE__{global_or_local: :global, identifier: identifier, push_type: type}
     end
 
     def local(identifier, type) do
-      %__MODULE__{global_or_local: :local, identifier: identifier, type: type}
+      %__MODULE__{global_or_local: :local, identifier: identifier, push_type: type}
     end
 
     def set(
-          %__MODULE__{global_or_local: :local, identifier: identifier, type: type},
+          %__MODULE__{global_or_local: :local, identifier: identifier, push_type: type},
           new_value
         ) do
       Instruction.local_set(type, identifier, new_value)
     end
 
-    def as_set(%__MODULE__{global_or_local: :local, identifier: identifier, type: type}) do
+    def as_set(%__MODULE__{global_or_local: :local, identifier: identifier, push_type: type}) do
       Instruction.local_set(type, identifier)
     end
 
@@ -558,7 +558,8 @@ defmodule Orb do
 
     @impl Access
     # TODO: I think this should only live on custom types like UnsafePointer
-    def fetch(%__MODULE__{global_or_local: :local, identifier: _identifier, type: :i32} = ref,
+    def fetch(
+          %__MODULE__{global_or_local: :local, identifier: _identifier, push_type: :i32} = ref,
           at: offset
         ) do
       ast = Instruction.i32(:load, Instruction.i32(:add, ref, offset))
@@ -566,7 +567,7 @@ defmodule Orb do
     end
 
     def fetch(
-          %__MODULE__{global_or_local: :local, identifier: _identifier, type: mod} = ref,
+          %__MODULE__{global_or_local: :local, identifier: _identifier, push_type: mod} = ref,
           key
         ) do
       mod.fetch(ref, key)
@@ -778,6 +779,7 @@ defmodule Orb do
         unquote(pre)
 
         unquote(Orb.DSL.do_snippet(locals, block_items))
+        |> Orb.InstructionSequence.new()
       end
     end
   end

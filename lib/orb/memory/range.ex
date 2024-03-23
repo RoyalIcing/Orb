@@ -9,7 +9,7 @@ defmodule Orb.Memory.Range do
       byte_length::unsigned-little-integer-size(32)>>
   end
 
-  def from(byte_offset = %{type: _}, byte_length = %{type: _}) do
+  def from(byte_offset = %{push_type: _}, byte_length = %{push_type: _}) do
     byte_length
     |> I64.extend_i32_u()
     |> I64.or(
@@ -24,7 +24,7 @@ defmodule Orb.Memory.Range do
     byte_offset
   end
 
-  def get_byte_offset(range = %{type: _}) do
+  def get_byte_offset(range = %{push_type: _}) do
     I64.shr_u(range, 32) |> I32.wrap_i64()
   end
 
@@ -34,7 +34,7 @@ defmodule Orb.Memory.Range do
     byte_length
   end
 
-  def get_byte_length(range = %{type: _}) do
+  def get_byte_length(range = %{push_type: _}) do
     I32.wrap_i64(range)
   end
 end

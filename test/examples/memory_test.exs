@@ -52,6 +52,8 @@ defmodule Examples.MemoryTest do
       Memory.pages(1)
 
       defw example() do
+        # TODO: we should add a function to convert a string to a I32.U8.UnsafePointer
+        # Or just use Memory.Range
         Copying.memcpy(0x400, ~S"hello", 3)
       end
     end

@@ -48,7 +48,10 @@ defmodule Orb.Ops do
   def to_primitive_type(type) when is_primitive_type(type), do: type
   def to_primitive_type(type) when is_effect(type), do: type
   def to_primitive_type(type) when type in @elixir_types, do: type
+  def to_primitive_type(nil), do: :nop
   def to_primitive_type(:nop), do: :nop
+  def to_primitive_type(:trap), do: :trap
+  def to_primitive_type(%{result: result}), do: result
 
   def to_primitive_type(type) when is_tuple(type) do
     for nested <- Tuple.to_list(type) do
@@ -83,15 +86,33 @@ defmodule Orb.Ops do
 
   def typeof(n) when is_integer(n), do: Elixir.Integer
   def typeof(n) when is_float(n), do: Elixir.Float
-  def typeof(%{type: type}), do: type
-  def typeof(_), do: :unknown_effect
+  def typeof(%{push_type: type}), do: type
+  def typeof(%{type_signature: type_signature}), do: %{type_signature: type_signature}
+  def typeof(%{if: _}), do: :control
+  def typeof(str) when is_binary(str), do: :i32
+  # def typeof(_), do: :unknown_effect
 
   def typeof(value, :primitive), do: typeof(value) |> to_primitive_type()
 
+  def pop_push_of(n) when is_integer(n), do: {nil, Elixir.Integer}
+  def pop_push_of(n) when is_float(n), do: {nil, Elixir.Float}
+  def pop_push_of(%{pop_type: pop_type, push_type: push_type}), do: {pop_type, push_type}
+  def pop_push_of(%{push_type: push_type}), do: {nil, push_type}
+  # Orb.Loop.Branch, Orb.Block.Branch
+  def pop_push_of(%{if: _}), do: {nil, nil}
+  # Orb.Control.Return
+  def pop_push_of(%{body: nil}), do: {nil, nil}
+  def pop_push_of(%{body: body}), do: pop_push_of(body)
+  # TODO: String64
+  def pop_push_of(str) when is_binary(str), do: {nil, Process.get(Orb.StringConstantType, :i32)}
+
   def extract_common_type(a, b) do
-    case {typeof(a, :primitive), typeof(b, :primitive)} do
+    {nil, push_a} = pop_push_of(a)
+    {nil, push_b} = pop_push_of(b)
+
+    case {to_primitive_type(push_a), to_primitive_type(push_b)} do
       {same, same} -> same
-      {a, b} when is_effect(a) and is_effect(b) -> :unknown_effect
+      {a, b} when is_effect(a) and is_effect(b) -> nil
       {type, Elixir.Integer} when type in @integer_types -> type
       {Elixir.Integer, type} when type in @integer_types -> type
       {type, Elixir.Float} when type in @float_types -> type

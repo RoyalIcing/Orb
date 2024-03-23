@@ -32,22 +32,24 @@ defmodule I32ConveniencesTest do
   end
 
   test "url safe characters" do
-    assert Wasm.call(URLEncoding, :is_url_safe?, ?a) == 1
-    assert Wasm.call(URLEncoding, :is_url_safe?, ?z) == 1
-    assert Wasm.call(URLEncoding, :is_url_safe?, ?A) == 1
-    assert Wasm.call(URLEncoding, :is_url_safe?, ?Z) == 1
-    assert Wasm.call(URLEncoding, :is_url_safe?, ?0) == 1
-    assert Wasm.call(URLEncoding, :is_url_safe?, ?9) == 1
-    assert Wasm.call(URLEncoding, :is_url_safe?, ?~) == 1
-    assert Wasm.call(URLEncoding, :is_url_safe?, ?_) == 1
-    assert Wasm.call(URLEncoding, :is_url_safe?, ?-) == 1
-    assert Wasm.call(URLEncoding, :is_url_safe?, ?.) == 1
+    wat = Orb.to_wat(URLEncoding)
+    assert Wasm.call(wat, :is_url_safe?, ?a) == 1
+    assert Wasm.call(wat, :is_url_safe?, ?z) == 1
+    assert Wasm.call(wat, :is_url_safe?, ?A) == 1
+    assert Wasm.call(wat, :is_url_safe?, ?Z) == 1
+    assert Wasm.call(wat, :is_url_safe?, ?0) == 1
+    assert Wasm.call(wat, :is_url_safe?, ?9) == 1
+    assert Wasm.call(wat, :is_url_safe?, ?~) == 1
+    assert Wasm.call(wat, :is_url_safe?, ?_) == 1
+    assert Wasm.call(wat, :is_url_safe?, ?-) == 1
+    assert Wasm.call(wat, :is_url_safe?, ?.) == 1
   end
 
   test "url unsafe characters" do
-    assert Wasm.call(URLEncoding, :is_url_safe?, ??) == 0
-    assert Wasm.call(URLEncoding, :is_url_safe?, ?/) == 0
-    assert Wasm.call(URLEncoding, :is_url_safe?, ?*) == 0
+    wat = Orb.to_wat(URLEncoding)
+    assert Wasm.call(wat, :is_url_safe?, ??) == 0
+    assert Wasm.call(wat, :is_url_safe?, ?/) == 0
+    assert Wasm.call(wat, :is_url_safe?, ?*) == 0
   end
 
   defmodule Attrs do
@@ -76,7 +78,7 @@ defmodule I32ConveniencesTest do
     assert (OrbHelper.module_wat do
               use Orb
 
-              defw get_path(), I32.String, state: I32 do
+              defw get_path(), I32, state: I32 do
                 state = 0
 
                 I32.match state do

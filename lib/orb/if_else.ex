@@ -1,17 +1,21 @@
 defmodule Orb.IfElse do
   @moduledoc false
 
-  defstruct type: :unknown_effect, condition: nil, when_true: nil, when_false: nil
+  defstruct pop_type: nil,
+            push_type: nil,
+            condition: nil,
+            when_true: nil,
+            when_false: nil
 
   alias Orb.Ops
 
   def new(if_else = %__MODULE__{}, concat_true) when is_struct(concat_true) do
     when_true = Orb.InstructionSequence.concat(if_else.when_true, concat_true)
-    new(if_else.type, if_else.condition, when_true, if_else.when_false)
+    new(if_else.push_type, if_else.condition, when_true, if_else.when_false)
   end
 
   def new(condition, when_true) when is_struct(when_true) do
-    type = Ops.typeof(when_true)
+    {_, type} = Ops.pop_push_of(when_true)
     new(type, condition, when_true, nil)
   end
 
@@ -19,28 +23,36 @@ defmodule Orb.IfElse do
       when is_struct(concat_true) and is_struct(concat_false) do
     when_true = Orb.InstructionSequence.concat(if_else.when_true, concat_true)
     when_false = Orb.InstructionSequence.concat(if_else.when_false, concat_false)
-    new(if_else.type, if_else.condition, when_true, when_false)
+    new(if_else.push_type, if_else.condition, when_true, when_false)
   end
 
   def new(condition, when_true, when_false) when is_struct(when_true) and is_struct(when_false) do
-    type = Ops.extract_common_type(when_true, when_false)
+    case {Ops.pop_push_of(when_true), Ops.pop_push_of(when_false)} do
+      {same, same = {nil, push_type}} ->
+        new(push_type, condition, when_true, when_false)
 
-    case type do
-      nil ->
-        raise Orb.TypeCheckError,
-          expected_type: Ops.typeof(when_true),
-          received_type: Ops.typeof(when_false),
-          instruction_identifier: "if/else"
+      {{nil, push_true}, {nil, push_false}} ->
+        cond do
+          Ops.types_compatible?(push_true, push_false) ->
+            new(push_true, condition, when_true, when_false)
 
-      type ->
-        new(type, condition, when_true, when_false)
+          true ->
+            raise Orb.TypeCheckError,
+              expected_type: push_true,
+              received_type: push_false,
+              instruction_identifier: :if
+        end
+
+      _ ->
+        raise ArgumentError,
+              "Cannot pop within if/else"
     end
   end
 
   def new(result, condition, when_true, when_false)
-      when not is_nil(result) and (is_struct(when_false) or is_nil(when_false)) do
+      when is_struct(when_false) or is_nil(when_false) do
     %__MODULE__{
-      type: result,
+      push_type: result,
       condition: condition,
       when_true: when_true,
       when_false: when_false
@@ -59,7 +71,7 @@ defmodule Orb.IfElse do
 
     def to_wat(
           %Orb.IfElse{
-            type: result,
+            push_type: result,
             condition: condition,
             when_true: when_true,
             when_false: when_false
@@ -74,7 +86,7 @@ defmodule Orb.IfElse do
           indent,
           "(if",
           case result do
-            effect when Ops.is_effect(effect) -> ""
+            nil -> ""
             type -> [" (result ", do_type(type), ")"]
           end,
           ?\n
@@ -97,12 +109,12 @@ defmodule Orb.IfElse do
   end
 
   defimpl Orb.TypeNarrowable do
-    def type_narrow_to(%Orb.IfElse{type: current_type} = if_else, narrower_type) do
+    def type_narrow_to(%Orb.IfElse{push_type: current_type} = if_else, narrower_type) do
       case Ops.types_compatible?(current_type, narrower_type) do
         true ->
           %{
             if_else
-            | type: narrower_type,
+            | push_type: narrower_type,
               when_true: Orb.TypeNarrowable.type_narrow_to(if_else.when_true, narrower_type),
               when_false: Orb.TypeNarrowable.type_narrow_to(if_else.when_false, narrower_type)
           }

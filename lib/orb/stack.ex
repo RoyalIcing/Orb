@@ -2,23 +2,32 @@ defmodule Orb.Stack do
   @moduledoc false
 
   defmodule Drop do
-    defstruct instruction: nil, count: 0
+    defstruct instruction: nil, count: 0, pop_type: nil, push_type: nil
 
     require alias Orb.Ops
 
     def new(instruction) do
-      type = Ops.typeof(instruction)
-      count = Ops.type_stack_count(type)
+      case Ops.pop_push_of(instruction) do
+        {nil, nil} ->
+          raise ArgumentError,
+            message: "Cannot drop instruction pushing nothing to the stack."
 
-      if count === 0 do
-        raise ArgumentError,
-          message: "Cannot drop #{type}."
+        {nil, type} when is_atom(type) ->
+          %__MODULE__{
+            instruction: instruction,
+            count: 1
+          }
+
+        {nil, type} when is_tuple(type) ->
+          %__MODULE__{
+            instruction: instruction,
+            count: tuple_size(type)
+          }
+
+        {pop, _} ->
+          raise ArgumentError,
+            message: "Cannot drop instruction that is already popping #{pop} from the stack."
       end
-
-      %__MODULE__{
-        instruction: instruction,
-        count: count
-      }
     end
 
     defimpl Orb.ToWat do

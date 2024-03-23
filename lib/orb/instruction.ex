@@ -1,30 +1,13 @@
 defmodule Orb.Instruction do
-  defstruct [:type, :operation, :operands]
+  defstruct [:pop_type, :push_type, :operation, :operands]
 
   require Orb.Ops, as: Ops
   alias Orb.Constants
-
-  @types [:i64, :i32, :f64, :f32, :local_effect, :global_effect, :memory_effect, :unknown_effect]
 
   # def new(type, operation, operands \\ [])
   def new(type, operation), do: new(type, operation, [])
 
   def new(type, operation, operands)
-
-  def new(type, {:call, param_types, name} = operation, params),
-    do: %__MODULE__{
-      type: type,
-      operation: operation,
-      operands: type_check_call!(param_types, name, params)
-    }
-
-  def new(type, operation, operands) when type in @types do
-    %__MODULE__{
-      type: type,
-      operation: operation,
-      operands: type_check_operands!(type, operation, operands)
-    }
-  end
 
   def new(Elixir.Integer, _, _) do
     raise "Can’t create an instruction for Elixir.Integer, need concrete type like Orb.I64."
@@ -34,27 +17,18 @@ defmodule Orb.Instruction do
     raise "Can’t create an instruction for Elixir.Float, need concrete type like Orb.F64."
   end
 
-  def new(nil, operation, operands) when is_list(operands) do
-    raise "Can’t create an instruction for nil, need :unknown_effect instead. #{inspect(operation)} #{inspect(operands)}"
-  end
-
-  def new(type, operation, operands) when is_atom(type) and is_list(operands) do
-    # type = Orb.CustomType.resolve!(type)
-
-    %__MODULE__{
-      type: type,
+  def new(type, {:call, param_types, name} = operation, params),
+    do: %__MODULE__{
+      push_type: type,
       operation: operation,
-      # TODO: type check custom types.
-      operands: operands |> Enum.map(&Constants.expand_if_needed/1)
+      operands: type_check_call!(param_types, name, params)
     }
-  end
 
-  def new(type, operation, operands) when is_tuple(type) and is_list(operands) do
+  def new(type, operation, operands) do
     %__MODULE__{
-      type: type,
+      push_type: type,
       operation: operation,
-      # TODO: type check function.
-      operands: operands |> Enum.map(&Constants.expand_if_needed/1)
+      operands: type_check_operands!(type, operation, operands)
     }
   end
 
@@ -68,14 +42,15 @@ defmodule Orb.Instruction do
 
   def wrap_constant!(type, value) when is_number(value),
     do: %__MODULE__{
-      type: type,
+      push_type: type,
       operation: :const,
       operands: [value]
     }
 
-  def wrap_constant!(type, %{type: type} = value), do: value
+  def wrap_constant!(type, %{push_type: type} = value), do: value
 
-  def wrap_constant!(type_a, %{type: type_b} = value) do
+  # TODO: remove
+  def wrap_constant!(type_a, %{push_type: type_b} = value) do
     case Ops.types_compatible?(type_a, type_b) do
       true ->
         value
@@ -103,6 +78,7 @@ defmodule Orb.Instruction do
   def f32(operation, a), do: new(:f32, operation, [a])
   def f32(operation, a, b), do: new(:f32, operation, [a, b])
 
+  # TODO: remove call()
   def call(f), do: new(:unknown_effect, {:call, f})
   def call(f, args) when is_list(args), do: new(:unknown_effect, {:call, f}, args)
 
@@ -114,16 +90,23 @@ defmodule Orb.Instruction do
   def local_get(type, local_name), do: new(type, {:local_get, local_name})
   def local_tee(type, local_name, value), do: new(type, {:local_tee, local_name}, [value])
 
-  def local_set(type, local_name),
-    do: new(:local_effect, {:local_set, local_name, type}, [])
+  def local_set(type, local_name) do
+    %__MODULE__{
+      pop_type: type,
+      operation: {:local_set, local_name, type},
+      operands: []
+    }
+  end
 
-  def local_set(type, local_name, value),
-    do: new(:local_effect, {:local_set, local_name, type}, [value])
+  def local_set(type, local_name, value) do
+    new(nil, {:local_set, local_name, type}, [value])
+  end
 
   def global_get(type, global_name), do: new(type, {:global_get, global_name})
 
-  def global_set(type, global_name, value),
-    do: new(:global_effect, {:global_set, global_name, type}, [value])
+  def global_set(type, global_name, value) do
+    new(nil, {:global_set, global_name, type}, [value])
+  end
 
   @types_to_stores %{
     i32: %{store: true, store8: true, store16: true},
@@ -137,7 +120,7 @@ defmodule Orb.Instruction do
              is_map_key(:erlang.map_get(type, @types_to_stores), store) do
     offset = Keyword.fetch!(opts, :offset)
     value = Keyword.fetch!(opts, :value)
-    new(:memory_effect, {type, store}, [offset, value])
+    new(nil, {type, store}, [offset, value])
   end
 
   def memory_size(), do: new(:i32, {:memory, :size}, [])
@@ -157,8 +140,9 @@ defmodule Orb.Instruction do
       received_type =
         cond do
           is_integer(param) -> Elixir.Integer
+          # TODO: Change to Elixir.Float
           is_float(param) -> :f32
-          %{type: type} = param -> type
+          %{push_type: type} = param -> type
         end
 
       types_must_match!(expected_type, received_type, "call #{name} param #{index}")
@@ -173,6 +157,7 @@ defmodule Orb.Instruction do
       operand = Constants.expand_if_needed(operand)
 
       case type_check_operand!(type, operation, operand, index) do
+        # TODO: might be able to remove this?
         nil ->
           operand
 
@@ -190,10 +175,10 @@ defmodule Orb.Instruction do
       cond do
         # is_integer(number) -> :i32
         is_integer(number) -> Elixir.Integer
+        # TODO: F64
         is_float(number) -> :f32
       end
 
-    # type_check_operand!(type, op, %{type: received_type}, param_index)
     types_must_match!(expected_type, received_type, "#{type}.#{op}")
 
     case expected_type do
@@ -208,7 +193,7 @@ defmodule Orb.Instruction do
     end
   end
 
-  defp type_check_operand!(:i32, op, %{type: received_type} = operand, param_index)
+  defp type_check_operand!(:i32, op, %{push_type: received_type} = operand, param_index)
        when is_atom(op) do
     expected_type = Ops.i32_param_type!(op, param_index)
 
@@ -224,7 +209,7 @@ defmodule Orb.Instruction do
     wrap_constant!(expected_type, operand)
   end
 
-  defp type_check_operand!(:i64, op, %{type: received_type} = operand, param_index)
+  defp type_check_operand!(:i64, op, %{push_type: received_type} = operand, param_index)
        when is_atom(op) do
     expected_type = Ops.i64_param_type!(op, param_index)
 
@@ -241,7 +226,7 @@ defmodule Orb.Instruction do
   end
 
   defp type_check_operand!(
-         :local_effect,
+         nil,
          {:local_set, local_name, expected_type},
          operand,
          0
@@ -254,7 +239,7 @@ defmodule Orb.Instruction do
   end
 
   defp type_check_operand!(
-         :global_effect,
+         nil,
          {:global_set, global_name, expected_type},
          operand,
          0
@@ -267,7 +252,7 @@ defmodule Orb.Instruction do
   end
 
   defp type_check_operand!(
-         :memory_effect,
+         nil,
          {:i32, :store},
          operand,
          1
@@ -283,7 +268,7 @@ defmodule Orb.Instruction do
     operand
   end
 
-  defp get_operand_type(%{type: received_type}), do: received_type
+  defp get_operand_type(%{push_type: received_type}), do: received_type
   defp get_operand_type(n) when is_integer(n), do: Elixir.Integer
   defp get_operand_type(n) when is_float(n), do: Elixir.Float
 
@@ -411,7 +396,7 @@ defmodule Orb.Instruction do
 
     def to_wat(
           %Orb.Instruction{
-            type: :memory_effect,
+            push_type: nil,
             operation: {type, store},
             operands: operands
           },
@@ -430,7 +415,7 @@ defmodule Orb.Instruction do
 
     def to_wat(
           %Orb.Instruction{
-            type: :i32,
+            push_type: :i32,
             operation: {:memory, memory_op},
             operands: operands
           },
@@ -447,7 +432,7 @@ defmodule Orb.Instruction do
 
     def to_wat(
           %Orb.Instruction{
-            type: type,
+            push_type: type,
             operation: :const,
             operands: [number]
           },
@@ -465,7 +450,7 @@ defmodule Orb.Instruction do
 
     def to_wat(
           %Orb.Instruction{
-            type: type,
+            push_type: type,
             operation: operation,
             operands: operands
           },
@@ -497,7 +482,7 @@ defmodule Orb.Instruction do
 
     def to_wasm(
           %Orb.Instruction{
-            type: type,
+            push_type: type,
             operation: :const,
             operands: [number]
           },

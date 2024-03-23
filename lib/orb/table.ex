@@ -114,7 +114,9 @@ defmodule Orb.Table do
   # end
 
   defmodule CallIndirect do
-    defstruct type_signature: nil,
+    defstruct pop_type: nil,
+              push_type: nil,
+              type_signature: nil,
               table_index: 0,
               arguments: []
 
@@ -173,35 +175,33 @@ defmodule Orb.Table do
     }
   end
 
-  def call_indirect(type_signature, table_index) do
-    %CallIndirect{type_signature: type_signature, table_index: table_index}
+  def call_indirect(func_type, type_signature, table_index) do
+    do_call_indirect(func_type, type_signature, table_index, [])
   end
 
-  def call_indirect(type_signature, table_index, arg1) do
-    %CallIndirect{type_signature: type_signature, table_index: table_index, arguments: [arg1]}
+  def call_indirect(func_type, type_signature, table_index, arg1) do
+    do_call_indirect(func_type, type_signature, table_index, [arg1])
   end
 
-  def call_indirect(type_signature, table_index, arg1, arg2) do
+  def call_indirect(func_type, type_signature, table_index, arg1, arg2) do
+    do_call_indirect(func_type, type_signature, table_index, [arg1, arg2])
+  end
+
+  def call_indirect(func_type, type_signature, table_index, arg1, arg2, arg3) do
+    do_call_indirect(func_type, type_signature, table_index, [arg1, arg2, arg3])
+  end
+
+  def call_indirect(func_type, type_signature, table_index, arg1, arg2, arg3, arg4) do
+    do_call_indirect(func_type, type_signature, table_index, [arg1, arg2, arg3, arg4])
+  end
+
+  defp do_call_indirect(func_type = %Orb.Func.Type{}, type_signature, table_index, arguments) do
     %CallIndirect{
+      pop_type: if(func_type.params, do: for(param <- func_type.params, do: param.type)),
+      push_type: func_type.result,
       type_signature: type_signature,
       table_index: table_index,
-      arguments: [arg1, arg2]
-    }
-  end
-
-  def call_indirect(type_signature, table_index, arg1, arg2, arg3) do
-    %CallIndirect{
-      type_signature: type_signature,
-      table_index: table_index,
-      arguments: [arg1, arg2, arg3]
-    }
-  end
-
-  def call_indirect(type_signature, table_index, arg1, arg2, arg3, arg4) do
-    %CallIndirect{
-      type_signature: type_signature,
-      table_index: table_index,
-      arguments: [arg1, arg2, arg3, arg4]
+      arguments: arguments
     }
   end
 end

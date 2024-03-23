@@ -112,7 +112,6 @@ defmodule DefwTest do
     refute {:second, 0} in Visibilities.__info__(:functions)
 
     assert Visibilities.first() == %Orb.Instruction{
-             type: :unknown_effect,
              operation: {:call, [], :first},
              operands: []
            }

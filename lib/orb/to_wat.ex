@@ -22,7 +22,10 @@ defmodule Orb.ToWat.Helpers do
 
       # e.g. {I32, I32} or {F32, F32, F32}
       tuple when is_tuple(tuple) ->
-        tuple |> Tuple.to_list() |> Enum.map(&do_type/1) |> Enum.join(" ")
+        tuple
+        |> Tuple.to_list()
+        |> Enum.map(&do_type/1)
+        |> Enum.join(" ")
 
       type ->
         CustomType.resolve!(type) |> to_string()

@@ -125,8 +125,6 @@ defmodule Orb.ModuleDefinition do
   end
 
   defimpl Orb.ToWat do
-    alias Orb.ToWat.Instructions
-
     def to_wat(
           %Orb.ModuleDefinition{
             name: name,
@@ -178,16 +176,20 @@ defmodule Orb.ModuleDefinition do
 
     @wasm_prefix <<"\0asm", 0x01000000::32>>
 
+    @spec to_wasm(%Orb.ModuleDefinition{}, any()) :: [
+            <<_::64>> | [[binary() | list(), ...] | 1 | 3 | 7 | 10, ...],
+            ...
+          ]
     def to_wasm(
           %Orb.ModuleDefinition{
-            types: types,
-            table_size: table_size,
-            imports: imports,
-            globals: globals,
-            memory: memory,
-            constants: constants,
-            body: body,
-            data: data
+            types: _types,
+            table_size: _table_size,
+            imports: _imports,
+            globals: _globals,
+            memory: _memory,
+            constants: _constants,
+            body: _body,
+            data: _data
           },
           _
         ) do

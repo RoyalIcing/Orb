@@ -7,6 +7,8 @@ defmodule Orb.DSL do
   alias Orb.Ops
   require Ops
 
+  # TODO: remove func, funcp
+
   defmacro func(call, do: block) do
     define_func(call, :public, [], block, __CALLER__)
   end
@@ -166,7 +168,7 @@ defmodule Orb.DSL do
     block_items =
       List.wrap(
         case block do
-          {:__block__, _, items} -> items
+          {:__block__, _, items} -> List.flatten(items)
           single -> single
         end
       )
@@ -178,6 +180,7 @@ defmodule Orb.DSL do
 
     quote do
       with do
+        result = unquote(result_type)
         block_items = unquote(block_items)
 
         body_local_types =
@@ -195,9 +198,9 @@ defmodule Orb.DSL do
               {prefix, name} -> "#{prefix}.#{name}"
             end,
           params: unquote(params),
-          result: unquote(result_type),
+          result: result,
           local_types: local_types,
-          body: Orb.InstructionSequence.new(block_items),
+          body: Orb.InstructionSequence.new(result, block_items),
           exported_names: unquote(exported_names)
         }
         |> Orb.Func.narrow_if_needed()
@@ -431,29 +434,36 @@ defmodule Orb.DSL do
            when is_atom(identifier) do
     quote do
       with do
+        # FIXME: need to support not just I32 but at least I64
         var!(unquote(var)) = Orb.VariableReference.local(unquote(identifier), Orb.I32)
         %Range{first: first, last: last, step: 1} = unquote(source)
 
         Orb.InstructionSequence.new(
-          :unknown_effect,
+          nil,
           [
             Orb.Instruction.local_set(Orb.I32, unquote(identifier), first),
             %Orb.Loop{
               identifier: unquote(identifier),
               body:
-                Orb.InstructionSequence.new(:unknown_effect, [
-                  unquote(__get_block_items(block)),
-                  Orb.Instruction.local_set(
-                    Orb.I32,
-                    unquote(identifier),
-                    Orb.I32.add(Orb.Instruction.local_get(Orb.I32, unquote(identifier)), 1)
-                  ),
-                  %Orb.Loop.Branch{
-                    identifier: unquote(identifier),
-                    if:
-                      Orb.I32.le_u(Orb.Instruction.local_get(Orb.I32, unquote(identifier)), last)
-                  }
-                ])
+                Orb.InstructionSequence.new(
+                  nil,
+                  List.flatten([
+                    unquote(__get_block_items(block)),
+                    Orb.Instruction.local_set(
+                      Orb.I32,
+                      unquote(identifier),
+                      Orb.I32.add(Orb.Instruction.local_get(Orb.I32, unquote(identifier)), 1)
+                    ),
+                    %Orb.Loop.Branch{
+                      identifier: unquote(identifier),
+                      if:
+                        Orb.I32.le_u(
+                          Orb.Instruction.local_get(Orb.I32, unquote(identifier)),
+                          last
+                        )
+                    }
+                  ])
+                )
             }
           ],
           locals: [{unquote(identifier), Orb.I32}]
@@ -474,7 +484,7 @@ defmodule Orb.DSL do
 
         _ ->
           {quote bind_quoted: [source: source, item: item] do
-             Orb.VariableReference.set(item, source.type.value(source))
+             Orb.VariableReference.set(item, source.push_type.value(source))
            end, quote(do: unquote(item).identifier)}
       end
 
@@ -486,13 +496,15 @@ defmodule Orb.DSL do
               block_items: __get_block_items(block)
             ] do
         Orb.IfElse.new(
-          source.type.valid?(source),
-          Orb.InstructionSequence.new([
-            set_item,
-            block_items,
-            Orb.VariableReference.set(source, source.type.next(source)),
-            %Orb.Loop.Branch{identifier: identifier}
-          ])
+          source.push_type.valid?(source),
+          Orb.InstructionSequence.new(
+            List.flatten([
+              set_item,
+              block_items,
+              Orb.VariableReference.set(source, source.push_type.next(source)),
+              %Orb.Loop.Branch{identifier: identifier}
+            ])
+          )
         )
       end
 
@@ -544,10 +556,12 @@ defmodule Orb.DSL do
           quote do:
                   Orb.IfElse.new(
                     unquote(condition),
-                    Orb.InstructionSequence.new([
-                      unquote(block_items),
-                      %Orb.Loop.Branch{identifier: unquote(identifier)}
-                    ])
+                    Orb.InstructionSequence.new(
+                      List.flatten([
+                        unquote(block_items),
+                        %Orb.Loop.Branch{identifier: unquote(identifier)}
+                      ])
+                    )
                   )
       end
 

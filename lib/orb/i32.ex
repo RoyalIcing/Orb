@@ -72,8 +72,8 @@ defmodule Orb.I32 do
             eq(value, item)
 
           _ ->
-            InstructionSequence.new(:i32, [eq(value, item), Instruction.i32(:or)])
-            # Instruction.i32(:or, eq(value, item))
+            # InstructionSequence.new(:i32, [eq(value, item), Instruction.i32(:or)])
+            Instruction.i32(:or, eq(value, item))
         end
       end
 
@@ -112,25 +112,31 @@ defmodule Orb.I32 do
           # _ ->
           # like an else clause
           [{:_, _, _}] ->
-            __get_block_items(result)
+            quote do: Orb.InstructionSequence.new(unquote(__get_block_items(result)))
 
           [match] ->
             quote do
               Orb.IfElse.new(
+                nil,
                 Orb.I32.eq(unquote(value), unquote(match)),
                 Orb.InstructionSequence.new(
+                  :i32,
                   unquote(__get_block_items(result)) ++ [Orb.Control.break(:i32_match)]
-                )
+                ),
+                nil
               )
             end
 
           matches ->
             quote do
               Orb.IfElse.new(
+                nil,
                 Orb.I32.in?(unquote(value), unquote(matches)),
                 Orb.InstructionSequence.new(
+                  :i32,
                   unquote(__get_block_items(result)) ++ [Orb.Control.break(:i32_match)]
-                )
+                ),
+                nil
               )
             end
         end
@@ -149,7 +155,7 @@ defmodule Orb.I32 do
         require Orb.Control
 
         Orb.Control.block :i32_match, Orb.I32 do
-          unquote(statements)
+          Orb.InstructionSequence.new(nil, unquote(statements))
           unquote(final_instruction)
         end
       end
@@ -190,7 +196,7 @@ defmodule Orb.I32 do
         require Orb.Control
 
         Orb.Control.block :i32_map, Orb.I32 do
-          unquote(statements)
+          Orb.InstructionSequence.new(unquote(statements))
           unquote(final_instruction)
         end
       end

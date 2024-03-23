@@ -34,7 +34,8 @@ defmodule Examples.ArenaTest do
 
     defw too_many(), i: I32 do
       loop AllocManyTimes do
-        _ = First.alloc(16)
+        # _ = First.alloc(16)
+        First.alloc(16) |> Orb.Stack.drop()
 
         i = i + 1
         AllocManyTimes.continue(if: i <= 2 * 64 * 1024 / 16)

@@ -226,7 +226,7 @@ defmodule Examples.Memory do
 
       loop Iterate, result: I32 do
         # return(prev, if: I32.eqz(current))
-        if I32.eqz(current), do: return(prev)
+        if(I32.eqz(current), do: return(prev))
 
         next = current[at!: 1]
         current[at!: 1] = prev
