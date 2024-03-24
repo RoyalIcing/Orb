@@ -89,7 +89,7 @@ defmodule Orb.IfElse do
             condition: condition,
             when_true: when_true,
             when_false: when_false
-          },
+          } = ast,
           indent
         )
         when not is_nil(condition) do
@@ -119,6 +119,10 @@ defmodule Orb.IfElse do
         end,
         [indent, ")"]
       ]
+    rescue
+      exception in [Orb.CustomType.InvalidError] ->
+        reraise Orb.ToWat.Error, [value: ast, exception: exception], __STACKTRACE__
+        # reraise exception, __STACKTRACE__
     end
   end
 

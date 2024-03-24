@@ -3,6 +3,18 @@ defprotocol Orb.ToWat do
   def to_wat(data, indent)
 end
 
+defmodule Orb.ToWat.Error do
+  defexception [:message, :exception]
+
+  @impl Exception
+  def exception(opts) do
+    exception = Keyword.fetch!(opts, :exception)
+    value = Keyword.fetch!(opts, :value)
+    msg = Exception.message(exception) <> " | Source AST: #{inspect(value)}"
+    %__MODULE__{message: msg, exception: exception}
+  end
+end
+
 defmodule Orb.ToWat.Helpers do
   alias Orb.CustomType
 
