@@ -142,7 +142,7 @@ defmodule Orb.I32.String do
 
     quote do
       Orb.Control.block :i32_string_match, I32 do
-        unquote(statements)
+        Orb.InstructionSequence.new(unquote(statements))
         unquote(final_instruction)
       end
     end
