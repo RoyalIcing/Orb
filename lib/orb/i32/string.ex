@@ -115,14 +115,17 @@ defmodule Orb.I32.String do
           # like an else clause
           [{:_, _, _}] ->
             quote do
-              unquote(Orb.__get_block_items(target))
+              Orb.InstructionSequence.new(unquote(Orb.__get_block_items(target)))
             end
 
           [match] ->
             quote do
               Orb.IfElse.new(
                 streq(unquote(value), unquote(match)),
-                [unquote(Orb.__get_block_items(target)), Orb.Control.break(:i32_string_match)]
+                Orb.InstructionSequence.new([
+                  unquote(Orb.__get_block_items(target)),
+                  Orb.Control.break(:i32_string_match)
+                ])
               )
             end
         end
@@ -133,8 +136,8 @@ defmodule Orb.I32.String do
 
     final_instruction =
       case has_catchall? do
-        false -> %Orb.Unreachable{}
-        true -> []
+        false -> quote do: %Orb.Unreachable{}
+        true -> quote do: Orb.InstructionSequence.empty()
       end
 
     quote do
