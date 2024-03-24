@@ -123,7 +123,7 @@ defmodule Orb.I32.String do
               Orb.IfElse.new(
                 streq(unquote(value), unquote(match)),
                 Orb.InstructionSequence.new([
-                  unquote(Orb.__get_block_items(target)),
+                  Orb.InstructionSequence.new(unquote(Orb.__get_block_items(target))),
                   Orb.Control.break(:i32_string_match)
                 ])
               )
