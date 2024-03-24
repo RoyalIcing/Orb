@@ -44,7 +44,7 @@ defmodule Orb.Control do
     quote do
       %Orb.Block{
         identifier: unquote(identifier),
-        result: unquote(result_type),
+        push_type: unquote(result_type),
         body: Orb.InstructionSequence.new(unquote(block_items))
       }
     end

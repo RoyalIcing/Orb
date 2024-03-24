@@ -100,10 +100,8 @@ defmodule Orb.Ops do
   def pop_push_of(%{pop_type: pop_type, push_type: push_type}), do: {pop_type, push_type}
   def pop_push_of(%{push_type: push_type}), do: {nil, push_type}
   # Orb.Loop.Branch, Orb.Block.Branch
+  # Probably should add a `control: :branch`, `control: :return` field.
   def pop_push_of(%{if: _}), do: {nil, nil}
-  # Orb.Control.Return
-  def pop_push_of(%{body: nil}), do: {nil, nil}
-  def pop_push_of(%{body: body}), do: pop_push_of(body)
   # TODO: String64
   def pop_push_of(str) when is_binary(str), do: {nil, Process.get(Orb.StringConstantType, :i32)}
 

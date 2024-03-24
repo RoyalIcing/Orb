@@ -1,13 +1,13 @@
 defmodule Orb.Block do
   @moduledoc false
 
-  defstruct [:identifier, :result, :body]
+  defstruct [:identifier, :push_type, :body]
 
   defimpl Orb.ToWat do
     alias Orb.ToWat.Helpers
 
     def to_wat(
-          %Orb.Block{identifier: identifier, result: result, body: body},
+          %Orb.Block{identifier: identifier, push_type: push_type, body: body},
           indent
         ) do
       [
@@ -15,7 +15,7 @@ defmodule Orb.Block do
           indent,
           "(block $",
           to_string(identifier),
-          if(result, do: [" (result ", Helpers.do_type(result), ")"], else: []),
+          if(push_type, do: [" (result ", Helpers.do_type(push_type), ")"], else: []),
           "\n"
         ],
         Orb.ToWat.to_wat(body, "  " <> indent),

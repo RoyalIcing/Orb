@@ -1,5 +1,5 @@
 defmodule Orb.Control.Return do
-  defstruct body: :unset
+  defstruct body: :unset, push_type: nil
 
   def new(), do: %__MODULE__{body: nil}
   def new(value), do: %__MODULE__{body: value}
