@@ -8,10 +8,15 @@ defmodule Orb.IfElse do
             when_false: nil
 
   alias Orb.Ops
+  alias Orb.InstructionSequence
+
+  def new(%InstructionSequence{body: [if_else = %__MODULE__{}]}, concat_true) do
+    new(if_else, concat_true)
+  end
 
   def new(if_else = %__MODULE__{}, concat_true) when is_struct(concat_true) do
-    when_true = Orb.InstructionSequence.concat(if_else.when_true, concat_true)
-    new(if_else.push_type, if_else.condition, when_true, if_else.when_false)
+    when_true = InstructionSequence.concat(if_else.when_true, concat_true)
+    new(if_else.condition, when_true, if_else.when_false)
   end
 
   def new(condition, when_true) when is_struct(when_true) do
@@ -19,11 +24,20 @@ defmodule Orb.IfElse do
     new(type, condition, when_true, nil)
   end
 
+  def new(%InstructionSequence{body: [if_else = %__MODULE__{}]}, concat_true, concat_false) do
+    new(if_else, concat_true, concat_false)
+  end
+
   def new(if_else = %__MODULE__{}, concat_true, concat_false)
       when is_struct(concat_true) and is_struct(concat_false) do
-    when_true = Orb.InstructionSequence.concat(if_else.when_true, concat_true)
-    when_false = Orb.InstructionSequence.concat(if_else.when_false, concat_false)
-    new(if_else.push_type, if_else.condition, when_true, when_false)
+    when_true = InstructionSequence.concat(if_else.when_true, concat_true)
+    when_false = InstructionSequence.concat(if_else.when_false, concat_false)
+    new(if_else.condition, when_true, when_false)
+  end
+
+  def new(condition, when_true, %InstructionSequence{body: []})
+      when is_struct(when_true) do
+    new(condition, when_true)
   end
 
   def new(condition, when_true, when_false) when is_struct(when_true) and is_struct(when_false) do
@@ -133,7 +147,7 @@ defmodule Orb.IfElse do
 
     import Kernel, except: [if: 2, unless: 2]
 
-    require Orb.InstructionSequence |> alias
+    require InstructionSequence |> alias
 
     # Multi-line
     defmacro if(condition, [result: result], do: when_true, else: when_false) do

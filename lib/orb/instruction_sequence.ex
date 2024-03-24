@@ -50,6 +50,7 @@ defmodule Orb.InstructionSequence do
   """
 
   def new([instruction_sequence = %__MODULE__{}]), do: instruction_sequence
+  # def new([instruction = %{push_type: _}]), do: instruction
 
   def new(instructions) when is_list(instructions) do
     push_type = do_pop_push_type([], instructions)
@@ -102,7 +103,7 @@ defmodule Orb.InstructionSequence do
       {{nil, push}, stack} ->
         do_pop_push_type(type_to_list(push) ++ stack, rest)
 
-      {{pop, push}, [expected_type | _]} ->
+      {{pop, push}, [expected_type | stack]} ->
         cond do
           Ops.is_primitive_type(expected_type) and Ops.to_primitive_type(pop) === expected_type ->
             do_pop_push_type(type_to_list(push) ++ stack, rest)
@@ -121,18 +122,29 @@ defmodule Orb.InstructionSequence do
       iex> Orb.InstructionSequence.concat(Orb.InstructionSequence.empty(), Orb.InstructionSequence.empty())
       Orb.InstructionSequence.empty()
 
+      iex> Orb.InstructionSequence.concat(nil, nil)
+      Orb.InstructionSequence.empty()
+
       iex> Orb.InstructionSequence.concat(Orb.InstructionSequence.new([Orb.Instruction.i32(:const, 1)]), Orb.InstructionSequence.new([Orb.Instruction.f32(:const, 2.0)]))
-      %Orb.InstructionSequence{push_type: :f32, body: [
+      %Orb.InstructionSequence{push_type: {:i32, :f32}, body: [
         Orb.Instruction.i32(:const, 1),
         Orb.Instruction.f32(:const, 2.0)
       ]}
 
+      iex> Orb.InstructionSequence.concat(Orb.InstructionSequence.new([Orb.Instruction.i32(:const, 1)]), nil)
+      %Orb.InstructionSequence{push_type: :i32, body: [
+        Orb.Instruction.i32(:const, 1)
+      ]}
+
   """
-  def concat(first, second) do
-    %__MODULE__{
-      push_type: second.push_type,
-      body: first.body ++ second.body
-    }
+  def concat(first, second)
+
+  def concat(nil, nil), do: empty()
+  def concat(nil, seq = %__MODULE__{}), do: seq
+  def concat(seq = %__MODULE__{}, nil), do: seq
+
+  def concat(first = %__MODULE__{}, second = %__MODULE__{}) do
+    new(first.body ++ second.body)
   end
 
   def expand(%__MODULE__{} = func) do
