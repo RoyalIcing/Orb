@@ -47,14 +47,12 @@ defmodule Orb do
     I32.global(count: 0, tally: 0)
 
     defw insert(element: I32) do
-      I32.add(global_get(:count), 1)
-      global_set(:count)
-      I32.add(global_get(:tally), element)
-      global_set(:tally)
+      Orb.Instruction.global_set(Orb.I32, :count, I32.add(Orb.Instruction.global_get(Orb.I32, :count), 1))
+      Orb.Instruction.global_set(Orb.I32, :tally, I32.add(Orb.Instruction.global_get(Orb.I32, :tally), element))
     end
 
     defw calculate_mean(), I32 do
-      I32.div_s(global_get(:tally), global_get(:count))
+      I32.div_s(Orb.Instruction.global_get(Orb.I32, :tally), Orb.Instruction.global_get(Orb.I32, :count))
     end
   end
   ```
