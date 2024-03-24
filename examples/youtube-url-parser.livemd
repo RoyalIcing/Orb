@@ -2,15 +2,8 @@
 
 ```elixir
 Mix.install([
-  # {:orb, "~> 0.0.36"},
-  # :silver_orb,
-  {:orb,
-   git: "https://github.com/RoyalIcing/Orb.git",
-   ref: "c27095a93bb63e12108fd14a46dfc35a2bedb4f9",
-   override: true},
-  {:silver_orb,
-   git: "https://github.com/RoyalIcing/SilverOrb.git",
-   ref: "9ae96cc63600fc8120e97431aceff329829a605f"},
+  {:orb, "~> 0.0.37"},
+  {:silver_orb, "~> 0.0.7"},
   {:wasmex, "~> 0.8.3"},
   {:mime, "~> 2.0.5"},
   {:kino, "~> 0.12.0"}
@@ -39,8 +32,7 @@ defmodule CharParser do
 
   def must(chars, offset_mut_ref, fail_instruction) when is_list(chars) do
     Orb.snippet do
-      may(chars, offset_mut_ref)
-      |> unless do
+      unless may(chars, offset_mut_ref) do
         fail_instruction
       end
     end
@@ -70,30 +62,40 @@ defmodule YouTubeURLParser do
 
   defw(input_offset(), I32, do: Input.Values.start_page_offset() * Memory.page_byte_size())
 
-  defw parse(), I32, input_offset: I32 do
+  defw parse(), I32, input_offset: I32.UnsafePointer do
     input_offset = Input.Values.start_page_offset() * Memory.page_byte_size()
+
+    # input_offset[~c|http|]
 
     Control.block OptionalScheme do
       CharParser.must(~c|http|, mut!(input_offset), OptionalScheme.break())
+      # unless CharParser.may(~c|http|, mut!(input_offset)), do: OptionalScheme.break()
       CharParser.may(~c|s|, mut!(input_offset))
       CharParser.must(~c|:|, mut!(input_offset), OptionalScheme.break())
     end
 
     CharParser.may(~c|//|, mut!(input_offset))
 
-    Control.block ShortDomain do
-      push(input_offset)
+    Control.block Final do
+      Control.block ShortDomain do
+        push(input_offset)
 
-      Control.block FullDomain do
-        CharParser.may(~c|www.|, mut!(input_offset))
-        CharParser.must(~c|youtube.com|, mut!(input_offset), FullDomain.break())
-        CharParser.must(~c|/watch?v=|, mut!(input_offset), FullDomain.break())
-        ShortDomain.break()
+        Control.block FullDomain do
+          CharParser.may(~c|www.|, mut!(input_offset))
+          CharParser.must(~c|youtube.com|, mut!(input_offset), FullDomain.break())
+          CharParser.must(~c|/watch?v=|, mut!(input_offset), FullDomain.break())
+          unless input_offset[at!: 0], do: FullDomain.break()
+          Final.break()
+        end
+
+        input_offset = Orb.Stack.pop(I32)
+
+        CharParser.must(~c|youtu.be/|, mut!(input_offset), ShortDomain.break())
+        unless input_offset[at!: 0], do: ShortDomain.break()
+        Final.break()
       end
 
-      input_offset = Orb.Stack.pop(Orb.I32)
-
-      CharParser.must(~c|youtu.be/|, mut!(input_offset), return(0))
+      return(0)
     end
 
     input_offset
@@ -124,6 +126,9 @@ end
 ## We can run the WebAssembly module in Elixir using Wasmex
 
 ```elixir
+# source = Orb.to_wat(YouTubeURLParser)
+# File.write!(Path.join([File.cwd!(), "Desktop", "youtube.wat"]), source)
+
 [
   "http://www.youtube.com/watch?v=hello",
   "https://www.youtube.com/watch?v=hello",
@@ -136,10 +141,8 @@ end
   "www.youtu.be/watch?v=hello",
   "https://www.youtube.com/watch",
   "https://www.youtube.com/watch?v=",
+  "https://youtu.be/",
   "hello"
 ]
 |> Enum.map(&YouTubeURLParser.run/1)
-
-# source = Orb.to_wat(YouTubeURLParser)
-# File.write!(Path.join([File.cwd!(), "Desktop", "youtube.wat"]), source)
 ```
