@@ -20,9 +20,9 @@ Write WebAssembly with the power of Elixir as your compiler:
 
 ## Libraries
 
-- Orb (alpha): Write WebAssembly 1.0 in Elixir
-- SilverOrb (work-in-progress): Batteries-included standard library for Orb
-- OrbExtismPDK (coming soon): Write Extism plugins in Elixir with Orb
+- **Orb** (alpha): Write WebAssembly 1.0 in Elixir.
+- [**SilverOrb**](https://github.com/RoyalIcing/SilverOrb) (work-in-progress): Batteries-included standard library for Orb.
+- OrbExtismPDK (coming soon): Write Extism plugins in Elixir with Orb.
 
 ## Installation
 
