@@ -2,8 +2,15 @@
 
 ```elixir
 Mix.install([
-  :orb,
-  :silver_orb,
+  # {:orb, "~> 0.0.36"},
+  # :silver_orb,
+  {:orb,
+   git: "https://github.com/RoyalIcing/Orb.git",
+   ref: "c27095a93bb63e12108fd14a46dfc35a2bedb4f9",
+   override: true},
+  {:silver_orb,
+   git: "https://github.com/RoyalIcing/SilverOrb.git",
+   ref: "9ae96cc63600fc8120e97431aceff329829a605f"},
   {:wasmex, "~> 0.8.3"},
   {:mime, "~> 2.0.5"},
   {:kino, "~> 0.12.0"}
@@ -16,22 +23,6 @@ Mix.install([
 defmodule CharParser do
   use Orb
 
-  def must(chars, offset_mut_ref, fail_instruction) when is_list(chars) do
-    Orb.snippet do
-      chars
-      |> Enum.with_index(fn char, index ->
-        Memory.load!(I32.U8, offset_mut_ref.read + index) === char
-      end)
-      |> Enum.reduce(&I32.band/2)
-      |> if do
-        offset_mut_ref.read + length(chars)
-        offset_mut_ref.write
-      else
-        fail_instruction
-      end
-    end
-  end
-
   def may(chars, offset_mut_ref) when is_list(chars) do
     Orb.snippet do
       chars
@@ -42,6 +33,15 @@ defmodule CharParser do
       |> if do
         offset_mut_ref.read + length(chars)
         offset_mut_ref.write
+      end
+    end
+  end
+
+  def must(chars, offset_mut_ref, fail_instruction) when is_list(chars) do
+    Orb.snippet do
+      may(chars, offset_mut_ref)
+      |> unless do
+        fail_instruction
       end
     end
   end
@@ -91,7 +91,7 @@ defmodule YouTubeURLParser do
         ShortDomain.break()
       end
 
-      input_offset = Orb.Stack.pop(:i32)
+      input_offset = Orb.Stack.pop(Orb.I32)
 
       CharParser.must(~c|youtu.be/|, mut!(input_offset), return(0))
     end
