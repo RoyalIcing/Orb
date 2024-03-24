@@ -102,8 +102,14 @@ defmodule Orb.InstructionSequence do
       {{nil, push}, stack} ->
         do_pop_push_type(type_to_list(push) ++ stack, rest)
 
-      {{pop, _push}, [expected_type | _]} ->
-        raise "Cannot pop #{pop} from stack, expected type #{expected_type}."
+      {{pop, push}, [expected_type | _]} ->
+        cond do
+          Ops.is_primitive_type(expected_type) and Ops.to_primitive_type(pop) === expected_type ->
+            do_pop_push_type(type_to_list(push) ++ stack, rest)
+
+          true ->
+            raise "Cannot pop #{pop} from stack, expected type #{expected_type}."
+        end
     end
   end
 
