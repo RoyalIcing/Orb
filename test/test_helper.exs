@@ -21,10 +21,4 @@ defmodule OrbHelper do
       unquote(mod).to_wat()
     end
   end
-
-  defmacro __using__(_) do
-    quote do
-      require OrbHelper
-    end
-  end
 end

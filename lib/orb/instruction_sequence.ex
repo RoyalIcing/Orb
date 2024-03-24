@@ -153,7 +153,12 @@ defmodule Orb.InstructionSequence do
             to_wat(instruction, indent)
 
           _ ->
-            [Instructions.do_wat(instruction, indent), "\n"]
+            # [Orb.ToWat.to_wat(instruction, indent), "\n"]
+            case Instructions.do_wat(instruction, indent) do
+              # "" -> ""
+              # [] -> ""
+              output -> [output, "\n"]
+            end
         end
       end
     end

@@ -46,7 +46,7 @@ defmodule Orb.Stack do
   end
 
   defmodule Pop do
-    defstruct type: nil, count: 0
+    defstruct pop_type: nil, push_type: nil, count: 0
 
     require alias Orb.Ops
 
@@ -54,7 +54,13 @@ defmodule Orb.Stack do
       count = type |> Ops.type_stack_count()
 
       %__MODULE__{
-        type: type,
+        # This instruction struct is weird. It essentially does nothing
+        # as WebAssembly automatically pops from the stack if it needs.
+        # So we pretend to pop and push the same type: effectively a nop.
+        # Other parts of the system need to see the type, say
+        # `Orb.Instruction.get_operand_type/1` so we fulfill that contract.
+        pop_type: type,
+        push_type: type,
         count: count
       }
     end
@@ -64,6 +70,13 @@ defmodule Orb.Stack do
     end
   end
 
+  @doc """
+  Drops the passed instruction from the stack, ignoring its resulting value.
+  """
   def drop(instruction), do: Drop.new(instruction)
+
+  @doc """
+  Pops the last value from the stack, useful for assigning it to a local.
+  """
   def pop(type), do: Pop.new(type)
 end

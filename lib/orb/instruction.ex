@@ -98,6 +98,15 @@ defmodule Orb.Instruction do
     }
   end
 
+  # When passing Orb.Stack.Pop
+  def local_set(type, local_name, %{pop_type: type}) when not is_nil(type) do
+    %__MODULE__{
+      pop_type: type,
+      operation: {:local_set, local_name, type},
+      operands: []
+    }
+  end
+
   def local_set(type, local_name, value) do
     new(nil, {:local_set, local_name, type}, [value])
   end

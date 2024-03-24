@@ -1,6 +1,6 @@
 defmodule I32ConveniencesTest do
   use ExUnit.Case, async: true
-  use OrbHelper
+  require OrbHelper
 
   alias OrbWasmtime.Wasm
 

@@ -4,6 +4,34 @@ defmodule LoopTest do
   import Orb, only: [to_wat: 1]
   alias OrbWasmtime.Wasm
 
+  test "block stack" do
+    require OrbHelper
+
+    assert (OrbHelper.module_wat do
+              use Orb
+
+              defw example(a: I32), b: I32 do
+                Control.block Outer do
+                  push(a)
+
+                  Control.block Inner do
+                  end
+
+                  # mut!(b).read_stack
+                  # Orb.Stack.pop(mut!(b))
+                  b = Orb.Stack.pop(I32)
+                end
+              end
+            end) =~ ~s"""
+               (block $Outer
+                 (local.get $a)
+                 (block $Inner
+                 )
+                 (local.set $b)
+               )
+           """
+  end
+
   test "loop through chars manually" do
     defmodule FileNameSafe do
       use Orb
