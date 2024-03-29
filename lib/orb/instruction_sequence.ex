@@ -1,6 +1,7 @@
 defmodule Orb.InstructionSequence do
   defstruct pop_type: nil,
             push_type: nil,
+            # control: nil,
             body: [],
             contains:
               %{
