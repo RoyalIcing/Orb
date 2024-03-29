@@ -127,6 +127,7 @@ defmodule Orb.Ops do
   defmacro i32(:store), do: @i32_store_ops |> Macro.escape()
   defmacro i32(:all), do: @i32_ops_all |> Macro.escape()
 
+  # FIXME: conditional ops like i64.eq and i64.ge_u return i32 not i64
   defmacro i64(arity_or_type)
   defmacro i64(1), do: @i64_ops_1 |> Macro.escape()
   defmacro i64(2), do: @i64_ops_2 |> Macro.escape()
