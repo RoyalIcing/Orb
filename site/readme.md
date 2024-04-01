@@ -8,9 +8,9 @@ It does this by leaning on Elixir's existing ecosystem:
 
 - Elixir’s composable module system
 - Elixir’s powerful macros
-- Elixir’s [package manager Hex](https://hex.pm)
+- Elixir’s [package manager Hex](https://hex.pm) for publishing your WebAssembly modules as reusable libraries.
 - Elixir’s [testing library ExUnit](https://hexdocs.pm/ex_unit/ExUnit.html)
-- Extensive ecosystem of libraries, all of which can be run at compile time for your WebAssembly module
+- Elixir’s existing ecosystem of libraries, all of which can be run at compile-time for your WebAssembly module
 - Elixir language servers in Visual Studio Code and Zed
 
 ## Platform agnostic
@@ -26,9 +26,9 @@ The strength of WebAssembly is that it can run anywhere:
 
 So unlike projects like [`wasm-bindgen`](https://github.com/rustwasm/wasm-bindgen) or [Spin](https://github.com/fermyon/spin) Orb doesn't generate boilerplate JavaScript bindings or plug into a hosted service.
 
-Orb lets you think and write in WebAssembly, working with the primitives it has via a little bit of Elixir sugar syntax.
+Orb lets you think and write in WebAssembly, working directly with the primitives it has, with a little bit of Elixir sugar syntax.
 
-It uses lightweight conventions that let it integrate into any platform. That way you can write once, and deploy anywhere.
+It uses lightweight conventions that let you integrate into any platform. That way you can write once, and then plugin anywhere.
 
 ## Example
 
