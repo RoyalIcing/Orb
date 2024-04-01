@@ -12,6 +12,7 @@
 
 - [Core WebAssembly](/concepts/core-webassembly)
 - [Elixir Compiler](/concepts/elixir-compiler)
+- [Platform Agnostic](/concepts/platform-agnostic)
 
 </details>
 
