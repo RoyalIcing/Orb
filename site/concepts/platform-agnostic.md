@@ -1,4 +1,4 @@
-# Platform agnostic
+# Platform Agnostic
 
 Orb is unlike other WebAssembly systems in that it’s not trying to take an existing model like Lambda and make it WebAssembly flavoured. It aims to be broader by being agnostic to a particular target platform.
 
