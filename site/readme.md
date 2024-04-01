@@ -1,9 +1,5 @@
 # Orb
 
-## Write once, install everywhere you are
-## Write once, add everywhere
-## Write once, sprinkle everywhere
-## Write once, deploy everywhere
 ## Elixir at compile time, WebAssembly at runtime
 
 Orb is a fresh way to write WebAssembly. Instead of choosing an existing language like C and having it contort itself into WebAssembly, Orb starts with the raw ingredients of WebAssembly and asks “how can we make it way more convenient to write”.
@@ -34,3 +30,40 @@ Orb lets you think and write in WebAssembly, working with the primitives it has 
 
 It uses lightweight conventions that let it integrate into any platform. That way you can write once, and deploy anywhere.
 
+## Example
+
+```elixir
+defmodule TemperatureConverter do
+  use Orb
+
+  Orb.I32.export_enum([:celsius, :fahrenheit])
+
+  global do
+    @mode 0
+  end
+
+  defw celsius_to_fahrenheit(celsius: F32), F32 do
+    celsius * (9.0 / 5.0) + 32.0
+  end
+
+  defw fahrenheit_to_celsius(fahrenheit: F32), F32 do
+    (fahrenheit - 32.0) * (5.0 / 9.0)
+  end
+
+  defw convert_temperature(temperature: F32), F32 do
+    if @mode === @celsius do
+      celsius_to_fahrenheit(temperature)
+    else
+      fahrenheit_to_celsius(temperature)
+    end
+  end
+
+  defw set_mode(mode: I32) do
+    @mode = mode
+  end
+end
+```
+
+## Compile-time Macros
+
+Orb lets you run any Elixir code at compile-time. You could read from the `Process` dictionary for feature flags, make a HTTP request, or call out to an Elixir library.
