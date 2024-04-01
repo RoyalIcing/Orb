@@ -1,4 +1,4 @@
-<details>
+<details open>
     <summary>Start Here</summary>
 
 - [Getting Started](/getting-started)
@@ -7,7 +7,7 @@
 </details>
 
 
-<details>
+<details open>
     <summary>Core Concepts</summary>
 
 - [Core WebAssembly](/concepts/core-webassembly)
@@ -16,7 +16,7 @@
 </details>
 
 
-<details>
+<details open>
     <summary>Tutorials</summary>
 
 - [Temperature Converter](/tutorials/temperature-converter)
