@@ -1,7 +1,9 @@
-<details open>
-    <summary>Start Here</summary>
+- [Orb](/)
 
-- [Getting Started](/getting-started)
+
+<details open>
+    <summary>Getting Started</summary>
+
 - [Install](/install)
 
 </details>
