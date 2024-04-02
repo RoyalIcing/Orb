@@ -3,6 +3,7 @@ defmodule I32ConveniencesTest do
   require OrbHelper
 
   alias OrbWasmtime.Wasm
+  alias OrbWasmtime.Instance
 
   defmodule URLEncoding do
     use Orb
@@ -93,7 +94,7 @@ defmodule I32ConveniencesTest do
     assert (OrbHelper.module_wat do
               use Orb
 
-              defw get_path(), I32.String, state: I32 do
+              defw get_path(), I32.UnsafePointer, state: I32 do
                 state = 0
 
                 I32.match state do
@@ -105,24 +106,32 @@ defmodule I32ConveniencesTest do
   end
 
   test "can return string constant" do
-    assert (OrbHelper.module_wat do
-              use Orb
+    wat =
+      OrbHelper.module_wat do
+        use Orb
 
-              global do
-                @method "GET"
-              end
+        Memory.pages(1)
 
-              defw text_html(), I32.String do
-                if not I32.String.streq(@method, "GET") do
-                  return(~S"""
-                  <!doctype html>
-                  <h1>Method not allowed</h1>
-                  """)
-                end
+        global do
+          @method "GET"
+        end
 
-                "<p>Hello</p>"
-              end
-            end) =~ "Method not allowed"
+        defw text_html(), I32.UnsafePointer do
+          if Memory.load!(I32, @method) !== I32.from_4_byte_ascii("GET\0") do
+            return(~S"""
+            <!doctype html>
+            <h1>Method not allowed</h1>
+            """)
+          end
+
+          "<p>Hello</p>"
+        end
+      end
+
+    assert wat =~ "Method not allowed"
+
+    assert "<p>Hello</p>" =
+             Instance.run(wat) |> Instance.call_reading_string(:text_html)
   end
 
   test "I32.sum!" do
