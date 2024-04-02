@@ -7,7 +7,7 @@ Add `orb` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:orb, "~> 0.0.39"}
+    {:orb, "~> 0.0.40"}
   ]
 end
 ```
@@ -20,5 +20,8 @@ You can now `use Orb` in your modules:
 defmodule Example do
     use Orb
 
+    defw meaning_of_life(), I32 do
+      42
+    end
 end
 ```

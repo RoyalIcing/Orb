@@ -6,4 +6,10 @@ defmodule ReadmeTest do
     version = Mix.Project.config()[:version]
     assert readme_markdown =~ ~s({:orb, "~> #{version}"})
   end
+
+  test "version in site install matches mix.exs" do
+    readme_markdown = File.read!(Path.join(__DIR__, "../site/install.md"))
+    version = Mix.Project.config()[:version]
+    assert readme_markdown =~ ~s({:orb, "~> #{version}"})
+  end
 end
