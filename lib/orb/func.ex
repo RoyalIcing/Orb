@@ -87,12 +87,13 @@ defmodule Orb.Func do
           %Orb.Func{params: params, body: body, local_types: local_types},
           context
         ) do
+      local_decls = for {_, type} <- local_types, do: [0x01, Orb.Func.Param.to_wasm_type(type)]
+
       param_types = for param <- params, do: {param.name, param.type}
       context = Context.set_local_get_types(context, param_types ++ local_types)
       wasm = Orb.ToWasm.to_wasm(body, context)
-      # sized([vec(locals), wasm, <<0x0B>>])
-      # FIXME: locals
-      sized([vec([]), wasm, <<0x0B>>])
+
+      sized([vec(local_decls), wasm, <<0x0B>>])
     end
   end
 
@@ -106,6 +107,10 @@ defmodule Orb.Func do
     def to_wasm_type(:f32), do: 0x7D
     def to_wasm_type(:f64), do: 0x7C
     def to_wasm_type(:v128), do: 0x7B
+
+    def to_wasm_type(custom_type) when is_atom(custom_type),
+      do: Orb.Ops.to_primitive_type(custom_type) |> to_wasm_type()
+
     def to_wasm_type(%Param{type: type}), do: to_wasm_type(type)
 
     defimpl Orb.ToWat do

@@ -510,21 +510,36 @@ defmodule Orb.Instruction do
       ]
     end
 
-    def i32_operation(:add), do: 0x6A
-    def i32_operation(:sub), do: 0x6B
-    def i32_operation(:mul), do: 0x6C
-    def i32_operation(:div_s), do: 0x6D
-    def i32_operation(:div_u), do: 0x6E
-    def i32_operation(:rem_s), do: 0x6F
-    def i32_operation(:rem_u), do: 0x70
-    def i32_operation(:and), do: 0x71
-    def i32_operation(:or), do: 0x72
-    def i32_operation(:xor), do: 0x73
-    def i32_operation(:shl), do: 0x74
-    def i32_operation(:shr_s), do: 0x75
-    def i32_operation(:shr_u), do: 0x76
-    def i32_operation(:rotl), do: 0x77
-    def i32_operation(:rotr), do: 0x78
+    def to_wasm(
+          %Orb.Instruction{
+            push_type: nil,
+            operation: {:local_set, identifier, _},
+            operands: operands
+          },
+          context
+        ) do
+      [
+        for(operand <- operands, do: Orb.ToWasm.to_wasm(operand, context)),
+        0x21,
+        uleb128(Orb.ToWasm.Context.fetch_local_index!(context, identifier))
+      ]
+    end
+
+    defp i32_operation(:add), do: 0x6A
+    defp i32_operation(:sub), do: 0x6B
+    defp i32_operation(:mul), do: 0x6C
+    defp i32_operation(:div_s), do: 0x6D
+    defp i32_operation(:div_u), do: 0x6E
+    defp i32_operation(:rem_s), do: 0x6F
+    defp i32_operation(:rem_u), do: 0x70
+    defp i32_operation(:and), do: 0x71
+    defp i32_operation(:or), do: 0x72
+    defp i32_operation(:xor), do: 0x73
+    defp i32_operation(:shl), do: 0x74
+    defp i32_operation(:shr_s), do: 0x75
+    defp i32_operation(:shr_u), do: 0x76
+    defp i32_operation(:rotl), do: 0x77
+    defp i32_operation(:rotr), do: 0x78
 
     # def to_wasm(
     #       %Orb.Instruction{
