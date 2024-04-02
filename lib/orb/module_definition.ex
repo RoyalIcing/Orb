@@ -208,14 +208,7 @@ defmodule Orb.ModuleDefinition do
           export_func(name, index)
         end
 
-      func_code =
-        for {%Orb.Func{params: params, body: body, local_types: local_types}, _index} <- funcs do
-          param_types = for param <- params, do: {param.name, param.type}
-          local_types = param_types ++ local_types
-          context = Orb.ToWasm.Context.set_local_types(context, local_types)
-          wasm = Orb.ToWasm.to_wasm(body, context)
-          func_code([], wasm)
-        end
+      func_code = for {f, _index} <- funcs, do: Orb.ToWasm.to_wasm(f, context)
 
       [
         @wasm_prefix,

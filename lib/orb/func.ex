@@ -79,6 +79,23 @@ defmodule Orb.Func do
     end
   end
 
+  defimpl Orb.ToWasm do
+    import Orb.ToWasm.Helpers
+    alias Orb.ToWasm.Context
+
+    def to_wasm(
+          %Orb.Func{params: params, body: body, local_types: local_types},
+          context
+        ) do
+      param_types = for param <- params, do: {param.name, param.type}
+      context = Context.set_local_get_types(context, param_types ++ local_types)
+      wasm = Orb.ToWasm.to_wasm(body, context)
+      # sized([vec(locals), wasm, <<0x0B>>])
+      # FIXME: locals
+      sized([vec([]), wasm, <<0x0B>>])
+    end
+  end
+
   defmodule Param do
     @moduledoc false
 

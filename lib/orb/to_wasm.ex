@@ -3,12 +3,28 @@ defprotocol Orb.ToWasm do
   def to_wasm(data, options)
 end
 
+defmodule Orb.ToWasm.Helpers do
+  import Orb.Leb
+
+  def sized(bytes) do
+    bytes = IO.iodata_to_binary(bytes)
+    [byte_size(bytes) |> uleb128(), bytes]
+  end
+
+  def vec(items) when is_list(items) do
+    [
+      length(items) |> uleb128(),
+      items
+    ]
+  end
+end
+
 defmodule Orb.ToWasm.Context do
   defstruct local_indexes: %{}
 
   def new(), do: %__MODULE__{}
 
-  def set_local_types(context = %__MODULE__{}, local_types) do
+  def set_local_get_types(context = %__MODULE__{}, local_types) do
     local_indexes =
       Enum.with_index(local_types)
       |> Map.new(fn {{id, type}, index} -> {id, %{index: index, type: type}} end)
