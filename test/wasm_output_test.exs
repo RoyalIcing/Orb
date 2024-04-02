@@ -23,18 +23,19 @@ defmodule WasmOutputTest do
     defmodule MathI32 do
       use Orb
 
-      defw math(a: I32, b: I32), I32 do
+      defw math(a: I32, b: I32), I32, denominator: I32 do
         a * b / (4 + a - b)
       end
     end
 
-    ~S"""
-    (module $MathI32
-      (func $math (export "math") (param $a i32) (param $b i32) (result i32)
-      (i32.div_s (i32.mul (local.get $a) (local.get $b)) (i32.sub (i32.add (i32.const 4) (local.get $a)) (local.get $b)))
-      )
-    )
-    """ === Orb.to_wat(MathI32)
+    assert ~S"""
+           (module $MathI32
+             (func $math (export "math") (param $a i32) (param $b i32) (result i32)
+               (local $denominator i32)
+               (i32.div_s (i32.mul (local.get $a) (local.get $b)) (i32.sub (i32.add (i32.const 4) (local.get $a)) (local.get $b)))
+             )
+           )
+           """ === Orb.to_wat(MathI32)
 
     assert <<"\0asm", 0x01000000::32>> <>
              <<0x01, 0x07, 0x01>> <>
