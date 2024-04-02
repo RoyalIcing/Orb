@@ -16,4 +16,4 @@ Here how every step is broken down:
 
 - `Orb.snippet`
 
-## Processing blocks with macros
+## Processing `do` blocks with macros
