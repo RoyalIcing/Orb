@@ -84,6 +84,13 @@ defmodule Orb.Func do
 
     defstruct [:name, :type]
 
+    def to_wasm_type(:i32), do: 0x7F
+    def to_wasm_type(:i64), do: 0x7E
+    def to_wasm_type(:f32), do: 0x7D
+    def to_wasm_type(:f64), do: 0x7C
+    def to_wasm_type(:v128), do: 0x7B
+    def to_wasm_type(%Param{type: type}), do: to_wasm_type(type)
+
     defimpl Orb.ToWat do
       import Orb.ToWat.Helpers
 
@@ -96,6 +103,7 @@ defmodule Orb.Func do
         ]
       end
 
+      @spec to_wat(%Orb.Func.Param{}, any()) :: [...]
       def to_wat(%Param{name: name, type: type}, indent) do
         [
           indent,

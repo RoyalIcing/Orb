@@ -177,6 +177,23 @@ defmodule Orb.InstructionSequence do
     end
   end
 
+  defimpl Orb.ToWasm do
+    def to_wasm(
+          %Orb.InstructionSequence{body: instructions},
+          options
+        ) do
+      for instruction <- instructions do
+        case instruction do
+          %Orb.InstructionSequence{} ->
+            to_wasm(instruction, options)
+
+          _ ->
+            Orb.ToWasm.to_wasm(instruction, options)
+        end
+      end
+    end
+  end
+
   defimpl Orb.TypeNarrowable do
     def type_narrow_to(
           %Orb.InstructionSequence{push_type: current_type, body: [single]} = seq,

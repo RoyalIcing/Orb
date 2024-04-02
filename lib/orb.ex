@@ -590,6 +590,17 @@ defmodule Orb do
         [indent, "(local.get $", to_string(identifier), ?)]
       end
     end
+
+    defimpl Orb.ToWasm do
+      import Orb.Leb
+
+      def to_wasm(
+            %VariableReference{global_or_local: :local, identifier: identifier},
+            context
+          ) do
+        [0x20, uleb128(Orb.ToWasm.Context.fetch_local_index!(context, identifier))]
+      end
+    end
   end
 
   defp do_module_body(block) do
@@ -988,7 +999,8 @@ defmodule Orb do
     #   <<0x07, 0x0A, 0x01, 0x06, 0x61, 0x6E, 0x73, 0x77, 0x65, 0x72, 0x00, 0x00>> <>
     #   <<0x0A, 0x06, 0x01, 0x04, 0x00, 0x41, 0x2A, 0x0B>>
 
-    Orb.ToWasm.to_wasm(term, nil) |> IO.iodata_to_binary()
+    context = Orb.ToWasm.Context.new()
+    Orb.ToWasm.to_wasm(term, context) |> IO.iodata_to_binary()
   end
 
   def __get_block_items(block) do

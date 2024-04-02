@@ -480,8 +480,6 @@ defmodule Orb.Instruction do
   defimpl Orb.ToWasm do
     import Orb.Leb
 
-    def encode_type(:i32), do: 0x7F
-
     def type_const(:i32), do: 0x41
     def type_const(:i64), do: 0x42
     def type_const(:f32), do: 0x43
@@ -496,6 +494,21 @@ defmodule Orb.Instruction do
           _
         ) do
       [type_const(type), uleb128(number)]
+    end
+
+    def to_wasm(
+          %Orb.Instruction{
+            push_type: :i32,
+            operation: :mul,
+            operands: [a, b]
+          },
+          context
+        ) do
+      [
+        Orb.ToWasm.to_wasm(a, context),
+        Orb.ToWasm.to_wasm(b, context),
+        [0x6C]
+      ]
     end
 
     # def to_wasm(

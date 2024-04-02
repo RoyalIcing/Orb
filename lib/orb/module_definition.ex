@@ -176,10 +176,6 @@ defmodule Orb.ModuleDefinition do
 
     @wasm_prefix <<"\0asm", 0x01000000::32>>
 
-    @spec to_wasm(%Orb.ModuleDefinition{}, any()) :: [
-            <<_::64>> | [[binary() | list(), ...] | 1 | 3 | 7 | 10, ...],
-            ...
-          ]
     def to_wasm(
           %Orb.ModuleDefinition{
             types: _types,
@@ -188,18 +184,58 @@ defmodule Orb.ModuleDefinition do
             globals: _globals,
             memory: _memory,
             constants: _constants,
-            body: _body,
+            body: mod_body,
             data: _data
           },
-          _
+          context
         ) do
+      funcs = Enum.with_index(for f = %Orb.Func{} <- mod_body, do: f)
+
+      uniq_func_types =
+        for({f, _index} <- funcs, do: func_type_tuple(f))
+        |> Enum.uniq()
+
+      func_defs =
+        for {f, _index} <- funcs do
+          type_to_find = func_type_tuple(f)
+
+          Enum.find_index(uniq_func_types, fn type -> type === type_to_find end)
+          |> uleb128()
+        end
+
+      export_funcs =
+        for {%Orb.Func{exported_names: names}, index} <- funcs, name <- names do
+          export_func(name, index)
+        end
+
+      func_code =
+        for {%Orb.Func{params: params, body: body, local_types: local_types}, _index} <- funcs do
+          param_types = for param <- params, do: {param.name, param.type}
+          local_types = param_types ++ local_types
+          context = Orb.ToWasm.Context.set_local_types(context, local_types)
+          wasm = Orb.ToWasm.to_wasm(body, context)
+          func_code([], wasm)
+        end
+
       [
         @wasm_prefix,
-        section(:type, vec([func_type({}, {:i32})])),
-        section(:function, vec([0])),
-        section(:export, vec([export_func("answer", 0)])),
-        section(:code, vec([func_code([], Orb.Instruction.wrap_constant!(:i32, 42))]))
+        section(:type, vec(for {p, r} <- uniq_func_types, do: func_type(p, r))),
+        section(:function, vec(func_defs)),
+        section(:export, vec(export_funcs)),
+        section(:code, vec(func_code))
       ]
+    end
+
+    defp func_type_tuple(%Orb.Func{params: params, result: result}) do
+      import Orb.Ops
+
+      params =
+        for(param <- params, do: to_primitive_type(param.type))
+        |> List.to_tuple()
+
+      result = to_primitive_type(result)
+
+      {params, result}
     end
 
     defp sized(bytes) do
@@ -215,20 +251,22 @@ defmodule Orb.ModuleDefinition do
     end
 
     defp func_type(params, results) do
+      alias Orb.Func.Param
+
       [
         0x60,
         for types <- [params, results] do
-          vec(
-            for type <- Tuple.to_list(types) do
-              case type do
-                :i32 -> 0x7F
-                :i64 -> 0x7E
-                :f32 -> 0x7D
-                :f64 -> 0x7C
-                :v128 -> 0x7B
-              end
-            end
-          )
+          case types do
+            types when is_list(types) ->
+              for type <- types, do: Param.to_wasm_type(type)
+
+            types when is_tuple(types) ->
+              for type <- Tuple.to_list(types), do: Param.to_wasm_type(type)
+
+            type when is_atom(type) ->
+              [Param.to_wasm_type(type)]
+          end
+          |> vec()
         end
       ]
     end
@@ -243,10 +281,6 @@ defmodule Orb.ModuleDefinition do
 
     defp func_code(locals = [], expr) when is_binary(expr) or is_list(expr) do
       sized([vec(locals), expr, <<0x0B>>])
-    end
-
-    defp func_code(locals = [], expr) when is_struct(expr) do
-      func_code(locals, Orb.ToWasm.to_wasm(expr, nil))
     end
 
     defp section(:custom, bytes), do: section(0x00, bytes)
