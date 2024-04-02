@@ -499,17 +499,32 @@ defmodule Orb.Instruction do
     def to_wasm(
           %Orb.Instruction{
             push_type: :i32,
-            operation: :mul,
-            operands: [a, b]
+            operation: operation,
+            operands: operands
           },
           context
         ) do
       [
-        Orb.ToWasm.to_wasm(a, context),
-        Orb.ToWasm.to_wasm(b, context),
-        [0x6C]
+        for(operand <- operands, do: Orb.ToWasm.to_wasm(operand, context)),
+        i32_operation(operation)
       ]
     end
+
+    def i32_operation(:add), do: 0x6A
+    def i32_operation(:sub), do: 0x6B
+    def i32_operation(:mul), do: 0x6C
+    def i32_operation(:div_s), do: 0x6D
+    def i32_operation(:div_u), do: 0x6E
+    def i32_operation(:rem_s), do: 0x6F
+    def i32_operation(:rem_u), do: 0x70
+    def i32_operation(:and), do: 0x71
+    def i32_operation(:or), do: 0x72
+    def i32_operation(:xor), do: 0x73
+    def i32_operation(:shl), do: 0x74
+    def i32_operation(:shr_s), do: 0x75
+    def i32_operation(:shr_u), do: 0x76
+    def i32_operation(:rotl), do: 0x77
+    def i32_operation(:rotr), do: 0x78
 
     # def to_wasm(
     #       %Orb.Instruction{
