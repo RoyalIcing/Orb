@@ -31,6 +31,16 @@
 
 
 <details open>
+    <summary>Standard library</summary>
+
+- [SilverOrb](/silverorb)
+- [Parsing](/silverorb/parse)
+- [Formatting](/silverorb/format)
+
+</details>
+
+
+<details open>
     <summary>Tutorials</summary>
 
 - [Temperature Converter](/tutorials/temperature-converter)
