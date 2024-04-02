@@ -31,9 +31,9 @@
 
 
 <details open>
-    <summary>Standard library</summary>
+    <summary>SilverOrb</summary>
 
-- [SilverOrb](/silverorb)
+- [Standard Library](/silverorb)
 - [Parsing](/silverorb/parse)
 - [Formatting](/silverorb/format)
 
