@@ -106,7 +106,12 @@ defmodule Orb.Constants do
   end
 
   defmodule NulTerminatedString do
-    defstruct memory_offset: nil, string: nil, push_type: Orb.I32.String
+    defstruct memory_offset: nil, string: nil, push_type: Orb.I32.UnsafePointer
+
+    @behaviour Orb.CustomType
+
+    @impl Orb.CustomType
+    def wasm_type(), do: :i32
 
     def empty() do
       %__MODULE__{

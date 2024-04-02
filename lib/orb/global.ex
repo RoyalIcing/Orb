@@ -51,7 +51,7 @@ defmodule Orb.Global do
 
     %__MODULE__{
       name: name,
-      type: Orb.I32.String,
+      type: Orb.Constants.NulTerminatedString,
       initial_value: value,
       mutability: mutability,
       exported: exported == :exported
@@ -75,19 +75,19 @@ defmodule Orb.Global do
     end
   end
 
-  def expand!(%Orb.Global{type: Orb.I32.String, initial_value: ""} = global) do
+  def expand!(%Orb.Global{type: Orb.Constants.NulTerminatedString, initial_value: ""} = global) do
     %Orb.Global{
       global
-      | type: Orb.I32.String,
-        initial_value: Orb.Constants.NulTerminatedString.empty()
+      | initial_value: Orb.Constants.NulTerminatedString.empty()
     }
   end
 
-  def expand!(%Orb.Global{type: Orb.I32.String, initial_value: string} = global) do
+  def expand!(
+        %Orb.Global{type: Orb.Constants.NulTerminatedString, initial_value: string} = global
+      ) do
     %Orb.Global{
       global
-      | type: Orb.I32.String,
-        initial_value: Orb.Constants.expand_if_needed(string)
+      | initial_value: Orb.Constants.expand_if_needed(string)
     }
   end
 

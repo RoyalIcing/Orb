@@ -76,11 +76,11 @@ defmodule OrbTest do
           @empty ""
         end
 
-        defw mime_type_constant, I32.String do
+        defw mime_type_constant, I32.UnsafePointer do
           "text/html"
         end
 
-        defw mime_type_global, I32.String do
+        defw mime_type_global, I32.UnsafePointer do
           @mime_type
         end
 
