@@ -173,6 +173,7 @@ defmodule Orb.ModuleDefinition do
 
   defimpl Orb.ToWasm do
     import Orb.Leb
+    import Orb.ToWasm.Helpers
 
     @wasm_prefix <<"\0asm", 0x01000000::32>>
 
@@ -229,18 +230,6 @@ defmodule Orb.ModuleDefinition do
       result = to_primitive_type(result)
 
       {params, result}
-    end
-
-    defp sized(bytes) do
-      bytes = IO.iodata_to_binary(bytes)
-      [byte_size(bytes) |> uleb128(), bytes]
-    end
-
-    defp vec(items) when is_list(items) do
-      [
-        length(items) |> uleb128(),
-        items
-      ]
     end
 
     defp func_type(params, results) do
