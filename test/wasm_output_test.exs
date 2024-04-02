@@ -1,4 +1,5 @@
 defmodule WasmOutputTest do
+  alias OrbWasmtime.Wasm
   use ExUnit.Case, async: true
 
   test "basic module" do
@@ -18,7 +19,7 @@ defmodule WasmOutputTest do
              Orb.to_wasm(Basic)
   end
 
-  test "func params" do
+  test "i23 operations and func params" do
     defmodule MathI32 do
       use Orb
 
@@ -44,5 +45,9 @@ defmodule WasmOutputTest do
                <<0x20, 0x00>>, 0x6A, <<0x20, 0x01>>, 0x6B, 0x6D,
                0x0B>> =
              Orb.to_wasm(MathI32)
+
+    assert (11 * 7) |> div(4 + 11 - 7) === 9
+    assert Orb.to_wat(MathI32) |> Wasm.call(:math, 11, 7) === 9
+    assert Orb.to_wasm(MathI32) |> Wasm.call(:math, 11, 7) === 9
   end
 end
