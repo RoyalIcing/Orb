@@ -78,26 +78,6 @@ defmodule ParserTest do
 
       input_offset
     end
-
-    def run(input) do
-      {:ok, pid} = Wasmex.start_link(%{bytes: Orb.to_wat(YouTubeURLParser)})
-      {:ok, memory} = Wasmex.memory(pid)
-      {:ok, store} = Wasmex.store(pid)
-
-      {:ok, [input_offset]} = Wasmex.call_function(pid, :input_offset, [])
-      Wasmex.Memory.write_binary(store, memory, input_offset, input <> "\0")
-
-      {:ok, [result]} = Wasmex.call_function(pid, :parse, [])
-
-      case result do
-        0 ->
-          nil
-
-        offset ->
-          Wasmex.Memory.read_string(store, memory, offset, 255)
-          |> String.replace_trailing("\0", "")
-      end
-    end
   end
 
   test "works" do
