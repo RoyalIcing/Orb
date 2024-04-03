@@ -17,7 +17,7 @@ defmodule Orb.MixProject do
       name: "Orb",
       docs: docs(),
       source_url: @source_url,
-      homepage_url: "https://calculated.world/orb"
+      homepage_url: "https://useorb.dev/"
     ]
   end
 
@@ -32,9 +32,13 @@ defmodule Orb.MixProject do
   defp deps do
     [
       # {:wasmex, "~> 0.8.3", only: :test},
+      # {:wasmex,
+      #  git: "https://github.com/tessi/wasmex.git",
+      #  ref: "3eac8b87f4cb17e47ac35a8315123cdcb812a447",
+      #  only: :test},
       {:orb_wasmtime, "~> 0.1.13", only: :test},
       {:jason, "~> 1.0", only: :test},
-      {:ex_doc, "~> 0.27", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.31.2", only: :dev, runtime: false}
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
     ]
@@ -53,7 +57,7 @@ defmodule Orb.MixProject do
     [
       # The main page in the docs
       main: "Orb",
-      logo: "orb-logo-orange.svg",
+      logo: "orb-logo-blue-orange.svg",
       extras: [
         "README.md",
         "examples/01-intro.livemd",
