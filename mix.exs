@@ -32,7 +32,7 @@ defmodule Orb.MixProject do
   defp deps do
     [
       # {:wasmex, "~> 0.8.3", only: :test},
-      {:orb_wasmtime, "~> 0.1.11", only: :test},
+      {:orb_wasmtime, "~> 0.1.13", only: :test},
       {:jason, "~> 1.0", only: :test},
       {:ex_doc, "~> 0.27", only: :dev, runtime: false}
       # {:dep_from_hexpm, "~> 0.3.0"},

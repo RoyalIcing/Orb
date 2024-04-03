@@ -1,6 +1,6 @@
 ExUnit.start()
 
-defmodule OrbHelper do
+defmodule TestHelper do
   defmacro location(plus) do
     caller = __CALLER__
     file = Path.relative_to_cwd(caller.file)
@@ -20,5 +20,14 @@ defmodule OrbHelper do
     quote do
       unquote(mod).to_wat()
     end
+  end
+
+  def wasm_call(source, function), do: do_wasm_call(source, function, [])
+  def wasm_call(source, function, arg1), do: do_wasm_call(source, function, [arg1])
+  def wasm_call(source, function, arg1, arg2), do: do_wasm_call(source, function, [arg1, arg2])
+
+  defp do_wasm_call(source, function, args) do
+    result = OrbWasmtime.Wasm.call_apply(source, to_string(function), args)
+    result
   end
 end

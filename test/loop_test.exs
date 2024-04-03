@@ -5,9 +5,9 @@ defmodule LoopTest do
   alias OrbWasmtime.Wasm
 
   test "block stack" do
-    require OrbHelper
+    require TestHelper
 
-    assert (OrbHelper.module_wat do
+    assert (TestHelper.module_wat do
               use Orb
 
               defw example(a: I32), b: I32 do

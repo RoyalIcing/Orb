@@ -2,6 +2,7 @@ defmodule OrbTest do
   use ExUnit.Case, async: true
 
   import Orb, only: [to_wat: 1]
+  import TestHelper
 
   test "basic module" do
     import Orb.DSL

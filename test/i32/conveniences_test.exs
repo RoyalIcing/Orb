@@ -1,6 +1,6 @@
 defmodule I32ConveniencesTest do
   use ExUnit.Case, async: true
-  require OrbHelper
+  require TestHelper
 
   alias OrbWasmtime.Wasm
   alias OrbWasmtime.Instance
@@ -76,7 +76,7 @@ defmodule I32ConveniencesTest do
   end
 
   test "I32.match output int" do
-    assert (OrbHelper.module_wat do
+    assert (TestHelper.module_wat do
               use Orb
 
               defw get_path(), I32, state: I32 do
@@ -91,7 +91,7 @@ defmodule I32ConveniencesTest do
   end
 
   test "I32.match output string constant" do
-    assert (OrbHelper.module_wat do
+    assert (TestHelper.module_wat do
               use Orb
 
               defw get_path(), I32.UnsafePointer, state: I32 do
@@ -107,7 +107,7 @@ defmodule I32ConveniencesTest do
 
   test "can return string constant" do
     wat =
-      OrbHelper.module_wat do
+      TestHelper.module_wat do
         use Orb
 
         Memory.pages(1)
@@ -136,7 +136,7 @@ defmodule I32ConveniencesTest do
 
   test "I32.sum!" do
     assert 30 =
-             (OrbHelper.module_wat do
+             (TestHelper.module_wat do
                 use Orb
 
                 defwp(ten(), I32, do: 10)
