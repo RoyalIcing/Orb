@@ -2,7 +2,7 @@
 
 ```elixir
 Mix.install([
-  {:orb, "~> 0.0.37"},
+  {:orb, "~> 0.0.40"},
   {:silver_orb, "~> 0.0.7"},
   {:wasmex, "~> 0.8.3"},
   {:mime, "~> 2.0.5"},
@@ -10,7 +10,7 @@ Mix.install([
 ])
 ```
 
-## Define our module using Orb
+## Define a helper module for parsing characters
 
 ```elixir
 defmodule CharParser do
@@ -52,6 +52,8 @@ defmodule CharParser do
   end
 end
 ```
+
+## Define our module using Orb
 
 ```elixir
 defmodule YouTubeURLParser do
@@ -102,7 +104,7 @@ defmodule YouTubeURLParser do
   end
 
   def run(input) do
-    {:ok, pid} = Wasmex.start_link(%{bytes: Orb.to_wat(YouTubeURLParser)})
+    {:ok, pid} = Wasmex.start_link(%{bytes: Orb.to_wat(__MODULE__)})
     {:ok, memory} = Wasmex.memory(pid)
     {:ok, store} = Wasmex.store(pid)
 
