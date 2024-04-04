@@ -261,10 +261,6 @@ defmodule Orb.ModuleDefinition do
       ]
     end
 
-    defp func_code(locals = [], expr) when is_binary(expr) or is_list(expr) do
-      sized([vec(locals), expr, <<0x0B>>])
-    end
-
     defp section(:custom, bytes), do: section(0x00, bytes)
     defp section(:type, bytes), do: section(0x01, bytes)
     defp section(:import, bytes), do: section(0x02, bytes)
