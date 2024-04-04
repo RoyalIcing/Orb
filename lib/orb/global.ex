@@ -3,9 +3,20 @@ defmodule Orb.Global do
 
   defstruct [:name, :type, :initial_value, :mutability, :exported]
 
+  def new(nil, name, mutability, exported, value) when is_binary(value) do
+    new(Orb.Constants.NulTerminatedString, name, mutability, exported, value)
+  end
+
+  def new(nil, name, mutability, exported, value) when is_integer(value) do
+    new(Orb.I32, name, mutability, exported, value)
+  end
+
+  def new(nil, name, mutability, exported, value) when is_float(value) do
+    new(Orb.F32, name, mutability, exported, value)
+  end
+
   def new(type, name, mutability, exported, value)
-      when type in [:i32, :f32] and
-             is_atom(name) and
+      when is_atom(type) and is_atom(name) and
              mutability in ~w[readonly mutable]a and
              exported in ~w[internal exported]a do
     %__MODULE__{
@@ -58,7 +69,19 @@ defmodule Orb.Global do
     }
   end
 
-  defmacro register32(mutability, exported, list)
+  defmacro register(type, name, mutability, exported, value) do
+    #  when mutability in ~w{readonly mutable}a and
+    #         exported in ~w[internal exported]a do
+    quote bind_quoted: [
+            type: type,
+            name: name,
+            mutability: mutability,
+            exported: exported,
+            value: value
+          ] do
+      @wasm_globals Orb.Global.new(type, name, mutability, exported, value)
+    end
+  end
 
   defmacro register32(mutability, exported, list) do
     #  when mutability in ~w{readonly mutable}a and
@@ -132,58 +155,6 @@ defmodule Orb.Global do
   end
 
   defmodule Declare do
-    defmodule ReadonlyDSL do
-      import Kernel, except: [@: 1]
-
-      defmacro @{name, _meta, [arg]} do
-        quote do
-          with do
-            require Orb.Global
-            Orb.Global.register32(:readonly, :internal, [{unquote(name), unquote(arg)}])
-          end
-        end
-      end
-    end
-
-    defmodule MutableDSL do
-      import Kernel, except: [@: 1]
-
-      defmacro @{name, _meta, [arg]} do
-        quote do
-          with do
-            require Orb.Global
-            Orb.Global.register32(:mutable, :internal, [{unquote(name), unquote(arg)}])
-          end
-        end
-      end
-    end
-
-    defmodule ExportReadonlyDSL do
-      import Kernel, except: [@: 1]
-
-      defmacro @{name, _meta, [arg]} do
-        quote do
-          with do
-            require Orb.Global
-            Orb.Global.register32(:readonly, :exported, [{unquote(name), unquote(arg)}])
-          end
-        end
-      end
-    end
-
-    defmodule ExportMutableDSL do
-      import Kernel, except: [@: 1]
-
-      defmacro @{name, _meta, [arg]} do
-        quote do
-          with do
-            require Orb.Global
-            Orb.Global.register32(:mutable, :exported, [{unquote(name), unquote(arg)}])
-          end
-        end
-      end
-    end
-
     defmodule DeclareDSL do
       import Kernel, except: [@: 1]
 
@@ -192,12 +163,15 @@ defmodule Orb.Global do
           with do
             require Orb.Global
 
-            Orb.Global.register32(
+            preferred_type =
+              Module.get_last_attribute(__MODULE__, :wasm_global_preferred_type, nil)
+
+            Orb.Global.register(
+              preferred_type,
+              unquote(name),
               Module.get_last_attribute(__MODULE__, :wasm_global_mutability),
               Module.get_last_attribute(__MODULE__, :wasm_global_exported),
-              [
-                {unquote(name), unquote(value)}
-              ]
+              unquote(value)
             )
           end
         end
@@ -208,22 +182,21 @@ defmodule Orb.Global do
           with do
             require Orb.Global
 
-            Orb.Global.register32(
+            preferred_type =
+              Module.get_last_attribute(__MODULE__, :wasm_global_preferred_type, nil)
+
+            Orb.Global.register(
+              preferred_type,
+              unquote(name),
               Module.get_last_attribute(__MODULE__, :wasm_global_mutability),
               Module.get_last_attribute(__MODULE__, :wasm_global_exported),
-              [
-                {unquote(name), unquote(arg)}
-              ]
+              unquote(arg)
             )
           end
         end
       end
     end
 
-    # defmacro __import_dsl(:readonly, :internal), do: quote(do: import(ReadonlyDSL))
-    # defmacro __import_dsl(:mutable, :internal), do: quote(do: import(MutableDSL))
-    # defmacro __import_dsl(:readonly, :exported), do: quote(do: import(ExportReadonlyDSL))
-    # defmacro __import_dsl(:mutable, :exported), do: quote(do: import(ExportMutableDSL))
     defmacro __import_dsl(mutability, exported) do
       quote do
         import DeclareDSL

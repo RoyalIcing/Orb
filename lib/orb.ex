@@ -496,7 +496,7 @@ defmodule Orb do
   defmacro __using__(_opts) do
     quote do
       # TODO: don’t import types/1
-      import Orb, only: [global: 1, global: 2, importw: 2, types: 1]
+      import Orb, only: [export: 1, global: 1, global: 2, global: 3, importw: 2, types: 1]
       import Orb.DefwDSL
       alias Orb.{I32, I64, S32, U32, F32, Memory, Table}
       require Orb.{I32, I64, F32, Table, Memory}
@@ -876,6 +876,17 @@ defmodule Orb do
   end
 
   @doc """
+  Makes the globals inside exported.
+  """
+  defmacro export(do: block) do
+    quote do
+      Module.put_attribute(__MODULE__, :wasm_export_members, true)
+      unquote(block)
+      Module.delete_attribute(__MODULE__, :wasm_export_members)
+    end
+  end
+
+  @doc """
   Declare WebAssembly globals.
 
   `mode` can be :readonly, :mutable, :export_readonly, or :export_mutable. The default is :mutable.
@@ -926,6 +937,68 @@ defmodule Orb do
         )
 
         unquote(__global_block(:orb, block))
+      end
+    end
+  end
+
+  @doc """
+  Declare WebAssembly globals.
+
+  `mode` can be :readonly, :mutable, :export_readonly, or :export_mutable. The default is :mutable.
+
+  ## Examples
+
+  ```elixir
+  defmodule GlobalExample do
+    use Orb
+
+    global do # :mutable by default
+      @some_internal_global 99
+    end
+
+    global :readonly do
+      @some_internal_constant 99
+    end
+
+    global :export_readonly do
+      @some_public_constant 1001
+    end
+
+    global :export_mutable do
+      @some_public_variable 42
+    end
+
+    # You can define multiple globals at once:
+    global do
+      @magic_number_a 99
+      @magic_number_b 12
+      @magic_number_c -5
+    end
+  end
+  ```
+  """
+  defmacro global(type, mode, do: block) do
+    quote generated: true do
+      unquote(__global_block(:elixir, block))
+
+      with do
+        import Kernel, except: [@: 1]
+        require Orb.Global.Declare
+
+        Module.put_attribute(__MODULE__, :wasm_global_preferred_type, unquote(type))
+
+        Orb.Global.Declare.__import_dsl(
+          unquote(__MODULE__).__global_mode_mutable(unquote(mode)),
+          if(Module.get_last_attribute(__MODULE__, :wasm_export_members, false),
+            do: :exported,
+            else: :internal
+          )
+        )
+
+        require Orb.Global
+        unquote(block)
+
+        Module.delete_attribute(__MODULE__, :wasm_global_preferred_type)
       end
     end
   end
