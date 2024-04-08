@@ -1,7 +1,15 @@
 defmodule Orb.Memory.Range do
+  # TODO: should this be renamed Memory.Slice?
+  # I think it’s closer to Rust’s slice: https://doc.rust-lang.org/1.77.0/std/primitive.slice.html
+
   require Orb.I64 |> alias
   require Orb.I32 |> alias
   # import Bitwise
+
+  with @behaviour Orb.CustomType do
+    @impl Orb.CustomType
+    def wasm_type, do: :i64
+  end
 
   def from(byte_offset, byte_length) when is_integer(byte_offset) and is_integer(byte_length) do
     # :binary.encode_unsigned(byte_offset, :little)

@@ -280,7 +280,7 @@ defmodule Orb do
 
   ## Strings constants
 
-  You can use constant strings with the `~S` sigil. These will be extracted as initial data definitions at the start of the WebAssembly module, and their memory offsets substituted in their place.
+  You can use constant strings directly. These will be extracted as initial data definitions at the start of the WebAssembly module, and their memory offsets substituted in their place.
 
   Each string is packed together for maximum efficiency of memory space. Strings are deduplicated, so you can use the same string constant multiple times and a single allocation will be made.
 
@@ -292,16 +292,16 @@ defmodule Orb do
 
     Memory.pages(1)
 
-    defw get_mime_type(), I32 do
-      ~S"text/html"
+    defw get_mime_type(), I32.U8.UnsafePointer do
+      "text/html"
     end
 
-    defw get_body(), I32 do
-      ~S\"""
+    defw get_body(), I32.U8.UnsafePointer do
+      \"\"\"
       <!doctype html>
       <meta charset=utf-8>
       <h1>Hello world</h1>
-      \"""
+      \"\"\"
     end
   end
   ```

@@ -11,7 +11,7 @@ defmodule Orb.I32 do
 
   with @behaviour Orb.CustomType do
     @impl Orb.CustomType
-    def wasm_type(), do: :i32
+    def wasm_type, do: :i32
   end
 
   def const(n) when is_integer(n), do: Instruction.wrap_constant!(:i32, n)

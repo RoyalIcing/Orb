@@ -14,6 +14,7 @@
 
 - [Core WebAssembly](/concepts/core-webassembly)
 - [Elixir Compiler](/concepts/elixir-compiler)
+- [String Constants](/concepts/string-constants)
 - [Composable Modules](/concepts/composable-modules)
 - [Custom Types](/concepts/custom-types)
 - [Platform Agnostic](/concepts/platform-agnostic)
