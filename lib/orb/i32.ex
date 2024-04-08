@@ -83,6 +83,7 @@ defmodule Orb.I32 do
     InstructionSequence.new(:i32, instructions)
   end
 
+  # TODO: if can do what when? does now.
   defmacro when?(condition, do: when_true, else: when_false) do
     quote do
       Orb.IfElse.new(
