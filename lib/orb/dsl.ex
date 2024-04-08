@@ -382,55 +382,6 @@ defmodule Orb.DSL do
     ]
   end
 
-  # TODO: remove
-  def typed_call(output_type, f, args) when is_list(args),
-    do: Instruction.typed_call(output_type, f, args)
-
-  @doc """
-  Call local function `f`.
-  """
-  @deprecated "Use typed_call/3 instead."
-  def call(f), do: Instruction.call(f, [])
-
-  @doc """
-  Call local function `f`, passing arguments `args` when list, or single argument otherwise.
-  """
-  @deprecated "Use typed_call/3 instead."
-  def call(f, args)
-
-  def call(f, args) when is_list(args), do: Instruction.call(f, args)
-  def call(f, a), do: Instruction.call(f, [a])
-
-  @doc """
-  Call local function `f`, passing arguments `a` & `b`.
-  """
-  @deprecated "Use typed_call/3 instead."
-  def call(f, a, b), do: Instruction.call(f, [a, b])
-
-  @doc """
-  Call local function `f`, passing argument `a`, `b`, `c`.
-  """
-  @deprecated "Use typed_call/3 instead."
-  def call(f, a, b, c), do: Instruction.call(f, [a, b, c])
-
-  @doc """
-  Call local function `f`, passing argument `a`, `b`, `c`, `d`.
-  """
-  @deprecated "Use typed_call/3 instead."
-  def call(f, a, b, c, d), do: Instruction.call(f, [a, b, c, d])
-
-  @doc """
-  Call local function `f`, passing argument `a`, `b`, `c`, `d`, `e`.
-  """
-  @deprecated "Use typed_call/3 instead."
-  def call(f, a, b, c, d, e), do: Instruction.call(f, [a, b, c, d, e])
-
-  @doc """
-  Call local function `f`, passing argument `a`, `b`, `c`, `d`, `e`, `f`.
-  """
-  @deprecated "Use typed_call/3 instead."
-  def call(f, a, b, c, d, e, f), do: Instruction.call(f, [a, b, c, d, e, f])
-
   def __expand_identifier(identifier, env) do
     identifier = Macro.expand_once(identifier, env) |> Kernel.to_string()
 
