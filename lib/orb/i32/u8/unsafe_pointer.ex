@@ -5,14 +5,17 @@ defmodule Orb.I32.U8.UnsafePointer do
 
   alias Orb.{Memory, I32, VariableReference}
 
-  @behaviour Orb.CustomType
   @behaviour Access
 
-  @impl Orb.CustomType
-  def wasm_type(), do: :i32
+  with @behaviour Orb.CustomType do
+    @impl Orb.CustomType
+    def wasm_type, do: :i32
 
-  @impl Orb.CustomType
-  def load_instruction(), do: :load8_u
+    @impl Orb.CustomType
+    def load_instruction, do: :load8_u
+  end
+
+  def alignment, do: 1
 
   @impl Access
   def fetch(%VariableReference{} = var_ref, at!: offset) do
