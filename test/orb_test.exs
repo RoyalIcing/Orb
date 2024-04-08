@@ -160,6 +160,7 @@ defmodule OrbTest do
 
       assert to_wat(HTMLTypes) == """
              (module $HTMLTypes
+               (; constants 26 bytes ;)
                (data (i32.const 255) "<!doctype html>")
                (data (i32.const 271) "text/html")
                (func $doctype (export "doctype") (result i32)
@@ -189,6 +190,7 @@ defmodule OrbTest do
 
       assert to_wat(ConstHTMLTypes) == """
              (module $ConstHTMLTypes
+               (; constants 26 bytes ;)
                (data (i32.const 255) "<!doctype html>")
                (data (i32.const 271) "text/html")
                (func $doctype (export "doctype") (result i32)
@@ -216,6 +218,7 @@ defmodule OrbTest do
 
       assert to_wat(ConstHTMLTypes2) == """
              (module $ConstHTMLTypes2
+               (; constants 26 bytes ;)
                (data (i32.const 255) "<!doctype html>")
                (data (i32.const 271) "text/html")
                (func $doctype (export "doctype") (result i32)

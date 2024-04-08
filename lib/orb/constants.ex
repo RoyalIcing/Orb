@@ -19,6 +19,7 @@ defmodule Orb.Constants do
 
     # __MODULE__ = :ets.new(__MODULE__, [:set, :private, :named_table])
     tid = :ets.new(__MODULE__, [:set, :private])
+    :ets.insert(tid, {:start_offset, start_offset})
     :ets.insert(tid, {:offset, start_offset})
     Process.put(__MODULE__, tid)
     nil
@@ -76,12 +77,16 @@ defmodule Orb.Constants do
     matcher = [{{:"$1", :"$2"}, [is_binary: :"$1"], [{{:"$1", :"$2"}}]}]
     lookup_table = :ets.select(tid, matcher)
 
+    start_offset = :ets.update_counter(tid, :start_offset, {2, 0})
+    last_offset = :ets.update_counter(tid, :offset, {2, 0})
+    byte_size = last_offset - start_offset
+
     # Sort by offsets, lowest to largest
     lookup_table = List.keysort(lookup_table, 1, :asc)
 
     # entries = :ets.match_object(__MODULE__, {:"$0", :"$1"})
 
-    %__MODULE__{offset: 0xFF, items: [], lookup_table: lookup_table}
+    %__MODULE__{offset: 0xFF, items: [], lookup_table: lookup_table, byte_size: byte_size}
   end
 
   def __cleanup() do
@@ -178,19 +183,24 @@ defmodule Orb.Constants do
   end
 
   defimpl Orb.ToWat do
-    def to_wat(%Orb.Constants{lookup_table: lookup_table}, indent) do
-      for {string, offset} <- lookup_table do
-        [
-          indent,
-          "(data (i32.const ",
-          to_string(offset),
-          ") ",
-          ?",
-          string |> String.replace(~S["], ~S[\"]) |> String.replace("\n", ~S"\n"),
-          ?",
-          ")\n"
-        ]
-      end
+    def to_wat(%Orb.Constants{lookup_table: []}, indent), do: []
+
+    def to_wat(%Orb.Constants{lookup_table: lookup_table, byte_size: byte_size}, indent) do
+      [
+        [indent, "(; constants #{byte_size} bytes ;)\n"],
+        for {string, offset} <- lookup_table do
+          [
+            indent,
+            "(data (i32.const ",
+            to_string(offset),
+            ") ",
+            ?",
+            string |> String.replace(~S["], ~S[\"]) |> String.replace("\n", ~S"\n"),
+            ?",
+            ")\n"
+          ]
+        end
+      ]
     end
   end
 end
