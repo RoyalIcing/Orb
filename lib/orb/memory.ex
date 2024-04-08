@@ -131,13 +131,15 @@ defmodule Orb.Memory do
     align = Keyword.get(options, :align)
     # delta = Keyword.get(options, :delta)
 
-    if align not in [nil, 1, 2, 4, 8] do
-      raise ArgumentError, "malformed alignment #{align}"
-    end
+    if align do
+      unless align in [1, 2, 4, 8] do
+        raise ArgumentError, "malformed alignment #{align}"
+      end
 
-    if align && align > natural_alignment do
-      raise ArgumentError,
-            "alignment #{align} must not be larger than natural #{natural_alignment}"
+      if align > natural_alignment do
+        raise ArgumentError,
+              "alignment #{align} must not be larger than natural #{natural_alignment}"
+      end
     end
 
     Orb.Instruction.memory_store(primitive_type, store_instruction,
