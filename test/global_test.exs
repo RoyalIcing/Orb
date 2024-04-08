@@ -140,24 +140,4 @@ defmodule GlobalTest do
            )
            """ = to_wat(GlobalsI32Enum)
   end
-
-  test "F32" do
-    defmodule GlobalsF32 do
-      use Orb
-
-      F32.global(abc: 42.0)
-      F32.global(:readonly, BAD_PI: 3.14)
-      F32.export_global(:mutable, public1: 11.0)
-      F32.export_global(:readonly, public2: 22.0)
-    end
-
-    assert ~S"""
-           (module $GlobalsF32
-             (global $abc (mut f32) (f32.const 42.0))
-             (global $BAD_PI f32 (f32.const 3.14))
-             (global $public1 (export "public1") (mut f32) (f32.const 11.0))
-             (global $public2 (export "public2") f32 (f32.const 22.0))
-           )
-           """ = to_wat(GlobalsF32)
-  end
 end

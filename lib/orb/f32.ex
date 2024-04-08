@@ -24,36 +24,6 @@ defmodule Orb.F32 do
     end
   end
 
-  defmacro global(mutability \\ :mutable, list)
-           when mutability in ~w{readonly mutable}a do
-    quote do
-      @wasm_globals (for {key, value} <- unquote(list) do
-                       Orb.Global.new(
-                         :f32,
-                         key,
-                         unquote(mutability),
-                         :internal,
-                         value
-                       )
-                     end)
-    end
-  end
-
-  defmacro export_global(mutability, list)
-           when mutability in ~w{readonly mutable}a do
-    quote do
-      @wasm_globals (for {key, value} <- unquote(list) do
-                       Orb.Global.new(
-                         :f32,
-                         key,
-                         unquote(mutability),
-                         :exported,
-                         value
-                       )
-                     end)
-    end
-  end
-
   defmodule DSL do
     @moduledoc """
     32-bit float operators.
