@@ -581,7 +581,7 @@ defmodule Orb.DSL do
         import Orb.DSL
         require Orb.Control, as: Control
 
-        unquote(__get_block_items(block))
+        Orb.InstructionSequence.new(unquote(__get_block_items(block)))
       end
     end
   end
