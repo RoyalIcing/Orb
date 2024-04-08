@@ -1,11 +1,11 @@
 defmodule Orb.Memory.Load do
   @moduledoc false
 
-  defstruct push_type: nil, load_instruction: :load, offset: nil, align: nil
+  defstruct push_type: nil, load_instruction: :load, address: nil, align: nil
 
   require Orb.Ops |> alias
 
-  def new(type, offset, opts) when is_atom(type) do
+  def new(type, address, opts) when is_atom(type) do
     load_instruction =
       cond do
         Ops.is_primitive_type(type) ->
@@ -26,12 +26,12 @@ defmodule Orb.Memory.Load do
     %__MODULE__{
       push_type: type,
       load_instruction: load_instruction,
-      offset: offset,
+      address: address,
       align: align
     }
   end
 
-  def new(primitive_type, load_instruction, offset, opts)
+  def new(primitive_type, load_instruction, address, opts)
       when Ops.is_primitive_type(primitive_type) do
     align = Keyword.get(opts, :align)
     {_, natural_alignment} = store_and_alignment_for(primitive_type, load_instruction)
@@ -40,7 +40,7 @@ defmodule Orb.Memory.Load do
     %__MODULE__{
       push_type: primitive_type,
       load_instruction: load_instruction,
-      offset: offset,
+      address: address,
       align: align
     }
   end
@@ -84,7 +84,7 @@ defmodule Orb.Memory.Load do
           %Orb.Memory.Load{
             push_type: type,
             load_instruction: load_instruction,
-            offset: offset,
+            address: address,
             align: align
           },
           indent
@@ -99,7 +99,7 @@ defmodule Orb.Memory.Load do
           nil -> []
           align -> [" align=", to_string(align)]
         end,
-        [" ", Orb.ToWat.Instructions.do_wat(offset)],
+        [" ", Orb.ToWat.Instructions.do_wat(address)],
         ")"
       ]
     end

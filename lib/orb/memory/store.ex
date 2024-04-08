@@ -4,7 +4,7 @@ defmodule Orb.Memory.Store do
   defstruct push_type: nil,
             store_type: nil,
             store_instruction: :store,
-            offset: nil,
+            address: nil,
             align: nil,
             natural_align: nil,
             value: nil
@@ -12,7 +12,7 @@ defmodule Orb.Memory.Store do
   alias Orb.Memory.Load
   require Orb.Ops |> alias
 
-  def new(type, offset, value, opts) when is_atom(type) do
+  def new(type, address, value, opts) when is_atom(type) do
     load_instruction =
       cond do
         Ops.is_primitive_type(type) ->
@@ -36,14 +36,14 @@ defmodule Orb.Memory.Store do
     %__MODULE__{
       store_type: type,
       store_instruction: store_instruction,
-      offset: offset,
+      address: address,
       align: align,
       natural_align: natural_align,
       value: value
     }
   end
 
-  def new(primitive_type, load_instruction, offset, value, opts)
+  def new(primitive_type, load_instruction, address, value, opts)
       when Ops.is_primitive_type(primitive_type) do
     align = Keyword.get(opts, :align)
 
@@ -55,7 +55,7 @@ defmodule Orb.Memory.Store do
     %__MODULE__{
       store_type: primitive_type,
       store_instruction: store_instruction,
-      offset: offset,
+      address: address,
       align: align,
       natural_align: natural_align,
       value: value
@@ -72,14 +72,14 @@ defmodule Orb.Memory.Store do
           align
       end
 
-    new_offset =
+    new_address =
       Orb.Numeric.Add.optimized(
         :i32,
-        store.offset,
+        store.address,
         Orb.Numeric.Multiply.optimized(:i32, delta, delta_factor)
       )
 
-    %{store | offset: new_offset}
+    %{store | address: new_address}
   end
 
   defimpl Orb.ToWat do
@@ -87,7 +87,7 @@ defmodule Orb.Memory.Store do
           %Orb.Memory.Store{
             store_type: type,
             store_instruction: store_instruction,
-            offset: offset,
+            address: address,
             align: align,
             value: value
           },
@@ -103,7 +103,7 @@ defmodule Orb.Memory.Store do
           nil -> []
           align -> [" align=", to_string(align)]
         end,
-        [" ", Orb.ToWat.Instructions.do_wat(offset)],
+        [" ", Orb.ToWat.Instructions.do_wat(address)],
         [" ", Orb.ToWat.Instructions.do_wat(value)],
         ")"
       ]
