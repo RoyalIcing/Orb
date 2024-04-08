@@ -19,7 +19,7 @@ Execute Elixir at compile time and WebAssembly at runtime.
 defmodule TemperatureConverter do
   use Orb
 
-  Orb.I32.export_enum([:celsius, :fahrenheit])
+  I32.export_enum([:celsius, :fahrenheit])
 
   global do
     @mode 0
