@@ -51,6 +51,8 @@ defmodule DefwTest do
       i32(3)
       |> Orb.Stack.drop()
     end
+
+    def __shush_warning, do: second()
   end
 
   test "function visiblity" do
