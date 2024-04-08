@@ -2,7 +2,7 @@
 
 Another feature that is central to C is string constants. You type `"abc"` and you can pass it around, read the characters in it, and even do operations on it.
 
-WebAssembly lets you initialize a region of memory with a string. But it doesn’t let you use the strings directly. Instead you must manually assign memory addresses for each string constant, and then only refer to the addresses.
+WebAssembly lets you initialize a region of memory with a string. But it doesn’t let you use the strings directly. Instead you must manually assign memory addresses for each string constant, and then in functions only refer to the addresses.
 
 Orb adds a simple convenience on top, letting you use strings directly. At compile-time these strings are substituted by their addresses.
 
