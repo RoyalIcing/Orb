@@ -295,6 +295,57 @@ defmodule OperatorsTest do
            """ === Orb.to_wat(F1)
   end
 
+  test "float 64-bit work" do
+    defmodule F64Example do
+      use Orb
+
+      defw add(), F64 do
+        1.0 + 2.0
+      end
+
+      defw multiply(a: F64, b: F64), F64 do
+        a * b
+      end
+
+      defw divide(), F64 do
+        # f64 do: 4.0 / 2.0
+        4.0 / 2.0
+      end
+
+      defw lab_to_xyz(l: F64, a: F64, b: F64), {F64, F64, F64} do
+        f64(0.0)
+        push(f64(0.0))
+        f64(0.0)
+      end
+
+      defw fahrenheit_to_celsius(fahrenheit: F64), F64 do
+        (fahrenheit - 32.0) * 5.0 / 9.0
+      end
+    end
+
+    assert """
+           (module $F64Example
+             (func $add (export "add") (result f64)
+               (f64.const 3.0)
+             )
+             (func $multiply (export "multiply") (param $a f64) (param $b f64) (result f64)
+               (f64.mul (local.get $a) (local.get $b))
+             )
+             (func $divide (export "divide") (result f64)
+               (f64.const 2.0)
+             )
+             (func $lab_to_xyz (export "lab_to_xyz") (param $l f64) (param $a f64) (param $b f64) (result f64 f64 f64)
+               (f64.const 0.0)
+               (f64.const 0.0)
+               (f64.const 0.0)
+             )
+             (func $fahrenheit_to_celsius (export "fahrenheit_to_celsius") (param $fahrenheit f64) (result f64)
+               (f64.div (f64.mul (f64.sub (local.get $fahrenheit) (f64.const 32.0)) (f64.const 5.0)) (f64.const 9.0))
+             )
+           )
+           """ === Orb.to_wat(F64Example)
+  end
+
   test "numeric mode" do
     defmodule N1 do
       use Orb

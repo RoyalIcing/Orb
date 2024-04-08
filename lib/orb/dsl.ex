@@ -351,6 +351,8 @@ defmodule Orb.DSL do
   end
 
   def i64(n) when is_integer(n), do: Instruction.i64(:const, n)
+  def f32(n) when is_float(n), do: Instruction.f32(:const, n)
+  def f64(n) when is_float(n), do: Instruction.f64(:const, n)
 
   # TODO: move all of these to Orb.Stack
   @doc """
@@ -358,9 +360,7 @@ defmodule Orb.DSL do
   """
   def push(value)
 
-  def push(tuple)
-      when is_tuple(tuple) and elem(tuple, 0) in [:i32, :i32_const, :local_get, :global_get],
-      do: tuple
+  def push(instruction = %Orb.Instruction{}), do: instruction
 
   # FIXME: assumes only 32-bit integer, doesn’t work with 64-bit or float
   def push(n) when is_integer(n), do: Orb.Instruction.wrap_constant!(:i32, n)

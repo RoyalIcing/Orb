@@ -28,8 +28,11 @@ defmodule Orb.Ops do
   @i64_ops_2 @i_binary_ops ++ @i_relative_ops
   @i64_ops_all @i64_ops_1 ++ @i64_ops_2 ++ @i64_load_ops ++ @i64_store_ops
 
-  @f32_ops_1 ~w(floor ceil trunc nearest abs neg sqrt convert_i32_s convert_i32_u)a
+  @f32_ops_1 ~w(floor ceil trunc nearest abs neg sqrt convert_i32_s convert_i32_u demote_f64)a
   @f32_ops_2 ~w(add sub mul div eq ne lt gt le ge copysign min max)a
+
+  @f64_ops_1 ~w(floor ceil trunc nearest abs neg sqrt convert_i32_s convert_i32_u convert_i64_s convert_i64_u promote_f32)a
+  @f64_ops_2 ~w(add sub mul div eq ne lt gt le ge copysign min max)a
 
   # TODO: add conversions ops https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/Numeric#conversion
 
@@ -95,6 +98,7 @@ defmodule Orb.Ops do
 
   def typeof(value, :primitive), do: typeof(value) |> to_primitive_type()
 
+  @spec pop_push_of(binary() | number() | map()) :: {any(), any()}
   def pop_push_of(n) when is_integer(n), do: {nil, Elixir.Integer}
   def pop_push_of(n) when is_float(n), do: {nil, Elixir.Float}
   def pop_push_of(%{pop_type: pop_type, push_type: push_type}), do: {pop_type, push_type}
@@ -139,13 +143,20 @@ defmodule Orb.Ops do
   defmacro f32(1), do: @f32_ops_1 |> Macro.escape()
   defmacro f32(2), do: @f32_ops_2 |> Macro.escape()
 
+  defmacro f64(arity_or_type)
+  defmacro f64(1), do: @f64_ops_1 |> Macro.escape()
+  defmacro f64(2), do: @f64_ops_2 |> Macro.escape()
+
   defp i32_arity(op) when op in @i32_ops_1, do: 1
   defp i32_arity(op) when op in @i32_ops_2, do: 2
   defp i64_arity(op) when op in @i64_ops_1, do: 1
   defp i64_arity(op) when op in @i64_ops_2, do: 2
   defp f32_arity(op) when op in @f32_ops_1, do: 1
   defp f32_arity(op) when op in @f32_ops_2, do: 2
+  defp f64_arity(op) when op in @f64_ops_1, do: 1
+  defp f64_arity(op) when op in @f64_ops_2, do: 2
 
+  defp i32_param_type(op, param_index)
   defp i32_param_type(:const, 0), do: Elixir.Integer
   defp i32_param_type(op, 0) when op in @i32_load_ops, do: :i32
   defp i32_param_type(op, i) when op in @i32_store_ops and i in [0, 1], do: :i32
@@ -155,8 +166,9 @@ defmodule Orb.Ops do
   defp i32_param_type(op, 0) when op in @i32_wrap_ops, do: :i64
   defp i32_param_type(op, i) when op in @i_binary_ops and i in [0, 1], do: :i32
   defp i32_param_type(op, i) when op in @i_relative_ops and i in [0, 1], do: :i32
-  defp i32_param_type(_op, _param_index), do: :error
+  defp i32_param_type(_, _), do: :error
 
+  defp i64_param_type(op, param_index)
   defp i64_param_type(:const, 0), do: Elixir.Integer
   defp i64_param_type(op, 0) when op in @i64_load_ops, do: :i64
   defp i64_param_type(op, i) when op in @i64_store_ops and i in [0, 1], do: :i64
@@ -166,20 +178,33 @@ defmodule Orb.Ops do
   defp i64_param_type(op, 0) when op in @i64_extend_ops, do: :i32
   defp i64_param_type(op, i) when op in @i_binary_ops and i in [0, 1], do: :i64
   defp i64_param_type(op, i) when op in @i_relative_ops and i in [0, 1], do: :i64
-  defp i64_param_type(_op, _param_index), do: :error
+  defp i64_param_type(_, _), do: :error
 
+  defp f32_param_type(op, param_index)
   defp f32_param_type(:const, 0), do: Elixir.Float
+  defp f32_param_type(:convert_i32_s, 0), do: :i32
+  defp f32_param_type(:convert_i32_u, 0), do: :i32
+  defp f32_param_type(:demote_f64, 0), do: :f64
   defp f32_param_type(op, 0) when op in @f32_ops_1, do: :f32
   defp f32_param_type(op, i) when op in @f32_ops_2 and i in [0, 1], do: :f32
-  defp f32_param_type(_op, _param_index), do: :error
+  defp f32_param_type(_, _), do: :error
+
+  defp f64_param_type(op, param_index)
+  defp f64_param_type(:const, 0), do: Elixir.Float
+  defp f64_param_type(:convert_i32_s, 0), do: :i32
+  defp f64_param_type(:convert_i32_u, 0), do: :i32
+  defp f64_param_type(:convert_i64_s, 0), do: :i64
+  defp f64_param_type(:convert_i64_u, 0), do: :i64
+  defp f64_param_type(:promote_f32, 0), do: :f32
+  defp f64_param_type(op, 0) when op in @f64_ops_1, do: :f64
+  defp f64_param_type(op, i) when op in @f64_ops_2 and i in [0, 1], do: :f64
+  defp f64_param_type(_, _), do: :error
 
   def i32_param_type!(op, param_index) do
     case i32_param_type(op, param_index) do
       :error ->
-        arity = i32_arity(op)
-
         raise ArgumentError,
-              "WebAssembly instruction i32.#{op}/#{arity} does not accept a #{nth(param_index)} argument."
+              "WebAssembly instruction i32.#{op}/#{i32_arity(op)} does not accept a #{nth(param_index)} argument."
 
       type ->
         type
@@ -189,10 +214,8 @@ defmodule Orb.Ops do
   def i64_param_type!(op, param_index) do
     case i64_param_type(op, param_index) do
       :error ->
-        arity = i64_arity(op)
-
         raise ArgumentError,
-              "WebAssembly instruction i64.#{op}/#{arity} does not accept a #{nth(param_index)} argument."
+              "WebAssembly instruction i64.#{op}/#{i64_arity(op)} does not accept a #{nth(param_index)} argument."
 
       type ->
         type
@@ -202,10 +225,19 @@ defmodule Orb.Ops do
   def f32_param_type!(op, param_index) do
     case f32_param_type(op, param_index) do
       :error ->
-        arity = f32_arity(op)
-
         raise ArgumentError,
-              "WebAssembly instruction f32.#{op}/#{arity} does not accept a #{nth(param_index)} argument."
+              "WebAssembly instruction f32.#{op}/#{f32_arity(op)} does not accept a #{nth(param_index)} argument."
+
+      type ->
+        type
+    end
+  end
+
+  def f64_param_type!(op, param_index) do
+    case f64_param_type(op, param_index) do
+      :error ->
+        raise ArgumentError,
+              "WebAssembly instruction f64.#{op}/#{f64_arity(op)} does not accept a #{nth(param_index)} argument."
 
       type ->
         type
@@ -215,6 +247,7 @@ defmodule Orb.Ops do
   def param_type!(:i32, op, param_index), do: i32_param_type!(op, param_index)
   def param_type!(:i64, op, param_index), do: i64_param_type!(op, param_index)
   def param_type!(:f32, op, param_index), do: f32_param_type!(op, param_index)
+  def param_type!(:f64, op, param_index), do: f64_param_type!(op, param_index)
 
   defp nth(0), do: "1st"
   defp nth(1), do: "2nd"

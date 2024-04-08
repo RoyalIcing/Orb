@@ -78,6 +78,11 @@ defmodule Orb.Instruction do
   def f32(operation, a), do: new(:f32, operation, [a])
   def f32(operation, a, b), do: new(:f32, operation, [a, b])
 
+  def f64(operation), do: new(:f64, operation)
+  def f64(operation, a) when is_list(a), do: new(:f64, operation, a)
+  def f64(operation, a), do: new(:f64, operation, [a])
+  def f64(operation, a, b), do: new(:f64, operation, [a, b])
+
   # TODO: remove call()
   def call(f), do: new(:unknown_effect, {:call, f})
   def call(f, args) when is_list(args), do: new(:unknown_effect, {:call, f}, args)
@@ -185,7 +190,7 @@ defmodule Orb.Instruction do
         # is_integer(number) -> :i32
         is_integer(number) -> Elixir.Integer
         # TODO: F64
-        is_float(number) -> :f32
+        is_float(number) -> Elixir.Float
       end
 
     types_must_match!(expected_type, received_type, "#{type}.#{op}")

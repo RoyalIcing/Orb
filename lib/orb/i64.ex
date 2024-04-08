@@ -6,10 +6,10 @@ defmodule Orb.I64 do
   require alias Orb.Ops
   alias Orb.Instruction
 
-  @behaviour Orb.CustomType
-
-  @impl Orb.CustomType
-  def wasm_type(), do: :i64
+  with @behaviour Orb.CustomType do
+    @impl Orb.CustomType
+    def wasm_type(), do: :i64
+  end
 
   for op <- Ops.i64(1) do
     def unquote(op)(a) do

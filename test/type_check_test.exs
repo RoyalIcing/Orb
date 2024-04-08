@@ -25,7 +25,7 @@ defmodule TypeCheckTest do
 
   test "passing F32 constant to I32.add fails" do
     assert_raise Orb.TypeCheckError,
-                 "Instruction i32.add expected type i32, found f32.",
+                 "Instruction i32.add expected type i32, found Elixir.Float.",
                  fn -> Orb.to_wat(PassConstantF32ToI32Add) end
   end
 

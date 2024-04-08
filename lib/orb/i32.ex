@@ -9,10 +9,10 @@ defmodule Orb.I32 do
   alias Orb.Instruction
   alias Orb.InstructionSequence
 
-  @behaviour Orb.CustomType
-
-  @impl Orb.CustomType
-  def wasm_type(), do: :i32
+  with @behaviour Orb.CustomType do
+    @impl Orb.CustomType
+    def wasm_type(), do: :i32
+  end
 
   def const(n) when is_integer(n), do: Instruction.wrap_constant!(:i32, n)
 
