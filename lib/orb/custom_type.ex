@@ -3,8 +3,6 @@ defmodule Orb.CustomType do
   @callback load_instruction() ::
               :load | :load8_s | :load8_u | :load16_s | :load16_u | :load32_s | :load32_u
   # @callback store_instruction() :: :store | :store8 | :store16 | :store32
-  # TODO: remove byte_count
-  @callback byte_count() :: 1 | 4 | 8
 
   @optional_callbacks load_instruction: 0
 
