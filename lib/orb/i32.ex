@@ -221,6 +221,7 @@ defmodule Orb.I32 do
   def __global_value(mod) when is_atom(mod),
     do: const(mod.initial_i32())
 
+  # TODO: remove
   defmacro global(mutability \\ :mutable, list)
            when mutability in ~w{readonly mutable}a do
     quote do
@@ -236,6 +237,7 @@ defmodule Orb.I32 do
     end
   end
 
+  # TODO: remove
   defmacro export_global(mutability, list)
            when mutability in ~w{readonly mutable}a do
     quote do
