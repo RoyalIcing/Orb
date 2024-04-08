@@ -178,7 +178,7 @@ defmodule Examples.Memory do
       # Zig: https://godbolt.org/z/bG5zj6bzx
       # ptr[at: 0, fallback: 0x0]
       # ptr |> I32.eqz?(do: 0x0, else: ptr[at!: 0])
-      I32.eqz(ptr) |> I32.when?(do: 0x0, else: ptr[at!: 0])
+      I32.eqz(ptr) |> if(do: i32(0x0), else: ptr[at!: 0])
       # ptr &&& ptr[at!: 0]
       # ptr[at!: 0]
     end
@@ -186,7 +186,7 @@ defmodule Examples.Memory do
     defw tl(ptr: I32.UnsafePointer), I32.UnsafePointer do
       # ptr.unwrap[at!: 1]
       # ptr |> I32.eqz?(do: :unreachable, else: ptr[at!: 1])
-      I32.eqz(ptr) |> I32.when?(do: 0x0, else: ptr[at!: 1])
+      I32.eqz(ptr) |> if(do: i32(0x0), else: ptr[at!: 1])
       # ptr[at!: 1]
     end
 

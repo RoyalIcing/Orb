@@ -83,18 +83,6 @@ defmodule Orb.I32 do
     InstructionSequence.new(:i32, instructions)
   end
 
-  # TODO: if can do what when? does now.
-  defmacro when?(condition, do: when_true, else: when_false) do
-    quote do
-      Orb.IfElse.new(
-        :i32,
-        unquote(condition),
-        Orb.InstructionSequence.new(unquote(__get_block_items(when_true))),
-        Orb.InstructionSequence.new(unquote(__get_block_items(when_false)))
-      )
-    end
-  end
-
   @doc "Converts an ASCII little-endian 4-byte string to an 32-bit integer."
   def from_4_byte_ascii(<<int::little-size(32)>>), do: int
 

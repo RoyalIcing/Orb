@@ -330,20 +330,20 @@ defmodule Orb do
   end
   ```
 
-  If you want a ternary operator (e.g. to map from one value to another), you can use `Orb.I32.when?/2` instead:
+  If you want a ternary operator (e.g. to map from one value to another), you can use `if` when both clauses push the same type:
 
   ```elixir
-  music_volume = I32.when? @party_mode? do
-    100
+  music_volume = if @party_mode? do
+    i32(100)
   else
-    30
+    i32(30)
   end
   ```
 
   These can be written on single line too:
 
   ```elixir
-  music_volume = I32.when?(@party_mode?, do: 100, else: 30)
+  music_volume = I32.if(@party_mode?, do: i32(100), else: i32(30))
   ```
 
   ### Loops

@@ -101,17 +101,17 @@ defmodule TypeCheckTest do
                  fn -> Orb.to_wat(GlobalI32SetToF32) end
   end
 
-  defmodule LocalI32SetToI32When do
+  defmodule LocalI32SetToI32If do
     use Orb
 
     defw example(), a: F32 do
-      a = I32.when?(i32(1), do: 1, else: 2)
+      a = if(i32(1), do: 1, else: 2)
     end
   end
 
-  test "setting f32 local to I32.when? fails" do
+  test "setting f32 local to Integer if fails" do
     assert_raise Orb.TypeCheckError,
-                 "Instruction local.set $a expected type f32 via Orb.F32, found i32.",
-                 fn -> Orb.to_wat(LocalI32SetToI32When) end
+                 "Instruction local.set $a expected type f32 via Orb.F32, found Elixir.Integer.",
+                 fn -> Orb.to_wat(LocalI32SetToI32If) end
   end
 end
