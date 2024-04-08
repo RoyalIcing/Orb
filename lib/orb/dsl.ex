@@ -335,6 +335,7 @@ defmodule Orb.DSL do
 
   def i32(n) when is_integer(n), do: Instruction.i32(:const, n)
 
+  # TODO: should either commit to this idea (with a unit test) or remove it.
   def i32(locals) when is_list(locals) do
     Orb.InstructionSequence.new(
       :local_effect,
