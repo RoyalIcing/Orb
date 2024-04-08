@@ -312,6 +312,13 @@ defmodule OperatorsTest do
         4.0 / 2.0
       end
 
+      defw add_every_flavor(a: I32, b: I64, c: F32, d: F64), F64 do
+        F64.convert_i32_s(a)
+        |> F64.add(F64.convert_i64_s(b))
+        |> F64.add(F64.promote_f32(c))
+        |> F64.add(d)
+      end
+
       defw lab_to_xyz(l: F64, a: F64, b: F64), {F64, F64, F64} do
         f64(0.0)
         push(f64(0.0))
@@ -333,6 +340,9 @@ defmodule OperatorsTest do
              )
              (func $divide (export "divide") (result f64)
                (f64.const 2.0)
+             )
+             (func $add_every_flavor (export "add_every_flavor") (param $a i32) (param $b i64) (param $c f32) (param $d f64) (result f64)
+               (f64.add (f64.add (f64.add (f64.convert_i32_s (local.get $a)) (f64.convert_i64_s (local.get $b))) (f64.promote_f32 (local.get $c))) (local.get $d))
              )
              (func $lab_to_xyz (export "lab_to_xyz") (param $l f64) (param $a f64) (param $b f64) (result f64 f64 f64)
                (f64.const 0.0)
