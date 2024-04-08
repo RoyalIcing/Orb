@@ -223,13 +223,45 @@ defmodule Orb.DSL do
          value
        ]}
       when is_atom(local) and is_map_key(locals, local) ->
-        # FIXME: add error message
-        bytes_factor = locals[local].byte_count()
+        # FIXME: remove all of this. Replace with:
+        # local_type = locals[local]
 
-        store_instruction =
-          case bytes_factor do
-            1 -> :store8
-            4 -> :store
+        # quote do:
+        #         Orb.Memory.store!(
+        #           unquote(local_type),
+        #           Orb.Numeric.Add.optimized(
+        #             unquote(local_type),
+        #             Instruction.local_get(unquote(local_type), unquote(local)),
+        #             unquote(offset)
+        #           ),
+        #           unquote(value)
+        #         )
+
+        local_type = locals[local] |> Code.ensure_loaded!()
+
+        load_instruction =
+          if function_exported?(local_type, :load_instruction, 0) do
+            local_type.load_instruction()
+          else
+            :load
+          end
+
+        {store_instruction, byte_width} =
+          case load_instruction do
+            i when i in [:load8_s, :load8_u] ->
+              {:store8, 1}
+
+            i when i in [:load16_s, :load16_u] ->
+              {:store16, 2}
+
+            i when i in [:load32_s, :load32_u] ->
+              {:store32, 4}
+
+            :load ->
+              case Ops.to_primitive_type(local_type) do
+                t when t in [:i32, :f32] -> {:store, 4}
+                t when t in [:i64, :f64] -> {:store, 8}
+              end
           end
 
         local_get_instruction =
@@ -240,29 +272,12 @@ defmodule Orb.DSL do
         # TODO: remove, as should be handled by the custom type implementing
         # the Access protocol.
         computed_offset =
-          case {offset, bytes_factor} do
-            {0, _} ->
-              quote do: unquote(local_get_instruction)
-
-            {offset, 1} ->
-              quote do: Orb.I32.add(unquote(local_get_instruction), unquote(offset))
-
-            # We can compute at compile-time
-            {offset, factor} when is_integer(offset) ->
-              quote do:
-                      Orb.I32.add(
-                        unquote(local_get_instruction),
-                        unquote(offset * factor)
-                      )
-
-            # We can only compute at runtime
-            {offset, factor} ->
-              quote do:
-                      Orb.I32.add(
-                        unquote(local_get_instruction),
-                        I32.mul(unquote(offset), unquote(factor))
-                      )
-          end
+          quote do:
+                  Orb.Numeric.Add.optimized(
+                    :i32,
+                    unquote(local_get_instruction),
+                    Orb.Numeric.Multiply.optimized(:i32, unquote(offset), unquote(byte_width))
+                  )
 
         quote do:
                 Orb.Instruction.memory_store(

@@ -8,9 +8,7 @@ defmodule Orb.I32.U8 do
   @impl Orb.CustomType
   def wasm_type(), do: :i32
 
+  # TODO: remove this
   @impl Orb.CustomType
   def load_instruction(), do: :load8_u
-
-  @impl Orb.CustomType
-  def byte_count(), do: 1
 end

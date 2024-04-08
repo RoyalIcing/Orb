@@ -12,7 +12,7 @@ defmodule Orb.I32.U8.UnsafePointer do
   def wasm_type(), do: :i32
 
   @impl Orb.CustomType
-  def byte_count(), do: 1
+  def load_instruction(), do: :load8_u
 
   @impl Access
   def fetch(%VariableReference{} = var_ref, at!: offset) do

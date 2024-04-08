@@ -9,9 +9,6 @@ defmodule Orb.F32 do
   @impl Orb.CustomType
   def wasm_type, do: :f32
 
-  @impl Orb.CustomType
-  def byte_count, do: 4
-
   for op <- Ops.f32(1) do
     def unquote(op)(a) do
       Instruction.f32(unquote(op), a)
