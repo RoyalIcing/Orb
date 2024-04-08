@@ -95,17 +95,6 @@ defmodule Orb.I32 do
     end
   end
 
-  # This only works with WebAssembly 1.1
-  # Sadly wat2wasm doesn’t like it
-  def select(condition, do: when_true, else: when_false) do
-    [
-      when_true,
-      when_false,
-      condition,
-      :select
-    ]
-  end
-
   @doc "Converts an ASCII little-endian 4-byte string to an 32-bit integer."
   def from_4_byte_ascii(<<int::little-size(32)>>), do: int
 
