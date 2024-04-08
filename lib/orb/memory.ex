@@ -47,7 +47,7 @@ defmodule Orb.Memory do
   end
 
   @doc """
-  Load value of `type` from memory `offset`.
+  Load value of `type` from memory `address`.
 
   ```elixir
   Memory.load!(I32, 0x100)
@@ -78,12 +78,12 @@ defmodule Orb.Memory do
       ** (ArgumentError) alignment 2 must not be larger than natural 1
   ```
   """
-  def load!(type, offset, opts \\ []) do
-    Orb.Memory.Load.new(type, offset, opts)
+  def load!(type, address, opts \\ []) do
+    Orb.Memory.Load.new(type, address, opts)
   end
 
   @doc """
-  Store `value` of `type` at memory `offset`.
+  Store `value` of `type` at memory `address`.
 
   ```elixir
   Memory.store!(I32, 0x100, 42)
@@ -114,8 +114,8 @@ defmodule Orb.Memory do
       iex> Memory.store!(I32.U8, 0x100, 42, align: 2)
       ** (ArgumentError) alignment 2 must not be larger than natural 1
   """
-  def store!(type, offset, value, opts \\ []) do
-    Orb.Memory.Store.new(type, offset, value, opts)
+  def store!(type, address, value, opts \\ []) do
+    Orb.Memory.Store.new(type, address, value, opts)
   end
 
   @doc """
