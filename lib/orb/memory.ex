@@ -52,6 +52,7 @@ defmodule Orb.Memory do
   ```elixir
   Memory.load!(I32, 0x100)
   Memory.load!(I32.U8, 0x100)
+  ```
 
   ## Examples
 

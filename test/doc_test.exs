@@ -3,4 +3,5 @@ defmodule DocTest do
 
   doctest Orb.InstructionSequence
   doctest Orb.Memory
+  doctest Orb.Constants
 end

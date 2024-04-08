@@ -2,7 +2,7 @@ defmodule Orb.Constants do
   @moduledoc false
 
   # TODO: decide on non-arbitrary offset, and document it.
-  defstruct offset: 0xFF, items: [], lookup_table: []
+  defstruct offset: 0xFF, items: [], lookup_table: [], byte_size: 0
 
   def __begin(start_offset \\ 0xFF) do
     tid = Process.get(__MODULE__)
@@ -87,7 +87,19 @@ defmodule Orb.Constants do
     end
   end
 
-  # TODO: calculate offset based on how much memory we have used so far.
+  @doc """
+  Creates a ordered lookup table of deduplicated constants.
+
+  ## Examples
+
+      iex> Orb.Constants.from_attribute([
+      ...>  "abc",
+      ...>  "def",
+      ...>  "abc",
+      ...> ])
+      %Orb.Constants{offset: 255, items: ["abc", "def"], byte_size: 8, lookup_table: [{"abc", 255}, {"def", 259}]}
+
+  """
   def from_attribute(items, offset \\ 0xFF) do
     items =
       items
@@ -96,13 +108,15 @@ defmodule Orb.Constants do
       |> List.flatten()
       |> Enum.uniq()
 
-    {lookup_table, _} =
+    {lookup_table, last_offset} =
       items
       |> Enum.map_reduce(offset, fn string, offset ->
         {{string, offset}, offset + byte_size(string) + 1}
       end)
 
-    %__MODULE__{offset: offset, items: items, lookup_table: lookup_table}
+    byte_size = last_offset - offset
+
+    %__MODULE__{offset: offset, items: items, lookup_table: lookup_table, byte_size: byte_size}
   end
 
   defmodule NulTerminatedString do
