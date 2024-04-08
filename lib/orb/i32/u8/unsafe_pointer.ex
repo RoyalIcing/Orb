@@ -18,7 +18,7 @@ defmodule Orb.I32.U8.UnsafePointer do
   with @behaviour Access do
     @impl Access
     def fetch(%VariableReference{} = var_ref, at!: offset) do
-      ast = Memory.load!(I32.U8, Orb.Numeric.Add.optimized(I32, var_ref, offset))
+      ast = Memory.load!(__MODULE__, Orb.Numeric.Add.optimized(I32, var_ref, offset))
       {:ok, ast}
     end
 
