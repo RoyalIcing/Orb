@@ -244,7 +244,7 @@ defmodule OperatorsTest do
            """ === Orb.to_wat(ExampleS64)
   end
 
-  test "float 32-bit mode" do
+  test "float 32-bit work" do
     defmodule F1 do
       use Orb
 
