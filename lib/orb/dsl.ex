@@ -382,6 +382,7 @@ defmodule Orb.DSL do
     ]
   end
 
+  # TODO: remove
   def typed_call(output_type, f, args) when is_list(args),
     do: Instruction.typed_call(output_type, f, args)
 

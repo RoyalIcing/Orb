@@ -90,7 +90,7 @@ defmodule Orb.Instruction do
   def typed_call(result_type, param_types, f, args) when is_list(args),
     do: new(result_type, {:call, param_types, f}, args)
 
-  def typed_call(output_type, f, args) when is_list(args), do: new(output_type, {:call, f}, args)
+  # def typed_call(output_type, f, args) when is_list(args), do: new(output_type, {:call, f}, args)
 
   def local_get(type, local_name), do: new(type, {:local_get, local_name})
   def local_tee(type, local_name, value), do: new(type, {:local_tee, local_name}, [value])

@@ -63,7 +63,7 @@ defmodule Examples.Memory do
     end
 
     def memcpy(dest: dest, src: src, byte_count: byte_count) do
-      Orb.DSL.typed_call(I32, :memcpy, [dest, src, byte_count])
+      memcpy(dest, src, byte_count)
     end
 
     # TODO: add 32-bit-aligned version so we can use faster instructions.
@@ -80,7 +80,7 @@ defmodule Examples.Memory do
     end
 
     def memset(dest: dest, u8: u8, byte_count: byte_count) do
-      Orb.DSL.typed_call(I32, :memset, [dest, u8, byte_count])
+      memset(dest, u8, byte_count)
     end
   end
 
@@ -163,29 +163,12 @@ defmodule Examples.Memory do
     use Orb
     use BumpAllocator
 
-    defmacro __using__(_opts) do
-      quote do
-        # @wasm_memory 1
-
-        import Orb
-
-        wasm do
-          unquote(__MODULE__).funcp(:cons)
-          unquote(__MODULE__).funcp(:hd)
-          unquote(__MODULE__).funcp(:tl)
-          unquote(__MODULE__).funcp(:reverse_in_place)
-        end
-
-        import unquote(__MODULE__)
-      end
-    end
-
     # increase_memory pages: 2
     # @wasm_memory 2
 
     defw cons(hd: I32.UnsafePointer, tl: I32.UnsafePointer), I32.UnsafePointer,
       ptr: I32.UnsafePointer do
-      ptr = typed_call(I32.UnsafePointer, :bump_alloc, [8])
+      ptr = BumpAllocator.alloc(8)
       ptr[at!: 0] = hd
       ptr[at!: 1] = tl
       ptr
@@ -256,7 +239,7 @@ defmodule Examples.Memory do
         # I32.when? ptr, else_return: count
         # I32.when? ptr, else: return(count)
 
-        ptr = typed_call(I32.UnsafePointer, :tl, [ptr])
+        ptr = __MODULE__.tl(ptr)
         count = count + 1
         Iterate.continue()
       end
@@ -266,8 +249,8 @@ defmodule Examples.Memory do
       loop Iterate, result: I32 do
         if I32.eqz(ptr), do: return(sum)
 
-        sum = sum + typed_call(I32.UnsafePointer, :hd, [ptr])
-        ptr = typed_call(I32.UnsafePointer, :tl, [ptr])
+        sum = sum + __MODULE__.hd(ptr)
+        ptr = __MODULE__.tl(ptr)
 
         Iterate.continue()
       end
@@ -275,7 +258,7 @@ defmodule Examples.Memory do
 
     def cons(head, tail) do
       snippet U32 do
-        Orb.DSL.typed_call(I32.UnsafePointer, :cons, [head, tail])
+        __MODULE__.cons(head, tail)
       end
     end
 
@@ -292,8 +275,8 @@ defmodule Examples.Memory do
     end
 
     def reverse_in_place!(%Orb.MutRef{read: read, write: write_instruction}) do
-      snippet U32 do
-        Orb.DSL.typed_call(I32.UnsafePointer, :reverse_in_place, [read])
+      snippet do
+        reverse_in_place(read)
         write_instruction
       end
     end
