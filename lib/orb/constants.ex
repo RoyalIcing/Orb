@@ -76,6 +76,9 @@ defmodule Orb.Constants do
     matcher = [{{:"$1", :"$2"}, [is_binary: :"$1"], [{{:"$1", :"$2"}}]}]
     lookup_table = :ets.select(tid, matcher)
 
+    # Sort by offsets, lowest to largest
+    lookup_table = List.keysort(lookup_table, 1, :asc)
+
     # entries = :ets.match_object(__MODULE__, {:"$0", :"$1"})
 
     %__MODULE__{offset: 0xFF, items: [], lookup_table: lookup_table}
