@@ -334,11 +334,6 @@ defmodule Orb.DSL do
   end
 
   def i32(n) when is_integer(n), do: Instruction.i32(:const, n)
-  # TODO: should these be removed?
-  def i32(false), do: Instruction.i32(:const, 0)
-  def i32(true), do: Instruction.i32(:const, 1)
-  # TODO: should this be removed?
-  def i32(op) when op in Ops.i32(:all), do: {:i32, op}
 
   def i32(locals) when is_list(locals) do
     Orb.InstructionSequence.new(
