@@ -78,7 +78,9 @@ defmodule Orb.Memory do
       ** (ArgumentError) alignment 2 must not be larger than natural 1
   ```
   """
-  def load!(type, offset, opts \\ []), do: Orb.Memory.Load.new(type, offset, opts)
+  def load!(type, offset, opts \\ []) do
+    Orb.Memory.Load.new(type, offset, opts)
+  end
 
   @doc """
   Store `value` of `type` at memory `offset`.
@@ -112,54 +114,8 @@ defmodule Orb.Memory do
       iex> Memory.store!(I32.U8, 0x100, 42, align: 2)
       ** (ArgumentError) alignment 2 must not be larger than natural 1
   """
-  def store!(type, offset, value, options \\ []) do
-    primitive_type = Orb.CustomType.resolve!(type)
-
-    load_instruction =
-      if function_exported?(type, :load_instruction, 0) do
-        type.load_instruction()
-      else
-        :load
-      end
-
-    {store_instruction, natural_alignment} =
-      case load_instruction do
-        i when i in [:load8_s, :load8_u] ->
-          {:store8, 1}
-
-        i when i in [:load16_s, :load16_u] ->
-          {:store16, 2}
-
-        i when i in [:load32_s, :load32_u] ->
-          {:store32, 4}
-
-        :load ->
-          case primitive_type do
-            t when t in [:i32, :f32] -> {:store, 4}
-            t when t in [:i64, :f64] -> {:store, 8}
-          end
-      end
-
-    # Align: https://webassembly.github.io/spec/core/bikeshed/#syntax-instr-memory
-    align = Keyword.get(options, :align)
-    # delta = Keyword.get(options, :delta)
-
-    if align do
-      unless align in [1, 2, 4, 8] do
-        raise ArgumentError, "malformed alignment #{align}"
-      end
-
-      if align > natural_alignment do
-        raise ArgumentError,
-              "alignment #{align} must not be larger than natural #{natural_alignment}"
-      end
-    end
-
-    Orb.Instruction.memory_store(primitive_type, store_instruction,
-      offset: offset,
-      value: value,
-      align: align
-    )
+  def store!(type, offset, value, opts \\ []) do
+    Orb.Memory.Store.new(type, offset, value, opts)
   end
 
   @doc """

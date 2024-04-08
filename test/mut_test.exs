@@ -2,8 +2,6 @@ defmodule MutTest do
   use ExUnit.Case, async: true
 
   test "with func parameter" do
-    import Orb.DSL
-
     defmodule FuncParam do
       use Orb
 

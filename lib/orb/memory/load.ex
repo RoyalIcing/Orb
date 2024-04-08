@@ -19,7 +19,9 @@ defmodule Orb.Memory.Load do
       end
 
     align = Keyword.get(opts, :align)
-    validate_align!(align, Ops.to_primitive_type(type), load_instruction)
+    primitive_type = Ops.to_primitive_type(type)
+    {_, natural_alignment} = store_and_alignment_for(primitive_type, load_instruction)
+    validate_align!(align, natural_alignment)
 
     %__MODULE__{
       push_type: type,
@@ -29,12 +31,14 @@ defmodule Orb.Memory.Load do
     }
   end
 
-  def new(type, load_instruction, offset, opts) when Ops.is_primitive_type(type) do
+  def new(primitive_type, load_instruction, offset, opts)
+      when Ops.is_primitive_type(primitive_type) do
     align = Keyword.get(opts, :align)
-    validate_align!(align, type, load_instruction)
+    {_, natural_alignment} = store_and_alignment_for(primitive_type, load_instruction)
+    validate_align!(align, natural_alignment)
 
     %__MODULE__{
-      push_type: type,
+      push_type: primitive_type,
       load_instruction: load_instruction,
       offset: offset,
       align: align
@@ -60,17 +64,15 @@ defmodule Orb.Memory.Load do
     end
   end
 
-  def validate_align!(align, primitive_type, load_instruction)
+  def validate_align!(align, natural_alignment)
 
-  def validate_align!(nil, _, _), do: nil
+  def validate_align!(nil, _), do: nil
 
-  def validate_align!(align, _, _) when align not in [1, 2, 4, 8] do
+  def validate_align!(align, _) when align not in [1, 2, 4, 8] do
     raise ArgumentError, "malformed alignment #{align}"
   end
 
-  def validate_align!(align, primitive_type, load_instruction) do
-    {_, natural_alignment} = store_and_alignment_for(primitive_type, load_instruction)
-
+  def validate_align!(align, natural_alignment) do
     if align > natural_alignment do
       raise ArgumentError,
             "alignment #{align} must not be larger than natural #{natural_alignment}"
