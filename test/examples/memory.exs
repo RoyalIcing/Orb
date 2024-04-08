@@ -256,12 +256,6 @@ defmodule Examples.Memory do
       end
     end
 
-    def cons(head, tail) do
-      snippet U32 do
-        __MODULE__.cons(head, tail)
-      end
-    end
-
     def hd!(ptr) do
       snippet U32 do
         Memory.load!(I32, ptr)
