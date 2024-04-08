@@ -232,6 +232,7 @@ defmodule Examples.Memory do
         #           end
 
         if I32.eqz(ptr), do: return(count)
+        # guard ptr, else: return count
         # if I32.eqz(ptr), return: count
         # return(count, if: I32.eqz(ptr))
         # guard ptr, else_return: count
