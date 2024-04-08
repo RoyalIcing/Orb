@@ -2,7 +2,6 @@ defmodule GlobalTest do
   use ExUnit.Case, async: true
 
   import Orb, only: [to_wat: 1]
-  import TestHelper
 
   test "I32" do
     defmodule GlobalsI32 do

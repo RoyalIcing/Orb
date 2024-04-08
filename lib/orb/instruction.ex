@@ -134,7 +134,9 @@ defmodule Orb.Instruction do
              is_map_key(:erlang.map_get(type, @types_to_stores), store) do
     offset = Keyword.fetch!(opts, :offset)
     value = Keyword.fetch!(opts, :value)
-    new(nil, {type, store}, [offset, value])
+    align = Keyword.get(opts, :align)
+
+    new(nil, {type, store, align}, [offset, value])
   end
 
   def memory_size(), do: new(:i32, {:memory, :size}, [])
@@ -267,7 +269,7 @@ defmodule Orb.Instruction do
 
   defp type_check_operand!(
          nil,
-         {:i32, :store},
+         {:i32, :store, _},
          operand,
          1
        ) do
@@ -411,7 +413,7 @@ defmodule Orb.Instruction do
     def to_wat(
           %Orb.Instruction{
             push_type: nil,
-            operation: {type, store},
+            operation: {type, store, align},
             operands: operands
           },
           indent
@@ -422,6 +424,10 @@ defmodule Orb.Instruction do
         to_string(type),
         ".",
         to_string(store),
+        case align do
+          nil -> []
+          align -> [" align=", to_string(align)]
+        end,
         for(operand <- operands, do: [" ", Instructions.do_wat(operand)]),
         ")"
       ]

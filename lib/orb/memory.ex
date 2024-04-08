@@ -68,15 +68,28 @@ defmodule Orb.Memory do
   end
 
   @doc """
-  Store `value` of `type` at memory `address`.
+  Store `value` of `type` at memory `offset`.
 
   ```elixir
   Memory.store!(I32, 0x100, 42)
   Memory.store!(I32.U8, 0x100, ?a)
   ```
+
+  ## Examples
+
+      iex> use Orb
+      iex> Memory.store!(I32, 0x100, 42) |> Orb.to_wat()
+      "(i32.store (i32.const 256) (i32.const 42))"
+      iex> Memory.store!(I32.U8, 0x100, ?a) |> Orb.to_wat()
+      "(i32.store8 (i32.const 256) (i32.const 97))"
+      iex> Memory.store!(I32, 0x100, 42, align: 2) |> Orb.to_wat()
+      "(i32.store align=2 (i32.const 256) (i32.const 42))"
+      iex> Memory.store!(I32, 0x100, 42, align: 4) |> Orb.to_wat()
+      "(i32.store align=4 (i32.const 256) (i32.const 42))"
+      iex> Memory.store!(I32, 0x100, 42, align: 3)
+      ** (ArgumentError) malformed alignment 3
   """
-  def store!(type, offset, value) do
-    # TODO: add `align` arg https://webassembly.github.io/spec/core/bikeshed/#syntax-instr-memory
+  def store!(type, offset, value, options \\ []) do
     primitive_type = Orb.CustomType.resolve!(type)
 
     load_instruction =
@@ -93,7 +106,19 @@ defmodule Orb.Memory do
         :load -> :store
       end
 
-    Orb.Instruction.memory_store(primitive_type, store_instruction, offset: offset, value: value)
+    # Align: https://webassembly.github.io/spec/core/bikeshed/#syntax-instr-memory
+    align = Keyword.get(options, :align)
+    # delta = Keyword.get(options, :delta)
+
+    if align not in [nil, 1, 2, 4, 8] do
+      raise ArgumentError, "malformed alignment #{align}"
+    end
+
+    Orb.Instruction.memory_store(primitive_type, store_instruction,
+      offset: offset,
+      value: value,
+      align: align
+    )
   end
 
   @doc """

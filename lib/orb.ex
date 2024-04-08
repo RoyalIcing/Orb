@@ -494,6 +494,42 @@ defmodule Orb do
   require Ops
 
   defmacro __using__(_opts) do
+    def_quoted =
+      cond do
+        __CALLER__.function === nil ->
+          quote do
+            # IO.inspect(__ENV__.function)
+            @before_compile unquote(__MODULE__).BeforeCompile
+
+            @orb_experimental %{}
+
+            def __wasm_body__(_), do: []
+            defoverridable __wasm_body__: 1
+
+            # TODO: rename these to orb_ prefix instead of wasm_ ?
+            Module.put_attribute(
+              __MODULE__,
+              :wasm_name,
+              __MODULE__ |> Module.split() |> List.last()
+            )
+
+            Module.register_attribute(__MODULE__, :wasm_func_prefix, accumulate: false)
+            Module.register_attribute(__MODULE__, :wasm_memory, accumulate: true)
+            Module.register_attribute(__MODULE__, :wasm_section_data, accumulate: true)
+
+            Module.register_attribute(__MODULE__, :wasm_globals, accumulate: true)
+
+            Module.register_attribute(__MODULE__, :wasm_types, accumulate: true)
+            Module.register_attribute(__MODULE__, :wasm_table_allocations, accumulate: true)
+            Module.register_attribute(__MODULE__, :wasm_imports, accumulate: true)
+
+            # Module.register_attribute(__MODULE__, :orb_experimental, accumulate: false)
+          end
+
+        true ->
+          nil
+      end
+
     quote do
       # TODO: don’t import types/1
       import Orb, only: [export: 1, global: 1, global: 2, global: 3, importw: 2, types: 1]
@@ -501,27 +537,7 @@ defmodule Orb do
       alias Orb.{I32, I64, S32, U32, F32, F64, Memory, Table}
       require Orb.{I32, I64, Table, Memory}
 
-      @before_compile unquote(__MODULE__).BeforeCompile
-
-      @orb_experimental %{}
-
-      def __wasm_body__(_), do: []
-      defoverridable __wasm_body__: 1
-
-      # TODO: rename these to orb_ prefix instead of wasm_ ?
-      Module.put_attribute(__MODULE__, :wasm_name, __MODULE__ |> Module.split() |> List.last())
-
-      Module.register_attribute(__MODULE__, :wasm_func_prefix, accumulate: false)
-      Module.register_attribute(__MODULE__, :wasm_memory, accumulate: true)
-      Module.register_attribute(__MODULE__, :wasm_section_data, accumulate: true)
-
-      Module.register_attribute(__MODULE__, :wasm_globals, accumulate: true)
-
-      Module.register_attribute(__MODULE__, :wasm_types, accumulate: true)
-      Module.register_attribute(__MODULE__, :wasm_table_allocations, accumulate: true)
-      Module.register_attribute(__MODULE__, :wasm_imports, accumulate: true)
-
-      # Module.register_attribute(__MODULE__, :orb_experimental, accumulate: false)
+      unquote(def_quoted)
     end
   end
 

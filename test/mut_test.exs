@@ -32,8 +32,6 @@ defmodule MutTest do
   end
 
   test "with local variable" do
-    import Orb.DSL
-
     defmodule LocalVar do
       use Orb
 
