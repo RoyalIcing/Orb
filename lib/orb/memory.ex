@@ -86,8 +86,18 @@ defmodule Orb.Memory do
       "(i32.store align=2 (i32.const 256) (i32.const 42))"
       iex> Memory.store!(I32, 0x100, 42, align: 4) |> Orb.to_wat()
       "(i32.store align=4 (i32.const 256) (i32.const 42))"
+
+      iex> use Orb
       iex> Memory.store!(I32, 0x100, 42, align: 3)
       ** (ArgumentError) malformed alignment 3
+
+      iex> use Orb
+      iex> Memory.store!(I32, 0x100, 42, align: 8)
+      ** (ArgumentError) alignment 8 must not be larger than natural 4
+
+      iex> use Orb
+      iex> Memory.store!(I32.U8, 0x100, 42, align: 2)
+      ** (ArgumentError) alignment 2 must not be larger than natural 1
   """
   def store!(type, offset, value, options \\ []) do
     primitive_type = Orb.CustomType.resolve!(type)
@@ -99,11 +109,22 @@ defmodule Orb.Memory do
         :load
       end
 
-    store_instruction =
+    {store_instruction, natural_alignment} =
       case load_instruction do
-        :load8_u -> :store8
-        :load8_s -> :store8
-        :load -> :store
+        i when i in [:load8_s, :load8_u] ->
+          {:store8, 1}
+
+        i when i in [:load16_s, :load16_u] ->
+          {:store16, 2}
+
+        i when i in [:load32_s, :load32_u] ->
+          {:store32, 4}
+
+        :load ->
+          case primitive_type do
+            t when t in [:i32, :f32] -> {:store, 4}
+            t when t in [:i64, :f64] -> {:store, 8}
+          end
       end
 
     # Align: https://webassembly.github.io/spec/core/bikeshed/#syntax-instr-memory
@@ -112,6 +133,11 @@ defmodule Orb.Memory do
 
     if align not in [nil, 1, 2, 4, 8] do
       raise ArgumentError, "malformed alignment #{align}"
+    end
+
+    if align && align > natural_alignment do
+      raise ArgumentError,
+            "alignment #{align} must not be larger than natural #{natural_alignment}"
     end
 
     Orb.Instruction.memory_store(primitive_type, store_instruction,
