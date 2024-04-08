@@ -224,7 +224,7 @@ defmodule Orb.DSL do
        ]}
       when is_atom(local) and is_map_key(locals, local) ->
         # FIXME: remove all of this. Replace with:
-        # local_type = locals[local]
+        # local_type = locals[local] |> Code.ensure_loaded!()
 
         # quote do:
         #         Orb.Memory.store!(

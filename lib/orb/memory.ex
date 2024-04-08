@@ -47,25 +47,38 @@ defmodule Orb.Memory do
   end
 
   @doc """
-  Load value of `type` from memory `address`.
+  Load value of `type` from memory `offset`.
 
   ```elixir
   Memory.load!(I32, 0x100)
   Memory.load!(I32.U8, 0x100)
+
+  ## Examples
+
+      iex> use Orb
+      iex> Memory.load!(I32, 0x100) |> Orb.to_wat()
+      "(i32.load (i32.const 256))"
+      iex> Memory.load!(I32.U8, 0x100) |> Orb.to_wat()
+      "(i32.load8_u (i32.const 256))"
+      iex> Memory.load!(I32, 0x100, align: 2) |> Orb.to_wat()
+      "(i32.load align=2 (i32.const 256))"
+      iex> Memory.load!(I32, 0x100, align: 4) |> Orb.to_wat()
+      "(i32.load align=4 (i32.const 256))"
+
+      iex> use Orb
+      iex> Memory.load!(I32, 0x100, align: 3)
+      ** (ArgumentError) malformed alignment 3
+
+      iex> use Orb
+      iex> Memory.load!(I32, 0x100, align: 8)
+      ** (ArgumentError) alignment 8 must not be larger than natural 4
+
+      iex> use Orb
+      iex> Memory.load!(I32.U8, 0x100, align: 2)
+      ** (ArgumentError) alignment 2 must not be larger than natural 1
   ```
   """
-  def load!(type, address) do
-    primitive_type = Orb.CustomType.resolve!(type)
-
-    load_instruction =
-      if function_exported?(type, :load_instruction, 0) do
-        type.load_instruction()
-      else
-        :load
-      end
-
-    Orb.Instruction.new(primitive_type, load_instruction, [address])
-  end
+  def load!(type, offset, opts \\ []), do: Orb.Memory.Load.new(type, offset, opts)
 
   @doc """
   Store `value` of `type` at memory `offset`.
