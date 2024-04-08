@@ -53,28 +53,6 @@ defmodule I32ConveniencesTest do
     assert Wasm.call(wat, :is_url_safe?, ?*) == 0
   end
 
-  defmodule Attrs do
-    use Orb
-
-    Orb.I32.global(first: 7)
-
-    Orb.I32.attr_writer(:first)
-  end
-
-  test "attr_writer works" do
-    assert Attrs.to_wat() === """
-           (module $Attrs
-             (global $first (mut i32) (i32.const 7))
-             (func $first= (export "first=") (param $new_value i32)
-               (local.get $new_value)
-               (global.set $first)
-             )
-           )
-           """
-
-    assert Wasm.call(Attrs, :"first=", 9) == nil
-  end
-
   test "I32.match output int" do
     assert (TestHelper.module_wat do
               use Orb
@@ -94,7 +72,7 @@ defmodule I32ConveniencesTest do
     assert (TestHelper.module_wat do
               use Orb
 
-              defw get_path(), I32.UnsafePointer, state: I32 do
+              defw get_path(), I32.U8.UnsafePointer, state: I32 do
                 state = 0
 
                 I32.match state do

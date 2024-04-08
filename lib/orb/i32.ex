@@ -265,29 +265,4 @@ defmodule Orb.I32 do
       unquote(__MODULE__).global(:readonly, Enum.with_index(unquote(keys), unquote(offset)))
     end
   end
-
-  defmacro attr_writer(global_name) when is_atom(global_name) do
-    quote do
-      defw unquote(String.to_atom("#{global_name}="))(new_value: Orb.I32) do
-        Orb.Instruction.global_set(
-          Orb.I32,
-          unquote(global_name),
-          Orb.Instruction.local_get(Orb.I32, :new_value)
-        )
-      end
-    end
-  end
-
-  defmacro attr_writer(global_name, as: func_name)
-           when is_atom(global_name) |> Kernel.and(is_atom(func_name)) do
-    quote do
-      defw unquote(func_name)(new_value: Orb.I32) do
-        Orb.Instruction.global_set(
-          Orb.I32,
-          unquote(global_name),
-          Orb.Instruction.local_get(Orb.I32, :new_value)
-        )
-      end
-    end
-  end
 end
