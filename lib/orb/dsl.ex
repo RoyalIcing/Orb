@@ -210,82 +210,27 @@ defmodule Orb.DSL do
 
   def do_snippet(locals, block_items) do
     Macro.prewalk(block_items, fn
-      # local[at!: offset] = value
+      # local[at!: delta] = value
       {:=, _meta,
        [
          {{:., _, [Access, :get]}, _,
           [
             {local, _, nil},
             [
-              at!: offset
+              at!: delta
             ]
           ]},
          value
        ]}
       when is_atom(local) and is_map_key(locals, local) ->
-        # FIXME: remove all of this. Replace with:
-        # local_type = locals[local] |> Code.ensure_loaded!()
-
-        # quote do:
-        #         Orb.Memory.store!(
-        #           unquote(local_type),
-        #           Orb.Numeric.Add.optimized(
-        #             unquote(local_type),
-        #             Instruction.local_get(unquote(local_type), unquote(local)),
-        #             unquote(offset)
-        #           ),
-        #           unquote(value)
-        #         )
-
-        local_type = locals[local] |> Code.ensure_loaded!()
-
-        load_instruction =
-          if function_exported?(local_type, :load_instruction, 0) do
-            local_type.load_instruction()
-          else
-            :load
-          end
-
-        {store_instruction, byte_width} =
-          case load_instruction do
-            i when i in [:load8_s, :load8_u] ->
-              {:store8, 1}
-
-            i when i in [:load16_s, :load16_u] ->
-              {:store16, 2}
-
-            i when i in [:load32_s, :load32_u] ->
-              {:store32, 4}
-
-            :load ->
-              case Ops.to_primitive_type(local_type) do
-                t when t in [:i32, :f32] -> {:store, 4}
-                t when t in [:i64, :f64] -> {:store, 8}
-              end
-          end
-
-        local_get_instruction =
-          quote do
-            Instruction.local_get(unquote(locals[local]), unquote(local))
-          end
-
-        # TODO: remove, as should be handled by the custom type implementing
-        # the Access protocol.
-        computed_offset =
-          quote do:
-                  Orb.Numeric.Add.optimized(
-                    :i32,
-                    unquote(local_get_instruction),
-                    Orb.Numeric.Multiply.optimized(:i32, unquote(offset), unquote(byte_width))
-                  )
-
-        quote do:
-                Orb.Instruction.memory_store(
-                  :i32,
-                  unquote(store_instruction),
-                  offset: unquote(computed_offset),
-                  value: unquote(value)
-                )
+        quote do
+          Orb.Memory.store!(
+            unquote(locals[local]),
+            Instruction.local_get(unquote(locals[local]), unquote(local)),
+            unquote(value)
+          )
+          |> Orb.Memory.Store.offset_by(unquote(delta))
+        end
 
       {:=, _, [{local, _, nil}, input]}
       when is_atom(local) and is_map_key(locals, local) and

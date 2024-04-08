@@ -6,6 +6,7 @@ defmodule Orb.Memory.Store do
             store_instruction: :store,
             offset: nil,
             align: nil,
+            natural_align: nil,
             value: nil
 
   alias Orb.Memory.Load
@@ -37,6 +38,7 @@ defmodule Orb.Memory.Store do
       store_instruction: store_instruction,
       offset: offset,
       align: align,
+      natural_align: natural_align,
       value: value
     }
   end
@@ -55,8 +57,29 @@ defmodule Orb.Memory.Store do
       store_instruction: store_instruction,
       offset: offset,
       align: align,
+      natural_align: natural_align,
       value: value
     }
+  end
+
+  def offset_by(%__MODULE__{} = store, delta) do
+    delta_factor =
+      case store do
+        %{align: nil, natural_align: natural_align} ->
+          natural_align
+
+        %{align: align} ->
+          align
+      end
+
+    new_offset =
+      Orb.Numeric.Add.optimized(
+        :i32,
+        store.offset,
+        Orb.Numeric.Multiply.optimized(:i32, delta, delta_factor)
+      )
+
+    %{store | offset: new_offset}
   end
 
   defimpl Orb.ToWat do
