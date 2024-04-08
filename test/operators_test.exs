@@ -248,8 +248,6 @@ defmodule OperatorsTest do
     defmodule F1 do
       use Orb
 
-      wasm_mode(F32)
-
       defw add(), F32 do
         1.0 + 2.0
       end
@@ -277,13 +275,13 @@ defmodule OperatorsTest do
     assert """
            (module $F1
              (func $add (export "add") (result f32)
-               (f32.add (f32.const 1.0) (f32.const 2.0))
+               (f32.const 3.0)
              )
              (func $multiply (export "multiply") (param $a f32) (param $b f32) (result f32)
                (f32.mul (local.get $a) (local.get $b))
              )
              (func $divide (export "divide") (result f32)
-               (f32.div (f32.const 4.0) (f32.const 2.0))
+               (f32.const 2.0)
              )
              (func $lab_to_xyz (export "lab_to_xyz") (param $l f32) (param $a f32) (param $b f32) (result f32 f32 f32)
                (f32.const 0.0)

@@ -702,12 +702,6 @@ defmodule Orb do
             import Orb.Global.DSL
           end
 
-        Orb.F32 ->
-          quote do
-            import Orb.F32.DSL
-            import Orb.Global.DSL
-          end
-
         :no_magic ->
           []
       end

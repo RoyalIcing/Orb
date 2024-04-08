@@ -588,7 +588,6 @@ defmodule Orb.DSL do
         import Orb.I32.DSL, only: []
         import Orb.U32.DSL, only: []
         import Orb.S32.DSL, only: []
-        import Orb.F32.DSL, only: []
         import Kernel
 
         unquote(block)
