@@ -46,7 +46,7 @@ defmodule CharParser do
 end
 ```
 
-The `Memory.load/2` and `I32.band/2` provide the WebAssembly instructions via Orb’s DSL, while the rest is standard Elixir code. The result is just WebAssembly instructions, effectively inlining the loop at compile time.
+The `Memory.load!/2` and `I32.band/2` provide the WebAssembly instructions via Orb’s DSL, while the rest is standard Elixir code. The result is just WebAssembly instructions, effectively inlining the loop at compile time.
 
 ## 3. WebAssembly instructions at WebAssembly runtime
 
