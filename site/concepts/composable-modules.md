@@ -34,8 +34,6 @@ defmodule RGB do
 
   # We copy all the WebAssembly functions from Hex into this module.
   Orb.include(Hex)
-  # And allow us to call them from Elixir.
-  import Hex
 
   defw rgb_to_hex(write_ptr: I32.U8.UnsafePointer, red: I32, green: I32, blue: I32), I32 do
     Hex.write_u8_hex_upper(write_ptr, red)
