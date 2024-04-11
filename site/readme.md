@@ -2,7 +2,7 @@
 
 Orb is a fresh way to write WebAssembly. Instead of choosing an existing language like C and mapping its semantics to WebAssembly, Orb starts with the raw ingredients of WebAssembly and asks “how can we make this more convenient to write?”.
 
-It achieves this by embracing the Elixir ecosystem at compile time. Elixir becomes a flexible preprocessor for WebAssembly.
+It achieves this by embracing the Elixir ecosystem at compile time. Elixir becomes a powerful preprocessor for WebAssembly.
 
 You get to use:
 
@@ -47,6 +47,8 @@ defmodule TemperatureConverter do
     @mode = mode
   end
 end
+
+wasm_data = Orb.to_wasm(TemperatureConverter)
 ```
 
 ## Compile-time Macros
