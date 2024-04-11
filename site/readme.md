@@ -1,17 +1,19 @@
-# The raw ingredients of WebAssembly made beautiful, composable, reusable with Elixir
+# The raw ingredients of WebAssembly made beautiful, composable & reusable with Elixir
 
-Orb is a fresh way to write WebAssembly. Instead of choosing an existing language like C and having it map itself to WebAssembly, Orb starts with the raw ingredients of WebAssembly and asks “how can we make this more convenient to write?”.
+Orb is a fresh way to write WebAssembly. Instead of choosing an existing language like C and mapping its semantics to WebAssembly, Orb starts with the raw ingredients of WebAssembly and asks “how can we make this more convenient to write?”.
 
-It achieves this by embracing Elixir's existing ecosystem:
+It achieves this by embracing the Elixir ecosystem at compile time. Elixir becomes a flexible preprocessor for WebAssembly.
+
+You get to use:
 
 - Elixir’s composable module system
 - Elixir’s powerful macros
-- Elixir’s existing ecosystem of libraries, all of which can be run at compile-time for your WebAssembly module
-- Elixir’s [package manager Hex](https://hex.pm) for publishing your WebAssembly modules as reusable libraries.
+- Elixir’s existing ecosystem of libraries running at compile-time for your WebAssembly module
+- Elixir’s [package manager Hex](https://hex.pm) for publishing your WebAssembly modules as reusable Elixir libraries.
 - Elixir’s [testing library ExUnit](https://hexdocs.pm/ex_unit/ExUnit.html)
-- Elixir language servers in Visual Studio Code and Zed
+- Elixir language servers and syntax highlighting in Visual Studio Code, Zed & GitHub
 
-Execute Elixir at compile time and WebAssembly at runtime.
+Orb is Elixir at compile time and WebAssembly at runtime.
 
 ## Example
 
