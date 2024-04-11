@@ -651,30 +651,6 @@ defmodule Orb do
           )
         end
 
-        # Orb.DefwDSL.define_helpers(__wasm_body__())
-
-        # def func(),
-        #   do: Orb.ModuleDefinition.func_ref_all!(__MODULE__)
-
-        def _func(name),
-          do: Orb.ModuleDefinition.func_ref!(__MODULE__, name)
-
-        @doc "Include all WebAssembly functions defined via `defw` & `defwp` from this module’s Orb definition into the context’s module."
-        # def include() do
-        #   Orb.wasm do
-        #     # Orb.ModuleDefinition.Include.all_internal(__MODULE__)
-        #     Orb.ModuleDefinition.funcp_ref_all!(__MODULE__)
-        #   end
-        # end
-
-        @doc "Import all WebAssembly functions from this module’s Orb definition."
-        def funcp(),
-          do: Orb.ModuleDefinition.funcp_ref_all!(__MODULE__)
-
-        @doc "Import a specific WebAssembly function from this module’s Orb definition."
-        def funcp(name),
-          do: Orb.ModuleDefinition.funcp_ref!(__MODULE__, name)
-
         @doc "Convert this module’s Orb definition to WebAssembly text (Wat) format."
         # def to_wat(), do: Orb.to_wat(__wasm_module__())
         def to_wat() do
