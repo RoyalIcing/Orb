@@ -18,7 +18,8 @@ defmodule TestHelper do
       )
 
     quote do
-      unquote(mod).to_wat()
+      Process.put(Orb.ModuleDefinition.Name, "Sample")
+      Orb.to_wat(unquote(mod))
     end
   end
 

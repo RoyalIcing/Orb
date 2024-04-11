@@ -295,34 +295,6 @@ defmodule Orb.DSL do
   def f32(n) when is_float(n), do: Instruction.f32(:const, n)
   def f64(n) when is_float(n), do: Instruction.f64(:const, n)
 
-  # TODO: move all of these to Orb.Stack
-  @doc """
-  Pushes a value onto the current stack.
-  """
-  def push(value)
-
-  def push(instruction = %Orb.Instruction{}), do: instruction
-
-  # FIXME: assumes only 32-bit integer, doesn’t work with 64-bit or float
-  def push(n) when is_integer(n), do: Orb.Instruction.wrap_constant!(:i32, n)
-  # FIXME: assumes only 32-bit float, doesn’t work with 64-bit float
-  def push(n) when is_float(n), do: Orb.Instruction.wrap_constant!(:f32, n)
-  def push(%Orb.VariableReference{} = ref), do: ref
-
-  def push(do: %Orb.Instruction{operation: {:local_set, identifier, type}, operands: [value]}),
-    do: Orb.Instruction.local_tee(type, identifier, value)
-
-  @doc """
-  Push value then run the block. Useful for when you mutate a variable but want its previous value.
-  """
-  def push(value, do: block) do
-    [
-      value,
-      __get_block_items(block)
-      # :pop
-    ]
-  end
-
   def __expand_identifier(identifier, env) do
     identifier = Macro.expand_once(identifier, env) |> Kernel.to_string()
 

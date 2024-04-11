@@ -12,7 +12,7 @@ defmodule LoopTest do
 
               defw example(a: I32), b: I32 do
                 Control.block Outer do
-                  push(a)
+                  Orb.Stack.push(a)
 
                   Control.block Inner do
                   end

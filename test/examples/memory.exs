@@ -138,7 +138,7 @@ defmodule Examples.Memory do
       # and if so, either err or increase the available memory.
       # TODO: Need better maths than this to round up to aligned memory?
 
-      push(@bump_offset) do
+      Orb.Stack.push @bump_offset do
         @bump_offset = I32.add(@bump_offset, size)
       end
 

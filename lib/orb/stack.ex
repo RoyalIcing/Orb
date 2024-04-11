@@ -71,7 +71,7 @@ defmodule Orb.Stack do
   end
 
   @doc """
-  Drops the passed instruction from the stack, ignoring its resulting value.
+  Executes the passed instruction and immediately drops its result(s) from the stack, effectively ignoring the resulting value.
   """
   def drop(instruction), do: Drop.new(instruction)
 
@@ -79,4 +79,28 @@ defmodule Orb.Stack do
   Pops the last value from the stack, useful for assigning it to a local.
   """
   def pop(type), do: Pop.new(type)
+
+  @doc """
+  Pushes a value onto the current stack.
+  """
+  def push(value)
+
+  def push(%Orb.Instruction{operation: {:local_set, identifier, type}, operands: [value]}) do
+    Orb.Instruction.local_tee(type, identifier, value)
+  end
+
+  def push(%Orb.Instruction{} = instruction), do: instruction
+  def push(%Orb.VariableReference{} = ref), do: ref
+
+  @doc """
+  Push value then run the block. Useful for when you mutate a variable but want its previous value.
+  """
+  defmacro push(value, do: block) do
+    quote do
+      Orb.InstructionSequence.concat(
+        Orb.InstructionSequence.new([unquote(value)]),
+        Orb.InstructionSequence.new(unquote(Orb.__get_block_items(block)))
+      )
+    end
+  end
 end

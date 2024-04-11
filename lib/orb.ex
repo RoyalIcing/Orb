@@ -535,7 +535,7 @@ defmodule Orb do
       import Orb, only: [export: 1, global: 1, global: 2, global: 3, importw: 2, types: 1]
       import Orb.DefwDSL
       alias Orb.{I32, I64, S32, U32, F32, F64, Memory, Table}
-      require Orb.{I32, I64, Table, Memory}
+      require Orb.{I32, I64, Stack, Table, Memory}
 
       unquote(def_quoted)
     end

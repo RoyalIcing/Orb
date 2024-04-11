@@ -62,7 +62,7 @@ defmodule ParserTest do
       CharParser.may(~c|//|, mut!(input_offset))
 
       Control.block ShortDomain do
-        push(input_offset)
+        Orb.Stack.push(input_offset)
 
         Control.block FullDomain do
           CharParser.may(~c|www.|, mut!(input_offset))

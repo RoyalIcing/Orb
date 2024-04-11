@@ -263,7 +263,7 @@ defmodule OperatorsTest do
 
       defw lab_to_xyz(l: F32, a: F32, b: F32), {F32, F32, F32} do
         0.0
-        push(0.0)
+        Orb.Stack.push(f32(0.0))
         0.0
       end
 
@@ -321,7 +321,7 @@ defmodule OperatorsTest do
 
       defw lab_to_xyz(l: F64, a: F64, b: F64), {F64, F64, F64} do
         f64(0.0)
-        push(f64(0.0))
+        Orb.Stack.push(f64(0.0))
         f64(0.0)
       end
 
@@ -388,7 +388,7 @@ defmodule OperatorsTest do
 
       defw lab_to_xyz(l: F32, a: F32, b: F32), {F32, F32, F32} do
         0.0
-        push(0.0)
+        Orb.Stack.push(f32(0.0))
         0.0
       end
 

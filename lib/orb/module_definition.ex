@@ -141,6 +141,9 @@ defmodule Orb.ModuleDefinition do
         ) do
       next_indent = "  " <> indent
 
+      # TODO: replace with reading from opts
+      name = Process.get(Orb.ModuleDefinition.Name, name)
+
       [
         [indent, "(module $#{name}", "\n"],
         [for(type <- types, do: [Orb.ToWat.to_wat(type, next_indent), "\n"])],
