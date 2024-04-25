@@ -6,7 +6,7 @@
 </details>
 
 
-<details>
+<details data-path="/concepts">
     <summary>Core Concepts</summary>
 
 - [Core WebAssembly](/concepts/core-webassembly)
@@ -19,7 +19,7 @@
 </details>
 
 
-<details>
+<details data-path="/run">
     <summary>Running Modules</summary>
 
 - [In JavaScript](/run/javascript)
@@ -30,7 +30,7 @@
 </details>
 
 
-<details>
+<details data-path="/silverorb">
     <summary>SilverOrb</summary>
 
 - [Standard Library](/silverorb)
@@ -40,7 +40,7 @@
 </details>
 
 
-<details>
+<details  data-path="/tutorials">
     <summary>Tutorials</summary>
 
 - [Temperature Converter](/tutorials/temperature-converter)
