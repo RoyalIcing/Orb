@@ -1,4 +1,4 @@
-<details>
+<details open>
     <summary>Getting Started</summary>
 
 - [Install](/install)
