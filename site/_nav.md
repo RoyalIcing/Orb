@@ -1,10 +1,3 @@
-<a href="/">
-  <img src="https://raw.githubusercontent.com/RoyalIcing/Orb/main/orb-logo-blue-orange.svg" width="64" height="64" alt="Orb">
-</a>
-
-- [🕸️ Orb](/)
-
-
 <details>
     <summary>Getting Started</summary>
 
