@@ -1,4 +1,4 @@
-# The raw ingredients of WebAssembly made beautiful, composable & reusable with Elixir
+# The raw ingredients of WebAssembly made beautifully composable with Elixir
 
 Orb is a fresh way to write WebAssembly. Instead of choosing an existing language like C and mapping its semantics to WebAssembly, Orb starts with the raw ingredients of WebAssembly and asks “how can we make this more convenient to write?”.
 
