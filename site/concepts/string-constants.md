@@ -1,10 +1,10 @@
 # String Constants
 
-Another feature that is central to C is string constants. You type `"abc"` and you can pass it around, read the characters in it, and even do operations on it.
+A feature central to C is string constants. You type `"abc"` and you can pass it around, read the characters in it, and even do operations on it. Underneath it's a pointer to a sequence of bytes, yet C makes it feel natural.
 
-WebAssembly lets you initialize a region of memory with a string. But it doesn’t let you use the strings directly. Instead you must manually assign memory addresses for each string constant, and then in functions only refer to the addresses.
+WebAssembly give you the ability to initialize a region of its memory with a string. But it doesn’t let you use the strings directly like C. Instead you must manually allocate memory addresses for each string constant, and then in functions only refer to the addresses, remembering what each are.
 
-Orb adds a simple convenience on top, letting you use strings directly. At compile-time these strings are substituted by their addresses.
+Orb adds a string constant system on top, like C by letting you use strings directly. At compile-time these strings are substituted by their addresses.
 
 ```elixir
 defmodule HTMLPage do
@@ -26,4 +26,4 @@ defmodule HTMLPage do
 end
 ```
 
-Note: dynamic string concententation is not supported in core Orb as that requires memory allocation. If you wish to build dynamic strings check out `SilverOrb.StringBuilder` from Orb‘s sister standard library.
+Note: dynamic string concatentation is not supported in core Orb as that requires a memory allocation system. If you wish to build dynamic strings check out `SilverOrb.StringBuilder` from Orb‘s sister standard library.
