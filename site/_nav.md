@@ -1,7 +1,7 @@
 - [🕸️ Orb](/)
 
 
-<details open>
+<details>
     <summary>Getting Started</summary>
 
 - [Install](/install)
@@ -9,7 +9,7 @@
 </details>
 
 
-<details open>
+<details>
     <summary>Core Concepts</summary>
 
 - [Core WebAssembly](/concepts/core-webassembly)
@@ -22,7 +22,7 @@
 </details>
 
 
-<details open>
+<details>
     <summary>Running Modules</summary>
 
 - [In JavaScript](/run/javascript)
@@ -33,7 +33,7 @@
 </details>
 
 
-<details open>
+<details>
     <summary>SilverOrb</summary>
 
 - [Standard Library](/silverorb)
@@ -43,7 +43,7 @@
 </details>
 
 
-<details open>
+<details>
     <summary>Tutorials</summary>
 
 - [Temperature Converter](/tutorials/temperature-converter)
