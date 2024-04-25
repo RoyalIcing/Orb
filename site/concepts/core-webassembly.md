@@ -1,5 +1,7 @@
 # Core WebAssembly
 
+Orb targets Core WebAssembly, also known as WebAssembly 1.0.
+
 WebAssembly is a low level language. Variables are integers or floats, 32 or 64-bit.
 
 You can import values as globals or import functions from the outside world (known as the host).
