@@ -347,34 +347,48 @@ defmodule Orb.DSL do
   """
   defmacro loop({:<-, _, [{identifier, _, nil} = var, source]}, do: block)
            when is_atom(identifier) do
-    quote do
-      case unquote(source) do
+    quote bind_quoted: [
+            source: source,
+            # FIXME: need to support not just I32 but at least I64
+            init_var:
+              quote(
+                do: var!(unquote(var)) = Orb.VariableReference.local(unquote(identifier), Orb.I32)
+              ),
+            identifier: identifier,
+            block_items: __get_block_items(block)
+          ] do
+      case source do
         %Range{first: first, last: last, step: 1} ->
           with do
-            # FIXME: need to support not just I32 but at least I64
-            var!(unquote(var)) = Orb.VariableReference.local(unquote(identifier), Orb.I32)
+            element_type = Orb.I32
+
+            init_var
 
             Orb.InstructionSequence.new(
               nil,
               [
-                Orb.Instruction.local_set(Orb.I32, unquote(identifier), first),
+                Orb.Instruction.local_set(element_type, identifier, first),
                 %Orb.Loop{
-                  identifier: unquote(identifier),
+                  identifier: identifier,
                   body:
                     Orb.InstructionSequence.new(
                       nil,
                       List.flatten([
-                        unquote(__get_block_items(block)),
+                        block_items,
                         Orb.Instruction.local_set(
-                          Orb.I32,
-                          unquote(identifier),
-                          Orb.I32.add(Orb.Instruction.local_get(Orb.I32, unquote(identifier)), 1)
+                          element_type,
+                          identifier,
+                          Orb.Numeric.Add.optimized(
+                            element_type,
+                            Orb.Instruction.local_get(element_type, identifier),
+                            1
+                          )
                         ),
                         %Orb.Loop.Branch{
-                          identifier: unquote(identifier),
+                          identifier: identifier,
                           if:
                             Orb.I32.le_u(
-                              Orb.Instruction.local_get(Orb.I32, unquote(identifier)),
+                              Orb.Instruction.local_get(element_type, identifier),
                               last
                             )
                         }
@@ -382,13 +396,16 @@ defmodule Orb.DSL do
                     )
                 }
               ],
-              locals: [{unquote(identifier), Orb.I32}]
+              locals: [{identifier, element_type}]
             )
           end
 
         source = %{push_type: source_iterator} when not is_nil(source_iterator) ->
           with do
-            var!(unquote(var)) = Orb.VariableReference.local(unquote(identifier), Orb.I32)
+            element_type = Orb.I32
+
+            # var!(unquote(var)) = Orb.VariableReference.local(identifier, Orb.I32)
+            init_var
 
             # case item do
             #   {:_, _, _} ->
@@ -401,13 +418,13 @@ defmodule Orb.DSL do
                   List.flatten([
                     # set_item,
                     Orb.Instruction.local_set(
-                      Orb.I32,
-                      unquote(identifier),
+                      element_type,
+                      identifier,
                       source_iterator.value(source)
                     ),
-                    unquote(__get_block_items(block)),
+                    block_items,
                     Orb.VariableReference.set(source, source_iterator.next(source)),
-                    %Orb.Loop.Branch{identifier: unquote(identifier)}
+                    %Orb.Loop.Branch{identifier: identifier}
                   ])
                 )
               )
@@ -416,12 +433,12 @@ defmodule Orb.DSL do
               nil,
               [
                 %Orb.Loop{
-                  identifier: unquote(identifier),
+                  identifier: identifier,
                   result: nil,
                   body: body
                 }
               ],
-              locals: [{unquote(identifier), Orb.I32}]
+              locals: [{identifier, element_type}]
             )
           end
       end
