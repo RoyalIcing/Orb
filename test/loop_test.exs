@@ -201,6 +201,7 @@ defmodule LoopTest do
 
     assert {26, ?z} = Wasm.call(IteratorConsumer, :test)
     assert 26 = Wasm.call(IteratorConsumer, :test2)
+    assert 26 = Wasm.call(IteratorConsumer, :test3)
 
     assert """
            (module $IteratorConsumer
