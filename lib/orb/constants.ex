@@ -183,7 +183,7 @@ defmodule Orb.Constants do
   end
 
   defimpl Orb.ToWat do
-    def to_wat(%Orb.Constants{lookup_table: []}, indent), do: []
+    def to_wat(%Orb.Constants{lookup_table: []}, _), do: []
 
     def to_wat(%Orb.Constants{lookup_table: lookup_table, byte_size: byte_size}, indent) do
       [
