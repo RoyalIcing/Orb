@@ -85,6 +85,7 @@ defmodule Orb.I32 do
 
   @doc "Converts an ASCII little-endian 4-byte string to an 32-bit integer."
   def from_4_byte_ascii(<<int::little-size(32)>>), do: int
+  # def to_4_byte_ascii(i32) when is_integer(i32), do: <<i32::little-size(32)>>
 
   defmacro match(value, do: transform) do
     statements =
