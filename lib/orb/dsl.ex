@@ -370,7 +370,7 @@ defmodule Orb.DSL do
           with do
             element_type = Orb.I32
 
-            init_elixir_var
+            _ = init_elixir_var
 
             Orb.InstructionSequence.new(
               nil,
@@ -411,7 +411,7 @@ defmodule Orb.DSL do
         source = %{push_type: source_iterator} when not is_nil(source_iterator) ->
           with do
             element_type = Orb.I32
-            init_elixir_var
+            _ = init_elixir_var
 
             body =
               Orb.IfElse.new(
