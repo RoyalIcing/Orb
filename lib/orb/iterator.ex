@@ -6,11 +6,17 @@ defmodule Orb.Iterator do
   @type var_ref :: %Orb.VariableReference{}
 
   @doc """
-
+  Calculates whether the iterator is done or not.
   """
-  @callback valid?(var_ref) :: %Orb.Instruction{} | integer() | float()
+  @callback valid?(var_ref) :: %Orb.Instruction{} | integer()
 
+  @doc """
+  Extracts or calculates the current value.
+  """
   @callback value(var_ref) :: %Orb.Instruction{} | integer() | float()
 
+  @doc """
+  Mutates the iterator advancing it to the next element.
+  """
   @callback next(var_ref) :: %Orb.Instruction{} | integer() | float()
 end

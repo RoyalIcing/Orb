@@ -178,6 +178,18 @@ defmodule LoopTest do
         i
         char
       end
+
+      defw test2, I32, i: I32, alpha: AlphabetIterator do
+        alpha = AlphabetIterator.new()
+
+        # TODO: allow char local to be defined by the loop, removing the need to explicitly declare it above.
+        # TODO: loop char <- AlphabetIterator.new() do
+        loop char <- alpha do
+          i = i + 1
+        end
+
+        i
+      end
     end
 
     assert {26, ?z} = Wasm.call(IteratorConsumer, :test)

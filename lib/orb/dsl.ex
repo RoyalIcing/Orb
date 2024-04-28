@@ -308,54 +308,130 @@ defmodule Orb.DSL do
   end
 
   @doc """
-  Declare a loop that iterates through a source.
+  Declare a loop that iterates through an Orb.Iterator or Elixir.Range.
+
+  ```elixir
+  sum = 0
+  loop i <- 1..10 do
+    sum = sum + i
+  end
+  ```
+
+  ```elixir
+  sum = 0
+  loop _ <- 1..10 do
+    sum = sum + 1
+  end
+  ```
+
+  ```elixir
+  sum = 0
+  loop char <- alphabet do
+    sum = sum + 1
+  end
+  ```
+
+  ```elixir
+  sum = 0
+  loop char <- alphabet do
+    sum = sum + char
+  end
+  ```
+
+  ```elixir
+  sum = 0
+  loop _ <- alphabet do
+    sum = sum + 1
+  end
+  ```
   """
   defmacro loop({:<-, _, [{identifier, _, nil} = var, source]}, do: block)
            when is_atom(identifier) do
     quote do
-      with do
-        # FIXME: need to support not just I32 but at least I64
-        var!(unquote(var)) = Orb.VariableReference.local(unquote(identifier), Orb.I32)
-        %Range{first: first, last: last, step: 1} = unquote(source)
+      case unquote(source) do
+        %Range{first: first, last: last, step: 1} ->
+          with do
+            # FIXME: need to support not just I32 but at least I64
+            var!(unquote(var)) = Orb.VariableReference.local(unquote(identifier), Orb.I32)
 
-        Orb.InstructionSequence.new(
-          nil,
-          [
-            Orb.Instruction.local_set(Orb.I32, unquote(identifier), first),
-            %Orb.Loop{
-              identifier: unquote(identifier),
-              body:
+            Orb.InstructionSequence.new(
+              nil,
+              [
+                Orb.Instruction.local_set(Orb.I32, unquote(identifier), first),
+                %Orb.Loop{
+                  identifier: unquote(identifier),
+                  body:
+                    Orb.InstructionSequence.new(
+                      nil,
+                      List.flatten([
+                        unquote(__get_block_items(block)),
+                        Orb.Instruction.local_set(
+                          Orb.I32,
+                          unquote(identifier),
+                          Orb.I32.add(Orb.Instruction.local_get(Orb.I32, unquote(identifier)), 1)
+                        ),
+                        %Orb.Loop.Branch{
+                          identifier: unquote(identifier),
+                          if:
+                            Orb.I32.le_u(
+                              Orb.Instruction.local_get(Orb.I32, unquote(identifier)),
+                              last
+                            )
+                        }
+                      ])
+                    )
+                }
+              ],
+              locals: [{unquote(identifier), Orb.I32}]
+            )
+          end
+
+        source = %{push_type: source_iterator} when not is_nil(source_iterator) ->
+          with do
+            var!(unquote(var)) = Orb.VariableReference.local(unquote(identifier), Orb.I32)
+
+            # case item do
+            #   {:_, _, _} ->
+            #     {[], "_"}
+
+            body =
+              Orb.IfElse.new(
+                source_iterator.valid?(source),
                 Orb.InstructionSequence.new(
-                  nil,
                   List.flatten([
-                    unquote(__get_block_items(block)),
+                    # set_item,
                     Orb.Instruction.local_set(
                       Orb.I32,
                       unquote(identifier),
-                      Orb.I32.add(Orb.Instruction.local_get(Orb.I32, unquote(identifier)), 1)
+                      source_iterator.value(source)
                     ),
-                    %Orb.Loop.Branch{
-                      identifier: unquote(identifier),
-                      if:
-                        Orb.I32.le_u(
-                          Orb.Instruction.local_get(Orb.I32, unquote(identifier)),
-                          last
-                        )
-                    }
+                    unquote(__get_block_items(block)),
+                    Orb.VariableReference.set(source, source_iterator.next(source)),
+                    %Orb.Loop.Branch{identifier: unquote(identifier)}
                   ])
                 )
-            }
-          ],
-          locals: [{unquote(identifier), Orb.I32}]
-        )
+              )
+
+            Orb.InstructionSequence.new(
+              nil,
+              [
+                %Orb.Loop{
+                  identifier: unquote(identifier),
+                  result: nil,
+                  body: body
+                }
+              ],
+              locals: [{unquote(identifier), Orb.I32}]
+            )
+          end
       end
     end
   end
 
-  defmacro loop({:<-, _, [item, source]},
-             do: block
-           ) do
+  defmacro loop({:<-, _, [item, source]}, do: block) do
     result_type = nil
+
+    source_iterator = quote bind_quoted: [source: source], do: source.push_type
 
     {set_item, identifier} =
       case item do
@@ -363,25 +439,25 @@ defmodule Orb.DSL do
           {[], "_"}
 
         _ ->
-          {quote bind_quoted: [source: source, item: item] do
-             Orb.VariableReference.set(item, source.push_type.value(source))
+          {quote bind_quoted: [source_iterator: source_iterator, item: item] do
+             Orb.VariableReference.set(item, source_iterator.value(source))
            end, quote(do: unquote(item).identifier)}
       end
 
     body =
       quote bind_quoted: [
-              source: source,
+              source_iterator: source_iterator,
               identifier: identifier,
               set_item: set_item,
               block_items: __get_block_items(block)
             ] do
         Orb.IfElse.new(
-          source.push_type.valid?(source),
+          source_iterator.valid?(source),
           Orb.InstructionSequence.new(
             List.flatten([
               set_item,
               block_items,
-              Orb.VariableReference.set(source, source.push_type.next(source)),
+              Orb.VariableReference.set(source, source_iterator.next(source)),
               %Orb.Loop.Branch{identifier: identifier}
             ])
           )
