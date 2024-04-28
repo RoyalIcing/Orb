@@ -915,14 +915,16 @@ defmodule Orb do
       with do
         import Kernel, except: [@: 1]
 
-        require Orb.Global.Declare
+        with do
+          require Orb.Global.Declare
 
-        Orb.Global.Declare.__import_dsl(
-          unquote(__MODULE__).__global_mode_mutable(unquote(mode)),
-          unquote(__MODULE__).__global_mode_exported(unquote(mode))
-        )
+          Orb.Global.Declare.__import_dsl(
+            unquote(__MODULE__).__global_mode_mutable(unquote(mode)),
+            unquote(__MODULE__).__global_mode_exported(unquote(mode))
+          )
 
-        unquote(__global_block(:orb, block))
+          unquote(__global_block(:orb, block))
+        end
       end
     end
   end
@@ -1019,7 +1021,9 @@ defmodule Orb do
     end
   end
 
-  def __global_block(_, block), do: quote([generated: true], do: unquote(block))
+  def __global_block(_, block) do
+    quote([generated: true], do: unquote(block))
+  end
 
   defmacro importw(mod, namespace) when is_atom(namespace) do
     quote do

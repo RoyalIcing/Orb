@@ -163,6 +163,9 @@ defmodule Orb.Global do
           with do
             require Orb.Global
 
+            # Ignore unused module attribute
+            _ = Module.get_attribute(__MODULE__, unquote(name))
+
             preferred_type =
               Module.get_last_attribute(__MODULE__, :wasm_global_preferred_type, nil)
 
@@ -179,20 +182,7 @@ defmodule Orb.Global do
 
       defmacro @{name, _meta, [arg]} do
         quote do
-          with do
-            require Orb.Global
-
-            preferred_type =
-              Module.get_last_attribute(__MODULE__, :wasm_global_preferred_type, nil)
-
-            Orb.Global.register(
-              preferred_type,
-              unquote(name),
-              Module.get_last_attribute(__MODULE__, :wasm_global_mutability),
-              Module.get_last_attribute(__MODULE__, :wasm_global_exported),
-              unquote(arg)
-            )
-          end
+          unquote(__MODULE__).register_global(unquote(name), unquote(arg))
         end
       end
     end
