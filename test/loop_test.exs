@@ -1,6 +1,6 @@
 defmodule LoopTest do
   use ExUnit.Case, async: true
-
+  require TestHelper
   alias OrbWasmtime.Wasm
 
   test "block stack" do
@@ -144,44 +144,42 @@ defmodule LoopTest do
     assert 55 = Wasm.call(Loop1To10, :sum1to10)
   end
 
-  test "iterators" do
+  describe "iterators" do
     defmodule AlphabetIterator do
-      @behaviour Orb.CustomType
-      @behaviour Access
-
-      @impl Orb.CustomType
-      defdelegate wasm_type, to: Orb.I32
-
       def new(), do: ?a
 
-      @impl Orb.Iterator
-      def valid?(var), do: Orb.I32.le_u(var, ?z)
-      @impl Orb.Iterator
-      def value(var), do: var
-      @impl Orb.Iterator
-      def next(var), do: Orb.I32.add(var, 1)
+      with @behaviour b = Orb.CustomType do
+        @impl b
+        defdelegate wasm_type, to: Orb.I32
+      end
+
+      with @behaviour b = Orb.Iterator do
+        @impl b
+        def valid?(var), do: Orb.I32.le_u(var, ?z)
+        @impl b
+        def value(var), do: var
+        @impl b
+        def next(var), do: Orb.I32.add(var, 1)
+      end
     end
 
     defmodule IteratorConsumer do
       use Orb
 
-      defw test, {I32, I32}, i: I32, char: I32, alpha: AlphabetIterator do
+      defw test, I32, i: I32, alpha: AlphabetIterator do
         alpha = AlphabetIterator.new()
 
-        # TODO: allow char local to be defined by the loop, removing the need to explicitly declare it above.
-        # TODO: loop char <- AlphabetIterator.new() do
         loop char <- alpha do
           i = i + 1
         end
 
         i
-        char
       end
 
       defw test2, I32, i: I32, alpha: AlphabetIterator do
         alpha = AlphabetIterator.new()
 
-        loop char <- alpha do
+        loop _ <- alpha do
           i = i + 1
         end
 
@@ -191,82 +189,110 @@ defmodule LoopTest do
       defw test3, I32, i: I32, alpha: AlphabetIterator do
         alpha = AlphabetIterator.new()
 
-        loop _ <- alpha do
-          i = i + 1
+        loop char <- alpha do
+          i = i + char
         end
 
         i
       end
     end
 
-    assert {26, ?z} = Wasm.call(IteratorConsumer, :test)
-    assert 26 = Wasm.call(IteratorConsumer, :test2)
-    assert 26 = Wasm.call(IteratorConsumer, :test3)
+    test "behaves correctly" do
+      assert 26 = Wasm.call(IteratorConsumer, :test)
+      assert 26 = Wasm.call(IteratorConsumer, :test2)
+      assert 2847 = Wasm.call(IteratorConsumer, :test3)
+      assert 2847 = Enum.sum(?a..?z)
+    end
 
-    assert """
-           (module $IteratorConsumer
-             (func $test (export "test") (result i32 i32)
-               (local $i i32)
-               (local $char i32)
-               (local $alpha i32)
-               (i32.const 97)
-               (local.set $alpha)
-               (loop $char
-                 (i32.le_u (local.get $alpha) (i32.const 122))
-                 (if
-                   (then
-                     (local.get $alpha)
-                     (local.set $char)
-                     (i32.add (local.get $i) (i32.const 1))
-                     (local.set $i)
-                     (i32.add (local.get $alpha) (i32.const 1))
-                     (local.set $alpha)
-                     (br $char)
-                   )
-                 )    )
-               (local.get $i)
-               (local.get $char)
+    test "compiles correctly" do
+      assert """
+             (module $IteratorConsumer
+               (func $test (export "test") (result i32)
+                 (local $i i32)
+                 (local $alpha i32)
+                 (local $char i32)
+                 (i32.const 97)
+                 (local.set $alpha)
+                 (loop $char
+                   (i32.le_u (local.get $alpha) (i32.const 122))
+                   (if
+                     (then
+                       (local.get $alpha)
+                       (local.set $char)
+                       (i32.add (local.get $i) (i32.const 1))
+                       (local.set $i)
+                       (i32.add (local.get $alpha) (i32.const 1))
+                       (local.set $alpha)
+                       (br $char)
+                     )
+                   )    )
+                 (local.get $i)
+               )
+               (func $test2 (export "test2") (result i32)
+                 (local $i i32)
+                 (local $alpha i32)
+                 (i32.const 97)
+                 (local.set $alpha)
+                 (loop $_
+                   (i32.le_u (local.get $alpha) (i32.const 122))
+                   (if
+                     (then
+                       (i32.add (local.get $i) (i32.const 1))
+                       (local.set $i)
+                       (i32.add (local.get $alpha) (i32.const 1))
+                       (local.set $alpha)
+                       (br $_)
+                     )
+                   )    )
+                 (local.get $i)
+               )
+               (func $test3 (export "test3") (result i32)
+                 (local $i i32)
+                 (local $alpha i32)
+                 (local $char i32)
+                 (i32.const 97)
+                 (local.set $alpha)
+                 (loop $char
+                   (i32.le_u (local.get $alpha) (i32.const 122))
+                   (if
+                     (then
+                       (local.get $alpha)
+                       (local.set $char)
+                       (i32.add (local.get $i) (local.get $char))
+                       (local.set $i)
+                       (i32.add (local.get $alpha) (i32.const 1))
+                       (local.set $alpha)
+                       (br $char)
+                     )
+                   )    )
+                 (local.get $i)
+               )
              )
-             (func $test2 (export "test2") (result i32)
-               (local $i i32)
-               (local $alpha i32)
-               (local $char i32)
-               (i32.const 97)
-               (local.set $alpha)
-               (loop $char
-                 (i32.le_u (local.get $alpha) (i32.const 122))
-                 (if
-                   (then
-                     (local.get $alpha)
-                     (local.set $char)
-                     (i32.add (local.get $i) (i32.const 1))
-                     (local.set $i)
-                     (i32.add (local.get $alpha) (i32.const 1))
-                     (local.set $alpha)
-                     (br $char)
-                   )
-                 )    )
-               (local.get $i)
-             )
-             (func $test3 (export "test3") (result i32)
-               (local $i i32)
-               (local $alpha i32)
-               (i32.const 97)
-               (local.set $alpha)
-               (loop $_
-                 (i32.le_u (local.get $alpha) (i32.const 122))
-                 (if
-                   (then
-                     (i32.add (local.get $i) (i32.const 1))
-                     (local.set $i)
-                     (i32.add (local.get $alpha) (i32.const 1))
-                     (local.set $alpha)
-                     (br $_)
-                   )
-                 )    )
-               (local.get $i)
-             )
-           )
-           """ = Orb.to_wat(IteratorConsumer)
+             """ = Orb.to_wat(IteratorConsumer)
+    end
+
+    test "does not allow reusing existing local name" do
+      # assert_raise CompileError, "Cannot iterate using existing local name.", fn ->
+      assert_raise CompileError,
+                   ~r[#{TestHelper.location(+8)}: Cannot iterate using existing local name.],
+                   fn ->
+                     defmodule ReusesLocal do
+                       use Orb
+
+                       defw test, {I32, I32}, i: I32, char: I32, alpha: AlphabetIterator do
+                         alpha = AlphabetIterator.new()
+
+                         loop char <- alpha do
+                           i = i + 1
+                         end
+
+                         i
+                         char
+                       end
+                     end
+
+                     Orb.to_wat(ReusesLocal)
+                   end
+    end
   end
 end

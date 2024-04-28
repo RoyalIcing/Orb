@@ -459,49 +459,13 @@ defmodule Orb.DSL do
     end
   end
 
-  defmacro loop({:<-, _, [item, source]}, do: block) do
-    result_type = nil
+  defmacro loop({:<-, meta, [_item, _source]}, do: _block) do
+    env = __CALLER__
 
-    source_iterator = quote bind_quoted: [source: source], do: source.push_type
-
-    {set_item, identifier} =
-      case item do
-        {:_, _, _} ->
-          {[], "_"}
-
-        _ ->
-          {quote bind_quoted: [source_iterator: source_iterator, item: item] do
-             Orb.VariableReference.set(item, source_iterator.value(source))
-           end, quote(do: unquote(item).identifier)}
-      end
-
-    body =
-      quote bind_quoted: [
-              source_iterator: source_iterator,
-              identifier: identifier,
-              set_item: set_item,
-              block_items: __get_block_items(block)
-            ] do
-        Orb.IfElse.new(
-          source_iterator.valid?(source),
-          Orb.InstructionSequence.new(
-            List.flatten([
-              set_item,
-              block_items,
-              Orb.VariableReference.set(source, source_iterator.next(source)),
-              %Orb.Loop.Branch{identifier: identifier}
-            ])
-          )
-        )
-      end
-
-    quote do
-      %Orb.Loop{
-        identifier: unquote(identifier),
-        result: unquote(result_type),
-        body: unquote(body)
-      }
-    end
+    raise CompileError,
+      line: meta[:line],
+      file: env.file,
+      description: "Cannot iterate using existing local name."
   end
 
   @doc """

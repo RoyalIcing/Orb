@@ -2,29 +2,10 @@ defmodule DefwTest do
   use ExUnit.Case, async: true
   alias OrbWasmtime.Instance
 
-  defmacrop location(plus) do
-    caller = __CALLER__
-    file = Path.relative_to_cwd(caller.file)
-    quote do: "#{unquote(file)}:#{unquote(caller.line) + unquote(plus)}"
-  end
-
-  defmacrop module_wat(do: block) do
-    location = Macro.Env.location(__CALLER__)
-
-    {:module, mod, _, _} =
-      Module.create(
-        String.to_atom("Elixir.Sample#{location[:line]}"),
-        block,
-        location
-      )
-
-    quote do
-      unquote(mod).to_wat()
-    end
-  end
+  require TestHelper
 
   test "globals work" do
-    assert (module_wat do
+    assert (TestHelper.module_wat do
               use Orb
 
               I32.enum([:component_l, :component_a, :component_b], 1)
@@ -80,7 +61,7 @@ defmodule DefwTest do
 
   test "multiple args errs" do
     assert_raise CompileError,
-                 ~r[#{location(+5)}: Cannot define function with multiple arguments, use keyword list instead.],
+                 ~r[#{TestHelper.location(+5)}: Cannot define function with multiple arguments, use keyword list instead.],
                  fn ->
                    defmodule Sample do
                      use Orb
