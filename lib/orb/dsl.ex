@@ -350,10 +350,18 @@ defmodule Orb.DSL do
     quote bind_quoted: [
             source: source,
             # FIXME: need to support not just I32 but at least I64
-            init_var:
-              quote(
-                do: var!(unquote(var)) = Orb.VariableReference.local(unquote(identifier), Orb.I32)
-              ),
+            init_elixir_var:
+              case identifier do
+                :_ ->
+                  nil
+
+                identifier ->
+                  quote(
+                    do:
+                      var!(unquote(var)) =
+                        Orb.VariableReference.local(unquote(identifier), Orb.I32)
+                  )
+              end,
             identifier: identifier,
             block_items: __get_block_items(block)
           ] do
@@ -362,7 +370,7 @@ defmodule Orb.DSL do
           with do
             element_type = Orb.I32
 
-            init_var
+            init_elixir_var
 
             Orb.InstructionSequence.new(
               nil,
@@ -403,25 +411,24 @@ defmodule Orb.DSL do
         source = %{push_type: source_iterator} when not is_nil(source_iterator) ->
           with do
             element_type = Orb.I32
-
-            # var!(unquote(var)) = Orb.VariableReference.local(identifier, Orb.I32)
-            init_var
-
-            # case item do
-            #   {:_, _, _} ->
-            #     {[], "_"}
+            init_elixir_var
 
             body =
               Orb.IfElse.new(
                 source_iterator.valid?(source),
                 Orb.InstructionSequence.new(
                   List.flatten([
-                    # set_item,
-                    Orb.Instruction.local_set(
-                      element_type,
-                      identifier,
-                      source_iterator.value(source)
-                    ),
+                    case identifier do
+                      :_ ->
+                        []
+
+                      identifier ->
+                        Orb.Instruction.local_set(
+                          element_type,
+                          identifier,
+                          source_iterator.value(source)
+                        )
+                    end,
                     block_items,
                     Orb.VariableReference.set(source, source_iterator.next(source)),
                     %Orb.Loop.Branch{identifier: identifier}
@@ -438,7 +445,14 @@ defmodule Orb.DSL do
                   body: body
                 }
               ],
-              locals: [{identifier, element_type}]
+              locals:
+                case identifier do
+                  :_ ->
+                    []
+
+                  identifier ->
+                    [{identifier, element_type}]
+                end
             )
           end
       end
