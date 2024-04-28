@@ -272,7 +272,6 @@ defmodule LoopTest do
     end
 
     test "does not allow reusing existing local name" do
-      # assert_raise CompileError, "Cannot iterate using existing local name.", fn ->
       assert_raise CompileError,
                    ~r[#{TestHelper.location(+8)}: Cannot iterate using existing local name.],
                    fn ->
