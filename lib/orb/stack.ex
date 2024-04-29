@@ -1,5 +1,9 @@
 defmodule Orb.Stack do
-  @moduledoc false
+  @moduledoc """
+  Functions for working with the WebAssembly function stack.
+
+  Particularly useful for inlined algorithms which can push a value to the stack and later pop it, avoiding the need to declare another local.
+  """
 
   defmodule Drop do
     defstruct instruction: nil, count: 0, pop_type: nil, push_type: nil

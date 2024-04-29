@@ -77,7 +77,6 @@ defmodule Orb.Memory do
       iex> use Orb
       iex> Memory.load!(I32.U8, 0x100, align: 2)
       ** (ArgumentError) alignment 2 must not be larger than natural 1
-  ```
   """
   def load!(type, address, opts \\ []) do
     Orb.Memory.Load.new(type, address, opts)

@@ -105,13 +105,13 @@ defmodule Orb do
   end
   ```
 
-  If you prefer, Orb allows you to be explicit with your stack pushes with `Orb.DSL.push/1`:
+  If you prefer, Orb allows you to be explicit with your stack pushes with `Orb.Stack.push/1`:
 
   ```elixir
   defw example(), {I32, I32, I32} do
-    push(1)
-    push(2)
-    push(3)
+    Orb.Stack.push(1)
+    Orb.Stack.push(2)
+    Orb.Stack.push(3)
   end
   ```
 
@@ -422,12 +422,6 @@ defmodule Orb do
   defw some_example(), n: I32 do
     n = magic_number()
   end
-  ```
-
-  You can also use `Orb.DSL.typed_call/3` to manually call functions defined within your module. Currently, the parameters are not checked, so you must ensure you are calling with the correct arity and types.
-
-  ```elixir
-  char = typed_call(I32, :encode_html_char, char)
   ```
 
   ## Composing modules with `Orb.include/1`
