@@ -186,6 +186,7 @@ defmodule Orb.DSL do
         body_local_types =
           for(%{locals: locals} <- block_items, do: locals)
           |> List.flatten()
+          |> List.keysort(0)
 
         local_types =
           (unquote(local_types) ++ body_local_types)
@@ -372,40 +373,36 @@ defmodule Orb.DSL do
 
             _ = init_elixir_var
 
-            Orb.InstructionSequence.new(
-              nil,
-              [
-                Orb.Instruction.local_set(element_type, identifier, first),
-                %Orb.Loop{
-                  identifier: identifier,
-                  body:
-                    Orb.InstructionSequence.new(
-                      nil,
-                      List.flatten([
-                        block_items,
-                        Orb.Instruction.local_set(
+            Orb.InstructionSequence.new([
+              Orb.Instruction.local_set(element_type, identifier, first),
+              %Orb.Loop{
+                identifier: identifier,
+                body:
+                  Orb.InstructionSequence.new(
+                    List.flatten([
+                      block_items,
+                      Orb.Instruction.local_set(
+                        element_type,
+                        identifier,
+                        Orb.Numeric.Add.optimized(
                           element_type,
-                          identifier,
-                          Orb.Numeric.Add.optimized(
-                            element_type,
+                          Orb.Instruction.local_get(element_type, identifier),
+                          1
+                        )
+                      ),
+                      %Orb.Loop.Branch{
+                        identifier: identifier,
+                        if:
+                          Orb.I32.le_u(
                             Orb.Instruction.local_get(element_type, identifier),
-                            1
+                            last
                           )
-                        ),
-                        %Orb.Loop.Branch{
-                          identifier: identifier,
-                          if:
-                            Orb.I32.le_u(
-                              Orb.Instruction.local_get(element_type, identifier),
-                              last
-                            )
-                        }
-                      ])
-                    )
-                }
-              ],
-              locals: [{identifier, element_type}]
-            )
+                      }
+                    ])
+                  )
+              }
+            ])
+            |> Orb.InstructionSequence.concat_locals([{identifier, element_type}])
           end
 
         source = %{push_type: source_iterator} when not is_nil(source_iterator) ->
@@ -436,23 +433,21 @@ defmodule Orb.DSL do
                 )
               )
 
-            Orb.InstructionSequence.new(
-              nil,
-              [
-                %Orb.Loop{
-                  identifier: identifier,
-                  result: nil,
-                  body: body
-                }
-              ],
-              locals:
-                case identifier do
-                  :_ ->
-                    []
+            Orb.InstructionSequence.new([
+              %Orb.Loop{
+                identifier: identifier,
+                push_type: nil,
+                body: body
+              }
+            ])
+            |> Orb.InstructionSequence.concat_locals(
+              case identifier do
+                :_ ->
+                  []
 
-                  identifier ->
-                    [{identifier, element_type}]
-                end
+                identifier ->
+                  [{identifier, element_type}]
+              end
             )
           end
       end
@@ -520,7 +515,7 @@ defmodule Orb.DSL do
     quote do
       %Orb.Loop{
         identifier: unquote(identifier),
-        result: unquote(result_type),
+        push_type: unquote(result_type),
         body: unquote(block_items)
       }
     end

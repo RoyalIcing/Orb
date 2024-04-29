@@ -294,4 +294,52 @@ defmodule LoopTest do
                    end
     end
   end
+
+  test "nested loops" do
+    defmodule NestedLoop do
+      use Orb
+
+      defw nested_loop(), I32, sum: I32 do
+        loop i <- 1..4 do
+          loop j <- 11..17 do
+            sum = sum + 1
+          end
+        end
+
+        sum
+      end
+    end
+
+    wat = """
+    (module $NestedLoop
+      (func $nested_loop (export "nested_loop") (result i32)
+        (local $sum i32)
+        (local $i i32)
+        (local $j i32)
+        (i32.const 1)
+        (local.set $i)
+        (loop $i
+          (i32.const 11)
+          (local.set $j)
+          (loop $j
+            (i32.add (local.get $sum) (i32.const 1))
+            (local.set $sum)
+            (i32.add (local.get $j) (i32.const 1))
+            (local.set $j)
+            (i32.le_u (local.get $j) (i32.const 17))
+            (br_if $j)
+          )
+          (i32.add (local.get $i) (i32.const 1))
+          (local.set $i)
+          (i32.le_u (local.get $i) (i32.const 4))
+          (br_if $i)
+        )
+        (local.get $sum)
+      )
+    )
+    """
+
+    assert wat === Orb.to_wat(NestedLoop)
+    assert 28 = Wasm.call(NestedLoop, :nested_loop)
+  end
 end

@@ -59,6 +59,7 @@ defmodule Orb.Func do
           ),
           "\n"
         ],
+        # for {id, type} <- List.keysort(local_types, 0) do
         for {id, type} <- local_types do
           [
             "  ",

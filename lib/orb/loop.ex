@@ -1,13 +1,13 @@
 defmodule Orb.Loop do
   @moduledoc false
 
-  defstruct identifier: nil, result: nil, body: nil
+  defstruct identifier: nil, push_type: nil, body: nil
 
   defimpl Orb.ToWat do
     import Orb.ToWat.Helpers
 
     def to_wat(
-          %Orb.Loop{identifier: identifier, result: result, body: body},
+          %Orb.Loop{identifier: identifier, push_type: result, body: body},
           indent
         ) do
       [

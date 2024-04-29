@@ -753,7 +753,8 @@ defmodule Orb do
   @doc """
   Declare a snippet of Orb AST for reuse. Enables DSL, with additions from `mode`.
   """
-  defmacro snippet(mode \\ Orb.S32, locals \\ [], do: block) do
+  # TODO: rename to Orb.instructions or Orb.quote ?
+  defmacro snippet(mode \\ Orb.Numeric, locals \\ [], do: block) do
     mode = Macro.expand_literals(mode, __CALLER__)
     pre = __mode_pre(mode)
 

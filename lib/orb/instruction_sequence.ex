@@ -55,7 +55,11 @@ defmodule Orb.InstructionSequence do
 
   def new(instructions) when is_list(instructions) do
     push_type = do_pop_push_type([], instructions)
-    new(push_type, instructions)
+
+    local_types =
+      do_local_types(instructions, [])
+
+    new(push_type, instructions, locals: local_types)
   end
 
   def new(push_type, instructions, opts \\ []) when is_list(instructions) do
@@ -113,6 +117,31 @@ defmodule Orb.InstructionSequence do
             raise "Cannot pop #{pop} from stack, expected type #{expected_type}."
         end
     end
+  end
+
+  defp do_local_types(instructions, local_types)
+  defp do_local_types([], local_types), do: local_types
+
+  defp do_local_types([%{locals: locals} | rest], local_types) do
+    local_types = merge_locals(local_types, locals)
+    do_local_types(rest, local_types)
+  end
+
+  defp do_local_types([%{body: %__MODULE__{locals: locals}} | rest], local_types) do
+    local_types = merge_locals(local_types, locals)
+    do_local_types(rest, local_types)
+  end
+
+  defp do_local_types([_ | rest], local_types), do: do_local_types(rest, local_types)
+
+  defp merge_locals(a, b) do
+    # TODO: raise on duplicate?
+    Keyword.merge(a, b)
+  end
+
+  def concat_locals(instruction_sequence = %__MODULE__{}, locals) do
+    new_locals = merge_locals(instruction_sequence.locals, locals)
+    %{instruction_sequence | locals: new_locals}
   end
 
   @doc ~S"""
