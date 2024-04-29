@@ -128,7 +128,7 @@ defmodule Orb.Memory do
 
     opts = Keyword.take(opts, [:align])
 
-    Orb.InstructionSequence.new([
+    Orb.InstructionSequence.new(nil, [
       address_b,
       load!(type, address_a, opts),
       address_a,
