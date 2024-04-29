@@ -123,14 +123,9 @@ defmodule Orb.Memory do
   A convenience for swapping two values in memory.
   """
   def swap!(type, address_a, address_b, opts \\ []) do
-    require Orb.Stack
+    alias Orb.I32
 
     opts = Keyword.take(opts, [:align])
-
-    # Orb.Stack.push load!(type, address_a, opts) do
-    #   store!(type, address_a, load!(type, address_b, opts), opts)
-    # end
-    # |> then(&store!(type, address_b, &1, opts))
 
     Orb.InstructionSequence.new([
       address_b,

@@ -66,7 +66,10 @@ defmodule Orb.Stack do
     end
 
     defimpl Orb.ToWat do
-      def to_wat(%Orb.Stack.Pop{}, _), do: []
+      alias Orb.ToWat.Helpers
+
+      # def to_wat(%Orb.Stack.Pop{}, _), do: []
+      def to_wat(%Orb.Stack.Pop{pop_type: type}, _), do: ["(;", Helpers.do_type(type), ";)"]
     end
   end
 
