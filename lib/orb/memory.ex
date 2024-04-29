@@ -120,7 +120,9 @@ defmodule Orb.Memory do
   end
 
   @doc """
-  A convenience for swapping two values in memory.
+  A convenience for swapping two values of `type` at addresses `address_a` and `address_b` in memory.
+
+  Bubble sort is an example of an algorithm which uses a swap.
   """
   def swap!(type, address_a, address_b, opts \\ []) do
     alias Orb.I32
