@@ -1,6 +1,7 @@
 defmodule MemoryTest do
   use ExUnit.Case, async: true
   require TestHelper
+  alias OrbWasmtime.Instance
 
   test "initial_data!/2" do
     defmodule InitialData do
@@ -20,7 +21,7 @@ defmodule MemoryTest do
       end
 
       defw read_i32(address: I32), I32 do
-        Memory.load!(I32, address)
+        Memory.load!(I32, address, align: 4)
       end
     end
 
@@ -37,7 +38,7 @@ defmodule MemoryTest do
                (i32.load8_u (local.get $address))
              )
              (func $read_i32 (export "read_i32") (param $address i32) (result i32)
-               (i32.load (local.get $address))
+               (i32.load align=4 (local.get $address))
              )
            )
            """ = Orb.to_wat(InitialData)
@@ -112,6 +113,48 @@ defmodule MemoryTest do
              )
            )
            """
+  end
+
+  test "swap!/4" do
+    defmodule Swap do
+      use Orb
+
+      Memory.pages(1)
+      Memory.initial_data!(16, u32: [123_456, 456_789])
+
+      defw read(), {I32, I32} do
+        Memory.load!(I32, 16)
+        Memory.load!(I32, 20)
+      end
+
+      defw swap() do
+        Memory.swap!(I32, 16, 20, align: 4)
+      end
+    end
+
+    assert ~S"""
+           (module $Swap
+             (memory (export "memory") 1)
+             (data (i32.const 16) "\40\e2\01\00\55\f8\06\00")
+             (func $read (export "read") (result i32 i32)
+               (i32.load (i32.const 16))
+               (i32.load (i32.const 20))
+             )
+             (func $swap (export "swap")
+               (i32.const 20)
+               (i32.load align=4 (i32.const 16))
+               (i32.const 16)
+               (i32.load align=4 (i32.const 20))
+               (i32.store align=4  )
+               (i32.store align=4  )
+             )
+           )
+           """ = Orb.to_wat(Swap)
+
+    inst = Instance.run(Swap)
+    assert {123_456, 456_789} = Instance.call(inst, :read)
+    Instance.call(inst, :swap)
+    assert {456_789, 123_456} = Instance.call(inst, :read)
   end
 
   test "size/1 and grow!/1" do
