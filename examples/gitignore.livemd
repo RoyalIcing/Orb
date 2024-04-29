@@ -1,0 +1,74 @@
+# Orb `.gitignore` Parser
+
+```elixir
+Mix.install([
+  {:orb, "~> 0.0.41"},
+  {:wasmex, "~> 0.8.3"}
+])
+```
+
+## Define our gitignore parser module using Orb
+
+```elixir
+defmodule GitIgnoreParser do
+  use Orb
+
+  SilverOrb.Lines.def GitIgnoreLineOffsetsSorted, pages: 1
+
+  SilverOrb.Input.Lines.def GitIgnoreContent, pages: 1, export_write: :write_gitignore do
+    for line <- GitIgnoreContent.lines() do
+      GitIgnoreLineOffsetsSorted.insert(line.slice)
+    end
+    GitIgnoreLineOffsetsSorted.sort()
+  end
+
+  SilverOrb.Input.def Path, export_write: :write_path, pages: 1
+
+  defw ignored?(), I32 do
+    for line <- GitIgnoreLineOffsetsSorted.lines() do
+      local order = evaluate_line(line, Path) do
+        case order do
+          # before
+          -1 ->
+            # continue
+            nop()
+
+          # after
+          1 ->
+            return(i32(0))
+          
+          # matches
+          0 ->
+            return(i32(1))
+        end
+      end
+    end
+  end
+
+  defwp evaluate_line(line: SilverOrb.Input.Line) do
+    
+  end
+end
+```
+
+## We can compile this module to the WebAssembly text format
+
+```elixir
+Orb.to_wat(GitIgnoreParser)
+|> IO.puts()
+```
+
+## We can run the WebAssembly module in Elixir using Wasmex
+
+```elixir
+{:ok, pid} = Wasmex.start_link(%{bytes: Orb.to_wat(GitIgnoreParser)})
+
+{:ok, [start, length]} = Wasmex.call_function(pid, :write_gitignore_slice, [])
+write_string(pid, :write_gitignore, start, length, ".DS_Store\ntmp/\nnode_modules/")
+
+{:ok, [start, length]} = Wasmex.call_function(pid, :write_path_slice, [])
+write_string(pid, :write_path, start, length, "some-file-name")
+
+{:ok, [ignored?]} = Wasmex.call_function(pid, :ignored?, [])
+IO.inspect(ignored?, label: "ignored?")
+```
