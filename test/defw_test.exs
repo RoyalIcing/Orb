@@ -109,4 +109,34 @@ defmodule DefwTest do
     assert Instance.call_reading_string(i, :cdata_start2) == "<![CDATA["
     assert Instance.call_reading_string(i, :use_other) == "<![CDATA["
   end
+
+  test "can unquote name" do
+    defmodule MacroWithDefw do
+      defmacro defw_wrapper(name) do
+        quote do
+          Orb.DefwDSL.defw unquote(name)() do
+          end
+        end
+      end
+    end
+
+    defmodule Unquoted do
+      use Orb
+
+      defw unquote(:first)() do
+      end
+
+      require MacroWithDefw
+      MacroWithDefw.defw_wrapper(:second)
+    end
+
+    assert ~S"""
+           (module $Unquoted
+             (func $first (export "first")
+             )
+             (func $second (export "second")
+             )
+           )
+           """ = Orb.to_wat(Unquoted)
+  end
 end
