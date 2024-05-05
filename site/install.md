@@ -26,4 +26,7 @@ defmodule Example do
     42
   end
 end
+
+wasm_bytes = Orb.to_wasm(Example)
+webassembly_text_format = Orb.to_wat(Example)
 ```
