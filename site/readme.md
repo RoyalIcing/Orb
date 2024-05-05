@@ -89,11 +89,11 @@ wasm_data = Orb.to_wasm(UsernameValidation)
 
 ## Dynamic compilation
 
-Orb lets you run any Elixir code at compile-time. You could have dynamically enabled feature flags by reading from the `Process` dictionary. You could call out to any existing Elixir library for Hex (see example below). You could even make HTTP requests or talk to a database. Orb instructions are just data, so it doesn’t matter what process you use to make or inform that data.
+Orb lets you run any Elixir code at compile-time. You could have dynamically enabled feature flags by reading from the `Process` dictionary. You could call out to any existing Elixir library from Hex (see example below). You could even make HTTP requests or talk to a database. Orb instructions are just data, so it doesn’t matter what process you use to make or inform that data.
 
-## Use existing Elixir libraries at compile-time
+### Use existing Elixir libraries at compile-time
 
-Here we use the existing `mime` Elixir package to lookup a MIME type for a given file extension. These values get compile as constants in the resulting WebAssembly module automatically.
+Here we use the existing `mime` Elixir package to lookup a MIME type for a given file extension. These values get compiled as constants in the resulting WebAssembly module automatically.
 
 ```elixir
 Mix.install([
