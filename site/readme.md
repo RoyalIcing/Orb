@@ -87,17 +87,13 @@ end
 wasm_data = Orb.to_wasm(UsernameValidation)
 ```
 
-## Write your own DSL
-
-You can write your own DSLs using Elixir functions that spit out Orb instructions. Go another step and write macros that accept blocks and transform each Elixir expression. For example, this is how SilverOrb’s StringBuilder and XMLBuilder work under the hood.
-
 ## Dynamic compilation
 
-Orb lets you run any Elixir code at compile-time. You could have dynamically enabled feature flags by reading from the `Process` dictionary. You could call out to any existing Elixir library for Hex. You could even make HTTP requests or talk to a database. Orb instructions are just data, so it doesn’t matter what process you use to make or inform that data.
+Orb lets you run any Elixir code at compile-time. You could have dynamically enabled feature flags by reading from the `Process` dictionary. You could call out to any existing Elixir library for Hex (see example below). You could even make HTTP requests or talk to a database. Orb instructions are just data, so it doesn’t matter what process you use to make or inform that data.
 
 ## Use existing Elixir libraries at compile-time
 
-Here we use the existing `mime` package to lookup a MIME type for a given file extension. These values get compile as constants in the resulting WebAssembly module automatically.
+Here we use the existing `mime` Elixir package to lookup a MIME type for a given file extension. These values get compile as constants in the resulting WebAssembly module automatically.
 
 ```elixir
 Mix.install([
@@ -124,5 +120,41 @@ defmodule MimeType do
   defw(js, Orb.Constants.NulTerminatedString, do: "application/javascript")
   defw(xml, Orb.Constants.NulTerminatedString, do: "application/xml")
   defw(sqlite, Orb.Constants.NulTerminatedString, do: "application/vnd.sqlite3")
+end
+```
+
+## Write your own DSL
+
+You can write your own DSLs using Elixir functions that spit out Orb instructions. Go another step and write macros that accept blocks and transform each Elixir expression. For example, this is how SilverOrb’s StringBuilder and XMLBuilder work under the hood.
+
+```elixir
+defmodule Assertions do
+  defmacro must!(do: conditions) do
+    quote do
+      Orb.snippet do
+        unquote(case conditions do
+          {:__block__, _, multiple} -> multiple
+          single -> [single]
+        end)
+        |> Enum.reduce(&I32.band/2)
+        |> unless(do: unreachable())
+      end
+    end
+  end
+end
+
+defmodule Example do
+  use Orb
+  
+  import Assertions
+
+  defw celsius_to_fahrenheit(celsius: F32), F32 do
+    must! do
+      celsius > -200.0
+      celsius < 500.0
+    end
+
+    celsius * (9.0 / 5.0) + 32.0
+  end
 end
 ```
