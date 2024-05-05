@@ -30,3 +30,19 @@ end
 wasm_bytes = Orb.to_wasm(Example)
 webassembly_text_format = Orb.to_wat(Example)
 ```
+
+## Serving WebAssembly
+
+Within a Phoenix or other Plug app you can send the WebAssembly bytes like so:
+
+```elixir
+defmodule MyController do
+  def show(conn, _) do
+    wasm_bytes = Orb.to_wasm(Example)
+
+    conn
+    |> put_resp_content_type("application/wasm", nil)
+    |> send_resp(200, wasm_bytes)
+  end
+end
+```
