@@ -14,7 +14,7 @@ You get to use:
 
 Orb is Elixir at compile time and WebAssembly at runtime.
 
-## Example
+## Write functions using an Elixir subset
 
 You can write maths using familiar `+ - * /` operators in Orb.
 
