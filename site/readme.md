@@ -1,6 +1,6 @@
 # The raw ingredients of WebAssembly made beautifully composable with Elixir
 
-Orb is a fresh way to write WebAssembly. Instead of choosing an existing language like C and mapping its semantics to WebAssembly, Orb starts with the raw ingredients of WebAssembly and asks “how can we make this more convenient to write?”.
+Orb is a fresh way to write WebAssembly. Instead of choosing an existing language like C and mapping its semantics to WebAssembly, Orb starts with WebAssembly’s raw ingredients and asks “how do we make this more convenient to write?”.
 
 It achieves this by embracing the Elixir ecosystem at compile time. Elixir becomes a powerful preprocessor for WebAssembly.
 
@@ -43,11 +43,11 @@ defmodule ASCIIChecks do
   use Orb
 
   defw alpha?(char: I32.U8), I32 do
-    (char > ?a &&& char < ?z) ||| (char > ?A &&& char < ?Z)
+    (char >= ?a &&& char <= ?z) ||| (char >= ?A &&& char <= ?Z)
   end
 
   defw numeric?(char: I32.U8), I32 do
-    char > ?1 &&& char < ?0
+    char >= ?0 &&& char <= ?9
   end
 
   defw alphanumeric?(char: I32.U8), I32 do
@@ -60,6 +60,8 @@ defmodule UsernameValidation do
 
   import ASCIIChecks
   Orb.include(ASCIIChecks)
+
+  Memory.pages(1)
 
   defw is_valid_username(char_ptr: I32.U8.UnsafePointer, len: I32), I32 do
     unless len > 0 do
@@ -118,15 +120,12 @@ defmodule MimeType do
   defw(csv, NulTerminatedString, do: MIME.type("csv"))
   defw(woff2, NulTerminatedString, do: MIME.type("woff2"))
   defw(pdf, NulTerminatedString, do: MIME.type("pdf"))
-  defw(js, NulTerminatedString, do: "application/javascript")
-  defw(xml, NulTerminatedString, do: "application/xml")
-  defw(sqlite, NulTerminatedString, do: "application/vnd.sqlite3")
 end
 ```
 
 ## Write your own DSL
 
-You can write your own DSLs using Elixir functions that spit out Orb instructions. Go another step and write macros that accept blocks and transform each Elixir expression. For example, this is how SilverOrb’s StringBuilder and XMLBuilder work under the hood.
+You can write your own DSLs using Elixir functions that spit out Orb instructions. Go another step and write macros that accept blocks and transform each Elixir expression. For example, this is how SilverOrb’s `StringBuilder` and `XMLBuilder` work under the hood.
 
 ```elixir
 defmodule Assertions do
@@ -138,7 +137,7 @@ defmodule Assertions do
           single -> [single]
         end)
         |> Enum.reduce(&I32.band/2)
-        |> unless(do: unreachable())
+        |> unless(do: unreachable!())
       end
     end
   end
@@ -151,7 +150,7 @@ defmodule Example do
 
   defw celsius_to_fahrenheit(celsius: F32), F32 do
     must! do
-      celsius > -200.0
+      celsius > -273.15
       celsius < 500.0
     end
 
