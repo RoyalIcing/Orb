@@ -84,7 +84,7 @@ defmodule Orb.Numeric.DSL do
   def left === right do
     case Ops.extract_common_type(left, right) do
       type when Ops.is_primitive_type(type) ->
-        Orb.Instruction.new(type, :eq, [left, right])
+        Orb.Instruction.Relative.new(type, :eq, left, right)
     end
   end
 
@@ -92,47 +92,47 @@ defmodule Orb.Numeric.DSL do
     # Orb.Numeric.NotEqual.optimized(Orb.I32, left, right)
     case Ops.extract_common_type(left, right) do
       type when Ops.is_primitive_type(type) ->
-        Orb.Instruction.new(type, :ne, [left, right])
+        Orb.Instruction.Relative.new(type, :ne, left, right)
     end
   end
 
   def left < right do
     case Ops.extract_common_type(left, right) do
       type when Ops.is_primitive_integer_type(type) ->
-        Orb.Instruction.new(type, :lt_s, [left, right])
+        Orb.Instruction.Relative.new(type, :lt_s, left, right)
 
       type when Ops.is_primitive_float_type(type) ->
-        Orb.Instruction.new(type, :lt, [left, right])
+        Orb.Instruction.Relative.new(type, :lt, left, right)
     end
   end
 
   def left > right do
     case Ops.extract_common_type(left, right) do
       type when Ops.is_primitive_integer_type(type) ->
-        Orb.Instruction.new(type, :gt_s, [left, right])
+        Orb.Instruction.Relative.new(type, :gt_s, left, right)
 
       type when Ops.is_primitive_float_type(type) ->
-        Orb.Instruction.new(type, :gt, [left, right])
+        Orb.Instruction.Relative.new(type, :gt, left, right)
     end
   end
 
   def left <= right do
     case Ops.extract_common_type(left, right) do
       type when Ops.is_primitive_integer_type(type) ->
-        Orb.Instruction.new(type, :le_s, [left, right])
+        Orb.Instruction.Relative.new(type, :le_s, left, right)
 
       type when Ops.is_primitive_float_type(type) ->
-        Orb.Instruction.new(type, :le, [left, right])
+        Orb.Instruction.Relative.new(type, :le, left, right)
     end
   end
 
   def left >= right do
     case Ops.extract_common_type(left, right) do
       type when Ops.is_primitive_integer_type(type) ->
-        Orb.Instruction.new(type, :ge_s, [left, right])
+        Orb.Instruction.Relative.new(type, :ge_s, left, right)
 
       type when Ops.is_primitive_float_type(type) ->
-        Orb.Instruction.new(type, :ge, [left, right])
+        Orb.Instruction.Relative.new(type, :ge, left, right)
     end
   end
 

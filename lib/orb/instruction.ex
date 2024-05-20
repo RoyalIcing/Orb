@@ -32,6 +32,10 @@ defmodule Orb.Instruction do
     }
   end
 
+  @spec wrap_constant!(any(), number() | %{:push_type => any(), optional(any()) => any()}) :: %{
+          :push_type => any(),
+          optional(any()) => any()
+        }
   def wrap_constant!(type, value)
 
   def wrap_constant!(Elixir.Integer, value) when is_number(value),

@@ -261,6 +261,10 @@ defmodule OperatorsTest do
         4.0 / 2.0
       end
 
+      defw normal?(f: F32), I32 do
+        f >= 0.0 &&& f <= 1.0
+      end
+
       defw lab_to_xyz(l: F32, a: F32, b: F32), {F32, F32, F32} do
         0.0
         Orb.Stack.push(f32(0.0))
@@ -282,6 +286,9 @@ defmodule OperatorsTest do
              )
              (func $divide (export "divide") (result f32)
                (f32.const 2.0)
+             )
+             (func $normal? (export "normal?") (param $f f32) (result i32)
+               (i32.and (f32.ge (local.get $f) (f32.const 0.0)) (f32.le (local.get $f) (f32.const 1.0)))
              )
              (func $lab_to_xyz (export "lab_to_xyz") (param $l f32) (param $a f32) (param $b f32) (result f32 f32 f32)
                (f32.const 0.0)
