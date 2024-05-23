@@ -25,10 +25,10 @@ defmodule Orb.Numeric.DSL do
   def left - right do
     case Ops.extract_common_type(left, right) do
       Integer ->
-        Kernel.+(left, right)
+        Kernel.-(left, right)
 
       Float ->
-        Kernel.+(left, right)
+        Kernel.-(left, right)
 
       type when Ops.is_primitive_integer_type(type) ->
         Orb.Numeric.Subtract.optimized(type, left, right)
