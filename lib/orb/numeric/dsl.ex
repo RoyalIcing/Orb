@@ -136,6 +136,18 @@ defmodule Orb.Numeric.DSL do
     end
   end
 
+  @doc """
+  Bitwise OR operation for i32 or i64 integers.
+
+  ## Examples
+
+      use Orb
+
+      defw bitwise_or_example(a: I32, b: I32), I32 do
+        a ||| b
+      end
+
+  """
   def left ||| right do
     case Ops.extract_common_type(left, right) do
       type when Ops.is_primitive_integer_type(type) ->
@@ -146,6 +158,18 @@ defmodule Orb.Numeric.DSL do
     end
   end
 
+  @doc """
+  Bitwise AND operation for i32 or i64 integers.
+
+  ## Examples
+
+      use Orb
+
+      defw bitwise_and_example(a: I32, b: I32), I32 do
+        a &&& b
+      end
+
+  """
   def left &&& right do
     case Ops.extract_common_type(left, right) do
       type when Ops.is_primitive_integer_type(type) ->
@@ -156,6 +180,18 @@ defmodule Orb.Numeric.DSL do
     end
   end
 
+  @doc """
+  Left shift operation for i32 or i64 integers.
+
+  ## Examples
+
+      use Orb
+
+      defw left_shift_by_4(a: I32), I32 do
+        a <<< 4
+      end
+
+  """
   def left <<< right do
     case Ops.extract_common_type(left, right) do
       type when Ops.is_primitive_integer_type(type) ->
@@ -166,24 +202,81 @@ defmodule Orb.Numeric.DSL do
     end
   end
 
+  @doc """
+  Logical NOT operation for i32 or i64 integers. Returns i32.
+
+  Zero is considered false, all other numbers are considered true.
+
+  It does not support short-circuiting.
+
+  ## Examples
+
+      use Orb
+
+      defw not_example(a: I32), I32 do
+        not a
+      end
+
+  """
   def not value do
     case Ops.typeof(value, :primitive) do
       type when Ops.is_primitive_integer_type(type) ->
         Orb.Instruction.new(type, :eqz, [value])
+
+      type when Ops.is_primitive_float_type(type) ->
+        raise ArgumentError, "Cannot NOT two expressions of type #{type}."
     end
   end
 
+  @doc """
+  Logical OR operation for i32 or i64 integers. Returns i32.
+
+  Zero is considered false, all other numbers are considered true.
+
+  It does not support short-circuiting.
+
+  ## Examples
+
+      use Orb
+
+      defw or_example(a: I32, b: I32), I32 do
+        a or b
+      end
+
+  """
   def left or right do
     case Ops.extract_common_type(left, right) do
       type when Ops.is_primitive_integer_type(type) ->
         Orb.Instruction.new(type, :or, [left, right])
+
+      type when Ops.is_primitive_float_type(type) ->
+        raise ArgumentError, "Cannot OR two expressions of type #{type}."
     end
   end
 
+  @doc """
+  Logical AND operation for i32 or i64 integers. Returns i32.
+
+  Zero is considered false, all other numbers are considered true.
+
+  It does not support short-circuiting.
+
+  ## Examples
+
+      use Orb
+
+      defw and_example(a: I32, b: I32), I32 do
+        a and b
+      end
+
+  """
   def left and right do
     case Ops.extract_common_type(left, right) do
       type when Ops.is_primitive_integer_type(type) ->
         Orb.Instruction.new(type, :and, [left, right])
+
+      type when Ops.is_primitive_float_type(type) ->
+        raise ArgumentError, "Cannot AND two expressions of type #{type}."
     end
   end
 end
