@@ -246,8 +246,8 @@ defmodule Orb.Numeric.DSL do
   """
   def left or right do
     case Ops.extract_common_type(left, right) do
-      type when Ops.is_primitive_integer_type(type) ->
-        Orb.Instruction.new(type, :or, [left, right])
+      :i32 ->
+        Orb.Instruction.new(:i32, :or, [left, right])
 
       type when Ops.is_primitive_float_type(type) ->
         raise ArgumentError, "Cannot OR two expressions of type #{type}."
@@ -272,8 +272,8 @@ defmodule Orb.Numeric.DSL do
   """
   def left and right do
     case Ops.extract_common_type(left, right) do
-      type when Ops.is_primitive_integer_type(type) ->
-        Orb.Instruction.new(type, :and, [left, right])
+      :i32 ->
+        Orb.Instruction.new(:i32, :and, [left, right])
 
       type when Ops.is_primitive_float_type(type) ->
         raise ArgumentError, "Cannot AND two expressions of type #{type}."
