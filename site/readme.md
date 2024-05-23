@@ -34,6 +34,10 @@ end
 wasm_data = Orb.to_wasm(TemperatureConverter)
 ```
 
+<script type="module">
+  const wasm = WebAssembly.instantiateStreaming("")
+</script>
+
 ## Compose reusable modules
 
 You can define a module, say for common ASCII operations, and then reuse it by including it into another module.
