@@ -46,6 +46,7 @@ wasm_data = Orb.to_wasm(TemperatureConverter)
   el.addEventListener("input", (event) => {
     const inputEl = event.target;
     const { name, valueAsNumber } = inputEl;
+    console.log(name, valueAsNumber);
     if (name === "celsius") {
       const fahrenheit = exports.celsius_to_fahrenheit(valueAsNumber);
       inputEl.value = fahrenheit.toString();
