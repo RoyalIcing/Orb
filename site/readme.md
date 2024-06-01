@@ -50,10 +50,10 @@ wasm_data = Orb.to_wasm(TemperatureConverter)
     console.log(name, valueAsNumber);
     if (name === "celsius") {
       const fahrenheit = exports.celsius_to_fahrenheit(valueAsNumber);
-      form.elements.fahrenheit.value = numberFormat(fahrenheit);
+      form.elements.fahrenheit.value = numberFormat.format(fahrenheit);
     } else {
       const celsius = exports.fahrenheit_to_celsius(valueAsNumber);
-      form.elements.celsius.value = numberFormat(celsius);
+      form.elements.celsius.value = numberFormat.format(celsius);
     }
   });
 </script>
