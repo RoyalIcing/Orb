@@ -39,7 +39,7 @@ wasm_data = Orb.to_wasm(TemperatureConverter)
   <label>Fahrenheit <input name="fahrenheit" inputmode="numeric"></label>
 </form>
 <script type="module">
-  const instance = await WebAssembly.instantiateStreaming(fetch("/wasm/temperature_converter"));
+  const { instance } = await WebAssembly.instantiateStreaming(fetch("/wasm/temperature_converter"));
   const exports = instance.exports;
   console.log(instance, exports);
   const el = document.getElementById("wasm|temperature_converter");
