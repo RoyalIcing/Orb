@@ -35,8 +35,8 @@ wasm_data = Orb.to_wasm(TemperatureConverter)
 ```
 
 <form id="wasm|temperature_converter">
-  <label>Celsius <input name="celsius" inputmode="numeric"></label>
-  <label>Fahrenheit <input name="fahrenheit" inputmode="numeric"></label>
+  <label>Celsius <input name="celsius" type="number" inputmode="numeric"></label>
+  <label>Fahrenheit <input name="fahrenheit"  type="number" inputmode="numeric"></label>
 </form>
 <script type="module">
   const { instance } = await WebAssembly.instantiateStreaming(fetch("/wasm/temperature_converter"));
@@ -45,14 +45,15 @@ wasm_data = Orb.to_wasm(TemperatureConverter)
   const el = document.getElementById("wasm|temperature_converter");
   el.addEventListener("input", (event) => {
     const inputEl = event.target;
+    const form = inputEl.form;
     const { name, valueAsNumber } = inputEl;
     console.log(name, valueAsNumber);
     if (name === "celsius") {
       const fahrenheit = exports.celsius_to_fahrenheit(valueAsNumber);
-      inputEl.value = fahrenheit.toString();
+      form.elements.fahrenheit.value = fahrenheit.toString();
     } else {
       const celsius = exports.fahrenheit_to_celsius(valueAsNumber);
-      inputEl.value = celsius.toString();
+      form.elements.celsius.value = celsius.toString();
     }
   });
 </script>
