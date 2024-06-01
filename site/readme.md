@@ -41,6 +41,7 @@ wasm_data = Orb.to_wasm(TemperatureConverter)
 <script type="module">
   const instance = await WebAssembly.instantiateStreaming(fetch("/wasm/temperature_converter"));
   const exports = instance.exports;
+  console.log(instance, exports);
   const el = document.getElementById("wasm|temperature_converter");
   el.addEventListener("input", (event) => {
     const inputEl = event.target;
