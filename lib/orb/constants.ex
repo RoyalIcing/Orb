@@ -1,7 +1,6 @@
 defmodule Orb.Constants do
   @moduledoc false
 
-  # @default_offset 0x400
   @default_offset 0xFF
 
   # TODO: decide on non-arbitrary offset, and document it.
@@ -15,13 +14,6 @@ defmodule Orb.Constants do
       raise "Must not nest Orb.Constants scopes."
     end
 
-    # try do
-    #   :ets.delete(__MODULE__)
-    # rescue
-    #   ArgumentError -> nil
-    # end
-
-    # __MODULE__ = :ets.new(__MODULE__, [:set, :private, :named_table])
     tid = :ets.new(__MODULE__, [:set, :private])
     :ets.insert(tid, {:start_offset, start_offset})
     :ets.insert(tid, {:offset, start_offset})
