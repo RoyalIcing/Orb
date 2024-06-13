@@ -91,4 +91,89 @@ defmodule StringConstantsTest do
              """
     end
   end
+
+  describe "allocates enough memory for constants" do
+    defmodule BigStrings do
+      def string_of_length_1_page, do: String.duplicate("a", 64 * 1024)
+      def string_should_fit_into_1_page, do: String.duplicate("a", 64 * 1024 - 0xFF - 1)
+      def string_should_just_overflow_2_pages, do: string_should_fit_into_1_page() <> "b"
+    end
+
+    test "constant that is exactly one page in size" do
+      defmodule ConstantOfOnePage do
+        use Orb
+
+        defw doctype(), I32 do
+          const(BigStrings.string_of_length_1_page())
+        end
+      end
+
+      wat =
+        to_wat(ConstantOfOnePage)
+        |> String.replace(BigStrings.string_of_length_1_page(), "BIGSTRING")
+
+      assert 65537 = 64 * 1024 + 1
+
+      assert wat == """
+             (module $ConstantOfOnePage
+               (memory (export "memory") 2)
+               (; constants 65537 bytes ;)
+               (data (i32.const 255) "BIGSTRING")
+               (func $doctype (export "doctype") (result i32)
+                 (i32.const 255)
+               )
+             )
+             """
+    end
+
+    test "constant that should allocate a single page" do
+      defmodule ExactlySinglePage do
+        use Orb
+
+        defw doctype(), I32 do
+          const(BigStrings.string_should_fit_into_1_page())
+        end
+      end
+
+      wat =
+        to_wat(ExactlySinglePage)
+        |> String.replace(BigStrings.string_should_fit_into_1_page(), "BIGSTRING")
+
+      assert wat == """
+             (module $ExactlySinglePage
+               (memory (export "memory") 1)
+               (; constants 65281 bytes ;)
+               (data (i32.const 255) "BIGSTRING")
+               (func $doctype (export "doctype") (result i32)
+                 (i32.const 255)
+               )
+             )
+             """
+    end
+
+    test "constant that should just allocate two pages" do
+      defmodule TwoPagesJust do
+        use Orb
+
+        defw doctype(), I32 do
+          const(BigStrings.string_should_just_overflow_2_pages())
+        end
+      end
+
+      wat =
+        to_wat(TwoPagesJust)
+        |> String.replace(BigStrings.string_should_just_overflow_2_pages(), "BIGSTRING")
+
+      assert wat == """
+             (module $TwoPagesJust
+               (memory (export "memory") 2)
+               (; constants 65282 bytes ;)
+               (data (i32.const 255) "BIGSTRING")
+               (func $doctype (export "doctype") (result i32)
+                 (i32.const 255)
+               )
+             )
+             """
+    end
+  end
 end
