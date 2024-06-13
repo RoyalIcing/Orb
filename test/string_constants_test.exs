@@ -97,6 +97,7 @@ defmodule StringConstantsTest do
       def string_of_length_1_page, do: String.duplicate("a", 64 * 1024)
       def string_should_fit_into_1_page, do: String.duplicate("a", 64 * 1024 - 0xFF - 1)
       def string_should_just_overflow_2_pages, do: string_should_fit_into_1_page() <> "b"
+      def string_should_fit_into_half_page(char), do: String.duplicate(char, 32 * 1024 - 128 - 1)
     end
 
     test "constant that is exactly one page in size" do
@@ -171,6 +172,40 @@ defmodule StringConstantsTest do
                (data (i32.const 255) "BIGSTRING")
                (func $doctype (export "doctype") (result i32)
                  (i32.const 255)
+               )
+             )
+             """
+    end
+
+    test "multiple constants that should allocate a single page" do
+      defmodule MultipleConstantsExactlySinglePage do
+        use Orb
+
+        defw first(), I32 do
+          const(BigStrings.string_should_fit_into_half_page("a"))
+        end
+
+        defw second(), I32 do
+          const(BigStrings.string_should_fit_into_half_page("b"))
+        end
+      end
+
+      wat =
+        to_wat(MultipleConstantsExactlySinglePage)
+        |> String.replace(BigStrings.string_should_fit_into_half_page("a"), "FIRST")
+        |> String.replace(BigStrings.string_should_fit_into_half_page("b"), "SECOND")
+
+      assert wat == """
+             (module $MultipleConstantsExactlySinglePage
+               (memory (export "memory") 1)
+               (; constants 65280 bytes ;)
+               (data (i32.const 255) "FIRST")
+               (data (i32.const 32895) "SECOND")
+               (func $first (export "first") (result i32)
+                 (i32.const 255)
+               )
+               (func $second (export "second") (result i32)
+                 (i32.const 32895)
                )
              )
              """
