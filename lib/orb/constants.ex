@@ -2,6 +2,7 @@ defmodule Orb.Constants do
   @moduledoc false
 
   # TODO: decide on non-arbitrary offset, and document it.
+  # Enscripten starts at offset 1024 (0x400).
   defstruct offset: 0xFF, items: [], lookup_table: [], byte_size: 0
 
   def __begin(start_offset \\ 0xFF) do

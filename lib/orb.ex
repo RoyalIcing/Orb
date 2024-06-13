@@ -632,13 +632,15 @@ defmodule Orb do
           %{body: body, constants: constants, global_definitions: global_definitions} =
             Orb.Compiler.run(__MODULE__, @wasm_globals)
 
+          memory = Memory.new(@wasm_memory, constants)
+
           Orb.ModuleDefinition.new(
             name: @wasm_name,
             types: @wasm_types |> Enum.reverse() |> List.flatten(),
             table_size: @wasm_table_allocations |> List.flatten() |> length(),
             imports: @wasm_imports |> Enum.reverse() |> List.flatten(),
             globals: global_definitions,
-            memory: Memory.from(@wasm_memory),
+            memory: memory,
             constants: constants,
             body: body,
             data: @wasm_section_data |> Enum.reverse()

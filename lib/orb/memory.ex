@@ -6,13 +6,26 @@ defmodule Orb.Memory do
   defstruct name: "", min: 0, exported?: false
 
   @doc false
-  def from(_)
+  def new(page_definitions, constants)
 
-  def from(nil), do: nil
-  def from([]), do: nil
+  # def new(nil), do: nil
+  # def new([]), do: nil
 
-  def from(list) when is_list(list) do
-    case Enum.sum(list) do
+  def new(list, %{offset: constants_offset, byte_size: constants_byte_size}) when is_list(list) do
+    bytes_per_page = page_byte_size()
+
+    requested_page_count = Enum.sum(list)
+
+    constants_page_count =
+      if constants_byte_size > 0 do
+        div(constants_offset + constants_byte_size + bytes_per_page - 1, bytes_per_page)
+      else
+        0
+      end
+
+    total_page_count = requested_page_count + constants_page_count
+
+    case total_page_count do
       0 ->
         nil
 

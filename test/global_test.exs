@@ -86,6 +86,7 @@ defmodule GlobalTest do
 
     assert ~S"""
            (module $GlobalDo
+             (memory (export "memory") 1)
              (global $abc (mut i32) (i32.const 42))
              (global $const32 i32 (i32.const 99))
              (global $const64 i64 (i64.const 99))
