@@ -1,11 +1,14 @@
 defmodule Orb.Constants do
   @moduledoc false
 
+  # @default_offset 0x400
+  @default_offset 0xFF
+
   # TODO: decide on non-arbitrary offset, and document it.
   # Enscripten starts at offset 1024 (0x400).
-  defstruct offset: 0xFF, items: [], lookup_table: [], byte_size: 0
+  defstruct offset: @default_offset, items: [], lookup_table: [], byte_size: 0
 
-  def __begin(start_offset \\ 0xFF) do
+  def __begin(start_offset \\ @default_offset) do
     tid = Process.get(__MODULE__)
 
     if not is_nil(tid) do
@@ -78,8 +81,9 @@ defmodule Orb.Constants do
     matcher = [{{:"$1", :"$2"}, [is_binary: :"$1"], [{{:"$1", :"$2"}}]}]
     lookup_table = :ets.select(tid, matcher)
 
-    start_offset = :ets.update_counter(tid, :start_offset, {2, 0})
-    last_offset = :ets.update_counter(tid, :offset, {2, 0})
+    # start_offset = :ets.update_counter(tid, :start_offset, {2, 0})
+    start_offset = safe_ets_lookup(tid, :start_offset)
+    last_offset = safe_ets_lookup(tid, :offset)
     byte_size = last_offset - start_offset
 
     # Sort by offsets, lowest to largest
@@ -87,7 +91,7 @@ defmodule Orb.Constants do
 
     # entries = :ets.match_object(__MODULE__, {:"$0", :"$1"})
 
-    %__MODULE__{offset: 0xFF, items: [], lookup_table: lookup_table, byte_size: byte_size}
+    %__MODULE__{offset: start_offset, items: [], lookup_table: lookup_table, byte_size: byte_size}
   end
 
   def __cleanup() do
