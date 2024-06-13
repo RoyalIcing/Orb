@@ -210,5 +210,47 @@ defmodule StringConstantsTest do
              )
              """
     end
+
+    test "multiple constants that should allocate two single pages just" do
+      defmodule MultipleConstantsTwoPagesJust do
+        use Orb
+
+        defw first(), I32 do
+          const(BigStrings.string_should_fit_into_half_page("a"))
+        end
+
+        defw second(), I32 do
+          const(BigStrings.string_should_fit_into_half_page("b"))
+        end
+
+        defw third(), I32 do
+          const("c")
+        end
+      end
+
+      wat =
+        to_wat(MultipleConstantsTwoPagesJust)
+        |> String.replace(BigStrings.string_should_fit_into_half_page("a"), "FIRST")
+        |> String.replace(BigStrings.string_should_fit_into_half_page("b"), "SECOND")
+
+      assert wat == """
+             (module $MultipleConstantsTwoPagesJust
+               (memory (export "memory") 2)
+               (; constants 65282 bytes ;)
+               (data (i32.const 255) "FIRST")
+               (data (i32.const 32895) "SECOND")
+               (data (i32.const 65535) "c")
+               (func $first (export "first") (result i32)
+                 (i32.const 255)
+               )
+               (func $second (export "second") (result i32)
+                 (i32.const 32895)
+               )
+               (func $third (export "third") (result i32)
+                 (i32.const 65535)
+               )
+             )
+             """
+    end
   end
 end
