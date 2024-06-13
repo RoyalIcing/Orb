@@ -34,6 +34,10 @@ defmodule OrbTest do
       defw answers(), {I32, I32} do
         {42, 99}
       end
+
+      defw xyz(), {F32, F32, F32} do
+        {1.0, 2.0, 3.0}
+      end
     end
 
     assert to_wat(MultipleReturn) == ~S"""
@@ -41,6 +45,11 @@ defmodule OrbTest do
              (func $answers (export "answers") (result i32 i32)
                (i32.const 42)
                (i32.const 99)
+             )
+             (func $xyz (export "xyz") (result f32 f32 f32)
+               (f32.const 1.0)
+               (f32.const 2.0)
+               (f32.const 3.0)
              )
            )
            """
