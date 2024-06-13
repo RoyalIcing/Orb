@@ -194,6 +194,13 @@ defmodule Orb.InstructionSequence do
           %Orb.InstructionSequence{} ->
             to_wat(instruction, indent)
 
+          tuple when is_tuple(tuple) ->
+            tuple
+            |> Tuple.to_list()
+            |> Enum.map(fn instruction ->
+              [Instructions.do_wat(instruction, indent), "\n"]
+            end)
+
           _ ->
             # [Orb.ToWat.to_wat(instruction, indent), "\n"]
             case Instructions.do_wat(instruction, indent) do

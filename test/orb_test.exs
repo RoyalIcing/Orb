@@ -25,6 +25,27 @@ defmodule OrbTest do
     assert to_wat(Basic) == wasm_source
   end
 
+  test "multiple return values" do
+    import Orb.DSL
+
+    defmodule MultipleReturn do
+      use Orb
+
+      defw answers(), {I32, I32} do
+        {42, 99}
+      end
+    end
+
+    assert to_wat(MultipleReturn) == ~S"""
+           (module $MultipleReturn
+             (func $answers (export "answers") (result i32 i32)
+               (i32.const 42)
+               (i32.const 99)
+             )
+           )
+           """
+  end
+
   describe "memory" do
     test "Memory.pages/1" do
       defmodule Pages2 do
