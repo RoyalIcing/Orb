@@ -252,5 +252,33 @@ defmodule StringConstantsTest do
              )
              """
     end
+
+    test "multiple constants add with manual requested memory pages" do
+      defmodule ContantsAndManualMemoryPages do
+        use Orb
+
+        Memory.pages(7)
+        Memory.pages(11)
+
+        defw first(), I32 do
+          const(BigStrings.string_should_just_overflow_2_pages())
+        end
+      end
+
+      wat =
+        to_wat(ContantsAndManualMemoryPages)
+        |> String.replace(BigStrings.string_should_just_overflow_2_pages(), "BIGSTRING")
+
+      assert wat == """
+             (module $ContantsAndManualMemoryPages
+               (memory (export "memory") 20)
+               (; constants 65282 bytes ;)
+               (data (i32.const 255) "BIGSTRING")
+               (func $first (export "first") (result i32)
+                 (i32.const 255)
+               )
+             )
+             """
+    end
   end
 end

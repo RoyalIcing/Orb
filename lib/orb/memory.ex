@@ -48,6 +48,8 @@ defmodule Orb.Memory do
     quote do
       start_offset = Enum.sum(@wasm_memory)
       @wasm_memory unquote(page_count)
+      # FIXME: the idea is this returns the page offset, but constants will push this down
+      # making this offset incorrect.
       start_offset
     end
   end
