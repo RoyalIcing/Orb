@@ -33,6 +33,7 @@ defmodule Orb.Table do
     def from_attribute(accumulated_value) do
       lookup_table =
         accumulated_value
+        |> Enum.reverse()
         |> List.flatten()
         |> Enum.with_index(fn {key, type}, index ->
           {key, {index, type}}
@@ -45,7 +46,9 @@ defmodule Orb.Table do
     def fetch!(%__MODULE__{lookup_table: lookup_table}, key) do
       case Map.fetch(lookup_table, key) do
         :error ->
-          raise "Could not find elem key #{inspect(key)} in table allocations #{inspect(lookup_table)}"
+          {table_module, table_key} = key
+
+          raise "Could not find elem key #{inspect(table_key)} from table module #{table_module} in table allocations #{inspect(lookup_table)}"
 
         {:ok, result} ->
           result
@@ -98,13 +101,13 @@ defmodule Orb.Table do
     end
   end
 
-  defmacro lookup!(mod, key) do
+  defmacro lookup!(table_mod, key) do
     caller_mod = __CALLER__.module
 
     quote do
       Allocations.fetch_index!(
         unquote(caller_mod).__wasm_table_allocations__(),
-        {unquote(mod), unquote(key)}
+        {unquote(table_mod), unquote(key)}
       )
     end
   end

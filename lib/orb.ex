@@ -492,6 +492,10 @@ defmodule Orb do
       cond do
         __CALLER__.function === nil ->
           quote do
+            # Public, used to register a func within a WebAssembly table via elem:
+            # e.g. `(elem (i32.const 0) $my_func)`
+            Module.register_attribute(__MODULE__, :table, accumulate: true)
+
             # IO.inspect(__ENV__.function)
             @before_compile unquote(__MODULE__).BeforeCompile
 
@@ -515,6 +519,7 @@ defmodule Orb do
 
             Module.register_attribute(__MODULE__, :wasm_types, accumulate: true)
             Module.register_attribute(__MODULE__, :wasm_table_allocations, accumulate: true)
+            Module.register_attribute(__MODULE__, :wasm_table_elems, accumulate: true)
             Module.register_attribute(__MODULE__, :wasm_imports, accumulate: true)
 
             # Module.register_attribute(__MODULE__, :orb_experimental, accumulate: false)
@@ -623,10 +628,20 @@ defmodule Orb do
   defmodule BeforeCompile do
     @moduledoc false
 
-    defmacro __before_compile__(_env) do
+    defmacro __before_compile__(%{module: module}) do
+      table_elems =
+        module
+        |> Module.get_attribute(:wasm_table_elems)
+        |> List.flatten()
+
       quote do
-        def __wasm_table_allocations__(),
-          do: Orb.Table.Allocations.from_attribute(@wasm_table_allocations)
+        def __wasm_table_allocations__ do
+          Orb.Table.Allocations.from_attribute(@wasm_table_allocations)
+        end
+
+        def __wasm_table_elems__(func_name) do
+          unquote(table_elems) |> Keyword.get(func_name, [])
+        end
 
         def __wasm_module__() do
           %{body: body, constants: constants, global_definitions: global_definitions} =
@@ -776,6 +791,7 @@ defmodule Orb do
     end
   end
 
+  # TODO: rename to something more specific and unlikely to clash with future Elixir.
   defmacro types(modules) do
     quote bind_quoted: [modules: modules] do
       @wasm_types (for mod <- modules do

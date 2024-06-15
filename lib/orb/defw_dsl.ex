@@ -37,23 +37,58 @@ defmodule Orb.DefwDSL do
   end
 
   defp define(call, visibility, result, locals, block, env) do
+    mod = env.module
+
     def_kind =
       case visibility do
         :public -> :def
         :private -> :defp
       end
 
-    ex_def = define_elixir_def(call, def_kind, result, env)
+    elixir_def = define_elixir_def(call, def_kind, result, env)
 
-    wasm =
-      Orb.DSL.__define_func(call, visibility, [result: result, locals: locals], block, env)
+    {func_name, _} = Macro.decompose_call(call)
+
+    func_def =
+      Orb.DSL.__define_func(
+        call,
+        visibility,
+        [
+          result: result,
+          locals: locals
+        ],
+        block,
+        env
+      )
 
     quote do
-      unquote(ex_def)
+      unquote(elixir_def)
 
-      # TODO: remove wasm do
-      Orb.__append_body do
-        unquote(wasm)
+      table_elems = Module.delete_attribute(unquote(mod), :table)
+      Module.put_attribute(unquote(mod), :wasm_table_elems, {unquote(func_name), table_elems})
+
+      with do
+        import Orb, only: []
+        unquote(Orb.__mode_pre(Orb.Numeric))
+
+        def __wasm_body__(context) do
+          func = unquote(func_def)
+          table_elems = unquote(mod).__wasm_table_elems__(func.name)
+          table_allocations = unquote(mod).__wasm_table_allocations__()
+
+          func =
+            for {mod, key} <- table_elems, reduce: func do
+              func ->
+                func
+                |> Orb.Func.__add_table_elem(
+                  Orb.Table.Allocations.fetch_index!(table_allocations, {mod, key})
+                )
+            end
+
+          super(context) ++ [func]
+        end
+
+        defoverridable __wasm_body__: 1
       end
     end
   end

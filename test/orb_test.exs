@@ -629,9 +629,6 @@ defmodule OrbTest do
     # )
 
     defmodule Answer do
-      # use Orb.Type, :answer, %Orb.Func.Type{result: I32}
-      # use Orb.TableEntries, result: I32
-
       @behaviour Orb.CustomType
       @behaviour Orb.Table.Type
 
@@ -649,8 +646,27 @@ defmodule OrbTest do
       end
     end
 
-    types([Answer])
+    defmodule Other do
+      @behaviour Orb.CustomType
+      @behaviour Orb.Table.Type
+
+      @impl Orb.CustomType
+      def wasm_type, do: %Orb.Func.Type{result: I32}
+
+      @impl Orb.Table.Type
+      def type_name, do: :other
+
+      @impl Orb.Table.Type
+      def table_func_keys, do: [:foo, :goo]
+
+      def call(elem_index) do
+        Table.call_indirect(wasm_type(), type_name(), elem_index)
+      end
+    end
+
+    types([Answer, Other])
     Table.allocate(Answer)
+    Table.allocate(Other)
 
     # global do
     #   i32 state(4), counter(0)
@@ -659,47 +675,52 @@ defmodule OrbTest do
     #   f32 t(0.0)
     # end
 
-    Orb.__append_body do
-      func good_answer(), I32 do
-        42
-      end
-      |> Table.elem!(Answer, :good)
+    @table {Answer, :good}
+    defw good_answer(), I32 do
+      42
+    end
 
-      func bad_answer(), I32 do
-        13
-      end
-      |> Table.elem!(Answer, :bad)
+    @table {Answer, :bad}
+    @table {Other, :foo}
+    defw bad_answer(), I32 do
+      13
+    end
 
-      func answer(), I32 do
-        Answer.call(Table.lookup!(Answer, :good))
-      end
+    defw answer(), {I32, I32, I32} do
+      {
+        Answer.call(Table.lookup!(Answer, :good)),
+        Answer.call(Table.lookup!(Answer, :bad)),
+        Answer.call(Table.lookup!(Other, :foo))
+      }
     end
   end
 
   test "table elem" do
     alias OrbWasmtime.Wasm
 
-    wasm_source = """
-    (module $TableExample
-      (type $answer (func (result i32)))
-      (table 2 funcref)
-      (func $good_answer (export "good_answer") (result i32)
-        (i32.const 42)
-      )
-      (elem (i32.const 0) $good_answer)
-      (func $bad_answer (export "bad_answer") (result i32)
-        (i32.const 13)
-      )
-      (elem (i32.const 1) $bad_answer)
-      (func $answer (export "answer") (result i32)
-        (call_indirect (type $answer) (i32.const 0))
-      )
-    )
-    """
+    assert """
+           (module $TableExample
+             (type $answer (func (result i32)))
+             (type $other (func (result i32)))
+             (table 4 funcref)
+             (func $good_answer (export "good_answer") (result i32)
+               (i32.const 42)
+             )
+             (elem (i32.const 0) $good_answer)
+             (func $bad_answer (export "bad_answer") (result i32)
+               (i32.const 13)
+             )
+             (elem (i32.const 1) $bad_answer)
+             (elem (i32.const 2) $bad_answer)
+             (func $answer (export "answer") (result i32 i32 i32)
+               (call_indirect (type $answer) (i32.const 0))
+               (call_indirect (type $answer) (i32.const 1))
+               (call_indirect (type $answer) (i32.const 2))
+             )
+           )
+           """ = to_wat(TableExample)
 
-    assert to_wat(TableExample) == wasm_source
-
-    assert Wasm.call(TableExample, :answer) === 42
+    assert Wasm.call(TableExample, :answer) === {42, 13, 13}
   end
 
   test "compiler errors reset state" do
