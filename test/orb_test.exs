@@ -31,8 +31,10 @@ defmodule OrbTest do
     defmodule MultipleReturn do
       use Orb
 
-      defw answers(), {I32, I32} do
-        {42, 99}
+      defw answers(b: I32), {I32, I32}, a: I32 do
+        a = 99 + b
+
+        {42, a}
       end
 
       defw xyz(), {F32, F32, F32} do
@@ -40,11 +42,14 @@ defmodule OrbTest do
       end
     end
 
-    assert to_wat(MultipleReturn) == ~S"""
+    assert ~S"""
            (module $MultipleReturn
-             (func $answers (export "answers") (result i32 i32)
+             (func $answers (export "answers") (param $b i32) (result i32 i32)
+               (local $a i32)
+               (i32.add (i32.const 99) (local.get $b))
+               (local.set $a)
                (i32.const 42)
-               (i32.const 99)
+               (local.get $a)
              )
              (func $xyz (export "xyz") (result f32 f32 f32)
                (f32.const 1.0)
@@ -52,7 +57,7 @@ defmodule OrbTest do
                (f32.const 3.0)
              )
            )
-           """
+           """ = to_wat(MultipleReturn)
   end
 
   describe "memory" do
