@@ -69,7 +69,7 @@ defmodule Orb.DefwDSL do
 
       with do
         import Orb, only: []
-        unquote(Orb.__mode_pre(Orb.Numeric))
+        unquote(Orb.__mode_pre(Module.get_attribute(mod, :wasm_mode, Orb.Numeric)))
 
         def __wasm_body__(context) do
           func = unquote(func_def)

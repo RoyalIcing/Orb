@@ -177,6 +177,7 @@ defmodule OperatorsTest do
       # Orb.numerics!(Orb.S64)
       wasm_mode(Orb.S64)
 
+      # @numerics Orb.S64
       defw add(a: I64) do
         i64(1 + 2)
         |> Orb.Stack.drop()
