@@ -114,7 +114,7 @@ defmodule DefwTest do
     defmodule MacroWithDefw do
       defmacro defw_wrapper(name) do
         quote do
-          Orb.DefwDSL.defw unquote(name)() do
+          Orb.DSL.Defw.defw unquote(name)() do
           end
         end
       end

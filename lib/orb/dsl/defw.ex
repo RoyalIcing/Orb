@@ -1,4 +1,8 @@
-defmodule Orb.DefwDSL do
+defmodule Orb.DSL.Defw do
+  @moduledoc """
+  Macros to define WebAssembly functions. Similar to Elixir’s `def` and Nx’s `defn`.
+  """
+
   defmacro wasm_mode(mode) do
     mode = Macro.expand_literals(mode, __CALLER__)
     Module.put_attribute(__CALLER__.module, :wasm_mode, mode)

@@ -5,7 +5,7 @@ defmodule Orb.Import do
 
   defmacro __using__(_) do
     quote do
-      import Orb.DefwDSL, only: []
+      import Orb.DSL.Defw, only: []
       import Orb.Import.DSL
       alias Orb.{I32, I64, F32}
 
@@ -42,7 +42,7 @@ defmodule Orb.Import do
 
   defmodule DSL do
     defmacro defw(call, result_type \\ nil) do
-      alias Elixir.Orb.{DefwDSL, Func, Import}
+      alias Elixir.Orb.{Func, Import}
 
       env = __CALLER__
 
@@ -58,7 +58,7 @@ defmodule Orb.Import do
       params = Func.Type.params_from_call_args(args, env, line)
       result_type = result_type |> Macro.expand_literals(env)
 
-      ex_def = DefwDSL.__define_elixir_def(call, :def, result_type, env)
+      ex_def = Elixir.Orb.DSL.Defw.__define_elixir_def(call, :def, result_type, env)
 
       quote do
         unquote(ex_def)
