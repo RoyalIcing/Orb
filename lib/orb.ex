@@ -744,30 +744,6 @@ defmodule Orb do
   end
 
   @doc """
-  Enter WebAssembly.
-  """
-  defmacro __append_body(mode \\ nil, do: block) do
-    mode = mode || Module.get_attribute(__CALLER__.module, :wasm_mode, Orb.Numeric)
-    mode = Macro.expand_literals(mode, __CALLER__)
-    pre = __mode_pre(mode)
-
-    body = do_module_body(block)
-
-    quote do
-      with do
-        import Orb, only: []
-        unquote(pre)
-
-        def __wasm_body__(context) do
-          super(context) ++ unquote(body)
-        end
-
-        defoverridable __wasm_body__: 1
-      end
-    end
-  end
-
-  @doc """
   Declare a snippet of Orb AST for reuse. Enables DSL, with additions from `mode`.
   """
   # TODO: rename to Orb.instructions or Orb.quote ?
@@ -865,9 +841,15 @@ defmodule Orb do
   """
   defmacro include(mod) do
     quote do
-      Orb.__append_body do
-        Orb.ModuleDefinition.funcp_ref_all!(unquote(mod))
+      def __wasm_body__(context) do
+        previous = super(context)
+
+        funcs = List.wrap(Orb.ModuleDefinition.funcp_ref_all!(unquote(mod)))
+
+        previous ++ funcs
       end
+
+      defoverridable __wasm_body__: 1
     end
   end
 
