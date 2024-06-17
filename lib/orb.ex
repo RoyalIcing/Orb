@@ -640,7 +640,13 @@ defmodule Orb do
         end
 
         def __wasm_table_elems__(func_name) do
-          unquote(table_elems) |> Keyword.get(func_name, [])
+          case unquote(table_elems) |> List.keyfind(func_name, 0) do
+            {_key, value} ->
+              value
+
+            nil ->
+              []
+          end
         end
 
         def __wasm_module__() do
