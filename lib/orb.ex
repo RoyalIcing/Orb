@@ -618,13 +618,6 @@ defmodule Orb do
     end
   end
 
-  defp do_module_body(block) do
-    case block do
-      {:__block__, _meta, block_items} -> block_items
-      single -> List.wrap(single)
-    end
-  end
-
   defmodule BeforeCompile do
     @moduledoc false
 
