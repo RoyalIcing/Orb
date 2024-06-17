@@ -64,14 +64,16 @@ defmodule Orb.DefwDSL do
     quote do
       unquote(elixir_def)
 
-      table_elems = Module.delete_attribute(unquote(mod), :table)
-      Module.put_attribute(unquote(mod), :wasm_table_elems, {unquote(func_name), table_elems})
-
       with do
+        table_elems = Module.delete_attribute(unquote(mod), :table)
+        Module.put_attribute(unquote(mod), :wasm_table_elems, {unquote(func_name), table_elems})
+
         import Orb, only: []
         unquote(Orb.__mode_pre(Module.get_attribute(mod, :wasm_mode, Orb.Numeric)))
 
         def __wasm_body__(context) do
+          previous = super(context)
+
           func = unquote(func_def)
           table_elems = unquote(mod).__wasm_table_elems__(func.name)
           table_allocations = unquote(mod).__wasm_table_allocations__()
@@ -85,7 +87,7 @@ defmodule Orb.DefwDSL do
                 )
             end
 
-          super(context) ++ [func]
+          previous ++ [func]
         end
 
         defoverridable __wasm_body__: 1
