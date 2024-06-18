@@ -242,6 +242,8 @@ input { font-size: inherit; }
   margin-bottom: 2rem;
   list-style: none;
   display: flex;
+  justify-content: center;
+  padding: 0;
   gap: 1rem;
   font-size: 125%;
 }
