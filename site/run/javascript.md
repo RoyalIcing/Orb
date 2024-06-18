@@ -2,6 +2,8 @@
 
 Here’s an example Orb module that exports a function, and imports a `log.i32` function from the outside world:
 
+## WebAssembly module defined using Orb:
+
 ```elixir
 defmodule Log do
   use Orb.Import
@@ -31,6 +33,8 @@ defmodule Example do
   end
 end
 ```
+
+## Running the code in JavaScript:
 
 ```javascript
 async function run() {
