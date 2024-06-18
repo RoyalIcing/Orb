@@ -235,6 +235,7 @@ input { font-size: inherit; }
   padding-bottom: 1em;
   font-size: 2em;
   font-style: italic;
+  margin: 0;
   border-bottom: none;
 }
 :root[data-path="/"] h1 + ul {
