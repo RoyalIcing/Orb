@@ -236,6 +236,20 @@ input { font-size: inherit; }
   font-size: 2em;
   font-style: italic;
 }
+:root[data-path="/"] h1 + ul {
+  font-size: 125%;
+}
+:root[data-path="/"] h1 + ul li {
+  margin-top: 0 !important;
+}
+:root[data-path="/"] h1 + ul a {
+  border: solid 2px currentcolor;
+  padding: 0.6rem 1rem;
+  border-radius: 1000px;
+}
+:root[data-path="/"] h1 + ul a:hover {
+  color: white;
+}
 
 @media (min-width: 900px) {
   :root {
