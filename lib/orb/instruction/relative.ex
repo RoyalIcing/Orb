@@ -1,4 +1,5 @@
 defmodule Orb.Instruction.Relative do
+  @moduledoc false
   defstruct push_type: :i32, input_type: nil, operation: nil, lhs: nil, rhs: nil
 
   def new(primitive_type, operation, lhs, rhs)

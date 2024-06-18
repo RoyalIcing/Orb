@@ -1,4 +1,5 @@
 defmodule Orb.Instruction do
+  @moduledoc false
   defstruct [:pop_type, :push_type, :operation, :operands]
 
   require Orb.Ops, as: Ops
