@@ -65,15 +65,15 @@ defmodule ASCIIChecks do
   use Orb
 
   defw alpha?(char: I32.U8), I32 do
-    (char >= ?a &&& char <= ?z) ||| (char >= ?A &&& char <= ?Z)
+    (char >= ?a and char <= ?z) or (char >= ?A and char <= ?Z)
   end
 
   defw numeric?(char: I32.U8), I32 do
-    char >= ?0 &&& char <= ?9
+    char >= ?0 and char <= ?9
   end
 
   defw alphanumeric?(char: I32.U8), I32 do
-    alpha?(char) ||| numeric?(char)
+    alpha?(char) or numeric?(char)
   end
 end
 
