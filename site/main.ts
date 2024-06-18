@@ -110,7 +110,7 @@ Deno.serve(async (req: Request) => {
 <html lang=en data-path="${pathname.replace('"', '')}">
 <meta charset=utf-8>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel=mask-icon href=/favicon.ico color="#74d1f0">
+<link rel="mask-icon" href="/favicon.ico" color="#74d1f0">
 <script src="https://cdn.usefathom.com/script.js" data-site="EFBQOFQL" defer></script>
 <link rel=stylesheet href="https://rsms.me/inter/inter.css">
 <style>
