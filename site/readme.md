@@ -35,6 +35,7 @@ wasm_data = Orb.to_wasm(TemperatureConverter)
 ```
 
 <form id="form|wasm|temperature_converter">
+  <p>Try it out:</p>
   <label>Celsius <input name="celsius" type="number" inputmode="numeric" value="35"></label>
   <label>Fahrenheit <input name="fahrenheit"  type="number" inputmode="numeric" value="95"></label>
 </form>
