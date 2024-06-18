@@ -254,6 +254,8 @@ input { font-size: inherit; }
 }
 :root[data-path="/"] h1 + ul a:hover {
   color: white;
+  text-decoration: none;
+  background: rgba(1.0 1.0 1.0 / 0.1)
 }
 
 @media (min-width: 900px) {
