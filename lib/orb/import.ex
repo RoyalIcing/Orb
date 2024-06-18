@@ -41,6 +41,10 @@ defmodule Orb.Import do
   end
 
   defmodule DSL do
+    @moduledoc """
+    DSL for declaring within Elixir module that get converted to `(import …)` expressions in WebAssembly.
+    """
+
     @doc """
     Declare the name and signature of function that will be imported.
     """
