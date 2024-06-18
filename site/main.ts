@@ -85,6 +85,16 @@ Deno.serve(async (req: Request) => {
 
   const { pathname } = new URL(req.url);
 
+  if (pathname === "/favicon.ico") {
+    return new Response(`<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100" height="100" fill="#74d1f0" />
+</svg>`, {
+        headers: {
+          "content-type": "image/svg+xml"
+        }
+      });
+  }
+
   if (pathname.startsWith("/wasm/")) {
     const name = pathname.replace("/wasm/", "");
     const wasmBytes = await getExampleWasm(name);
