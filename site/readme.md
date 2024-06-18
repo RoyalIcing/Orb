@@ -129,8 +129,6 @@ defmodule MimeType do
   use Orb
   alias Orb.Constants.NulTerminatedString
 
-  Memory.pages(1)
-
   defw(txt, NulTerminatedString, do: MIME.type("txt"))
   defw(json, NulTerminatedString, do: MIME.type("json"))
   defw(html, NulTerminatedString, do: MIME.type("html"))
