@@ -47,6 +47,16 @@ defmodule Orb.Import do
 
     @doc """
     Declare the name and signature of function that will be imported.
+
+    ```elixir
+    defmodule Log do
+      use Orb.Import
+
+      defw(int32(a: I32))
+      defw(int64(a: I64))
+      defw(two_int32(a: I32, b: I32))
+    end
+    ```
     """
     defmacro defw(call, result_type \\ nil) do
       alias Elixir.Orb.{Func, Import}
