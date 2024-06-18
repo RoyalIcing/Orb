@@ -254,6 +254,7 @@ input { font-size: inherit; }
   border: solid 2px currentcolor;
   padding: 0.6rem 1rem;
   border-radius: 1000px;
+  transition: all 1s ease-in-out;
 }
 :root[data-path="/"] h1 + ul a:hover {
   color: white;
@@ -279,6 +280,9 @@ input { font-size: inherit; }
   }
   :root[data-path="/"] h1 {
     font-size: 3em;
+  }
+  :root[data-path="/"] h1 + ul {
+    margin-bottom: 4rem;
   }
 }
 
