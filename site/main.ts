@@ -55,6 +55,7 @@ function getContentPath(path: `/${string}`): undefined | string {
     case "concepts/custom-types": return subpath;
     case "concepts/platform-agnostic": return subpath;
     case "run/elixir": return subpath;
+    case "run/javascript": return subpath;
     case "silverorb": return "silverorb/silverorb";
     case "silverorb/parse": return subpath;
     case "silverorb/format": return subpath;

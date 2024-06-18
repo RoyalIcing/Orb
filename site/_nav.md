@@ -30,7 +30,7 @@
 
 
 <details data-path="/silverorb">
-    <summary>SilverOrb</summary>
+    <summary>SilverOrb std lib</summary>
 
 - [Standard Library](/silverorb)
 - [Parsing](/silverorb/parse)
