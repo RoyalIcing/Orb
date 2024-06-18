@@ -243,7 +243,6 @@ input { font-size: inherit; }
 
 :root[data-path="/"] h1 {
   text-align: center;
-  padding-top: 1em;
   padding-bottom: 1em;
   font-size: 2em;
   font-style: italic;
@@ -257,7 +256,6 @@ input { font-size: inherit; }
   justify-content: center;
   padding: 0;
   gap: 1rem;
-  font-size: 125%;
 }
 :root[data-path="/"] h1 + ul li {
   margin-top: 0 !important;
@@ -291,10 +289,12 @@ input { font-size: inherit; }
     --link-padding: 0.125em 0 0.125em 2rem;
   }
   :root[data-path="/"] h1 {
+    padding-top: 1em;
     font-size: 3em;
   }
   :root[data-path="/"] h1 + ul {
     margin-bottom: 4rem;
+    font-size: 125%;
   }
 }
 
