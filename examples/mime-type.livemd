@@ -15,8 +15,6 @@ Mix.install([
 defmodule MimeType do
   use Orb
 
-  Memory.pages(1)
-
   defw(txt, I32.UnsafePointer, do: MIME.type("txt"))
   defw(json, I32.UnsafePointer, do: MIME.type("json"))
   defw(html, I32.UnsafePointer, do: MIME.type("html"))
