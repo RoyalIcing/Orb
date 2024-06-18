@@ -284,6 +284,7 @@ input { font-size: inherit; }
   nav {
     flex-direction: column;
     text-align: left;
+    font-size: 125%;
   }
   nav details {
     --link-padding: 0.125em 0 0.125em 2rem;
