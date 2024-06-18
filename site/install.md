@@ -1,8 +1,6 @@
 # Installing Orb
 
-First, [install Elixir](https://elixir-lang.org/install.html).
-
-Create an Elixir project with say `mix new your_project_name`.
+First, [install Elixir](https://elixir-lang.org/install.html) and create an Elixir project with say `mix new your_project_name`.
 
 Add `orb` to your list of dependencies in `mix.exs`:
 
@@ -31,7 +29,7 @@ wasm_bytes = Orb.to_wasm(Example)
 webassembly_text_format = Orb.to_wat(Example)
 ```
 
-## Serving WebAssembly
+## Serving WebAssembly from Phoenix
 
 Within a Phoenix or other Plug app you can send the WebAssembly bytes like so:
 
