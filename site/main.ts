@@ -122,7 +122,7 @@ ul, ol {
   flex-wrap: wrap;
 }
 li {
-  list-style: var(--list-item-style, list-item);
+  list-style: var(--list-item-style);
 }
 
 body {
