@@ -24,7 +24,6 @@
 
 - [In JavaScript](/run/javascript)
 - [In Elixir](/run/elixir)
-- [In Swift](/run/swift)
 
 </details>
 
