@@ -1,5 +1,9 @@
 # The raw ingredients of WebAssembly made beautifully composable with Elixir
 
+- [Get Started](/install)
+- [Documentation](https://hexdocs.pm/orb)
+- [GitHub](https://github.com/RoyalIcing/Orb)
+
 Orb is a fresh way to write WebAssembly. Instead of choosing an existing language like C and mapping its semantics to WebAssembly, Orb starts with WebAssembly’s raw ingredients and asks “how do we make this more convenient to write?”.
 
 It achieves this by embracing the Elixir ecosystem at compile time. Elixir becomes a powerful preprocessor for WebAssembly.
