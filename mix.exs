@@ -59,10 +59,10 @@ defmodule Orb.MixProject do
       main: "Orb",
       logo: "orb-logo-blue-orange.svg",
       extras: [
-        "README.md",
-        "examples/01-intro.livemd",
-        "examples/temperature-converter.livemd",
-        "examples/mime-type.livemd"
+        {"README.md", title: "Home"},
+        {"examples/01-intro.livemd", title: "Example: Introduction"},
+        {"examples/temperature-converter.livemd", title: "Example: Temperature Converter"},
+        {"examples/mime-type.livemd", title: "Example: Mime Type"}
       ]
     ]
   end
