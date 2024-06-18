@@ -6,6 +6,8 @@ defmodule Orb.Stack do
   """
 
   defmodule Drop do
+    @moduledoc false
+
     defstruct instruction: nil, count: 0, pop_type: nil, push_type: nil
 
     require alias Orb.Ops
@@ -50,6 +52,8 @@ defmodule Orb.Stack do
   end
 
   defmodule Pop do
+    @moduledoc false
+
     defstruct pop_type: nil, push_type: nil, count: 0
 
     require alias Orb.Ops

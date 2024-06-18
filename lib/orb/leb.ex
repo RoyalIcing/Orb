@@ -1,4 +1,6 @@
 defmodule Orb.Leb do
+  @moduledoc false
+
   def uleb128(0), do: [0]
   def uleb128(n), do: uleb128(n, [])
 

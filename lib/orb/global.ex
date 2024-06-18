@@ -155,7 +155,10 @@ defmodule Orb.Global do
   end
 
   defmodule Declare do
+    @moduledoc false
+
     defmodule DeclareDSL do
+      @moduledoc false
       import Kernel, except: [@: 1]
 
       defmacro register_global(name, value) do

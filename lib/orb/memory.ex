@@ -1,6 +1,6 @@
 defmodule Orb.Memory do
   @moduledoc """
-  Work with memory.
+  Work with memory: load, store, declare pages & initial data.
   """
 
   defstruct name: "", min: 0, exported?: false

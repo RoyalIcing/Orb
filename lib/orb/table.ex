@@ -117,6 +117,8 @@ defmodule Orb.Table do
   # end
 
   defmodule CallIndirect do
+    @moduledoc false
+
     defstruct pop_type: nil,
               push_type: nil,
               type_signature: nil,

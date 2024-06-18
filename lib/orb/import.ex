@@ -41,6 +41,9 @@ defmodule Orb.Import do
   end
 
   defmodule DSL do
+    @doc """
+    Declare the name and signature of function that will be imported.
+    """
     defmacro defw(call, result_type \\ nil) do
       alias Elixir.Orb.{Func, Import}
 

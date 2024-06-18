@@ -1,4 +1,6 @@
 defmodule Orb.Control.Return do
+  @moduledoc false
+
   defstruct body: :unset, push_type: nil
 
   def new(), do: %__MODULE__{body: nil}

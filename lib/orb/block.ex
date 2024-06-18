@@ -25,6 +25,7 @@ defmodule Orb.Block do
   end
 
   defmodule Branch do
+    @moduledoc false
     defstruct [:identifier, :if]
 
     defimpl Orb.ToWat do

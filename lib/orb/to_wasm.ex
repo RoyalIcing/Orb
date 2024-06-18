@@ -4,6 +4,8 @@ defprotocol Orb.ToWasm do
 end
 
 defmodule Orb.ToWasm.Helpers do
+  @moduledoc false
+
   import Orb.Leb
 
   def sized(bytes) do
