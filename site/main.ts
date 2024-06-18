@@ -237,6 +237,9 @@ input { font-size: inherit; }
   font-style: italic;
 }
 :root[data-path="/"] h1 + ul {
+  list-style: none;
+  display: flex;
+  gap: 1rem;
   font-size: 125%;
 }
 :root[data-path="/"] h1 + ul li {
