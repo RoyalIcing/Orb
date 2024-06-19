@@ -29,11 +29,9 @@
 
 
 <details data-path="/silverorb">
-    <summary>SilverOrb std lib</summary>
+    <summary>SilverOrb stdlib</summary>
 
-- [Standard Library](/silverorb)
-- [Parsing](/silverorb/parse)
-- [Formatting](/silverorb/format)
+- [SilverOrb](/silverorb)
 
 </details>
 
