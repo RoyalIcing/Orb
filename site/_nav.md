@@ -38,9 +38,10 @@
 </details>
 
 
-<details  data-path="/tutorials">
-    <summary>Tutorials</summary>
+<details data-path="/examples">
+    <summary>Livebook Examples</summary>
 
-- [Temperature Converter](/tutorials/temperature-converter)
+- [Temperature Converter ↗](https://hexdocs.pm/orb/temperature-converter.html)
+- [Mime Type ↗](https://hexdocs.pm/orb/mime-type.html)
 
 </details>
