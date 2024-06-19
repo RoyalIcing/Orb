@@ -18,6 +18,8 @@ You get to use:
 
 Orb is Elixir at compile time and WebAssembly at runtime.
 
+Orb is [alpha](https://github.com/RoyalIcing/Orb/issues?q=is%3Aopen+is%3Aissue+milestone%3AAlpha) in active development. My aim is to refine the current feature set and complete a `.wasm` compiler (current it compiles to WebAssembly’s `.wat` text format) in order to [get to beta](https://github.com/RoyalIcing/Orb/issues?q=is%3Aopen+is%3Aissue+milestone%3ABeta).
+
 ## Write functions using an Elixir subset
 
 You can write maths using familiar `+ - * /` operators in Orb.
