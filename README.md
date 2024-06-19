@@ -18,11 +18,15 @@ Write WebAssembly with the power of Elixir as your compiler:
 - **Run dynamic Elixir code at compile time** e.g. talk to the rest of your Elixir application, call out to an Elixir library, or make network requests.
 - **Compile modules on-the-fly** e.g. use feature flags to conditionally compile code paths or enable particular WebAssembly instructions, creating a custom “tree shaken” WebAssembly module per user.
 
+## Status
+
+Orb is alpha in active development. My aim is to refine the current feature set and complete a `.wasm` compiler (current it compiles to WebAssembly’s `.wat` text format) in order to get to beta.
+
 ## Libraries
 
 - **Orb** (alpha): Write WebAssembly 1.0 in Elixir.
 - [**SilverOrb**](https://github.com/RoyalIcing/SilverOrb) (work-in-progress): Batteries-included standard library for Orb.
-- OrbExtismPDK (coming soon): Write Extism plugins in Elixir with Orb.
+- OrbExtismPDK (coming later): Write Extism plugins in Elixir with Orb.
 
 ## Installation
 
@@ -61,7 +65,7 @@ end
 This can be converted to WebAssembly text format (wat):
 
 ```elixir
-Orb.to_wat(CalculateMean)
+wat = Orb.to_wat(CalculateMean)
 # """
 # (module $CalculateMean
 #   (global $count (mut i32) (i32.const 0))
@@ -79,7 +83,19 @@ Orb.to_wat(CalculateMean)
 # """
 ```
 
-You can then execute it in Elixir with [OrbWasmtime](https://github.com/RoyalIcing/OrbWasmtime):
+Write this out as a `.wat` WebAssembly text file:
+
+```elixir
+File.write!("example.wat", wat)
+```
+
+You can then compile this to a `.wasm` WebAssembly file using [wat2wasm from the WebAssembly Binary Toolkit](https://github.com/WebAssembly/wabt):
+
+```bash
+wat2wasm example.wat
+```
+
+Or you can execute it directly in Elixir with [OrbWasmtime](https://github.com/RoyalIcing/OrbWasmtime):
 
 ```elixir
 alias OrbWasmtime.Instance
