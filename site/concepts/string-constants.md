@@ -10,8 +10,6 @@ Orb adds a string constant system on top, like C by letting you use strings dire
 defmodule HTMLPage do
   use Orb
 
-  Memory.pages(1)
-
   defw get_mime_type(), Memory.Slice do
     "text/html"
   end
