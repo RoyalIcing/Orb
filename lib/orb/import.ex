@@ -1,5 +1,37 @@
 defmodule Orb.Import do
-  @moduledoc false
+  @moduledoc """
+  Define an interface to be imported into WebAssembly.
+
+  Each function declaration is turned into an `(import)` WebAssembly instruction.
+
+  ```elixir
+  defmodule Log do
+    use Orb.Import
+
+    defw logi32(value: I32)
+    defw logi64(value: I64)
+  end
+
+  defmodule Time do
+    use Orb.Import
+
+    defw get_unix_time(), I64
+  end
+
+  defmodule Example do
+    use Orb
+
+    Orb.importw(Log, :log)
+    Orb.importw(Log, :time)
+
+    defw example() do
+      Log.logi32(99)
+
+      Log.logi64(Time.get_unix_time())
+    end
+  end
+  ```
+  """
 
   defstruct [:module, :name, :type]
 
@@ -7,7 +39,7 @@ defmodule Orb.Import do
     quote do
       import Orb.DSL.Defw, only: []
       import Orb.Import.DSL
-      alias Orb.{I32, I64, F32}
+      alias Orb.{I32, I64, F32, F64}
 
       # Module.register_attribute(__MODULE__, :wasm_imports, accumulate: true, persist: true)
 

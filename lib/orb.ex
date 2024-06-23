@@ -1019,6 +1019,24 @@ defmodule Orb do
     quote([generated: true], do: unquote(block))
   end
 
+  @doc """
+  Declare functions to be imported from the host environment.
+
+  The `mod` is a module using `Orb.Import`. The `namespace` is the local name the import is registered under.
+
+  For each function from `mod` an `(import)` instruction is defined in the WebAssembly:
+
+  ```wasm
+  (module $example
+    (import "namespace" "function1" (func $function1 (param $a i32) (result i32)))
+    (import "namespace" "function2" (func $function2 (param $a i32) (result i32)))
+    (import "namespace" "function3" (func $function3 (param $a i32) (result i32)))
+  )
+  ```
+
+  See `Orb.Import` for more.
+  """
+  # TODO: Move this to `Orb.Import`
   defmacro importw(mod, namespace) when is_atom(namespace) do
     quote do
       @wasm_imports (for imp <- unquote(mod).__wasm_imports__(nil) do
