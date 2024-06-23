@@ -233,12 +233,12 @@ defmodule IfElseTest do
       Memory.pages(1)
 
       defmodule Log do
-        use Orb.Import
+        use Orb.Import, name: :log
 
         defw(found_alphanumeric(), nil)
       end
 
-      Orb.Import.register(Log, :log)
+      Orb.Import.register(Log)
 
       defw url_search_params_count(url_params: I32.U8.UnsafePointer), I32,
         char: I32.U8,

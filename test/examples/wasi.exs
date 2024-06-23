@@ -1,5 +1,5 @@
 defmodule WasiUnstable do
-  use Orb.Import
+  use Orb.Import, name: :wasi_unstable
 
   def esuccess, do: 0
 
@@ -25,7 +25,7 @@ defmodule Examples.ClockConsumer do
 
   Memory.pages(1)
 
-  Orb.Import.register(WasiUnstable, :wasi_unstable)
+  Orb.Import.register(WasiUnstable)
 
   defw get_seconds, I32 do
     0

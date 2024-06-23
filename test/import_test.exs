@@ -13,27 +13,26 @@ defmodule ImportTest do
       end
 
       defmodule Log do
-        use Orb.Import
+        use Orb.Import, name: :log
 
         defw(int32(a: I32))
         defw(int64(a: I64))
       end
 
       defmodule Time do
-        use Orb.Import
+        use Orb.Import, name: :time
 
         defw(unix_time(), I64)
       end
 
-      # TODO:
-      # use Orb.Import, name: :echo
+      # TODO?:
       # Echo.import()
       # Log.import()
       # Time.import()
 
-      Orb.Import.register(Echo, :echo)
-      Orb.Import.register(Log, :log)
-      Orb.Import.register(Time, :time)
+      Orb.Import.register(Echo)
+      Orb.Import.register(Log)
+      Orb.Import.register(Time)
 
       defw test() do
         Echo.int32(42) |> Orb.Stack.drop()

@@ -6,14 +6,14 @@ defmodule Orb.Import do
 
   ```elixir
   defmodule Log do
-    use Orb.Import
+    use Orb.Import, name: :log
 
     defw logi32(value: I32)
     defw logi64(value: I64)
   end
 
   defmodule Time do
-    use Orb.Import
+    use Orb.Import, name: :time
 
     defw get_unix_time(), I64
   end
@@ -21,8 +21,8 @@ defmodule Orb.Import do
   defmodule Example do
     use Orb
 
-    Orb.importw(Log, :log)
-    Orb.importw(Log, :time)
+    Orb.Import.register(Log)
+    Orb.Import.register(Time)
 
     defw example() do
       Log.logi32(99)
@@ -35,11 +35,14 @@ defmodule Orb.Import do
 
   defstruct [:module, :name, :type]
 
-  defmacro __using__(_) do
-    quote do
+  defmacro __using__(opts) do
+    quote bind_quoted: [opts: opts] do
       import Orb.DSL.Defw, only: []
       import Orb.Import.DSL
       alias Orb.{I32, I64, F32, F64}
+
+      @orb_import_namespace Keyword.get(opts, :name) ||
+                              raise("Option :name must be passed to `use Orb.Import`")
 
       # Module.register_attribute(__MODULE__, :wasm_imports, accumulate: true, persist: true)
 
@@ -69,10 +72,10 @@ defmodule Orb.Import do
   ```
   """
   @since "0.0.46"
-  defmacro register(module, namespace) when is_atom(namespace) do
+  defmacro register(module) do
     quote do
       @wasm_imports (for imp <- unquote(module).__wasm_imports__(nil) do
-                       %{imp | module: unquote(namespace)}
+                       imp
                      end)
     end
   end
@@ -106,7 +109,7 @@ defmodule Orb.Import do
 
     ```elixir
     defmodule Log do
-      use Orb.Import
+      use Orb.Import, name: :log
 
       defw(int32(a: I32))
       defw(int64(a: I64))
@@ -145,7 +148,7 @@ defmodule Orb.Import do
               end
 
             imp = %Import{
-              module: :tbd,
+              module: @orb_import_namespace,
               name: unquote(name),
               type: Func.Type.new(full_name, unquote(Macro.escape(params)), unquote(result_type))
             }

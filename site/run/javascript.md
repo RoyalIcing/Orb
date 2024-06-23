@@ -6,7 +6,7 @@ Here’s an example Orb module that exports a function, and imports a `log.i32` 
 
 ```elixir
 defmodule Log do
-  use Orb.Import
+  use Orb.Import, name: :log
 
   defw(debug_tally(n: I32))
 end
@@ -14,7 +14,7 @@ end
 defmodule Example do
   use Orb
 
-  Orb.importw(Log, :log)
+  Orb.Import.register(Log)
 
   global do
     @count 0
