@@ -451,35 +451,6 @@ defmodule Orb do
     end
   end
   ```
-
-  ## Importing with `Orb.importw/2`
-
-  Your running WebAssembly module can interact with the outside world by importing globals and functions.
-
-  ## Use Elixir features
-
-  - Piping
-
-  ## Inline
-
-  - `inline do:`
-    - Module attributes
-    - `wasm do:`
-  - `inline for`
-
-  ### Custom types with `Access`
-
-  TODO: extract this into its own section.
-
-  ## Define your own functions and macros
-
-  ## Hex packages
-
-  - SilverOrb
-      - String builder
-  - GoldenOrb
-
-  ## Running your module
   """
 
   alias Orb.CustomType
