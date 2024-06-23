@@ -238,7 +238,7 @@ defmodule IfElseTest do
         defw(found_alphanumeric(), nil)
       end
 
-      importw(Log, :log)
+      Orb.Import.register(Log, :log)
 
       defw url_search_params_count(url_params: I32.U8.UnsafePointer), I32,
         char: I32.U8,

@@ -25,7 +25,7 @@ defmodule Examples.ClockConsumer do
 
   Memory.pages(1)
 
-  Orb.importw(WasiUnstable, :wasi_unstable)
+  Orb.Import.register(WasiUnstable, :wasi_unstable)
 
   defw get_seconds, I32 do
     0
