@@ -53,6 +53,30 @@ defmodule Orb.Import do
     end
   end
 
+  @doc """
+  Register an import `module` under `namespace`.
+
+  The `module` is defined via `use Orb.Import`. The `namespace` is the local name the import is registered under.
+
+  For each function defined within `module` an `(import)` instruction is defined in the outputted WebAssembly:
+
+  ```wasm
+  (module $example
+    (import "namespace" "function1" (func $function1 (param $a i32) (result i32)))
+    (import "namespace" "function2" (func $function2 (param $a i32) (result i32)))
+    (import "namespace" "function3" (func $function3 (param $a i32) (result i32)))
+  )
+  ```
+  """
+  @since "0.0.46"
+  defmacro register(module, namespace) when is_atom(namespace) do
+    quote do
+      @wasm_imports (for imp <- unquote(module).__wasm_imports__(nil) do
+                       %{imp | module: unquote(namespace)}
+                     end)
+    end
+  end
+
   defimpl Orb.ToWat do
     def to_wat(%Orb.Import{module: nil, name: name, type: type}, indent) do
       [indent, ~S|(import "|, to_string(name), ~S|" |, Orb.ToWat.to_wat(type, ""), ?)]
