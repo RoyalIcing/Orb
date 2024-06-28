@@ -1,6 +1,7 @@
-defmodule Orb.Memory.Range do
-  # TODO: should this be renamed Memory.Slice?
-  # I think it’s closer to Rust’s slice: https://doc.rust-lang.org/1.77.0/std/primitive.slice.html
+defmodule Orb.Memory.Slice do
+  @moduledoc """
+  Similar to [Rust’s slice](https://doc.rust-lang.org/1.77.0/std/primitive.slice.html) but across all memory.
+  """
 
   require Orb.I64 |> alias
   require Orb.I32 |> alias
