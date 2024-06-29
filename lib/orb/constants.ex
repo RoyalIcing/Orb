@@ -141,12 +141,8 @@ defmodule Orb.Constants do
 
     defimpl Orb.ToWat do
       def to_wat(%Orb.Constants.NulTerminatedString{memory_offset: memory_offset}, indent) do
-        [
-          indent,
-          "(i32.const ",
-          to_string(memory_offset),
-          ")"
-        ]
+        Orb.Instruction.Const.new(:i32, memory_offset)
+        |> Orb.ToWat.to_wat(indent)
       end
     end
   end
