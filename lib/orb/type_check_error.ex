@@ -12,13 +12,13 @@ defmodule Orb.TypeCheckError do
     "Instruction #{instruction_identifier} expected type #{format_type(expected_type)}, found #{format_type(received_type)}."
   end
 
-  defp format_type(type) when Ops.is_primitive_type(type), do: to_string(type)
+  defp format_type(type) when Ops.is_primitive_type(type), do: inspect(type)
   defp format_type(:unknown_effect), do: "unknown_effect"
   defp format_type(Elixir.Integer), do: "Elixir.Integer"
   defp format_type(Elixir.Float), do: "Elixir.Float"
 
   defp format_type(type) when is_atom(type),
-    do: "#{Ops.to_primitive_type(type)} via #{inspect(type)}"
+    do: "#{inspect(Ops.to_primitive_type(type))} via #{inspect(type)}"
 
   defp format_type(type) when is_binary(type), do: type
 
