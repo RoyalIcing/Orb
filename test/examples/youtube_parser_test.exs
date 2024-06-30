@@ -57,17 +57,16 @@ defmodule Examples.YoutubeParserTest do
 
       Control.block Final do
         Control.block ShortDomain do
-          Orb.Stack.push(input_offset)
-
-          Control.block FullDomain do
-            CharParser.may(~c|www.|, mut!(input_offset))
-            CharParser.must(~c|youtube.com|, mut!(input_offset), FullDomain.break())
-            CharParser.must(~c|/watch?v=|, mut!(input_offset), FullDomain.break())
-            unless input_offset[at!: 0], do: FullDomain.break()
-            Final.break()
-          end
-
-          input_offset = Orb.Stack.pop(I32)
+          input_offset =
+            Orb.Stack.push input_offset do
+              Control.block FullDomain do
+                CharParser.may(~c|www.|, mut!(input_offset))
+                CharParser.must(~c|youtube.com|, mut!(input_offset), FullDomain.break())
+                CharParser.must(~c|/watch?v=|, mut!(input_offset), FullDomain.break())
+                unless input_offset[at!: 0], do: FullDomain.break()
+                Final.break()
+              end
+            end
 
           CharParser.must(~c|youtu.be/|, mut!(input_offset), ShortDomain.break())
           unless input_offset[at!: 0], do: ShortDomain.break()
@@ -87,7 +86,7 @@ defmodule Examples.YoutubeParserTest do
       inst = Instance.run(wat)
 
       input_offset = Instance.call(inst, :input_offset)
-      # Instance.write_memory(inst, input_offset, input <> "\0" |> :binary.bin_to_list())
+      # Instance.write_memory(inst, input_offset, (input <> "\0") |> :binary.bin_to_list())
       Instance.write_string_nul_terminated(inst, input_offset, input)
 
       result = Instance.call(inst, :parse)
