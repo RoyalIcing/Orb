@@ -14,17 +14,16 @@ defmodule Orb.Memory.Slice do
   def from(byte_offset, byte_length) when is_integer(byte_offset) and is_integer(byte_length) do
     # :binary.encode_unsigned(byte_offset, :little)
 
-    <<i64::unsigned-little-integer-size(64)>> =
-      <<byte_offset::unsigned-little-integer-size(32),
-        byte_length::unsigned-little-integer-size(32)>>
+    # <<i64::unsigned-little-integer-size(64)>> =
+    #   <<byte_offset::unsigned-little-integer-size(32),
+    #     byte_length::unsigned-little-integer-size(32)>>
 
     import Bitwise
     byte_length <<< 32 ||| byte_offset
   end
 
   def from(byte_offset = %{push_type: _}, byte_length = %{push_type: _}) do
-    byte_offset
-    |> I64.extend_i32_u()
+    I64.extend_i32_u(byte_offset)
     |> I64.or(
       I64.extend_i32_u(byte_length)
       |> I64.shl(32)
