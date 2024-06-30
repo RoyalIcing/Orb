@@ -19,11 +19,7 @@ defmodule Orb.Memory.Slice do
         byte_length::unsigned-little-integer-size(32)>>
 
     import Bitwise
-    b = byte_offset <<< 32 ||| byte_length
-
-    IO.inspect({byte_offset, byte_length, i64, b}, label: "#{__MODULE__}.from/2")
-
-    b
+    byte_offset <<< 32 ||| byte_length
   end
 
   def from(byte_offset = %{push_type: _}, byte_length = %{push_type: _}) do
