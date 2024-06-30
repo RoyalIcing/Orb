@@ -34,7 +34,7 @@ defmodule Orb.MixProject do
       # {:wasmex, "~> 0.8.3", only: :test},
       # {:wasmex,
       #  git: "https://github.com/tessi/wasmex.git",
-      #  ref: "3eac8b87f4cb17e47ac35a8315123cdcb812a447",
+      #  ref: "863cb01aba128420ed7d4ba6b755c2a9c421afef",
       #  only: :test},
       {:orb_wasmtime, "~> 0.1.13", only: :test},
       {:jason, "~> 1.0", only: :test},
