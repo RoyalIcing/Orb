@@ -35,14 +35,12 @@ defmodule Examples.YoutubeParserTest do
 
     Memory.pages(2)
 
-    defmodule Input.Values do
-      def start_page_offset(), do: 1
-    end
+    defp start_page_offset(), do: 1
 
-    defw(input_offset(), I32, do: Input.Values.start_page_offset() * Memory.page_byte_size())
+    defw(input_offset(), I32, do: start_page_offset() * Memory.page_byte_size())
 
     defw parse(), I32, input_offset: I32.UnsafePointer do
-      input_offset = Input.Values.start_page_offset() * Memory.page_byte_size()
+      input_offset = start_page_offset() * Memory.page_byte_size()
 
       # input_offset[~c|http|]
 
