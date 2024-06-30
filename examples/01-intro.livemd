@@ -3,7 +3,7 @@
 ```elixir
 Mix.install([
   {:jason, "~> 1.0"},
-  :orb,
+  {:orb, "~> 0.0.48"},
   {:wasmex, "~> 0.8.3"}
 ])
 ```
