@@ -21,5 +21,7 @@ defmodule Orb.Instruction.Global.Get do
       {global_get |> Orb.Memory.Slice.get_byte_offset(),
        global_get |> Orb.Memory.Slice.get_byte_length()}
     end
+
+    def type_narrow_to(as_is, _), do: as_is
   end
 end
