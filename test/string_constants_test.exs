@@ -7,11 +7,11 @@ defmodule StringConstantsTest do
     defmodule HTMLTypes do
       use Orb
 
-      defw doctype(), Orb.Str do
+      defw doctype(), Str do
         "<!doctype html>"
       end
 
-      defw mime_type(), Orb.Str do
+      defw mime_type(), Str do
         "text/html"
       end
     end
