@@ -63,7 +63,8 @@ defmodule Orb.MixProject do
         # {"https://useorb.dev/", title: "Website"},
         {"examples/01-intro.livemd", title: "Example: Introduction"},
         {"examples/temperature-converter.livemd", title: "Example: Temperature Converter"},
-        {"examples/mime-type.livemd", title: "Example: Mime Type"}
+        {"examples/mime-type.livemd", title: "Example: Mime Type"},
+        {"examples/youtube-url-parser.livemd", title: "Example: YouTube URL Parser"}
       ]
     ]
   end

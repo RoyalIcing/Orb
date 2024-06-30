@@ -41,5 +41,6 @@
 
 - [Temperature Converter ↗](https://hexdocs.pm/orb/temperature-converter.html)
 - [Mime Type ↗](https://hexdocs.pm/orb/mime-type.html)
+- [YouTube URL Parser ↗](https://hexdocs.pm/orb/youtube-url-parser.html)
 
 </details>
