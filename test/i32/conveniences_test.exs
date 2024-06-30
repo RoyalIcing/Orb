@@ -93,11 +93,11 @@ defmodule I32ConveniencesTest do
         end
 
         defw ptr(), I32 do
-          @method |> Orb.Memory.Slice.get_byte_offset()
+          @method |> Memory.Slice.get_byte_offset()
         end
 
-        defw text_html(), Orb.Str do
-          if Memory.load!(I32, @method |> Orb.Memory.Slice.get_byte_offset()) !==
+        defw text_html(), Str do
+          if Memory.load!(I32, @method |> Memory.Slice.get_byte_offset()) !==
                I32.from_4_byte_ascii("GET\0") do
             return(~S"""
             <!doctype html>

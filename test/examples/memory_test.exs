@@ -56,7 +56,7 @@ defmodule Examples.MemoryTest do
         # Or just use Memory.Slice
         Copying.memcpy(
           0x400,
-          "hello" |> Orb.Str.get_base_address(),
+          "hello" |> Str.get_base_address(),
           # const("hello").memory_offset,
           3
         )

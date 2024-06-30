@@ -1,6 +1,6 @@
 defmodule Orb.Str do
   @moduledoc """
-  A string slice.
+  A string slice. Represented under the hood as a `{:i32, :i32}` tuple, the first element being the base address, and the second element the string length.
   """
 
   defstruct push_type: __MODULE__, memory_offset: nil, string: nil
@@ -10,6 +10,11 @@ defmodule Orb.Str do
     def wasm_type, do: {:i32, :i32}
   end
 
+  @doc """
+  An empty string, represented by a string slice from offset zero and of zero length.
+
+  The ol’ billion-dollar mistake: null.
+  """
   def empty() do
     %__MODULE__{
       memory_offset: 0x0,

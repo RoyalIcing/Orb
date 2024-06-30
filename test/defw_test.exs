@@ -77,11 +77,11 @@ defmodule DefwTest do
     defmodule SharedStringConstants do
       use Orb
 
-      defw foo(), Orb.Str do
+      defw foo(), Str do
         ~S"foo"
       end
 
-      defw cdata_start(), Orb.Str do
+      defw cdata_start(), Str do
         ~S"<![CDATA["
       end
     end
@@ -94,11 +94,11 @@ defmodule DefwTest do
 
       Memory.pages(1)
 
-      defw cdata_start2(), Orb.Str do
+      defw cdata_start2(), Str do
         ~S"<![CDATA["
       end
 
-      defw use_other(), Orb.Str do
+      defw use_other(), Str do
         cdata_start()
       end
     end
