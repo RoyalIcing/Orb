@@ -2,8 +2,7 @@
 
 ```elixir
 Mix.install([
-  {:orb, "~> 0.0.40"},
-  {:silver_orb, "~> 0.0.7"},
+  {:orb, "~> 0.0.48"},
   {:wasmex, "~> 0.8.3"},
   {:mime, "~> 2.0.5"},
   {:kino, "~> 0.12.0"}
@@ -59,13 +58,13 @@ end
 defmodule YouTubeURLParser do
   use Orb
 
-  alias require SilverOrb.Arena
-  Arena.def(Input, pages: 1)
+  Memory.pages(2)
+  defp start_page_offset(), do: 1
 
-  defw(input_offset(), I32, do: Input.Values.start_page_offset() * Memory.page_byte_size())
+  defw(input_offset(), I32, do: start_page_offset() * Memory.page_byte_size())
 
   defw parse(), I32, input_offset: I32.UnsafePointer do
-    input_offset = Input.Values.start_page_offset() * Memory.page_byte_size()
+    input_offset = start_page_offset() * Memory.page_byte_size()
 
     # input_offset[~c|http|]
 
@@ -80,17 +79,16 @@ defmodule YouTubeURLParser do
 
     Control.block Final do
       Control.block ShortDomain do
-        push(input_offset)
-
-        Control.block FullDomain do
-          CharParser.may(~c|www.|, mut!(input_offset))
-          CharParser.must(~c|youtube.com|, mut!(input_offset), FullDomain.break())
-          CharParser.must(~c|/watch?v=|, mut!(input_offset), FullDomain.break())
-          unless input_offset[at!: 0], do: FullDomain.break()
-          Final.break()
-        end
-
-        input_offset = Orb.Stack.pop(I32)
+        input_offset =
+          Orb.Stack.push input_offset do
+            Control.block FullDomain do
+              CharParser.may(~c|www.|, mut!(input_offset))
+              CharParser.must(~c|youtube.com|, mut!(input_offset), FullDomain.break())
+              CharParser.must(~c|/watch?v=|, mut!(input_offset), FullDomain.break())
+              unless input_offset[at!: 0], do: FullDomain.break()
+              Final.break()
+            end
+          end
 
         CharParser.must(~c|youtu.be/|, mut!(input_offset), ShortDomain.break())
         unless input_offset[at!: 0], do: ShortDomain.break()
