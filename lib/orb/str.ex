@@ -58,6 +58,9 @@ defmodule Orb.Str do
   end
 
   defmodule Slice do
+    @moduledoc """
+    A string slice represented as a i64, a compromise for when storing strings as globals (Globals cannot be `(i32 i32)`, only single primitives like `i32` or `i64`).
+    """
     defstruct push_type: __MODULE__, slice64: nil
 
     with @behaviour Orb.CustomType do
