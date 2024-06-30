@@ -110,7 +110,6 @@ defmodule I32ConveniencesTest do
       end
 
     assert wat =~ "Method not allowed"
-    IO.puts(wat)
 
     assert 255 = Instance.run(wat) |> Instance.call(:ptr)
 

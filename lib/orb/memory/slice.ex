@@ -19,14 +19,14 @@ defmodule Orb.Memory.Slice do
         byte_length::unsigned-little-integer-size(32)>>
 
     import Bitwise
-    byte_offset <<< 32 ||| byte_length
+    byte_length <<< 32 ||| byte_offset
   end
 
   def from(byte_offset = %{push_type: _}, byte_length = %{push_type: _}) do
-    byte_length
+    byte_offset
     |> I64.extend_i32_u()
     |> I64.or(
-      I64.extend_i32_u(byte_offset)
+      I64.extend_i32_u(byte_length)
       |> I64.shl(32)
     )
   end
@@ -36,7 +36,7 @@ defmodule Orb.Memory.Slice do
     #   <<n::unsigned-little-integer-size(64)>>
 
     import Bitwise
-    n >>> 32
+    n &&& 0xFFFFFFFF
   end
 
   def get_byte_offset(
@@ -46,7 +46,7 @@ defmodule Orb.Memory.Slice do
   end
 
   def get_byte_offset(range = %{push_type: _}) do
-    I64.shr_u(range, 32) |> I32.wrap_i64()
+    I32.wrap_i64(range)
   end
 
   def get_byte_length(n) when is_integer(n) do
@@ -56,7 +56,7 @@ defmodule Orb.Memory.Slice do
     # byte_length
 
     import Bitwise
-    n &&& 0xFFFFFFFF
+    n >>> 32
   end
 
   def get_byte_length(
@@ -66,7 +66,7 @@ defmodule Orb.Memory.Slice do
   end
 
   def get_byte_length(range = %{push_type: _}) do
-    I32.wrap_i64(range)
+    I64.shr_u(range, 32) |> I32.wrap_i64()
   end
 
   # defimpl Orb.ToWat do

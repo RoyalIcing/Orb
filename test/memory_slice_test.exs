@@ -39,20 +39,19 @@ defmodule MemorySliceTest do
       b = 2
       c = Memory.Slice.from(a, b)
 
-      # assert!(c === i64(0x0000000F00000002))
-      # a = Memory.Slice.get_byte_offset(c)
-      # assert!(a === i32(0x0F))
-      # b = Memory.Slice.get_byte_length(c)
-      # assert!(b === i32(2))
+      assert!(c === i64(0x000000020000000F))
+      a = Memory.Slice.get_byte_offset(c)
+      assert!(a === i32(0x0F))
+      b = Memory.Slice.get_byte_length(c)
+      assert!(b === i32(2))
 
       {c, Memory.Slice.get_byte_offset(c), Memory.Slice.get_byte_length(c)}
     end
   end
 
   test "in WebAssembly" do
-    MemorySliceSubject |> Orb.to_wat() |> IO.puts()
     {c, a, b} = OrbWasmtime.Wasm.call(MemorySliceSubject, :test)
-    assert c === 0x0000000F00000002
+    assert c === 0x000000020000000F
     assert a === 0x0F
     assert b === 2
   end
