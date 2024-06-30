@@ -23,7 +23,6 @@ defmodule GlobalTest do
            """
   end
 
-  @tag skip: true
   test "global do" do
     defmodule GlobalDo do
       use Orb
@@ -72,11 +71,11 @@ defmodule GlobalTest do
         @empty ""
       end
 
-      defw mime_type_constant, I32.UnsafePointer do
+      defw mime_type_constant, Orb.Constants.NulTerminatedString do
         "text/html"
       end
 
-      defw mime_type_global, I32.UnsafePointer do
+      defw mime_type_global, Orb.Constants.NulTerminatedString do
         @mime_type
       end
 
@@ -96,17 +95,18 @@ defmodule GlobalTest do
              (global $public3 (export "public3") (mut i64) (i64.const 33))
              (global $public4 (export "public4") (mut f32) (f32.const 44.0))
              (global $five_quarters f32 (f32.const 1.25))
-             (global $language (mut i32) (i32.const 255))
-             (global $mime_type (mut i32) (i32.const 258))
-             (global $empty (mut i32) (i32.const 0))
+             (global $language (; string constant ;) (mut i64) (i64.const 8589934847))
+             (global $mime_type (; string constant ;) (mut i64) (i64.const 38654705922))
+             (global $empty (; empty string constant ;) (mut i64) (i64.const 0))
              (; constants 13 bytes ;)
              (data (i32.const 255) "en")
              (data (i32.const 258) "text/html")
-             (func $mime_type_constant (export "mime_type_constant") (result i32)
-               (i32.const 258)
+             (func $mime_type_constant (export "mime_type_constant") (result i32 i32)
+               (i32.const 258) (i32.const 9)
              )
-             (func $mime_type_global (export "mime_type_global") (result i32)
-               (global.get $mime_type)
+             (func $mime_type_global (export "mime_type_global") (result i32 i32)
+               (i32.wrap_i64 (global.get $mime_type))
+               (i32.wrap_i64 (i64.shr_u (global.get $mime_type) (i64.const 32)))
              )
            )
            """ = to_wat(GlobalDo)

@@ -11,4 +11,15 @@ defmodule Orb.Instruction.Global.Get do
       [indent, "(global.get $", to_string(global_name), ")"]
     end
   end
+
+  defimpl Orb.TypeNarrowable do
+    def type_narrow_to(
+          %Orb.Instruction.Global.Get{push_type: Orb.Constants.NulTerminatedString.Slice} =
+            global_get,
+          Orb.Constants.NulTerminatedString
+        ) do
+      {global_get |> Orb.Memory.Slice.get_byte_offset(),
+       global_get |> Orb.Memory.Slice.get_byte_length()}
+    end
+  end
 end
