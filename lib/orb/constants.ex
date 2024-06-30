@@ -125,11 +125,13 @@ defmodule Orb.Constants do
   end
 
   defmodule NulTerminatedString do
-    defstruct memory_offset: nil, string: nil, push_type: Orb.I32.UnsafePointer
+    # defstruct push_type: Orb.I32.UnsafePointer, memory_offset: nil, string: nil
+    defstruct push_type: Orb.Memory.Slice, memory_offset: nil, string: nil
 
     with @behaviour Orb.CustomType do
       @impl Orb.CustomType
       def wasm_type, do: :i32
+      # def wasm_type, do: Orb.Memory.Slice.wasm_type()
     end
 
     def empty() do
@@ -137,6 +139,24 @@ defmodule Orb.Constants do
         memory_offset: 0x0,
         string: ""
       }
+    end
+
+    defp len(%__MODULE__{} = constant) do
+      byte_size(constant.string)
+    end
+
+    def to_slice(%__MODULE__{} = constant) do
+      len = len(constant)
+      Orb.Memory.Slice.from(constant.memory_offset, Orb.Instruction.Const.new(:i32, len))
+    end
+
+    def to_slice(string) when is_binary(string) do
+      string |> Orb.Constants.expand_if_needed() |> to_slice()
+    end
+
+    def get_base_address(string) when is_binary(string) do
+      constant = string |> Orb.Constants.expand_if_needed()
+      constant.memory_offset
     end
 
     defimpl Orb.ToWat do

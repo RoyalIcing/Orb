@@ -54,7 +54,12 @@ defmodule Examples.MemoryTest do
       defw example() do
         # TODO: we should add a function to convert a string to a I32.U8.UnsafePointer
         # Or just use Memory.Slice
-        Copying.memcpy(0x400, ~S"hello", 3)
+        Copying.memcpy(
+          0x400,
+          "hello" |> Orb.Constants.NulTerminatedString.get_base_address(),
+          # const("hello").memory_offset,
+          3
+        )
       end
     end
 
