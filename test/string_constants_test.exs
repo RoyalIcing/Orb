@@ -7,11 +7,11 @@ defmodule StringConstantsTest do
     defmodule HTMLTypes do
       use Orb
 
-      defw doctype(), Orb.Constants.NulTerminatedString do
+      defw doctype(), Orb.Str do
         "<!doctype html>"
       end
 
-      defw mime_type(), Orb.Constants.NulTerminatedString do
+      defw mime_type(), Orb.Str do
         "text/html"
       end
     end
@@ -37,11 +37,11 @@ defmodule StringConstantsTest do
       defmodule ConstHTMLTypes do
         use Orb
 
-        defw doctype(), Orb.Constants.NulTerminatedString do
+        defw doctype(), Orb.Str do
           const("<!doctype html>")
         end
 
-        defw mime_type(), Orb.Constants.NulTerminatedString do
+        defw mime_type(), Orb.Str do
           const(Enum.join(["text", "/", "html"]))
         end
       end
@@ -66,11 +66,11 @@ defmodule StringConstantsTest do
       defmodule ConstHTMLTypes2 do
         use Orb
 
-        defw doctype(), Orb.Constants.NulTerminatedString do
+        defw doctype(), Orb.Str do
           const(Enum.join(["<!doctype ", "html>"]))
         end
 
-        defw mime_type(), Orb.Constants.NulTerminatedString do
+        defw mime_type(), Orb.Str do
           const(Enum.join(["text", "/", "html"]))
         end
       end
@@ -104,7 +104,7 @@ defmodule StringConstantsTest do
       defmodule ConstantOfOnePage do
         use Orb
 
-        defw doctype(), Orb.Constants.NulTerminatedString do
+        defw doctype(), Orb.Str do
           const(BigStrings.string_of_length_1_page())
         end
       end
@@ -131,7 +131,7 @@ defmodule StringConstantsTest do
       defmodule ExactlySinglePage do
         use Orb
 
-        defw doctype(), Orb.Constants.NulTerminatedString do
+        defw doctype(), Orb.Str do
           const(BigStrings.string_should_fit_into_1_page())
         end
       end
@@ -156,7 +156,7 @@ defmodule StringConstantsTest do
       defmodule TwoPagesJust do
         use Orb
 
-        defw doctype(), Orb.Constants.NulTerminatedString do
+        defw doctype(), Orb.Str do
           const(BigStrings.string_should_just_overflow_2_pages())
         end
       end
@@ -181,11 +181,11 @@ defmodule StringConstantsTest do
       defmodule MultipleConstantsExactlySinglePage do
         use Orb
 
-        defw first(), Orb.Constants.NulTerminatedString do
+        defw first(), Orb.Str do
           const(BigStrings.string_should_fit_into_half_page("a"))
         end
 
-        defw second(), Orb.Constants.NulTerminatedString do
+        defw second(), Orb.Str do
           const(BigStrings.string_should_fit_into_half_page("b"))
         end
       end
@@ -215,15 +215,15 @@ defmodule StringConstantsTest do
       defmodule MultipleConstantsTwoPagesJust do
         use Orb
 
-        defw first(), Orb.Constants.NulTerminatedString do
+        defw first(), Orb.Str do
           const(BigStrings.string_should_fit_into_half_page("a"))
         end
 
-        defw second(), Orb.Constants.NulTerminatedString do
+        defw second(), Orb.Str do
           const(BigStrings.string_should_fit_into_half_page("b"))
         end
 
-        defw third(), Orb.Constants.NulTerminatedString do
+        defw third(), Orb.Str do
           const("c")
         end
       end
@@ -260,7 +260,7 @@ defmodule StringConstantsTest do
         Memory.pages(7)
         Memory.pages(11)
 
-        defw first(), Orb.Constants.NulTerminatedString do
+        defw first(), Orb.Str do
           const(BigStrings.string_should_just_overflow_2_pages())
         end
       end

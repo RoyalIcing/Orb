@@ -4,8 +4,7 @@ defmodule Orb.Global do
   defstruct [:name, :type, :initial_value, :mutability, :exported, :comment]
 
   def new(nil, name, mutability, exported, value) when is_binary(value) do
-    new(Orb.Constants.NulTerminatedString.Slice, name, mutability, exported, value)
-    # new(Orb.Memory.Slice, name, mutability, exported, value)
+    new(Orb.Str.Slice, name, mutability, exported, value)
   end
 
   def new(nil, name, mutability, exported, value) when is_integer(value) do
@@ -64,7 +63,7 @@ defmodule Orb.Global do
 
     %__MODULE__{
       name: name,
-      type: Orb.Constants.NulTerminatedString.Slice,
+      type: Orb.Str.Slice,
       initial_value: value,
       mutability: mutability,
       exported: exported == :exported
@@ -100,27 +99,18 @@ defmodule Orb.Global do
     end
   end
 
-  def expand!(
-        %Orb.Global{type: Orb.Constants.NulTerminatedString.Slice, initial_value: ""} = global
-      ) do
+  def expand!(%Orb.Global{type: Orb.Str.Slice, initial_value: ""} = global) do
     %Orb.Global{
       global
-      | initial_value:
-          Orb.Constants.NulTerminatedString.empty()
-          |> Orb.Constants.NulTerminatedString.to_slice(),
+      | initial_value: Orb.Str.empty() |> Orb.Str.to_slice(),
         comment: "empty string constant"
     }
   end
 
-  def expand!(
-        %Orb.Global{type: Orb.Constants.NulTerminatedString.Slice, initial_value: string} = global
-      ) do
+  def expand!(%Orb.Global{type: Orb.Str.Slice, initial_value: string} = global) do
     %Orb.Global{
       global
-      | initial_value:
-          string
-          |> Orb.Constants.expand_if_needed()
-          |> Orb.Constants.NulTerminatedString.to_slice(),
+      | initial_value: string |> Orb.Constants.expand_if_needed() |> Orb.Str.to_slice(),
         comment: "string constant"
     }
   end

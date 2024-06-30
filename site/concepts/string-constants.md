@@ -4,17 +4,17 @@ A feature central to C is string constants. You type `"abc"` and you can pass it
 
 WebAssembly give you the ability to initialize a region of its memory with a string. But it doesn’t let you use the strings directly like C. Instead you must manually allocate memory addresses for each string constant, and then in functions only refer to the addresses, remembering what each are.
 
-Orb adds a string constant system on top, like C by letting you use strings directly. At compile-time these strings are substituted by their addresses.
+Orb adds a string constant system on top, like C by letting you use strings directly. At compile-time these strings are substituted by their address and length.
 
 ```elixir
 defmodule HTMLPage do
   use Orb
 
-  defw get_mime_type(), Memory.Slice do
+  defw get_mime_type(), Str do
     "text/html"
   end
 
-  defw get_body(), Memory.Slice do
+  defw get_body(), Str do
     """
     <!doctype html>
     <meta charset="utf-8">

@@ -134,19 +134,18 @@ Mix.install([
 
 defmodule MimeType do
   use Orb
-  alias Orb.Constants.NulTerminatedString
 
-  defw(txt, NulTerminatedString, do: MIME.type("txt"))
-  defw(json, NulTerminatedString, do: MIME.type("json"))
-  defw(html, NulTerminatedString, do: MIME.type("html"))
-  defw(css, NulTerminatedString, do: MIME.type("css"))
-  defw(wasm, NulTerminatedString, do: MIME.type("wasm"))
-  defw(epub, NulTerminatedString, do: MIME.type("epub"))
-  defw(rss, NulTerminatedString, do: MIME.type("rss"))
-  defw(atom, NulTerminatedString, do: MIME.type("atom"))
-  defw(csv, NulTerminatedString, do: MIME.type("csv"))
-  defw(woff2, NulTerminatedString, do: MIME.type("woff2"))
-  defw(pdf, NulTerminatedString, do: MIME.type("pdf"))
+  defw(txt, Str, do: MIME.type("txt"))
+  defw(json, Str, do: MIME.type("json"))
+  defw(html, Str, do: MIME.type("html"))
+  defw(css, Str, do: MIME.type("css"))
+  defw(wasm, Str, do: MIME.type("wasm"))
+  defw(epub, Str, do: MIME.type("epub"))
+  defw(rss, Str, do: MIME.type("rss"))
+  defw(atom, Str, do: MIME.type("atom"))
+  defw(csv, Str, do: MIME.type("csv"))
+  defw(woff2, Str, do: MIME.type("woff2"))
+  defw(pdf, Str, do: MIME.type("pdf"))
 end
 ```
 

@@ -292,11 +292,11 @@ defmodule Orb do
 
     Memory.pages(1)
 
-    defw get_mime_type(), I32.U8.UnsafePointer do
+    defw get_mime_type(), Str do
       "text/html"
     end
 
-    defw get_body(), I32.U8.UnsafePointer do
+    defw get_body(), Str do
       \"\"\"
       <!doctype html>
       <meta charset=utf-8>

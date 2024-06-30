@@ -96,7 +96,7 @@ defmodule I32ConveniencesTest do
           @method |> Orb.Memory.Slice.get_byte_offset()
         end
 
-        defw text_html(), Orb.Constants.NulTerminatedString do
+        defw text_html(), Orb.Str do
           if Memory.load!(I32, @method |> Orb.Memory.Slice.get_byte_offset()) !==
                I32.from_4_byte_ascii("GET\0") do
             return(~S"""

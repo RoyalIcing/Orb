@@ -71,11 +71,11 @@ defmodule GlobalTest do
         @empty ""
       end
 
-      defw mime_type_constant, Orb.Constants.NulTerminatedString do
+      defw mime_type_constant, Orb.Str do
         "text/html"
       end
 
-      defw mime_type_global, Orb.Constants.NulTerminatedString do
+      defw mime_type_global, Orb.Str do
         @mime_type
       end
 

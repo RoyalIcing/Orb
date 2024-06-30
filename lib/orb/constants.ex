@@ -124,81 +124,6 @@ defmodule Orb.Constants do
     %__MODULE__{offset: offset, items: items, lookup_table: lookup_table, byte_size: byte_size}
   end
 
-  defmodule NulTerminatedString do
-    # defstruct push_type: Orb.I32.UnsafePointer, memory_offset: nil, string: nil
-    defstruct push_type: __MODULE__, memory_offset: nil, string: nil
-
-    with @behaviour Orb.CustomType do
-      @impl Orb.CustomType
-      # def wasm_type, do: :i32
-      # def wasm_type, do: Orb.Memory.Slice.wasm_type()
-      def wasm_type, do: {:i32, :i32}
-    end
-
-    def empty() do
-      %__MODULE__{
-        memory_offset: 0x0,
-        string: ""
-      }
-    end
-
-    def to_slice(%__MODULE__{} = constant) do
-      len = byte_size(constant.string)
-
-      if is_integer(constant.memory_offset) do
-        Orb.Memory.Slice.from(constant.memory_offset, len)
-      else
-        Orb.Memory.Slice.from(constant.memory_offset, Orb.Instruction.Const.new(:i32, len))
-      end
-    end
-
-    def to_slice(string) when is_binary(string) do
-      string |> Orb.Constants.expand_if_needed() |> to_slice()
-    end
-
-    def get_base_address(string) when is_binary(string) do
-      constant = string |> Orb.Constants.expand_if_needed()
-      constant.memory_offset
-    end
-
-    defimpl Orb.ToWat do
-      def to_wat(
-            %Orb.Constants.NulTerminatedString{memory_offset: memory_offset, string: string},
-            indent
-          ) do
-        [
-          indent,
-          Orb.Instruction.Const.new(:i32, memory_offset)
-          |> Orb.ToWat.to_wat(""),
-          " ",
-          Orb.Instruction.Const.new(:i32, byte_size(string))
-          |> Orb.ToWat.to_wat("")
-        ]
-      end
-    end
-
-    defmodule Slice do
-      defstruct push_type: __MODULE__, slice64: nil
-
-      with @behaviour Orb.CustomType do
-        @impl Orb.CustomType
-        def wasm_type, do: :i64
-      end
-
-      defimpl Orb.ToWat do
-        def to_wat(%Orb.Constants.NulTerminatedString.Slice{slice64: slice64}, indent) do
-          Orb.Instruction.Const.new(:i64, slice64)
-          |> Orb.ToWat.to_wat(indent)
-        end
-      end
-    end
-  end
-
-  # def lookup(constants, value) do
-  #   {_, memory_offset} = List.keyfind!(constants.lookup_table, value, 0)
-  #   %NulTerminatedString{memory_offset: memory_offset, string: value}
-  # end
-
   def expand_if_needed(value)
   def expand_if_needed(value) when is_binary(value), do: expand_string!(value)
   def expand_if_needed(value) when is_list(value), do: :lists.map(&expand_if_needed/1, value)
@@ -215,7 +140,7 @@ defmodule Orb.Constants do
   defp expand_string!(string) when is_binary(string) do
     case lookup_offset(string) do
       {:ok, offset} ->
-        %NulTerminatedString{memory_offset: offset, string: string}
+        %Orb.Str{memory_offset: offset, string: string}
 
       :not_compiling ->
         raise "Orb: Can only lookup strings during compilation."

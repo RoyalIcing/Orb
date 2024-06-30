@@ -14,9 +14,9 @@ defmodule Orb.Instruction.Global.Get do
 
   defimpl Orb.TypeNarrowable do
     def type_narrow_to(
-          %Orb.Instruction.Global.Get{push_type: Orb.Constants.NulTerminatedString.Slice} =
+          %Orb.Instruction.Global.Get{push_type: Orb.Str.Slice} =
             global_get,
-          Orb.Constants.NulTerminatedString
+          Orb.Str
         ) do
       {global_get |> Orb.Memory.Slice.get_byte_offset(),
        global_get |> Orb.Memory.Slice.get_byte_length()}
