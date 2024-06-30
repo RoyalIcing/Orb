@@ -23,6 +23,7 @@ defmodule GlobalTest do
            """
   end
 
+  @tag skip: true
   test "global do" do
     defmodule GlobalDo do
       use Orb

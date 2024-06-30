@@ -88,14 +88,17 @@ defmodule I32ConveniencesTest do
       TestHelper.module_wat do
         use Orb
 
-        Memory.pages(1)
-
         global do
           @method "GET"
         end
 
-        defw text_html(), I32.UnsafePointer do
-          if Memory.load!(I32, @method) !== I32.from_4_byte_ascii("GET\0") do
+        defw ptr(), I32 do
+          @method |> Orb.Memory.Slice.get_byte_offset()
+        end
+
+        defw text_html(), Orb.Constants.NulTerminatedString do
+          if Memory.load!(I32, @method |> Orb.Memory.Slice.get_byte_offset()) !==
+               I32.from_4_byte_ascii("GET\0") do
             return(~S"""
             <!doctype html>
             <h1>Method not allowed</h1>
@@ -107,6 +110,9 @@ defmodule I32ConveniencesTest do
       end
 
     assert wat =~ "Method not allowed"
+    IO.puts(wat)
+
+    assert 255 = Instance.run(wat) |> Instance.call(:ptr)
 
     assert "<p>Hello</p>" =
              Instance.run(wat) |> Instance.call_reading_string(:text_html)

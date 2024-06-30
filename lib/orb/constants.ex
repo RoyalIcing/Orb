@@ -126,12 +126,13 @@ defmodule Orb.Constants do
 
   defmodule NulTerminatedString do
     # defstruct push_type: Orb.I32.UnsafePointer, memory_offset: nil, string: nil
-    defstruct push_type: Orb.Memory.Slice, memory_offset: nil, string: nil
+    defstruct push_type: __MODULE__, memory_offset: nil, string: nil
 
     with @behaviour Orb.CustomType do
       @impl Orb.CustomType
-      def wasm_type, do: :i32
+      # def wasm_type, do: :i32
       # def wasm_type, do: Orb.Memory.Slice.wasm_type()
+      def wasm_type, do: {:i32, :i32}
     end
 
     def empty() do
@@ -141,13 +142,14 @@ defmodule Orb.Constants do
       }
     end
 
-    defp len(%__MODULE__{} = constant) do
-      byte_size(constant.string)
-    end
-
     def to_slice(%__MODULE__{} = constant) do
-      len = len(constant)
-      Orb.Memory.Slice.from(constant.memory_offset, Orb.Instruction.Const.new(:i32, len))
+      len = byte_size(constant.string)
+
+      if is_integer(constant.memory_offset) do
+        Orb.Memory.Slice.from(constant.memory_offset, len)
+      else
+        Orb.Memory.Slice.from(constant.memory_offset, Orb.Instruction.Const.new(:i32, len))
+      end
     end
 
     def to_slice(string) when is_binary(string) do
@@ -160,9 +162,34 @@ defmodule Orb.Constants do
     end
 
     defimpl Orb.ToWat do
-      def to_wat(%Orb.Constants.NulTerminatedString{memory_offset: memory_offset}, indent) do
-        Orb.Instruction.Const.new(:i32, memory_offset)
-        |> Orb.ToWat.to_wat(indent)
+      def to_wat(
+            %Orb.Constants.NulTerminatedString{memory_offset: memory_offset, string: string},
+            indent
+          ) do
+        [
+          indent,
+          Orb.Instruction.Const.new(:i32, memory_offset)
+          |> Orb.ToWat.to_wat(""),
+          " ",
+          Orb.Instruction.Const.new(:i32, byte_size(string))
+          |> Orb.ToWat.to_wat("")
+        ]
+      end
+    end
+
+    defmodule Slice do
+      defstruct push_type: __MODULE__, slice64: nil
+
+      with @behaviour Orb.CustomType do
+        @impl Orb.CustomType
+        def wasm_type, do: :i64
+      end
+
+      defimpl Orb.ToWat do
+        def to_wat(%Orb.Constants.NulTerminatedString.Slice{slice64: slice64}, indent) do
+          Orb.Instruction.Const.new(:i64, slice64)
+          |> Orb.ToWat.to_wat(indent)
+        end
       end
     end
   end

@@ -5,7 +5,6 @@ defmodule Orb.Memory.Slice do
 
   require Orb.I64 |> alias
   require Orb.I32 |> alias
-  # import Bitwise
 
   with @behaviour Orb.CustomType do
     @impl Orb.CustomType
@@ -14,8 +13,17 @@ defmodule Orb.Memory.Slice do
 
   def from(byte_offset, byte_length) when is_integer(byte_offset) and is_integer(byte_length) do
     # :binary.encode_unsigned(byte_offset, :little)
-    <<byte_offset::unsigned-little-integer-size(32),
-      byte_length::unsigned-little-integer-size(32)>>
+
+    <<i64::unsigned-little-integer-size(64)>> =
+      <<byte_offset::unsigned-little-integer-size(32),
+        byte_length::unsigned-little-integer-size(32)>>
+
+    import Bitwise
+    b = byte_offset <<< 32 ||| byte_length
+
+    IO.inspect({byte_offset, byte_length, i64, b}, label: "#{__MODULE__}.from/2")
+
+    b
   end
 
   def from(byte_offset = %{push_type: _}, byte_length = %{push_type: _}) do
@@ -25,6 +33,14 @@ defmodule Orb.Memory.Slice do
       I64.extend_i32_u(byte_offset)
       |> I64.shl(32)
     )
+  end
+
+  def get_byte_offset(n) when is_integer(n) do
+    # <<byte_offset::unsigned-little-integer-size(32), _::unsigned-little-integer-size(32)>> =
+    #   <<n::unsigned-little-integer-size(64)>>
+
+    import Bitwise
+    n >>> 32
   end
 
   def get_byte_offset(
@@ -37,6 +53,16 @@ defmodule Orb.Memory.Slice do
     I64.shr_u(range, 32) |> I32.wrap_i64()
   end
 
+  def get_byte_length(n) when is_integer(n) do
+    # <<_::unsigned-little-integer-size(32), byte_length::unsigned-little-integer-size(32)>> =
+    #   <<n::unsigned-little-integer-size(64)>>
+
+    # byte_length
+
+    import Bitwise
+    n &&& 0xFFFFFFFF
+  end
+
   def get_byte_length(
         <<_::unsigned-little-integer-size(32), byte_length::unsigned-little-integer-size(32)>>
       ) do
@@ -46,4 +72,15 @@ defmodule Orb.Memory.Slice do
   def get_byte_length(range = %{push_type: _}) do
     I32.wrap_i64(range)
   end
+
+  # defimpl Orb.ToWat do
+  #   def to_wat(
+  #         %Orb.Memory.Slice{},
+  #         indent
+  #       ) do
+  #     [
+  #       indent,
+  #     ]
+  #   end
+  # end
 end

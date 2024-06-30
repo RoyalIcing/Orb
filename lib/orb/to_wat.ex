@@ -19,6 +19,14 @@ defmodule Orb.ToWat.Helpers do
   alias Orb.CustomType
 
   def do_type(type) do
+    do_type(type, 0, type)
+  end
+
+  defp do_type(_type, 10, original_type) do
+    raise "Cannot unfold deep 10+ layers of CustomType nesting. Top type is #{original_type}."
+  end
+
+  defp do_type(type, nesting, original_type) do
     case type do
       :i64 ->
         "i64"
@@ -40,7 +48,7 @@ defmodule Orb.ToWat.Helpers do
         |> Enum.join(" ")
 
       type ->
-        CustomType.resolve!(type) |> to_string()
+        CustomType.resolve!(type) |> do_type(nesting + 1, original_type)
     end
   end
 end

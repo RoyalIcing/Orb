@@ -10,7 +10,7 @@ defmodule Examples.Arena do
     end_offset = values_mod.end_offset()
 
     Orb.snippet Orb.S32, new_ptr: I32.UnsafePointer do
-      new_ptr = Instruction.global_get(Orb.I32, offset_global_name)
+      new_ptr = Orb.Instruction.Global.Get.new(Orb.I32, offset_global_name)
 
       if new_ptr + byte_count > end_offset * Orb.Memory.page_byte_size() do
         unreachable!()

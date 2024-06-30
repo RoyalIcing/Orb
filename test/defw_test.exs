@@ -77,11 +77,11 @@ defmodule DefwTest do
     defmodule SharedStringConstants do
       use Orb
 
-      defw foo(), I32.UnsafePointer do
+      defw foo(), Orb.Constants.NulTerminatedString do
         ~S"foo"
       end
 
-      defw cdata_start(), I32.UnsafePointer do
+      defw cdata_start(), Orb.Constants.NulTerminatedString do
         ~S"<![CDATA["
       end
     end
@@ -94,11 +94,11 @@ defmodule DefwTest do
 
       Memory.pages(1)
 
-      defw cdata_start2(), I32.UnsafePointer do
+      defw cdata_start2(), Orb.Constants.NulTerminatedString do
         ~S"<![CDATA["
       end
 
-      defw use_other(), I32.UnsafePointer do
+      defw use_other(), Orb.Constants.NulTerminatedString do
         cdata_start()
       end
     end

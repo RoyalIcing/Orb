@@ -1,10 +1,11 @@
 defmodule Orb.Global do
   @moduledoc false
 
-  defstruct [:name, :type, :initial_value, :mutability, :exported]
+  defstruct [:name, :type, :initial_value, :mutability, :exported, :comment]
 
   def new(nil, name, mutability, exported, value) when is_binary(value) do
-    new(Orb.Constants.NulTerminatedString, name, mutability, exported, value)
+    new(Orb.Constants.NulTerminatedString.Slice, name, mutability, exported, value)
+    # new(Orb.Memory.Slice, name, mutability, exported, value)
   end
 
   def new(nil, name, mutability, exported, value) when is_integer(value) do
@@ -54,6 +55,7 @@ defmodule Orb.Global do
     }
   end
 
+  # TODO: remove?
   def new32(name, mutability, exported, value)
       when is_atom(name) and
              mutability in ~w[readonly mutable]a and
@@ -62,7 +64,7 @@ defmodule Orb.Global do
 
     %__MODULE__{
       name: name,
-      type: Orb.Constants.NulTerminatedString,
+      type: Orb.Constants.NulTerminatedString.Slice,
       initial_value: value,
       mutability: mutability,
       exported: exported == :exported
@@ -98,19 +100,28 @@ defmodule Orb.Global do
     end
   end
 
-  def expand!(%Orb.Global{type: Orb.Constants.NulTerminatedString, initial_value: ""} = global) do
+  def expand!(
+        %Orb.Global{type: Orb.Constants.NulTerminatedString.Slice, initial_value: ""} = global
+      ) do
     %Orb.Global{
       global
-      | initial_value: Orb.Constants.NulTerminatedString.empty()
+      | initial_value:
+          Orb.Constants.NulTerminatedString.empty()
+          |> Orb.Constants.NulTerminatedString.to_slice(),
+        comment: "empty string constant"
     }
   end
 
   def expand!(
-        %Orb.Global{type: Orb.Constants.NulTerminatedString, initial_value: string} = global
+        %Orb.Global{type: Orb.Constants.NulTerminatedString.Slice, initial_value: string} = global
       ) do
     %Orb.Global{
       global
-      | initial_value: Orb.Constants.expand_if_needed(string)
+      | initial_value:
+          string
+          |> Orb.Constants.expand_if_needed()
+          |> Orb.Constants.NulTerminatedString.to_slice(),
+        comment: "string constant"
     }
   end
 
@@ -125,7 +136,8 @@ defmodule Orb.Global do
             type: type,
             initial_value: initial_value,
             mutability: mutability,
-            exported: exported
+            exported: exported,
+            comment: comment
           },
           indent
         ) do
@@ -137,6 +149,9 @@ defmodule Orb.Global do
           true -> [?$, to_string(name), ~S{ (export "}, to_string(name), ~S{")}]
         end,
         " ",
+        if comment do
+          ["(; ", comment, " ;) "]
+        end || [],
         case mutability do
           :readonly -> do_type(type)
           :mutable -> ["(mut ", do_type(type), ?)]
@@ -226,7 +241,7 @@ defmodule Orb.Global do
 
     defmacro @{name, _meta, _args} do
       quote do
-        Orb.Instruction.global_get(Orb.__lookup_global_type!(unquote(name)), unquote(name))
+        Orb.Instruction.Global.Get.new(Orb.__lookup_global_type!(unquote(name)), unquote(name))
       end
     end
   end

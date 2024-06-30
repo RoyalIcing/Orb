@@ -7,11 +7,11 @@ defmodule StringConstantsTest do
     defmodule HTMLTypes do
       use Orb
 
-      defw doctype(), I32 do
+      defw doctype(), Orb.Constants.NulTerminatedString do
         "<!doctype html>"
       end
 
-      defw mime_type(), I32 do
+      defw mime_type(), Orb.Constants.NulTerminatedString do
         "text/html"
       end
     end
@@ -22,11 +22,11 @@ defmodule StringConstantsTest do
              (; constants 26 bytes ;)
              (data (i32.const 255) "<!doctype html>")
              (data (i32.const 271) "text/html")
-             (func $doctype (export "doctype") (result i32)
-               (i32.const 255)
+             (func $doctype (export "doctype") (result i32 i32)
+               (i32.const 255) (i32.const 15)
              )
-             (func $mime_type (export "mime_type") (result i32)
-               (i32.const 271)
+             (func $mime_type (export "mime_type") (result i32 i32)
+               (i32.const 271) (i32.const 9)
              )
            )
            """
@@ -37,11 +37,11 @@ defmodule StringConstantsTest do
       defmodule ConstHTMLTypes do
         use Orb
 
-        defw doctype(), I32 do
+        defw doctype(), Orb.Constants.NulTerminatedString do
           const("<!doctype html>")
         end
 
-        defw mime_type(), I32 do
+        defw mime_type(), Orb.Constants.NulTerminatedString do
           const(Enum.join(["text", "/", "html"]))
         end
       end
@@ -52,11 +52,11 @@ defmodule StringConstantsTest do
                (; constants 26 bytes ;)
                (data (i32.const 255) "<!doctype html>")
                (data (i32.const 271) "text/html")
-               (func $doctype (export "doctype") (result i32)
-                 (i32.const 255)
+               (func $doctype (export "doctype") (result i32 i32)
+                 (i32.const 255) (i32.const 15)
                )
-               (func $mime_type (export "mime_type") (result i32)
-                 (i32.const 271)
+               (func $mime_type (export "mime_type") (result i32 i32)
+                 (i32.const 271) (i32.const 9)
                )
              )
              """
@@ -66,11 +66,11 @@ defmodule StringConstantsTest do
       defmodule ConstHTMLTypes2 do
         use Orb
 
-        defw doctype(), I32 do
+        defw doctype(), Orb.Constants.NulTerminatedString do
           const(Enum.join(["<!doctype ", "html>"]))
         end
 
-        defw mime_type(), I32 do
+        defw mime_type(), Orb.Constants.NulTerminatedString do
           const(Enum.join(["text", "/", "html"]))
         end
       end
@@ -81,11 +81,11 @@ defmodule StringConstantsTest do
                (; constants 26 bytes ;)
                (data (i32.const 255) "<!doctype html>")
                (data (i32.const 271) "text/html")
-               (func $doctype (export "doctype") (result i32)
-                 (i32.const 255)
+               (func $doctype (export "doctype") (result i32 i32)
+                 (i32.const 255) (i32.const 15)
                )
-               (func $mime_type (export "mime_type") (result i32)
-                 (i32.const 271)
+               (func $mime_type (export "mime_type") (result i32 i32)
+                 (i32.const 271) (i32.const 9)
                )
              )
              """
@@ -104,7 +104,7 @@ defmodule StringConstantsTest do
       defmodule ConstantOfOnePage do
         use Orb
 
-        defw doctype(), I32 do
+        defw doctype(), Orb.Constants.NulTerminatedString do
           const(BigStrings.string_of_length_1_page())
         end
       end
@@ -120,8 +120,8 @@ defmodule StringConstantsTest do
                (memory (export "memory") 2)
                (; constants 65537 bytes ;)
                (data (i32.const 255) "BIGSTRING")
-               (func $doctype (export "doctype") (result i32)
-                 (i32.const 255)
+               (func $doctype (export "doctype") (result i32 i32)
+                 (i32.const 255) (i32.const 65536)
                )
              )
              """
@@ -131,7 +131,7 @@ defmodule StringConstantsTest do
       defmodule ExactlySinglePage do
         use Orb
 
-        defw doctype(), I32 do
+        defw doctype(), Orb.Constants.NulTerminatedString do
           const(BigStrings.string_should_fit_into_1_page())
         end
       end
@@ -145,8 +145,8 @@ defmodule StringConstantsTest do
                (memory (export "memory") 1)
                (; constants 65281 bytes ;)
                (data (i32.const 255) "BIGSTRING")
-               (func $doctype (export "doctype") (result i32)
-                 (i32.const 255)
+               (func $doctype (export "doctype") (result i32 i32)
+                 (i32.const 255) (i32.const 65280)
                )
              )
              """
@@ -156,7 +156,7 @@ defmodule StringConstantsTest do
       defmodule TwoPagesJust do
         use Orb
 
-        defw doctype(), I32 do
+        defw doctype(), Orb.Constants.NulTerminatedString do
           const(BigStrings.string_should_just_overflow_2_pages())
         end
       end
@@ -170,8 +170,8 @@ defmodule StringConstantsTest do
                (memory (export "memory") 2)
                (; constants 65282 bytes ;)
                (data (i32.const 255) "BIGSTRING")
-               (func $doctype (export "doctype") (result i32)
-                 (i32.const 255)
+               (func $doctype (export "doctype") (result i32 i32)
+                 (i32.const 255) (i32.const 65281)
                )
              )
              """
@@ -181,11 +181,11 @@ defmodule StringConstantsTest do
       defmodule MultipleConstantsExactlySinglePage do
         use Orb
 
-        defw first(), I32 do
+        defw first(), Orb.Constants.NulTerminatedString do
           const(BigStrings.string_should_fit_into_half_page("a"))
         end
 
-        defw second(), I32 do
+        defw second(), Orb.Constants.NulTerminatedString do
           const(BigStrings.string_should_fit_into_half_page("b"))
         end
       end
@@ -201,11 +201,11 @@ defmodule StringConstantsTest do
                (; constants 65280 bytes ;)
                (data (i32.const 255) "FIRST")
                (data (i32.const 32895) "SECOND")
-               (func $first (export "first") (result i32)
-                 (i32.const 255)
+               (func $first (export "first") (result i32 i32)
+                 (i32.const 255) (i32.const 32639)
                )
-               (func $second (export "second") (result i32)
-                 (i32.const 32895)
+               (func $second (export "second") (result i32 i32)
+                 (i32.const 32895) (i32.const 32639)
                )
              )
              """
@@ -215,15 +215,15 @@ defmodule StringConstantsTest do
       defmodule MultipleConstantsTwoPagesJust do
         use Orb
 
-        defw first(), I32 do
+        defw first(), Orb.Constants.NulTerminatedString do
           const(BigStrings.string_should_fit_into_half_page("a"))
         end
 
-        defw second(), I32 do
+        defw second(), Orb.Constants.NulTerminatedString do
           const(BigStrings.string_should_fit_into_half_page("b"))
         end
 
-        defw third(), I32 do
+        defw third(), Orb.Constants.NulTerminatedString do
           const("c")
         end
       end
@@ -240,14 +240,14 @@ defmodule StringConstantsTest do
                (data (i32.const 255) "FIRST")
                (data (i32.const 32895) "SECOND")
                (data (i32.const 65535) "c")
-               (func $first (export "first") (result i32)
-                 (i32.const 255)
+               (func $first (export "first") (result i32 i32)
+                 (i32.const 255) (i32.const 32639)
                )
-               (func $second (export "second") (result i32)
-                 (i32.const 32895)
+               (func $second (export "second") (result i32 i32)
+                 (i32.const 32895) (i32.const 32639)
                )
-               (func $third (export "third") (result i32)
-                 (i32.const 65535)
+               (func $third (export "third") (result i32 i32)
+                 (i32.const 65535) (i32.const 1)
                )
              )
              """
@@ -260,7 +260,7 @@ defmodule StringConstantsTest do
         Memory.pages(7)
         Memory.pages(11)
 
-        defw first(), I32 do
+        defw first(), Orb.Constants.NulTerminatedString do
           const(BigStrings.string_should_just_overflow_2_pages())
         end
       end
@@ -274,8 +274,8 @@ defmodule StringConstantsTest do
                (memory (export "memory") 20)
                (; constants 65282 bytes ;)
                (data (i32.const 255) "BIGSTRING")
-               (func $first (export "first") (result i32)
-                 (i32.const 255)
+               (func $first (export "first") (result i32 i32)
+                 (i32.const 255) (i32.const 65281)
                )
              )
              """

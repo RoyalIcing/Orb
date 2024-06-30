@@ -121,8 +121,6 @@ defmodule Orb.Instruction do
     new(nil, {:local_set, local_name, type}, [value])
   end
 
-  def global_get(type, global_name), do: new(type, {:global_get, global_name})
-
   def global_set(type, global_name, value) do
     new(nil, {:global_set, global_name, type}, [value])
   end
@@ -387,16 +385,6 @@ defmodule Orb.Instruction do
         to_string(local_name),
         ")"
       ]
-    end
-
-    def to_wat(
-          %Orb.Instruction{
-            operation: {:global_get, global_name},
-            operands: []
-          },
-          indent
-        ) do
-      [indent, "(global.get $", to_string(global_name), ")"]
     end
 
     def to_wat(

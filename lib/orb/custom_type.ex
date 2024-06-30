@@ -1,5 +1,10 @@
 defmodule Orb.CustomType do
-  @callback wasm_type() :: :i64 | :i32 | :f64 | :f32
+  @type wasm_primitive() :: :i64 | :i32 | :f64 | :f32
+  @callback wasm_type() ::
+              wasm_primitive()
+              | {wasm_primitive(), wasm_primitive()}
+              | {wasm_primitive(), wasm_primitive(), wasm_primitive()}
+              | {wasm_primitive(), wasm_primitive(), wasm_primitive(), wasm_primitive()}
   @callback load_instruction() ::
               :load | :load8_s | :load8_u | :load16_s | :load16_u | :load32_s | :load32_u
   # @callback store_instruction() :: :store | :store8 | :store16 | :store32
