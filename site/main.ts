@@ -50,7 +50,7 @@ function getContentPath(path: `/${string}`): undefined | string {
     case "install": return subpath;
     case "concepts/core-webassembly": return subpath;
     case "concepts/elixir-compiler": return subpath;
-    case "concepts/string-constants": return subpath;
+    case "concepts/strings": return subpath;
     case "concepts/composable-modules": return subpath;
     case "concepts/custom-types": return subpath;
     case "concepts/platform-agnostic": return subpath;
