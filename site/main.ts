@@ -225,6 +225,10 @@ ${CSS}
   line-height: 1.75;
   font-family: inherit;
 }
+.markdown-body h1 {
+  font-size: 2.8em;
+  font-weight: 800;
+}
 .markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol, .markdown-body dl, .markdown-body table, .markdown-body pre, .markdown-body details {
   margin-bottom: 1lh;
 }
@@ -241,10 +245,6 @@ ${CSS}
 [data-color-mode=light][data-light-theme=dark], [data-color-mode=dark][data-dark-theme=dark] {
   --color-canvas-default: #01142E;
   --color-accent-fg: #ffc900;
-}
-h1 {
-  font-size: 2.8em;
-  font-weight: 800;
 }
 h1, h2, summary {
   color: #74d1f0;
