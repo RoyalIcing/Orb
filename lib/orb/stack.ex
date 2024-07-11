@@ -18,6 +18,7 @@ defmodule Orb.Stack do
           raise ArgumentError,
             message: "Cannot drop instruction pushing nothing to the stack."
 
+        # TODO: what about custom types?
         {nil, type} when is_atom(type) ->
           %__MODULE__{
             instruction: instruction,
