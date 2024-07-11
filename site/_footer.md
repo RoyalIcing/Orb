@@ -1,4 +1,6 @@
 - [GitHub](https://github.com/RoyalIcing/Orb)
+- [Twitter](https://icing.space/blog)
 - [Twitter](https://twitter.com/RoyalIcing)
+- [Threads](https://www.threads.net/@pattyfeatpatty)
 - [Mastodon](https://hachyderm.io/@royalicing)
 - Copyright 2024 [Patrick Smith](https://icing.space/)
