@@ -158,14 +158,14 @@ defmodule Orb.I32 do
               Orb.IfElse.new(
                 unquote(match),
                 Orb.InstructionSequence.new(
-                  unquote(__get_block_items(target)) ++ [Orb.Control.break(:i32_map)]
+                  unquote(__get_block_items(target)) ++ [Orb.Control.break(:i32_cond)]
                 )
               )
             end
         end
       end
 
-    has_catchall? = Enum.any?(transform, &match?({:->, _, [[{:_, _, _}], _]}, &1))
+    has_catchall? = Enum.any?(transform, &match?({:->, _, [[true], _]}, &1))
 
     final_instruction =
       case has_catchall? do
@@ -177,7 +177,7 @@ defmodule Orb.I32 do
       with do
         require Orb.Control
 
-        Orb.Control.block :i32_map, Orb.I32 do
+        Orb.Control.block :i32_cond, Orb.I32 do
           Orb.InstructionSequence.new(unquote(statements))
           unquote(final_instruction)
         end

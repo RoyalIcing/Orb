@@ -53,6 +53,87 @@ defmodule I32ConveniencesTest do
     assert Wasm.call(wat, :is_url_safe?, ?*) == 0
   end
 
+  test "I32.cond without catch-all" do
+    assert (TestHelper.module_wat do
+              use Orb
+
+              defw get_path(), I32, state: I32 do
+                state = 0
+
+                I32.cond do
+                  state === 0 -> i32(100)
+                  state === 1 -> i32(200)
+                end
+              end
+            end) == """
+           (module $Sample
+             (func $get_path (export "get_path") (result i32)
+               (local $state i32)
+               (i32.const 0)
+               (local.set $state)
+               (block $i32_cond (result i32)
+                 (i32.eq (local.get $state) (i32.const 0))
+                 (if (result i32)
+                   (then
+                     (i32.const 100)
+                     (br $i32_cond)
+                   )
+                 )
+                 (i32.eq (local.get $state) (i32.const 1))
+                 (if (result i32)
+                   (then
+                     (i32.const 200)
+                     (br $i32_cond)
+                   )
+                 )
+                 unreachable
+               )
+             )
+           )
+           """
+  end
+
+  test "I32.cond with catch-all" do
+    assert (TestHelper.module_wat do
+              use Orb
+
+              defw get_path(), I32, state: I32 do
+                state = 0
+
+                I32.cond do
+                  state === 0 -> i32(100)
+                  state === 1 -> i32(200)
+                  true -> i32(500)
+                end
+              end
+            end) == """
+           (module $Sample
+             (func $get_path (export "get_path") (result i32)
+               (local $state i32)
+               (i32.const 0)
+               (local.set $state)
+               (block $i32_cond (result i32)
+                 (i32.eq (local.get $state) (i32.const 0))
+                 (if (result i32)
+                   (then
+                     (i32.const 100)
+                     (br $i32_cond)
+                   )
+                 )
+                 (i32.eq (local.get $state) (i32.const 1))
+                 (if (result i32)
+                   (then
+                     (i32.const 200)
+                     (br $i32_cond)
+                   )
+                 )
+                 (i32.const 500)
+               )
+             )
+           )
+           """
+  end
+
   test "I32.match output int" do
     assert (TestHelper.module_wat do
               use Orb
