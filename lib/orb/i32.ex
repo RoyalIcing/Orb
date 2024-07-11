@@ -145,6 +145,9 @@ defmodule Orb.I32 do
   end
 
   defmacro cond(do: transform) do
+    line = __CALLER__.line
+    block_name = "i32_cond_#{line}"
+
     statements =
       for {:->, _, [input, target]} <- transform do
         case input do
@@ -158,7 +161,7 @@ defmodule Orb.I32 do
               Orb.IfElse.new(
                 unquote(match),
                 Orb.InstructionSequence.new(
-                  unquote(__get_block_items(target)) ++ [Orb.Control.break(:i32_cond)]
+                  unquote(__get_block_items(target)) ++ [Orb.Control.break(unquote(block_name))]
                 )
               )
             end
@@ -177,7 +180,7 @@ defmodule Orb.I32 do
       with do
         require Orb.Control
 
-        Orb.Control.block :i32_cond, Orb.I32 do
+        Orb.Control.block unquote(block_name), Orb.I32 do
           Orb.InstructionSequence.new(unquote(statements))
           unquote(final_instruction)
         end
