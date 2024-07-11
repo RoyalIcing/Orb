@@ -71,15 +71,15 @@ defmodule HelloWorldComponent do
   use Orb
   use SilverOrb.StringBuilder
 
-  defwp daytime?(hour_of_day: I32), I32 do
-    hour_of_day >= 6 &&& hour_of_day <= 19
+  defwp daytime?(hour: I32), I32 do
+    hour >= 6 &&& hour <= 19
   end
 
-  defw render(hour_of_day: I32), StringBuilder do
+  defw render(hour: I32), StringBuilder do
     StringBuilder.build! do
       "<h1>"
 
-      if daytime?(hour_of_day) do
+      if daytime?(hour) do
         "Hello 🌞 sunny world"
       else
         "Hello 🌛 moonlit world"
