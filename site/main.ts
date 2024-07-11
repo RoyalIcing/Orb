@@ -140,6 +140,7 @@ li {
 body {
   margin: 0;
   min-height: 100vh;
+  line-height: 1.5;
   display: grid;
   grid-template-areas:
     "nav"
@@ -153,6 +154,7 @@ main {
   max-width: 48rem;
   margin: 0 auto;
   padding: 3rem 3vw;
+  line-height: 1.75;
   --list-padding: 0 0 0 1em;
 }
 
@@ -193,6 +195,12 @@ nav li {
 }
 nav details {
   --link-padding: 0.125em 0;
+}
+nav a {
+  text-decoration: none;
+}
+nav a:hover {
+  text-decoration: underline;
 }
 nav a[href="/"] {
   font-size: 150%;
