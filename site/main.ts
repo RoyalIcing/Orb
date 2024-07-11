@@ -242,6 +242,10 @@ ${CSS}
   --color-canvas-default: #01142E;
   --color-accent-fg: #ffc900;
 }
+h1 {
+  font-size: 2.8em;
+  font-weight: 800;
+}
 h1, h2, summary {
   color: #74d1f0;
 }
@@ -258,6 +262,7 @@ input { font-size: inherit; }
   padding-bottom: 1em;
   font-size: 2em;
   font-style: italic;
+  font-weight: 600;
   margin: 0;
   border-bottom: none;
 }
