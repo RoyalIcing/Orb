@@ -10,8 +10,8 @@
     <summary>Core Concepts</summary>
 
 - [Core WebAssembly](/concepts/core-webassembly)
-- [String Constants](/concepts/string-constants)
 - [Composable Modules](/concepts/composable-modules)
+- [Strings](/concepts/strings)
 - [Platform Agnostic](/concepts/platform-agnostic)
 - [Elixir Compiler](/concepts/elixir-compiler)
 - [Custom Types](/concepts/custom-types)
