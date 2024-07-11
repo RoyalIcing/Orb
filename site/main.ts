@@ -222,6 +222,7 @@ ${CSS}
 
 .markdown-body {
   font-size: 125%;
+  line-height: 1.75;
   font-family: inherit;
 }
 .markdown-body .highlight pre, .markdown-body pre {
