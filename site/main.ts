@@ -225,6 +225,9 @@ ${CSS}
   line-height: 1.75;
   font-family: inherit;
 }
+.markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol, .markdown-body dl, .markdown-body table, .markdown-body pre, .markdown-body details {
+  margin-bottom: 1lh;
+}
 .markdown-body .highlight pre, .markdown-body pre {
   text-size-adjust: none;
   font-size: var(--pre-font-size, 0.75rem);
