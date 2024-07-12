@@ -315,6 +315,14 @@ input { font-size: inherit; }
   }
 }
 
+nav-primary details {
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+nav-primary:defined details {
+  opacity: 1;
+}
+
 </style>
 <script type="module">
 const breakpoints = { sm: "640px" };
@@ -338,7 +346,7 @@ customElements.define("nav-primary", class NavPrimary extends HTMLElement {
 <body data-color-mode="dark" data-light-theme="light" data-dark-theme="dark">
 
 <nav-primary style="grid-area: nav">
-<nav aria-label="Primary">
+<nav aria-label="Primary" style="min-width: 12em">
 <a href="/">
   ${logoSVG}
 </a>
