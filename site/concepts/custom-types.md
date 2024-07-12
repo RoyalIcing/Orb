@@ -21,6 +21,8 @@ These custom types can be used as function parameters.
 
 ```elixir
 defmodule Digit do
+  use Orb
+
   @behaviour Orb.CustomType
 
   @impl Orb.CustomType
@@ -36,6 +38,8 @@ This compiles to the exact same code as:
 
 ```elixir
 defmodule Digit do
+  use Orb
+  
   defw add(a: :i32, b: :i32), :i32 do
     a + b
   end
