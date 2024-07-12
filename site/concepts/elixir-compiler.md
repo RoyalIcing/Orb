@@ -26,7 +26,7 @@ Orb also has its own abstract syntax tree, represented using Elixir structs. You
 
 ### Reduce boilerplate with inlining
 
-`Orb.snippet/1` lets you use the Elixir DSL and return the Orb AST.
+`Orb.snippet/1` lets you use the Orb’s DSL returning WebAssembly instructions as a value.
 
 Here’s an example of a parser helper that iterates through a list of characters at compile time, mapping each to a WebAssembly instruction to read each character and finally boolean `AND` them all together.
 
@@ -46,10 +46,36 @@ defmodule CharParser do
 end
 ```
 
-The `Memory.load!/2` and `I32.band/2` provide the WebAssembly instructions via Orb’s DSL, while the rest is standard Elixir code. The result is just WebAssembly instructions, effectively inlining the loop at compile time.
+The `Memory.load!/2` and `I32.band/2` provide the WebAssembly instructions via Orb’s DSL, while the rest is standard Elixir code. The result is just WebAssembly instructions, effectively inlining a loop at compile time.
 
 ## 3. WebAssembly instructions at WebAssembly runtime
 
 Finally we get to the WebAssembly instructions themselves being executed on a WebAssembly runtime like JavaScript’s `WebAssembly.Instance` class or Wasmtime.
 
 The above compilation steps have been done and the WebAssembly instructions have been converted to their runnable format via `Orb.ToWasm` or `Orb.ToWat`. If you need you can implement these protocols yourself.
+
+For example, here’s how `Orb.Memory` implements `Orb.ToWat`:
+
+```elixir
+defmodule Orb.Memory do
+  # …
+
+  defimpl Orb.ToWat do
+    def to_wat(%Orb.Memory{min: min}, indent) do
+      [
+        indent,
+        ~S{(memory (export "memory")},
+        case min do
+          nil -> []
+          int -> [" ", to_string(int)]
+        end,
+        ~S{)},
+        "\n"
+      ]
+    end
+  end
+end
+```
+
+This allows you to extend Orb’s syntax: if there’s a new WebAssembly feature you can implement the building blocks for its instructions yourself.
+
