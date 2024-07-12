@@ -1,18 +1,18 @@
 # Elixir Compiler
 
-Orb lets you use the entire Elixir programming language at WebAssembly compile time. This allows you to use existing Elixir libraries or make network requests.
+Orb lets you use the entire Elixir programming language at WebAssembly compile time. This allows you to generate code dynamically, use existing Elixir libraries, or make network requests.
 
-Elixir today has two steps: compile-time and runtime. Compile-time is when its macros are run for example. Orb adds one more step in the middle that straddles the Elixir and WebAssembly worlds.
+Vanilla Elixir has two steps: Elixir compile-time and Elixir runtime. Elixir compile-time is when its macros are run for example. Orb adds one more step in the middle that straddles the Elixir and WebAssembly worlds: WebAssembly-compile-time.
 
 Here’s each step in Orb:
 
-1. Elixir-compile-time: Elixir macros are run.
+1. Elixir-compile-time: Top-level Elixir code is run, macros are run.
 2. WebAssembly-compile-time: Elixir functions are run.
-3. WebAssembly-runtime: WebAssembly instructions are run.
+3. WebAssembly-runtime: WebAssembly instructions are run. Elixir doesn’t exist at this step!
 
 ## 1. Elixir macros at Elixir compile-time
 
-Macros are one of the most powerful features of Elixir. They allow you to transform the abstract syntax tree (AST) of the Elixir language. For example, Ecto’s queries are powered by macros.
+Macros are one of the most powerful features of Elixir. They allow you to transform the abstract syntax tree (AST) of the Elixir language. For example, Ecto’s declarative queries are powered by macros.
 
 ### Processing `do` blocks with macros
 
@@ -46,7 +46,7 @@ defmodule CharParser do
 end
 ```
 
-The `Memory.load!/2` and `I32.band/2` provide the WebAssembly instructions via Orb’s DSL, while the rest is standard Elixir code. The result is just WebAssembly instructions, effectively inlining a loop at compile time.
+The `Memory.load!/2` and `I32.band/2` provide the WebAssembly instructions via Orb’s DSL, while the rest is standard Elixir code. The result is just a sequence of WebAssembly instructions, effectively inlining a loop at compile time.
 
 ## 3. WebAssembly instructions at WebAssembly runtime
 
