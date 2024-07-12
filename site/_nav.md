@@ -12,8 +12,8 @@
 - [Core WebAssembly](/concepts/core-webassembly)
 - [Composable Modules](/concepts/composable-modules)
 - [Strings](/concepts/strings)
-- [Platform Agnostic](/concepts/platform-agnostic)
 - [Elixir is Your Compiler](/concepts/elixir-compiler)
+- [Platform Agnostic](/concepts/platform-agnostic)
 - [Custom Types](/concepts/custom-types)
 
 </details>
