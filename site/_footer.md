@@ -3,4 +3,4 @@
 - [Twitter](https://twitter.com/RoyalIcing)
 - [Threads](https://www.threads.net/@pattyfeatpatty)
 - [Mastodon](https://hachyderm.io/@royalicing)
-- Copyright 2024 Patrick Smith
+- · Copyright 2024 Patrick Smith

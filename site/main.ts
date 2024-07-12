@@ -209,7 +209,8 @@ nav a[href="/"] {
 
 footer[role=contentinfo] {
   grid-area: footer;
-  padding-bottom: 1.5rem;
+  padding-top: 1rem;
+  padding-bottom: 4rem;
   text-align: center;
   color: white;
   --list-display: flex;
