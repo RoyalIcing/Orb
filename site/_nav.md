@@ -13,7 +13,7 @@
 - [Composable Modules](/concepts/composable-modules)
 - [Strings](/concepts/strings)
 - [Platform Agnostic](/concepts/platform-agnostic)
-- [Elixir Compiler](/concepts/elixir-compiler)
+- [Elixir is Your Compiler](/concepts/elixir-compiler)
 - [Custom Types](/concepts/custom-types)
 
 </details>

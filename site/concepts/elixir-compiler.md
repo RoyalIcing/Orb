@@ -1,4 +1,4 @@
-# Elixir Compiler
+# Elixir is Your Compiler
 
 Orb lets you use the entire Elixir programming language at WebAssembly compile time. This allows you to generate code dynamically, use existing Elixir libraries, or make network requests.
 
