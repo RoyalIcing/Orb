@@ -2,15 +2,15 @@
 
 Orb lets you use the entire Elixir programming language at WebAssembly compile time. This allows you to generate code dynamically, use existing Elixir libraries, or make network requests.
 
-Vanilla Elixir has two steps: Elixir compile-time and Elixir runtime. Elixir compile-time is when its macros are run for example. Orb adds one more step in the middle that straddles the Elixir and WebAssembly worlds: WebAssembly-compile-time.
+Vanilla Elixir has two steps: Elixir-compile-time and Elixir-runtime. Elixir-compile-time is when its macros are run for example. Orb adds one more step in the middle that straddles the Elixir and WebAssembly worlds: WebAssembly-compile-time.
 
-Here’s each step in Orb:
+Here’s each step in Orb in the order they run:
 
 1. Elixir-compile-time: Top-level Elixir code is run, macros are run.
 2. WebAssembly-compile-time: Elixir functions are run.
 3. WebAssembly-runtime: WebAssembly instructions are run. Elixir doesn’t exist at this step!
 
-## 1. Elixir macros at Elixir compile-time
+## 1. Elixir macros executed at Elixir compile-time
 
 Macros are one of the most powerful features of Elixir. They allow you to transform the abstract syntax tree (AST) of the Elixir language. For example, Ecto’s declarative queries are powered by macros.
 
@@ -20,7 +20,7 @@ A common building block in Elixir are `do` blocks. You can consume these “bloc
 
 Orb globals are defined using macros consuming `do` blocks. The core piece of Orb `defw` is made using macros and `do` blocks. They end up iterating through each Elixir AST and doing something with it — adding a new global to the list of globals, or adding a new function to the list of WebAssembly functions. They are what most make it feel like you are writing Elixir when using Orb.
 
-## 2. Elixir functions at WebAssembly compile-time
+## 2. Elixir functions executed at WebAssembly compile-time
 
 Orb also has its own abstract syntax tree, represented using Elixir structs. You create these structs using helper functions in the Orb DSL. As these are really functions like any other Elixir function, you can compose them like any other Elixir function. Find yourself doing the same 3 things in a row all the time? Wrap it in a function.
 
@@ -48,7 +48,7 @@ end
 
 The `Memory.load!/2` and `I32.band/2` provide the WebAssembly instructions via Orb’s DSL, while the rest is standard Elixir code. The result is just a sequence of WebAssembly instructions, effectively inlining a loop at compile time.
 
-## 3. WebAssembly instructions at WebAssembly runtime
+## 3. WebAssembly instructions executed at WebAssembly runtime
 
 Finally we get to the WebAssembly instructions themselves being executed on a WebAssembly runtime like JavaScript’s `WebAssembly.Instance` class or Wasmtime.
 
