@@ -69,6 +69,7 @@ defmodule Orb.Stack do
         # Other parts of the system need to see the type, say
         # `Orb.Instruction.get_operand_type/1` so we fulfill that contract.
         pop_type: type,
+        # FIXME: change to nil
         push_type: type,
         count: count
       }
