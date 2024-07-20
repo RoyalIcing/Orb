@@ -71,7 +71,7 @@ defmodule Orb.Import do
   )
   ```
   """
-  @since "0.0.46"
+  @doc since: "0.0.46"
   defmacro register(module) do
     quote do
       @wasm_imports (for imp <- unquote(module).__wasm_imports__(nil) do
