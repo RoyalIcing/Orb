@@ -1012,6 +1012,7 @@ defmodule Orb do
   end
 
   def to_wat(term) when is_struct(term) do
+    # TODO: should we leave this as iodata? Or allow an option to be passed in?
     Orb.ToWat.to_wat(term, "") |> IO.chardata_to_string()
   end
 
@@ -1032,6 +1033,7 @@ defmodule Orb do
     #   <<0x0A, 0x06, 0x01, 0x04, 0x00, 0x41, 0x2A, 0x0B>>
 
     context = Orb.ToWasm.Context.new()
+    # TODO: should we leave this as iodata? Or allow an option to be passed in?
     Orb.ToWasm.to_wasm(term, context) |> IO.iodata_to_binary()
   end
 

@@ -19,10 +19,20 @@ defmodule Orb.ToWasm.Helpers do
       items
     ]
   end
+
+  def to_wasm_type(nil), do: raise("nil is not a valid type")
+  def to_wasm_type(:i32), do: 0x7F
+  def to_wasm_type(:i64), do: 0x7E
+  def to_wasm_type(:f32), do: 0x7D
+  def to_wasm_type(:f64), do: 0x7C
+  def to_wasm_type(:v128), do: 0x7B
+
+  def to_wasm_type(custom_type) when is_atom(custom_type),
+    do: Orb.Ops.to_primitive_type(custom_type) |> to_wasm_type()
 end
 
 defmodule Orb.ToWasm.Context do
-  defstruct local_indexes: %{}
+  defstruct local_indexes: %{}, loop_indexes: %{}
 
   def new(), do: %__MODULE__{}
 
@@ -42,5 +52,17 @@ defmodule Orb.ToWasm.Context do
   def fetch_local_index!(context = %__MODULE__{}, local_identifier) do
     entry = Map.fetch!(context.local_indexes, local_identifier)
     entry.index
+  end
+
+  def register_loop_identifier(context = %__MODULE__{loop_indexes: loop_indexes}, loop_identifier)
+      when not is_map_key(loop_indexes, loop_identifier) do
+    next_index = map_size(loop_indexes)
+    loop_indexes = Map.put(loop_indexes, loop_identifier, next_index)
+    %__MODULE__{context | loop_indexes: loop_indexes}
+  end
+
+  def fetch_loop_identifier_index!(%__MODULE__{loop_indexes: loop_indexes}, loop_identifier)
+      when is_map_key(loop_indexes, loop_identifier) do
+    Map.fetch!(loop_indexes, loop_identifier)
   end
 end

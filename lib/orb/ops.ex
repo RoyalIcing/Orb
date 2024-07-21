@@ -98,7 +98,6 @@ defmodule Orb.Ops do
 
   def typeof(value, :primitive), do: typeof(value) |> to_primitive_type()
 
-  @spec pop_push_of(binary() | number() | map()) :: {any(), any()}
   def pop_push_of(n) when is_integer(n), do: {nil, Elixir.Integer}
   def pop_push_of(n) when is_float(n), do: {nil, Elixir.Float}
   def pop_push_of(%{pop_type: pop_type, push_type: push_type}), do: {pop_type, push_type}

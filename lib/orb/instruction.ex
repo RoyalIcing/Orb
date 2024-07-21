@@ -33,10 +33,6 @@ defmodule Orb.Instruction do
     }
   end
 
-  @spec wrap_constant!(any(), number() | %{:push_type => any(), optional(any()) => any()}) :: %{
-          :push_type => any(),
-          optional(any()) => any()
-        }
   def wrap_constant!(type, value)
 
   def wrap_constant!(Elixir.Integer, value) when is_number(value),
@@ -45,6 +41,7 @@ defmodule Orb.Instruction do
   def wrap_constant!(Elixir.Float, value) when is_number(value),
     do: raise("Need concrete type not Elixir.Float for constants.")
 
+  # TODO: replace with Orb.Instruction.Const
   def wrap_constant!(type, value) when is_number(value),
     do: %__MODULE__{
       push_type: type,
@@ -118,7 +115,9 @@ defmodule Orb.Instruction do
   end
 
   def local_set(type, local_name, value) do
-    new(nil, {:local_set, local_name, type}, [value])
+    new(nil, {:local_set, local_name, type}, [
+      Orb.Instruction.Const.wrap(type, value, "local.set $#{local_name}")
+    ])
   end
 
   def global_set(type, global_name, value) do
@@ -159,7 +158,7 @@ defmodule Orb.Instruction do
       received_type =
         cond do
           is_integer(param) -> Elixir.Integer
-          # TODO: Change to Elixir.Float
+          # FIXME: Change to Elixir.Float
           is_float(param) -> :f32
           %{push_type: type} = param -> type
         end
@@ -379,7 +378,7 @@ defmodule Orb.Instruction do
           indent
         ) do
       [
-        for(operand <- operands, do: [indent, Instructions.do_wat(operand), "\n"]),
+        for(operand <- operands, do: [Instructions.do_wat(operand, indent), "\n"]),
         indent,
         "(local.set $",
         to_string(local_name),
@@ -484,11 +483,12 @@ defmodule Orb.Instruction do
   defimpl Orb.ToWasm do
     import Orb.Leb
 
-    def type_const(:i32), do: 0x41
-    def type_const(:i64), do: 0x42
-    def type_const(:f32), do: 0x43
-    def type_const(:f64), do: 0x44
+    defp type_const(:i32), do: 0x41
+    defp type_const(:i64), do: 0x42
+    defp type_const(:f32), do: 0x43
+    defp type_const(:f64), do: 0x44
 
+    # TODO: remove, replace with Orb.Instruction.Const
     def to_wasm(
           %Orb.Instruction{
             push_type: type,
@@ -559,21 +559,21 @@ defmodule Orb.Instruction do
     defp i32_operation(:rotl), do: 0x77
     defp i32_operation(:rotr), do: 0x78
 
-    def i64_operation(:add), do: 0x7C
-    def i64_operation(:sub), do: 0x7D
-    def i64_operation(:mul), do: 0x7E
-    def i64_operation(:div_s), do: 0x7F
-    def i64_operation(:div_u), do: 0x80
-    def i64_operation(:rem_s), do: 0x81
-    def i64_operation(:rem_u), do: 0x82
-    def i64_operation(:and), do: 0x83
-    def i64_operation(:or), do: 0x84
-    def i64_operation(:xor), do: 0x85
-    def i64_operation(:shl), do: 0x86
-    def i64_operation(:shr_s), do: 0x87
-    def i64_operation(:shr_u), do: 0x88
-    def i64_operation(:rotl), do: 0x89
-    def i64_operation(:rotr), do: 0x8A
+    defp i64_operation(:add), do: 0x7C
+    defp i64_operation(:sub), do: 0x7D
+    defp i64_operation(:mul), do: 0x7E
+    defp i64_operation(:div_s), do: 0x7F
+    defp i64_operation(:div_u), do: 0x80
+    defp i64_operation(:rem_s), do: 0x81
+    defp i64_operation(:rem_u), do: 0x82
+    defp i64_operation(:and), do: 0x83
+    defp i64_operation(:or), do: 0x84
+    defp i64_operation(:xor), do: 0x85
+    defp i64_operation(:shl), do: 0x86
+    defp i64_operation(:shr_s), do: 0x87
+    defp i64_operation(:shr_u), do: 0x88
+    defp i64_operation(:rotl), do: 0x89
+    defp i64_operation(:rotr), do: 0x8A
 
     # def to_wasm(
     #       %Orb.Instruction{

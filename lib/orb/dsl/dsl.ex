@@ -467,7 +467,8 @@ defmodule Orb.DSL do
   Declare a loop.
   """
   defmacro loop(identifier, options \\ [], do: block) do
-    identifier = __expand_identifier(identifier, __CALLER__)
+    env = __CALLER__
+    identifier = __expand_identifier(identifier, env)
 
     result_type =
       Keyword.get(options, :result, nil) |> Macro.expand_literals(__CALLER__)
@@ -481,11 +482,11 @@ defmodule Orb.DSL do
     block_items =
       Macro.prewalk(block_items, fn
         {{:., _, [{:__aliases__, _, [identifier]}, :continue]}, _, []} ->
-          quote do: %Orb.Loop.Branch{identifier: unquote(identifier)}
+          quote do: %Orb.Loop.Branch{identifier: unquote(__expand_identifier(identifier, env))}
 
         {{:., _, [{:__aliases__, _, [identifier]}, :continue]}, _, [[if: condition]]} ->
           quote do: %Orb.Loop.Branch{
-                  identifier: unquote(identifier),
+                  identifier: unquote(__expand_identifier(identifier, env)),
                   if: unquote(condition)
                 }
 

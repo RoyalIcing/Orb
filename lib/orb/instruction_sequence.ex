@@ -220,13 +220,7 @@ defmodule Orb.InstructionSequence do
           options
         ) do
       for instruction <- instructions do
-        case instruction do
-          %Orb.InstructionSequence{} ->
-            to_wasm(instruction, options)
-
-          _ ->
-            Orb.ToWasm.to_wasm(instruction, options)
-        end
+        Orb.ToWasm.to_wasm(instruction, options)
       end
     end
   end

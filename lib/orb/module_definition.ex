@@ -197,26 +197,34 @@ defmodule Orb.ModuleDefinition do
 
       uniq_func_types =
         for({f, _index} <- funcs, do: func_type_tuple(f))
-        |> Enum.uniq()
 
       func_defs =
-        for {f, _index} <- funcs do
-          type_to_find = func_type_tuple(f)
-
-          Enum.find_index(uniq_func_types, fn type -> type === type_to_find end)
-          |> uleb128()
+        for {_f, index} <- funcs do
+          index |> uleb128()
         end
+
+      # uniq_func_types =
+      #   for({f, _index} <- funcs, do: func_type_tuple(f))
+      #   |> Enum.uniq()
+
+      # func_defs =
+      #   for {f, _index} <- funcs do
+      #     type_to_find = func_type_tuple(f)
+
+      #     Enum.find_index(uniq_func_types, fn type -> type === type_to_find end)
+      #     |> uleb128()
+      #   end
 
       export_funcs =
         for {%Orb.Func{exported_names: names}, index} <- funcs, name <- names do
-          export_func(name, index)
+          encode_export_func(name, index)
         end
 
       func_code = for {f, _index} <- funcs, do: Orb.ToWasm.to_wasm(f, context)
 
       [
         @wasm_prefix,
-        section(:type, vec(for {p, r} <- uniq_func_types, do: func_type(p, r))),
+        section(:type, vec(for {p, r} <- uniq_func_types, do: encode_func_type(p, r))),
         section(:function, vec(func_defs)),
         section(:export, vec(export_funcs)),
         section(:code, vec(func_code))
@@ -235,7 +243,7 @@ defmodule Orb.ModuleDefinition do
       {params, result}
     end
 
-    defp func_type(params, results) do
+    defp encode_func_type(params, results) do
       alias Orb.Func.Param
 
       [
@@ -249,14 +257,14 @@ defmodule Orb.ModuleDefinition do
               for type <- Tuple.to_list(types), do: Param.to_wasm_type(type)
 
             type when is_atom(type) ->
-              [Param.to_wasm_type(type)]
+              [to_wasm_type(type)]
           end
           |> vec()
         end
       ]
     end
 
-    defp export_func(name, func_index) do
+    defp encode_export_func(name, func_index) do
       [
         sized(name),
         0x00,

@@ -126,6 +126,28 @@ defmodule Orb.IfElse do
     end
   end
 
+  defimpl Orb.ToWasm do
+    import Orb.ToWasm.Helpers
+
+    def to_wasm(
+          %Orb.IfElse{
+            push_type: result,
+            condition: condition,
+            when_true: when_true,
+            when_false: when_false
+          },
+          context
+        ) do
+      [
+        Orb.ToWasm.to_wasm(condition, context),
+        [0x04, if(result, do: to_wasm_type(result), else: 0x40)],
+        Orb.ToWasm.to_wasm(when_true, context),
+        if(when_false, do: [0x05, Orb.ToWasm.to_wasm(when_false, context)], else: []),
+        0x0B
+      ]
+    end
+  end
+
   defimpl Orb.TypeNarrowable do
     def type_narrow_to(%Orb.IfElse{push_type: current_type} = if_else, narrower_type) do
       case Ops.types_compatible?(current_type, narrower_type) do
