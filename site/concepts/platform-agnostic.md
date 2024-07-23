@@ -14,3 +14,5 @@ So unlike projects like [`wasm-bindgen`](https://github.com/rustwasm/wasm-bindge
 Orb lets you think and write in WebAssembly, working directly with the primitives it has, with a little bit of Elixir sugar syntax.
 
 It uses lightweight conventions that let you integrate into any platform. That way you can write once, and then plugin anywhere.
+
+Here’s a table of what features work in what browser and JavaScript-based engines: https://webassembly.org/features/
