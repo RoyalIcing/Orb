@@ -1,5 +1,9 @@
 defprotocol Orb.ToWasm do
-  @doc "Protocol for converting to WebAssembly binary format (.wasm)"
+  @doc """
+  Protocol for converting to WebAssembly binary format (.wasm)
+
+  There’s a helpful table / cheatsheet of instruction opcodes here: https://pengowray.github.io/wasm-ops/
+  """
   def to_wasm(data, options)
 end
 
@@ -32,11 +36,20 @@ defmodule Orb.ToWasm.Helpers do
 end
 
 defmodule Orb.ToWasm.Context do
-  defstruct local_indexes: %{}, loop_indexes: %{}
+  defstruct func_names_to_indexes: %{}, local_indexes: %{}, loop_indexes: %{}
 
   def new(), do: %__MODULE__{}
 
-  def set_local_get_types(context = %__MODULE__{}, local_types) do
+  def set_func_name_index_lookup(%__MODULE__{} = context, func_names_to_indexes)
+      when is_map(func_names_to_indexes) do
+    %__MODULE__{context | func_names_to_indexes: func_names_to_indexes}
+  end
+
+  def fetch_func_index!(%__MODULE__{} = context, func_name) do
+    Map.fetch!(context.func_names_to_indexes, func_name)
+  end
+
+  def set_local_get_types(%__MODULE__{} = context, local_types) do
     local_indexes =
       Enum.with_index(local_types)
       |> Map.new(fn {{id, type}, index} -> {id, %{index: index, type: type}} end)
@@ -49,12 +62,12 @@ defmodule Orb.ToWasm.Context do
     put_in(context.local_indexes, local_indexes)
   end
 
-  def fetch_local_index!(context = %__MODULE__{}, local_identifier) do
+  def fetch_local_index!(%__MODULE__{} = context, local_identifier) do
     entry = Map.fetch!(context.local_indexes, local_identifier)
     entry.index
   end
 
-  def register_loop_identifier(context = %__MODULE__{loop_indexes: loop_indexes}, loop_identifier)
+  def register_loop_identifier(%__MODULE__{loop_indexes: loop_indexes} = context, loop_identifier)
       when not is_map_key(loop_indexes, loop_identifier) do
     next_index = map_size(loop_indexes)
     loop_indexes = Map.put(loop_indexes, loop_identifier, next_index)
