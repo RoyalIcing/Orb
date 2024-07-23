@@ -82,7 +82,7 @@ defmodule Orb.Instruction.Const do
         type_const(type),
         cond do
           is_integer(number) ->
-            uleb128(number)
+            leb128_s(number)
 
           is_float(number) and type === :f32 ->
             <<number::32-float-little>>

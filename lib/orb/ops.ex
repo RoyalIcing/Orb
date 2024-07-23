@@ -39,6 +39,7 @@ defmodule Orb.Ops do
   @integer_types ~w(i64 i32)a
   @float_types ~w(f64 f32)a
   @primitive_types @integer_types ++ @float_types
+  # TODO: remove effects
   @effects ~w(unknown_effect memory_effect global_effect local_effect)a
   @elixir_types [Elixir.Integer, Elixir.Float]
   # @base_types @primitive_types ++ @effects ++ @elixir_types
@@ -53,6 +54,7 @@ defmodule Orb.Ops do
   def to_primitive_type(type) when type in @elixir_types, do: type
   # TODO: remove these as they don’t match is_primitive_type/1 above
   def to_primitive_type(nil), do: :nop
+  # TODO: remove :nop and :trap
   def to_primitive_type(:nop), do: :nop
   def to_primitive_type(:trap), do: :trap
   def to_primitive_type(%{result: result}), do: result
@@ -61,6 +63,7 @@ defmodule Orb.Ops do
     for nested <- Tuple.to_list(type) do
       to_primitive_type(nested)
     end
+    |> List.flatten()
     |> List.to_tuple()
   end
 

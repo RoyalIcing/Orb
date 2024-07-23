@@ -497,7 +497,7 @@ defmodule Orb.Instruction do
           },
           _
         ) do
-      [type_const(type), uleb128(number)]
+      [type_const(type), leb128_s(number)]
     end
 
     def to_wasm(
@@ -539,7 +539,7 @@ defmodule Orb.Instruction do
       [
         for(operand <- operands, do: Orb.ToWasm.to_wasm(operand, context)),
         0x21,
-        uleb128(Orb.ToWasm.Context.fetch_local_index!(context, identifier))
+        leb128_u(Orb.ToWasm.Context.fetch_local_index!(context, identifier))
       ]
     end
 

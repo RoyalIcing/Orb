@@ -186,8 +186,8 @@ defmodule Orb.ModuleDefinition do
             table_size: _table_size,
             imports: _imports,
             globals: _globals,
-            memory: _memory,
-            constants: _constants,
+            memory: memory,
+            constants: constants,
             body: mod_body,
             data: _data
           },
@@ -195,29 +195,50 @@ defmodule Orb.ModuleDefinition do
         ) do
       funcs = Enum.with_index(for f = %Orb.Func{} <- mod_body, do: f)
 
-      uniq_func_types =
-        for({f, _index} <- funcs, do: func_type_tuple(f))
-
-      func_defs =
-        for {_f, index} <- funcs do
-          index |> uleb128()
-        end
+      context =
+        context
+        |> Orb.ToWasm.Context.set_func_name_index_lookup(
+          Map.new(funcs, fn {f, index} -> {f.name, index} end)
+        )
 
       # uniq_func_types =
       #   for({f, _index} <- funcs, do: func_type_tuple(f))
-      #   |> Enum.uniq()
 
       # func_defs =
-      #   for {f, _index} <- funcs do
-      #     type_to_find = func_type_tuple(f)
-
-      #     Enum.find_index(uniq_func_types, fn type -> type === type_to_find end)
-      #     |> uleb128()
+      #   for {_f, index} <- funcs do
+      #     leb128_u(index)
       #   end
+
+      uniq_func_types =
+        for({f, _index} <- funcs, do: func_type_tuple(f))
+        |> Enum.uniq()
+
+      func_defs =
+        for {f, _index} <- funcs do
+          type_to_find = func_type_tuple(f)
+
+          Enum.find_index(uniq_func_types, fn type -> type === type_to_find end)
+          |> leb128_u()
+        end
 
       export_funcs =
         for {%Orb.Func{exported_names: names}, index} <- funcs, name <- names do
           encode_export_func(name, index)
+        end
+
+      export_memories =
+        case memory do
+          nil ->
+            []
+
+          %{exported_name: exported_name} ->
+            [
+              [
+                sized(exported_name),
+                0x02,
+                leb128_u(0)
+              ]
+            ]
         end
 
       func_code = for {f, _index} <- funcs, do: Orb.ToWasm.to_wasm(f, context)
@@ -226,8 +247,18 @@ defmodule Orb.ModuleDefinition do
         @wasm_prefix,
         section(:type, vec(for {p, r} <- uniq_func_types, do: encode_func_type(p, r))),
         section(:function, vec(func_defs)),
-        section(:export, vec(export_funcs)),
-        section(:code, vec(func_code))
+        if memory do
+          section(:memory, vec([Orb.ToWasm.to_wasm(memory, context)]))
+        else
+          []
+        end,
+        section(:export, vec(export_memories ++ export_funcs)),
+        # section(:data_count, vec([])),
+        section(:code, vec(func_code)),
+        case Orb.ToWasm.to_wasm(constants, context) do
+          [] -> []
+          constants_wasm -> section(:data, vec(constants_wasm))
+        end
       ]
     end
 
@@ -282,9 +313,9 @@ defmodule Orb.ModuleDefinition do
     defp section(:export, bytes), do: section(0x07, bytes)
     defp section(:start, bytes), do: section(0x08, bytes)
     defp section(:element, bytes), do: section(0x09, bytes)
+    defp section(:data_count, bytes), do: section(0x0C, bytes)
     defp section(:code, bytes), do: section(0x0A, bytes)
     defp section(:data, bytes), do: section(0x0B, bytes)
-    defp section(:data_count, bytes), do: section(0x0C, bytes)
 
     defp section(id, bytes) do
       [

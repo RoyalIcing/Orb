@@ -85,7 +85,7 @@ defmodule Orb.Loop do
           ) do
         index = Orb.ToWasm.Context.fetch_loop_identifier_index!(context, identifier)
 
-        [0x0C, Leb.uleb128(index)]
+        [0x0C, Leb.leb128_u(index)]
       end
 
       def to_wasm(
@@ -97,7 +97,7 @@ defmodule Orb.Loop do
         [
           Orb.ToWasm.to_wasm(condition, context),
           0x0D,
-          Leb.uleb128(index)
+          Leb.leb128_u(index)
         ]
       end
     end

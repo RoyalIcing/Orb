@@ -137,7 +137,7 @@ defmodule Orb.DSL.Defw do
 
     quote do
       unquote(def_kind)(unquote(def_call)) do
-        Orb.Instruction.typed_call(
+        Orb.Instruction.Call.new(
           unquote(result_type),
           unquote(param_types),
           case {@wasm_func_prefix, unquote(name)} do

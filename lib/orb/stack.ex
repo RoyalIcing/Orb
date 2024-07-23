@@ -13,27 +13,25 @@ defmodule Orb.Stack do
     require alias Orb.Ops
 
     def new(instruction) do
-      case Ops.pop_push_of(instruction) do
-        {nil, nil} ->
-          raise ArgumentError,
-            message: "Cannot drop instruction pushing nothing to the stack."
+      {_pop, type} = Ops.pop_push_of(instruction)
 
-        # TODO: what about custom types?
-        {nil, type} when is_atom(type) ->
+      if is_nil(type) do
+        raise ArgumentError,
+          message: "Cannot drop instruction pushing nothing to the stack."
+      end
+
+      case Ops.to_primitive_type(type) do
+        type when is_atom(type) ->
           %__MODULE__{
             instruction: instruction,
             count: 1
           }
 
-        {nil, type} when is_tuple(type) ->
+        type when is_tuple(type) ->
           %__MODULE__{
             instruction: instruction,
             count: tuple_size(type)
           }
-
-        {pop, _} ->
-          raise ArgumentError,
-            message: "Cannot drop instruction that is already popping #{pop} from the stack."
       end
     end
 

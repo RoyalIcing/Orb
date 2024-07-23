@@ -584,7 +584,7 @@ defmodule Orb do
             %VariableReference{global_or_local: :local, identifier: identifier},
             context
           ) do
-        [0x20, uleb128(Orb.ToWasm.Context.fetch_local_index!(context, identifier))]
+        [0x20, leb128_u(Orb.ToWasm.Context.fetch_local_index!(context, identifier))]
       end
     end
   end

@@ -88,7 +88,8 @@ defmodule Orb.Func do
           %Orb.Func{params: params, body: body, local_types: local_types},
           context
         ) do
-      local_decls = for {_, type} <- local_types, do: [0x01, Orb.Func.Param.to_wasm_type(type)]
+      local_decls =
+        for {_, type} <- local_types, do: [0x01, to_wasm_type(type)]
 
       param_types = for param <- params, do: {param.name, param.type}
       context = Context.set_local_get_types(context, param_types ++ local_types)

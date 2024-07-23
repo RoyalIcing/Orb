@@ -168,4 +168,22 @@ defmodule Orb.Constants do
       ]
     end
   end
+
+  defimpl Orb.ToWasm do
+    def to_wasm(
+          %Orb.Constants{lookup_table: lookup_table},
+          context
+        ) do
+      for {string, offset} <- lookup_table do
+        [
+          # active
+          0x0,
+          Orb.Instruction.Const.new(:i32, offset) |> Orb.ToWasm.to_wasm(context),
+          # end opcode
+          0x0B,
+          Orb.ToWasm.Helpers.sized(string)
+        ]
+      end
+    end
+  end
 end

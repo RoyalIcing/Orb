@@ -3,7 +3,7 @@ defmodule Orb.Memory do
   Work with memory: load, store, declare pages & initial data.
   """
 
-  defstruct name: "", min: 0, exported?: false
+  defstruct name: "", min: 0, exported_name: "memory"
 
   @doc false
   def new(page_definitions, constants)
@@ -196,6 +196,24 @@ defmodule Orb.Memory do
         end,
         ~S{)},
         "\n"
+      ]
+    end
+  end
+
+  defimpl Orb.ToWasm do
+    import Orb.Leb
+
+    def to_wasm(
+          %Orb.Memory{
+            min: min
+          },
+          _context
+        ) do
+      [
+        case min do
+          nil -> [0x0, 0x0]
+          min when min >= 0 -> [0x0, leb128_u(min)]
+        end
       ]
     end
   end

@@ -51,9 +51,10 @@ defmodule DefwTest do
     assert {:first, 0} in Visibilities.__info__(:functions)
     refute {:second, 0} in Visibilities.__info__(:functions)
 
-    assert Visibilities.first() == %Orb.Instruction{
-             operation: {:call, [], :first},
-             operands: []
+    assert Visibilities.first() == %Orb.Instruction.Call{
+             push_type: nil,
+             args: [],
+             func_identifier: :first
            }
 
     assert_raise UndefinedFunctionError, &Visibilities.second/0
@@ -103,11 +104,25 @@ defmodule DefwTest do
       end
     end
 
-    # IO.puts(SharedStringConsumer.to_wat())
-    i = Instance.run(SharedStringConsumer)
-    # assert Instance.read_memory(i, 0xFF, 20) == ""
-    assert Instance.call_reading_string(i, :cdata_start2) == "<![CDATA["
-    assert Instance.call_reading_string(i, :use_other) == "<![CDATA["
+    wat = Orb.to_wat(SharedStringConsumer)
+    wasm = Orb.to_wasm(SharedStringConsumer)
+
+    if false do
+      path_wat = Path.join(__DIR__, "shared_string.wat")
+      path_wasm = Path.join(__DIR__, "shared_string.wasm")
+      File.write!(path_wat, wat)
+      File.write!(path_wasm, wasm)
+      System.cmd("wasm-validate", [path_wasm])
+    end
+
+    # TODO: switch to Wasmex so we can run wasm binaries properly
+    for source <- [wat] do
+      # IO.puts(SharedStringConsumer.to_wat())
+      i = Instance.run(source)
+      # assert Instance.read_memory(i, 0xFF, 20) == ""
+      assert Instance.call_reading_string(i, :cdata_start2) == "<![CDATA["
+      assert Instance.call_reading_string(i, :use_other) == "<![CDATA["
+    end
   end
 
   test "can unquote name" do

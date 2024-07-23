@@ -13,13 +13,14 @@ defmodule Orb.ToWasm.Helpers do
   import Orb.Leb
 
   def sized(bytes) do
+    # TODO: use IO.iodata_length/1 to save allocating binary
     bytes = IO.iodata_to_binary(bytes)
-    [byte_size(bytes) |> uleb128(), bytes]
+    [byte_size(bytes) |> leb128_u(), bytes]
   end
 
   def vec(items) when is_list(items) do
     [
-      length(items) |> uleb128(),
+      length(items) |> leb128_u(),
       items
     ]
   end

@@ -57,6 +57,20 @@ defmodule Orb.Str do
     end
   end
 
+  defimpl Orb.ToWasm do
+    def to_wasm(
+          %Orb.Str{memory_offset: memory_offset, string: string},
+          context
+        ) do
+      [
+        Orb.Instruction.Const.new(:i32, memory_offset)
+        |> Orb.ToWasm.to_wasm(context),
+        Orb.Instruction.Const.new(:i32, byte_size(string))
+        |> Orb.ToWasm.to_wasm(context)
+      ]
+    end
+  end
+
   defmodule Slice do
     @moduledoc """
     A string slice represented as a i64, a compromise for when storing strings as globals (Globals cannot be `(i32 i32)`, only single primitives like `i32` or `i64`).
