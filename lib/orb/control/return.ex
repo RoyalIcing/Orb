@@ -29,4 +29,15 @@ defmodule Orb.Control.Return do
       ]
     end
   end
+
+  defimpl Orb.ToWasm do
+    def to_wasm(%Orb.Control.Return{body: nil}, _), do: [0x0F]
+
+    def to_wasm(%Orb.Control.Return{body: value}, context) do
+      [
+        Orb.ToWasm.to_wasm(value, context),
+        0x0F
+      ]
+    end
+  end
 end

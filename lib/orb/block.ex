@@ -24,9 +24,24 @@ defmodule Orb.Block do
     end
   end
 
+  defimpl Orb.ToWasm do
+    import Orb.ToWasm.Helpers
+
+    def to_wasm(%Orb.Block{identifier: identifier, push_type: push_type, body: body}, context) do
+      context = Orb.ToWasm.Context.register_loop_identifier(context, to_string(identifier))
+
+      [
+        0x02,
+        if(push_type, do: to_wasm_type(push_type), else: 0x40),
+        Orb.ToWasm.to_wasm(body, context),
+        0x0B
+      ]
+    end
+  end
+
   defmodule Branch do
     @moduledoc false
-    defstruct [:identifier, :if]
+    defstruct identifier: nil, if: nil, body: nil
 
     defimpl Orb.ToWat do
       def to_wat(
@@ -52,6 +67,32 @@ defmodule Orb.Block do
           "(br_if $",
           to_string(identifier),
           ")"
+        ]
+      end
+    end
+
+    defimpl Orb.ToWasm do
+      alias Orb.Leb
+
+      def to_wasm(
+            %Orb.Block.Branch{identifier: identifier, if: nil},
+            context
+          ) do
+        index = Orb.ToWasm.Context.fetch_loop_identifier_index!(context, to_string(identifier))
+
+        [0x0C, Leb.leb128_u(index)]
+      end
+
+      def to_wasm(
+            %Orb.Block.Branch{identifier: identifier, if: condition},
+            context
+          ) do
+        index = Orb.ToWasm.Context.fetch_loop_identifier_index!(context, to_string(identifier))
+
+        [
+          Orb.ToWasm.to_wasm(condition, context),
+          0x0D,
+          Leb.leb128_u(index)
         ]
       end
     end

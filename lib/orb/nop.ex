@@ -8,4 +8,8 @@ defmodule Orb.Nop do
       [indent, "nop"]
     end
   end
+
+  defimpl Orb.ToWasm do
+    def to_wasm(%Orb.Nop{}, _context), do: [0x01]
+  end
 end

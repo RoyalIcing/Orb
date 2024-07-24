@@ -83,14 +83,16 @@ defmodule WasmOutputTest do
     wat = Orb.to_wat(MathI32)
     wasm = Orb.to_wasm(MathI32)
 
-    assert wat |> Wasm.call(:fibonacci, 0) === 0
-    assert wat |> Wasm.call(:fibonacci, 1) === 1
-    assert wat |> Wasm.call(:fibonacci, 2) === 1
-    assert wat |> Wasm.call(:fibonacci, 3) === 2
-    assert wat |> Wasm.call(:fibonacci, 4) === 3
-    assert wat |> Wasm.call(:fibonacci, 5) === 5
-    assert wat |> Wasm.call(:fibonacci, 6) === 8
-    assert wat |> Wasm.call(:fibonacci, 7) === 13
+    for source <- [wat, wasm] do
+      assert source |> Wasm.call(:fibonacci, 0) === 0
+      assert source |> Wasm.call(:fibonacci, 1) === 1
+      assert source |> Wasm.call(:fibonacci, 2) === 1
+      assert source |> Wasm.call(:fibonacci, 3) === 2
+      assert source |> Wasm.call(:fibonacci, 4) === 3
+      assert source |> Wasm.call(:fibonacci, 5) === 5
+      assert source |> Wasm.call(:fibonacci, 6) === 8
+      assert source |> Wasm.call(:fibonacci, 7) === 13
+    end
 
     assert wat === ~S"""
            (module $MathI32
@@ -195,6 +197,51 @@ defmodule WasmOutputTest do
     assert (11 * 7) |> div(4 + 11 - 7) === 9
     assert Orb.to_wat(MathI64) |> Wasm.call(:math, {:i64, 11}, {:i64, 7}) === 9
     assert Orb.to_wasm(MathI64) |> Wasm.call(:math, {:i64, 11}, {:i64, 7}) === 9
+  end
+
+  test "blocks" do
+    defmodule Divide64 do
+      use Orb
+
+      defw divide(a: I64, b: I64), I64 do
+        Control.block ByZero do
+          # ByZero.break() when b === i64(0)
+          if b === i64(0) do
+            ByZero.break()
+          end
+
+          return(a / b)
+        end
+
+        i64(0)
+      end
+
+      # defw divide2(a: I64, b: I64), I64 do
+      #   Control.block ByZero, I64 do
+      #     # ByZero.break() when b === i64(0)
+      #     if b === i64(0) do
+      #       ByZero.break(i64(0))
+      #     end
+
+      #     a / b
+      #   end
+      # end
+    end
+
+    wat = Orb.to_wat(Divide64)
+    wasm = Orb.to_wasm(Divide64)
+
+    if false do
+      path_wat = Path.join(__DIR__, "divide.wat")
+      path_wasm = Path.join(__DIR__, "divide.wasm")
+      File.write!(path_wat, wat)
+      File.write!(path_wasm, wasm)
+    end
+
+    assert Wasm.call(wat, :divide, {:i64, 22}, {:i64, 2}) === 11
+    assert Wasm.call(wat, :divide, {:i64, 0}, {:i64, 0}) === 0
+    assert Wasm.call(wasm, :divide, {:i64, 22}, {:i64, 2}) === 11
+    assert Wasm.call(wasm, :divide, {:i64, 0}, {:i64, 0}) === 0
   end
 
   defp extract_wasm_sections(<<"\0asm", 0x01000000::32>> <> bytes) do

@@ -70,7 +70,8 @@ defmodule Orb.ToWasm.Context do
 
   def register_loop_identifier(%__MODULE__{loop_indexes: loop_indexes} = context, loop_identifier)
       when not is_map_key(loop_indexes, loop_identifier) do
-    next_index = map_size(loop_indexes)
+    # Index 0 is the function itself, so we start at 1.
+    next_index = map_size(loop_indexes) + 1
     loop_indexes = Map.put(loop_indexes, loop_identifier, next_index)
     %__MODULE__{context | loop_indexes: loop_indexes}
   end

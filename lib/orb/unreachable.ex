@@ -11,4 +11,8 @@ defmodule Orb.Unreachable do
       [indent, "unreachable"]
     end
   end
+
+  defimpl Orb.ToWasm do
+    def to_wasm(%Orb.Unreachable{}, _context), do: [0x00]
+  end
 end

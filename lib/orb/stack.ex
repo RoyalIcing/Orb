@@ -48,6 +48,15 @@ defmodule Orb.Stack do
         ]
       end
     end
+
+    defimpl Orb.ToWasm do
+      def to_wasm(%Orb.Stack.Drop{instruction: instruction, count: count}, context) do
+        [
+          Orb.ToWasm.to_wasm(instruction, context),
+          for(_ <- 1..count, do: 0x1A)
+        ]
+      end
+    end
   end
 
   defmodule Pop do
@@ -78,6 +87,10 @@ defmodule Orb.Stack do
 
       # def to_wat(%Orb.Stack.Pop{}, _), do: []
       def to_wat(%Orb.Stack.Pop{pop_type: type}, _), do: ["(;", Helpers.do_type(type), ";)"]
+    end
+
+    defimpl Orb.ToWasm do
+      def to_wasm(%Orb.Stack.Pop{}, _context), do: []
     end
   end
 
