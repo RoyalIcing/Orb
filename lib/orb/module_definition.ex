@@ -185,7 +185,7 @@ defmodule Orb.ModuleDefinition do
             types: _types,
             table_size: _table_size,
             imports: _imports,
-            globals: _globals,
+            globals: globals,
             memory: memory,
             constants: constants,
             body: mod_body,
@@ -193,21 +193,23 @@ defmodule Orb.ModuleDefinition do
           },
           context
         ) do
+      globals_indexed = globals |> Enum.with_index()
+
       funcs = Enum.with_index(for f = %Orb.Func{} <- mod_body, do: f)
 
       context =
         context
+        |> Orb.ToWasm.Context.set_global_name_index_lookup(
+          Map.new(globals_indexed, fn {g, index} -> {g.name, index} end)
+        )
         |> Orb.ToWasm.Context.set_func_name_index_lookup(
           Map.new(funcs, fn {f, index} -> {f.name, index} end)
         )
 
-      # uniq_func_types =
-      #   for({f, _index} <- funcs, do: func_type_tuple(f))
-
-      # func_defs =
-      #   for {_f, index} <- funcs do
-      #     leb128_u(index)
-      #   end
+      global_defs =
+        for global <- globals do
+          Orb.ToWasm.to_wasm(global, context)
+        end
 
       uniq_func_types =
         for({f, _index} <- funcs, do: func_type_tuple(f))
@@ -249,6 +251,11 @@ defmodule Orb.ModuleDefinition do
         section(:function, vec(func_defs)),
         if memory do
           section(:memory, vec([Orb.ToWasm.to_wasm(memory, context)]))
+        else
+          []
+        end,
+        if global_defs != [] do
+          section(:global, vec(global_defs))
         else
           []
         end,

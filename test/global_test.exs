@@ -39,6 +39,17 @@ defmodule GlobalTest do
         @const64 99
       end
 
+      # TODO: change syntax???
+      # Global.var I64 do
+      #   @factor 5
+      # end
+      # Global.const I64 do
+      #   @factor 5
+      # end
+      # Global.export_const I64 do
+      #   @factor 5
+      # end
+
       export do
         global I32, :mutable do
           @public1 11

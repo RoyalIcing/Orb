@@ -37,9 +37,21 @@ defmodule Orb.ToWasm.Helpers do
 end
 
 defmodule Orb.ToWasm.Context do
-  defstruct func_names_to_indexes: %{}, local_indexes: %{}, loop_indexes: %{}
+  defstruct global_names_to_indexes: %{},
+            func_names_to_indexes: %{},
+            local_indexes: %{},
+            loop_indexes: %{}
 
   def new(), do: %__MODULE__{}
+
+  def set_global_name_index_lookup(%__MODULE__{} = context, global_names_to_indexes)
+      when is_map(global_names_to_indexes) do
+    %__MODULE__{context | global_names_to_indexes: global_names_to_indexes}
+  end
+
+  def fetch_global_index!(%__MODULE__{} = context, global_name) do
+    Map.fetch!(context.global_names_to_indexes, global_name)
+  end
 
   def set_func_name_index_lookup(%__MODULE__{} = context, func_names_to_indexes)
       when is_map(func_names_to_indexes) do

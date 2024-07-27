@@ -15,6 +15,8 @@ defmodule Orb.Global do
     new(Orb.F32, name, mutability, exported, value)
   end
 
+  # TODO: rename mutability to :const and :var to match the spec
+  # https://webassembly.github.io/JS-BigInt-integration/core/binary/types.html#global-types
   def new(type, name, mutability, exported, value)
       when is_atom(type) and is_atom(name) and
              mutability in ~w[readonly mutable]a and
@@ -155,6 +157,31 @@ defmodule Orb.Global do
             Orb.ToWat.to_wat(initial_value, "")
         end,
         ")\n"
+      ]
+    end
+  end
+
+  defimpl Orb.ToWasm do
+    import Orb.ToWasm.Helpers
+
+    def to_wasm(
+          %Orb.Global{
+            type: type,
+            initial_value: initial_value,
+            mutability: mutability
+          },
+          context
+        ) do
+      [
+        to_wasm_type(type),
+        case mutability do
+          :readonly -> 0x0
+          :mutable -> 0x1
+        end,
+        Orb.Instruction.Const.wrap(type, initial_value)
+        |> Orb.ToWasm.to_wasm(context),
+        # end opcode
+        0x0B
       ]
     end
   end

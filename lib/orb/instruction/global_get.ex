@@ -12,6 +12,16 @@ defmodule Orb.Instruction.Global.Get do
     end
   end
 
+  defimpl Orb.ToWasm do
+    import Orb.Leb
+
+    def to_wasm(%Orb.Instruction.Global.Get{global_name: global_name}, context) do
+      global_index = Orb.ToWasm.Context.fetch_global_index!(context, global_name)
+
+      [0x23, leb128_u(global_index)]
+    end
+  end
+
   defimpl Orb.TypeNarrowable do
     def type_narrow_to(
           %Orb.Instruction.Global.Get{push_type: Orb.Str.Slice} =
