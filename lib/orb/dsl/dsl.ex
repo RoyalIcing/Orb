@@ -249,9 +249,9 @@ defmodule Orb.DSL do
 
       # @some_global = input
       {:=, _, [{:@, _, [{global, _, nil}]}, input]} when is_atom(global) ->
-        # quote do: Orb.Instruction.global_set(unquote(Macro.var(:wasm_global_type, nil)).(unquote(global)), unquote(global), unquote(input))
+        # quote do: Orb.Instruction.Global.Set.new(unquote(Macro.var(:wasm_global_type, nil)).(unquote(global)), unquote(global), unquote(input))
         quote do:
-                Orb.Instruction.global_set(
+                Orb.Instruction.Global.Set.new(
                   Orb.__lookup_global_type!(unquote(global)),
                   unquote(global),
                   unquote(input)

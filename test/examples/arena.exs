@@ -16,7 +16,7 @@ defmodule Examples.Arena do
         unreachable!()
       end
 
-      Instruction.global_set(Orb.I32, offset_global_name, new_ptr + byte_count)
+      Instruction.Global.Set.new(Orb.I32, offset_global_name, new_ptr + byte_count)
 
       new_ptr
     end
@@ -27,7 +27,7 @@ defmodule Examples.Arena do
     start_offset = values_mod.start_offset()
 
     Orb.snippet Orb.S32 do
-      Instruction.global_set(
+      Instruction.Global.Set.new(
         Orb.I32,
         offset_global_name,
         start_offset * Orb.Memory.page_byte_size()

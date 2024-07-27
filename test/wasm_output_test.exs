@@ -220,8 +220,12 @@ defmodule WasmOutputTest do
         i64(0)
       end
 
-      defw multiple_by_global(a: I64), I64 do
+      defw multiple_by_factor(a: I64), I64 do
         a * @factor
+      end
+
+      defw set_factor(a: I64) do
+        @factor = a
       end
 
       # defw divide2(a: I64, b: I64), I64 do
@@ -251,8 +255,8 @@ defmodule WasmOutputTest do
     assert Wasm.call(wasm, :divide, {:i64, 22}, {:i64, 2}) === 11
     assert Wasm.call(wasm, :divide, {:i64, 0}, {:i64, 0}) === 0
 
-    assert Wasm.call(wat, :multiple_by_global, {:i64, 7}) === 35
-    assert Wasm.call(wasm, :multiple_by_global, {:i64, 7}) === 35
+    assert Wasm.call(wat, :multiple_by_factor, {:i64, 7}) === 35
+    assert Wasm.call(wasm, :multiple_by_factor, {:i64, 7}) === 35
   end
 
   defp extract_wasm_sections(<<"\0asm", 0x01000000::32>> <> bytes) do

@@ -47,8 +47,8 @@ defmodule Orb do
     I32.global(count: 0, tally: 0)
 
     defw insert(element: I32) do
-      Orb.Instruction.global_set(Orb.I32, :count, I32.add(Orb.Instruction.Global.Get.new(Orb.I32, :count), 1))
-      Orb.Instruction.global_set(Orb.I32, :tally, I32.add(Orb.Instruction.Global.Get.new(Orb.I32, :tally), element))
+      Orb.Instruction.Global.Set.new(Orb.I32, :count, I32.add(Orb.Instruction.Global.Get.new(Orb.I32, :count), 1))
+      Orb.Instruction.Global.Set.new(Orb.I32, :tally, I32.add(Orb.Instruction.Global.Get.new(Orb.I32, :tally), element))
     end
 
     defw calculate_mean(), I32 do
@@ -1045,6 +1045,7 @@ defmodule Orb do
     end
   end
 
+  # TODO: move to Orb.Compiler
   def __lookup_global_type!(global_identifier) do
     Process.get({Orb, :global_types}) |> Map.fetch!(global_identifier)
   end

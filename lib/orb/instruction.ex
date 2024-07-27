@@ -120,6 +120,7 @@ defmodule Orb.Instruction do
     ])
   end
 
+  # TODO: remove
   def global_set(type, global_name, value) do
     new(nil, {:global_set, global_name, type}, [value])
   end
@@ -256,6 +257,7 @@ defmodule Orb.Instruction do
     operand
   end
 
+  # TODO: remove
   defp type_check_operand!(
          nil,
          {:global_set, global_name, expected_type},
@@ -386,6 +388,7 @@ defmodule Orb.Instruction do
       ]
     end
 
+    # TODO: remove
     def to_wat(
           %Orb.Instruction{
             operation: {:global_set, global_name, _},

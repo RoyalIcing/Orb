@@ -276,7 +276,7 @@ defmodule Orb.ModuleDefinition do
         for(param <- params, do: to_primitive_type(param.type))
         |> List.to_tuple()
 
-      result = to_primitive_type(result)
+      result = if result, do: to_primitive_type(result)
 
       {params, result}
     end
@@ -293,6 +293,9 @@ defmodule Orb.ModuleDefinition do
 
             types when is_tuple(types) ->
               for type <- Tuple.to_list(types), do: Param.to_wasm_type(type)
+
+            nil ->
+              []
 
             type when is_atom(type) ->
               [to_wasm_type(type)]
