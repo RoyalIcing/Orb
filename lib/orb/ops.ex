@@ -57,7 +57,6 @@ defmodule Orb.Ops do
   # TODO: remove :nop and :trap
   def to_primitive_type(:nop), do: :nop
   def to_primitive_type(:trap), do: :trap
-  def to_primitive_type(%{result: result}), do: result
 
   def to_primitive_type(type) when is_tuple(type) do
     for nested <- Tuple.to_list(type) do
