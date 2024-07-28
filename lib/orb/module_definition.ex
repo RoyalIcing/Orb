@@ -189,7 +189,7 @@ defmodule Orb.ModuleDefinition do
             memory: memory,
             constants: constants,
             body: mod_body,
-            data: _data
+            data: data
           },
           context
         ) do
@@ -245,6 +245,13 @@ defmodule Orb.ModuleDefinition do
 
       func_code = for {f, _index} <- funcs, do: Orb.ToWasm.to_wasm(f, context)
 
+      data_defs =
+        for data_item = %Orb.Data{} <- data do
+          Orb.ToWasm.to_wasm(data_item, context)
+        end
+
+      constants_defs = Orb.ToWasm.to_wasm(constants, context)
+
       [
         @wasm_prefix,
         section(:type, vec(for {p, r} <- uniq_func_types, do: encode_func_type(p, r))),
@@ -262,7 +269,7 @@ defmodule Orb.ModuleDefinition do
         section(:export, vec(export_memories ++ export_funcs)),
         # section(:data_count, vec([])),
         section(:code, vec(func_code)),
-        case Orb.ToWasm.to_wasm(constants, context) do
+        case constants_defs ++ data_defs do
           [] -> []
           constants_wasm -> section(:data, vec(constants_wasm))
         end

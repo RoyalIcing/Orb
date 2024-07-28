@@ -1,6 +1,7 @@
 defmodule Orb.Data do
   @moduledoc false
 
+  # TODO: remove nul_terminated
   defstruct [:offset, :value, :nul_terminated]
 
   defimpl Orb.ToWat do
@@ -10,10 +11,12 @@ defmodule Orb.Data do
         "(data (i32.const ",
         to_string(offset),
         ") ",
-        ?",
         case value do
           string when is_binary(string) ->
-            string |> String.replace(~S["], ~S[\"]) |> String.replace("\n", ~S"\n")
+            # string |> String.replace(~S["], ~S[\"]) |> String.replace("\n", ~S"\n")
+            string
+            |> inspect(binaries: :as_strings)
+            |> String.replace(~s[\\x], ~s[\\])
 
           list when is_list(list) ->
             for option <- list do
@@ -34,8 +37,8 @@ defmodule Orb.Data do
                   end
               end
             end
+            |> then(&[?", &1, ?"])
         end,
-        ?",
         if(nul_terminated, do: ~S| "\00"|, else: []),
         ")\n"
       ]
@@ -45,6 +48,44 @@ defmodule Orb.Data do
       [
         ?\\,
         byte |> Integer.to_string(16) |> String.downcase(:ascii) |> String.pad_leading(2, "0")
+      ]
+    end
+  end
+
+  defimpl Orb.ToWasm do
+    def to_wasm(
+          %Orb.Data{offset: offset, value: value},
+          context
+        ) do
+      value_encoded =
+        case value do
+          string when is_binary(string) ->
+            string
+
+          list when is_list(list) ->
+            for option <- list do
+              case option do
+                {:u8, bytes} ->
+                  bytes
+
+                {:u32, u32s} ->
+                  for u32 <- List.wrap(u32s) do
+                    # <<a::8, b::8, c::8, d::8>> = <<u32::little-size(32)>>
+                    # [a, b, c, d]
+                    <<u32::little-size(32)>>
+                  end
+              end
+            end
+        end
+
+      [
+        # active
+        0x0,
+        Orb.Instruction.Const.wrap(:i32, offset)
+        |> Orb.ToWasm.to_wasm(context),
+        # end opcode
+        0x0B,
+        Orb.ToWasm.Helpers.sized(value_encoded)
       ]
     end
   end

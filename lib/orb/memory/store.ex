@@ -109,4 +109,46 @@ defmodule Orb.Memory.Store do
       ]
     end
   end
+
+  defimpl Orb.ToWasm do
+    import Orb.Leb
+
+    def to_wasm(
+          %Orb.Memory.Store{
+            store_type: type,
+            store_instruction: store_instruction,
+            address: address,
+            align: align,
+            natural_align: natural_align,
+            value: value
+          },
+          context
+        ) do
+      type = Orb.Ops.to_primitive_type(type)
+
+      [
+        Orb.ToWasm.to_wasm(address, context),
+        Orb.ToWasm.to_wasm(value, context),
+        do_instruction(type, store_instruction),
+        do_align(align || natural_align),
+        leb128_u(0)
+      ]
+    end
+
+    defp do_instruction(:i32, :store), do: 0x36
+    defp do_instruction(:i64, :store), do: 0x37
+    defp do_instruction(:f32, :store), do: 0x38
+    defp do_instruction(:f64, :store), do: 0x39
+    defp do_instruction(:i32, :store8), do: 0x3A
+    defp do_instruction(:i32, :store16), do: 0x3B
+    defp do_instruction(:i64, :store8), do: 0x3C
+    defp do_instruction(:i64, :store16), do: 0x3D
+    defp do_instruction(:i64, :store32), do: 0x3E
+
+    # Encoded as power of two
+    defp do_align(1), do: leb128_u(0)
+    defp do_align(2), do: leb128_u(1)
+    defp do_align(4), do: leb128_u(2)
+    defp do_align(8), do: leb128_u(3)
+  end
 end

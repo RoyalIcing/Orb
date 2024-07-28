@@ -68,21 +68,37 @@ defmodule Orb.Instruction do
   def i32(operation), do: new(:i32, operation)
   def i32(operation, a) when is_list(a), do: new(:i32, operation, a)
   def i32(operation, a), do: new(:i32, operation, [a])
+
+  def i32(operation, a, b) when operation in ~w(eq ne lt_u lt_s gt_u gt_s le_u le_s ge_u ge_s)a,
+    do: Orb.Instruction.Relative.new(:i32, operation, a, b)
+
   def i32(operation, a, b), do: new(:i32, operation, [a, b])
 
   def i64(operation), do: new(:i64, operation)
   def i64(operation, a) when is_list(a), do: new(:i64, operation, a)
   def i64(operation, a), do: new(:i64, operation, [a])
+
+  def i64(operation, a, b) when operation in ~w(eq ne lt_u lt_s gt_u gt_s le_u le_s ge_u ge_s)a,
+    do: Orb.Instruction.Relative.new(:i64, operation, a, b)
+
   def i64(operation, a, b), do: new(:i64, operation, [a, b])
 
   def f32(operation), do: new(:f32, operation)
   def f32(operation, a) when is_list(a), do: new(:f32, operation, a)
   def f32(operation, a), do: new(:f32, operation, [a])
+
+  def f32(operation, a, b) when operation in ~w(eq ne lt gt le ge)a,
+    do: Orb.Instruction.Relative.new(:f32, operation, a, b)
+
   def f32(operation, a, b), do: new(:f32, operation, [a, b])
 
   def f64(operation), do: new(:f64, operation)
   def f64(operation, a) when is_list(a), do: new(:f64, operation, a)
   def f64(operation, a), do: new(:f64, operation, [a])
+
+  def f64(operation, a, b) when operation in ~w(eq ne lt gt le ge)a,
+    do: Orb.Instruction.Relative.new(:f64, operation, a, b)
+
   def f64(operation, a, b), do: new(:f64, operation, [a, b])
 
   # TODO: remove call()
@@ -546,6 +562,7 @@ defmodule Orb.Instruction do
       ]
     end
 
+    defp i32_operation(:eqz), do: 0x45
     defp i32_operation(:add), do: 0x6A
     defp i32_operation(:sub), do: 0x6B
     defp i32_operation(:mul), do: 0x6C
@@ -562,6 +579,7 @@ defmodule Orb.Instruction do
     defp i32_operation(:rotl), do: 0x77
     defp i32_operation(:rotr), do: 0x78
 
+    defp i64_operation(:eqz), do: 0x50
     defp i64_operation(:add), do: 0x7C
     defp i64_operation(:sub), do: 0x7D
     defp i64_operation(:mul), do: 0x7E

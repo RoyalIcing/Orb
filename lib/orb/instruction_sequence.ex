@@ -217,10 +217,20 @@ defmodule Orb.InstructionSequence do
   defimpl Orb.ToWasm do
     def to_wasm(
           %Orb.InstructionSequence{body: instructions},
-          options
+          context
         ) do
       for instruction <- instructions do
-        Orb.ToWasm.to_wasm(instruction, options)
+        case instruction do
+          tuple when is_tuple(tuple) ->
+            tuple
+            |> Tuple.to_list()
+            |> Enum.map(fn instruction ->
+              Orb.ToWasm.to_wasm(instruction, context)
+            end)
+
+          instruction ->
+            Orb.ToWasm.to_wasm(instruction, context)
+        end
       end
     end
   end

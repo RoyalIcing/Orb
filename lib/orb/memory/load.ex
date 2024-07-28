@@ -104,4 +104,49 @@ defmodule Orb.Memory.Load do
       ]
     end
   end
+
+  defimpl Orb.ToWasm do
+    import Orb.Leb
+
+    def to_wasm(
+          %Orb.Memory.Load{
+            push_type: type,
+            load_instruction: load_instruction,
+            address: address,
+            align: align
+          },
+          context
+        ) do
+      type = Orb.Ops.to_primitive_type(type)
+      {_, natural_alignment} = Orb.Memory.Load.store_and_alignment_for(type, load_instruction)
+
+      [
+        Orb.ToWasm.to_wasm(address, context),
+        do_instruction(type, load_instruction),
+        do_align(align || natural_alignment),
+        leb128_u(0)
+      ]
+    end
+
+    defp do_instruction(:i32, :load), do: 0x28
+    defp do_instruction(:i64, :load), do: 0x29
+    defp do_instruction(:f32, :load), do: 0x2A
+    defp do_instruction(:f64, :load), do: 0x2B
+    defp do_instruction(:i32, :load8_s), do: 0x2C
+    defp do_instruction(:i32, :load8_u), do: 0x2D
+    defp do_instruction(:i32, :load16_s), do: 0x2E
+    defp do_instruction(:i32, :load16_u), do: 0x2F
+    defp do_instruction(:i64, :load8_s), do: 0x30
+    defp do_instruction(:i64, :load8_u), do: 0x31
+    defp do_instruction(:i64, :load16_s), do: 0x32
+    defp do_instruction(:i64, :load16_u), do: 0x33
+    defp do_instruction(:i64, :load32_s), do: 0x34
+    defp do_instruction(:i64, :load32_u), do: 0x35
+
+    # Encoded as power of two
+    defp do_align(1), do: leb128_u(0)
+    defp do_align(2), do: leb128_u(1)
+    defp do_align(4), do: leb128_u(2)
+    defp do_align(8), do: leb128_u(3)
+  end
 end

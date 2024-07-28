@@ -10,9 +10,9 @@ defmodule MemoryTest do
       Memory.pages(1)
 
       Memory.initial_data!(0x100, "abc")
-      Memory.initial_data!(0x200, "def")
-      Memory.initial_data!(0x300, ~S"\01\02\03\04")
-      Memory.initial_data!(0x400, ~S"\7b")
+      Memory.initial_data!(0x200, "de\n")
+      Memory.initial_data!(0x300, ~s"\x01\x02\x03\x04")
+      Memory.initial_data!(0x400, ~s"\x7b")
       Memory.initial_data!(0x500, u8: [4, 16, 3], u8: 12)
       Memory.initial_data!(0x600, u32: [4, 123_456, 3])
 
@@ -25,13 +25,23 @@ defmodule MemoryTest do
       end
     end
 
+    wat = Orb.to_wat(InitialData)
+    wasm = Orb.to_wasm(InitialData)
+
+    if false do
+      path_wat = Path.join(__DIR__, "initial_data.wat")
+      path_wasm = Path.join(__DIR__, "initial_data.wasm")
+      File.write!(path_wat, wat)
+      File.write!(path_wasm, wasm)
+    end
+
     assert ~S"""
            (module $InitialData
              (memory (export "memory") 1)
              (data (i32.const 256) "abc")
-             (data (i32.const 512) "def")
+             (data (i32.const 512) "de\n")
              (data (i32.const 768) "\01\02\03\04")
-             (data (i32.const 1024) "\7b")
+             (data (i32.const 1024) "{")
              (data (i32.const 1280) "\04\10\03\0c")
              (data (i32.const 1536) "\04\00\00\00\40\e2\01\00\03\00\00\00")
              (func $read_u8 (export "read_u8") (param $address i32) (result i32)
@@ -41,31 +51,33 @@ defmodule MemoryTest do
                (i32.load align=4 (local.get $address))
              )
            )
-           """ = Orb.to_wat(InitialData)
+           """ = wat
 
     alias OrbWasmtime.Instance
 
-    inst = Instance.run(InitialData)
-    assert ?a = Instance.call(inst, :read_u8, 0x100)
-    assert "abc\0" = Instance.call(inst, :read_i32, 0x100) |> i32_to_ascii()
+    for source <- [wat, wasm] do
+      inst = Instance.run(source)
+      assert ?a = Instance.call(inst, :read_u8, 0x100)
+      assert "abc\0" = Instance.call(inst, :read_i32, 0x100) |> i32_to_ascii()
 
-    assert "def\0" = Instance.call(inst, :read_i32, 0x200) |> i32_to_ascii()
+      assert "de\n\0" = Instance.call(inst, :read_i32, 0x200) |> i32_to_ascii()
 
-    assert 1 = Instance.call(inst, :read_u8, 0x300)
-    assert 2 = Instance.call(inst, :read_u8, 0x301)
-    assert 3 = Instance.call(inst, :read_u8, 0x302)
-    assert 4 = Instance.call(inst, :read_u8, 0x303)
+      assert 1 = Instance.call(inst, :read_u8, 0x300)
+      assert 2 = Instance.call(inst, :read_u8, 0x301)
+      assert 3 = Instance.call(inst, :read_u8, 0x302)
+      assert 4 = Instance.call(inst, :read_u8, 0x303)
 
-    assert 0x7B = 123 = Instance.call(inst, :read_u8, 0x400)
+      assert 0x7B = 123 = Instance.call(inst, :read_u8, 0x400)
 
-    assert 4 = Instance.call(inst, :read_u8, 0x500)
-    assert 16 = Instance.call(inst, :read_u8, 0x501)
-    assert 3 = Instance.call(inst, :read_u8, 0x502)
+      assert 4 = Instance.call(inst, :read_u8, 0x500)
+      assert 16 = Instance.call(inst, :read_u8, 0x501)
+      assert 3 = Instance.call(inst, :read_u8, 0x502)
 
-    assert 4 = Instance.call(inst, :read_i32, 0x600)
-    assert 123_456 = Instance.call(inst, :read_i32, 0x604)
-    assert 3 = Instance.call(inst, :read_i32, 0x608)
-    # assert -1 = Instance.call(inst, :read_i32, 0x612)
+      assert 4 = Instance.call(inst, :read_i32, 0x600)
+      assert 123_456 = Instance.call(inst, :read_i32, 0x604)
+      assert 3 = Instance.call(inst, :read_i32, 0x608)
+      # assert -1 = Instance.call(inst, :read_i32, 0x612)
+    end
   end
 
   defp i32_to_ascii(i32) when is_integer(i32), do: <<i32::little-size(32)>>
@@ -132,6 +144,9 @@ defmodule MemoryTest do
       end
     end
 
+    wat = Orb.to_wat(Swap)
+    wasm = Orb.to_wat(Swap)
+
     assert ~S"""
            (module $Swap
              (memory (export "memory") 1)
@@ -149,9 +164,14 @@ defmodule MemoryTest do
                (i32.store align=4 (;i32;) (;i32;))
              )
            )
-           """ = Orb.to_wat(Swap)
+           """ = wat
 
-    inst = Instance.run(Swap)
+    inst = Instance.run(wat)
+    assert {123_456, 456_789} = Instance.call(inst, :read)
+    Instance.call(inst, :swap)
+    assert {456_789, 123_456} = Instance.call(inst, :read)
+
+    inst = Instance.run(wasm)
     assert {123_456, 456_789} = Instance.call(inst, :read)
     Instance.call(inst, :swap)
     assert {456_789, 123_456} = Instance.call(inst, :read)
