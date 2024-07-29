@@ -83,6 +83,13 @@ defmodule WasmOutputTest do
     wat = Orb.to_wat(MathI32)
     wasm = Orb.to_wasm(MathI32)
 
+    if false do
+      path_wat = Path.join(__DIR__, "math.wat")
+      path_wasm = Path.join(__DIR__, "math.wasm")
+      File.write!(path_wat, wat)
+      File.write!(path_wasm, wasm)
+    end
+
     for source <- [wat, wasm] do
       assert source |> Wasm.call(:fibonacci, 0) === 0
       assert source |> Wasm.call(:fibonacci, 1) === 1
@@ -136,13 +143,6 @@ defmodule WasmOutputTest do
              )
            )
            """
-
-    if false do
-      path_wat = Path.join(__DIR__, "math.wat")
-      path_wasm = Path.join(__DIR__, "math.wasm")
-      File.write!(path_wat, wat)
-      File.write!(path_wasm, wasm)
-    end
 
     # assert <<"\0asm", 0x01000000::32>> <>
     #          <<0x01, 0x0C, 0x02, <<0x60, 0x02, 0x7F, 0x7F, 0x01, 0x7F>>,

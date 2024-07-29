@@ -120,7 +120,7 @@ defmodule LoopTest do
       end
     end
 
-    wasm_source = """
+    wat = """
     (module $Loop1To10
       (func $sum1to10 (export "sum1to10") (result i32)
         (local $sum i32)
@@ -140,7 +140,7 @@ defmodule LoopTest do
     )
     """
 
-    assert wasm_source == Orb.to_wat(Loop1To10)
+    assert wat == Orb.to_wat(Loop1To10)
     assert 55 = Wasm.call(Loop1To10, :sum1to10)
   end
 

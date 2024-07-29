@@ -138,6 +138,8 @@ defmodule Orb.IfElse do
           },
           context
         ) do
+      context = Orb.ToWasm.Context.register_loop_identifier(context, nil)
+
       [
         Orb.ToWasm.to_wasm(condition, context),
         [0x04, if(result, do: to_wasm_type(result), else: 0x40)],
