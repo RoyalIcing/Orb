@@ -1,7 +1,7 @@
 defmodule Orb.Global do
   @moduledoc false
 
-  defstruct [:name, :type, :initial_value, :mutability, :exported, :comment]
+  defstruct [:name, :type, :initial_value, :mutability, :exported?, :comment]
 
   def new(nil, name, mutability, exported, value) when is_binary(value) do
     new(Orb.Str.Slice, name, mutability, exported, value)
@@ -26,7 +26,7 @@ defmodule Orb.Global do
       type: type,
       initial_value: value,
       mutability: mutability,
-      exported: exported == :exported
+      exported?: exported == :exported
     }
   end
 
@@ -39,7 +39,7 @@ defmodule Orb.Global do
       type: :i32,
       initial_value: value,
       mutability: mutability,
-      exported: exported == :exported
+      exported?: exported == :exported
     }
   end
 
@@ -52,7 +52,7 @@ defmodule Orb.Global do
       type: :f32,
       initial_value: value,
       mutability: mutability,
-      exported: exported == :exported
+      exported?: exported == :exported
     }
   end
 
@@ -68,21 +68,21 @@ defmodule Orb.Global do
       type: Orb.Str.Slice,
       initial_value: value,
       mutability: mutability,
-      exported: exported == :exported
+      exported?: exported == :exported
     }
   end
 
-  defmacro register(type, name, mutability, exported, value) do
+  defmacro register(type, name, mutability, exported?, value) do
     #  when mutability in ~w{readonly mutable}a and
     #         exported in ~w[internal exported]a do
     quote bind_quoted: [
             type: type,
             name: name,
             mutability: mutability,
-            exported: exported,
+            exported?: exported?,
             value: value
           ] do
-      @wasm_globals Orb.Global.new(type, name, mutability, exported, value)
+      @wasm_globals Orb.Global.new(type, name, mutability, exported?, value)
     end
   end
 
@@ -128,7 +128,7 @@ defmodule Orb.Global do
             type: type,
             initial_value: initial_value,
             mutability: mutability,
-            exported: exported,
+            exported?: exported?,
             comment: comment
           },
           indent
@@ -136,7 +136,7 @@ defmodule Orb.Global do
       [
         indent,
         "(global ",
-        case exported do
+        case exported? do
           false -> [?$, to_string(name)]
           true -> [?$, to_string(name), ~S{ (export "}, to_string(name), ~S{")}]
         end,

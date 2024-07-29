@@ -223,6 +223,11 @@ defmodule Orb.ModuleDefinition do
           |> leb128_u()
         end
 
+      export_globals =
+        for {%Orb.Global{exported?: true, name: name}, index} <- globals_indexed do
+          encode_export_global(to_string(name), index)
+        end
+
       export_funcs =
         for {%Orb.Func{exported_names: names}, index} <- funcs, name <- names do
           encode_export_func(name, index)
@@ -266,7 +271,13 @@ defmodule Orb.ModuleDefinition do
         else
           []
         end,
-        section(:export, vec(export_memories ++ export_funcs)),
+        case export_memories ++ export_globals ++ export_funcs do
+          [] ->
+            []
+
+          export_defs ->
+            section(:export, vec(export_defs))
+        end,
         # section(:data_count, vec([])),
         section(:code, vec(func_code)),
         case constants_defs ++ data_defs do
@@ -316,7 +327,15 @@ defmodule Orb.ModuleDefinition do
       [
         sized(name),
         0x00,
-        func_index
+        leb128_u(func_index)
+      ]
+    end
+
+    defp encode_export_global(name, global_index) do
+      [
+        sized(name),
+        0x03,
+        leb128_u(global_index)
       ]
     end
 
