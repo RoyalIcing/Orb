@@ -32,6 +32,16 @@ defmodule Orb.ToWasm.Helpers do
   def to_wasm_type(:f64), do: 0x7C
   def to_wasm_type(:v128), do: 0x7B
 
+  def to_wasm_type(tuple) when is_tuple(tuple) do
+    [
+      0x7B,
+      leb128_u(tuple_size(tuple)),
+      tuple
+      |> Tuple.to_list()
+      |> Enum.map(&to_wasm_type/1)
+    ]
+  end
+
   def to_wasm_type(custom_type) when is_atom(custom_type) do
     Orb.Ops.to_primitive_type(custom_type) |> to_wasm_type()
   end
