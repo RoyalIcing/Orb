@@ -2,8 +2,6 @@ defmodule Orb.TypeDefinition do
   defstruct name: nil, inner_type: nil
 
   defimpl Orb.ToWat do
-    import Orb.ToWat.Helpers
-
     def to_wat(
           %Orb.TypeDefinition{
             name: name,
