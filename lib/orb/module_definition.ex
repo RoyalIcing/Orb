@@ -182,7 +182,7 @@ defmodule Orb.ModuleDefinition do
 
     def to_wasm(
           %Orb.ModuleDefinition{
-            types: _types,
+            types: types,
             table_size: _table_size,
             imports: _imports,
             globals: globals,
@@ -193,12 +193,14 @@ defmodule Orb.ModuleDefinition do
           },
           context
         ) do
+      types_indexed = types |> Enum.with_index(&{&1.name, &2})
       globals_indexed = globals |> Enum.with_index()
 
       funcs = Enum.with_index(for f = %Orb.Func{} <- mod_body, do: f)
 
       context =
         context
+        |> Orb.ToWasm.Context.set_custom_type_index_lookup(Map.new(types_indexed))
         |> Orb.ToWasm.Context.set_global_name_index_lookup(
           Map.new(globals_indexed, fn {g, index} -> {g.name, index} end)
         )
@@ -212,7 +214,8 @@ defmodule Orb.ModuleDefinition do
         end
 
       uniq_func_types =
-        for({f, _index} <- funcs, do: func_type_tuple(f))
+        (for({t, _} <- types_indexed, do: %Orb.Func{params: [], result: t}) ++
+           for({f, _index} <- funcs, do: func_type_tuple(f)))
         |> Enum.uniq()
 
       func_defs =

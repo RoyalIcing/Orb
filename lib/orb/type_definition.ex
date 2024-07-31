@@ -2,6 +2,8 @@ defmodule Orb.TypeDefinition do
   defstruct name: nil, inner_type: nil
 
   defimpl Orb.ToWat do
+    import Orb.ToWat.Helpers
+
     def to_wat(
           %Orb.TypeDefinition{
             name: name,
@@ -14,7 +16,13 @@ defmodule Orb.TypeDefinition do
         "(type $",
         to_string(name),
         " ",
-        Orb.ToWat.to_wat(inner_type, ""),
+        case inner_type do
+          %Orb.Func.Type{} = func_type ->
+            Orb.ToWat.to_wat(func_type, "")
+
+          other_type ->
+            %Orb.Func.Type{result: other_type} |> Orb.ToWat.to_wat("")
+        end,
         ")"
       ]
     end

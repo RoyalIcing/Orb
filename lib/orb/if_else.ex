@@ -142,7 +142,7 @@ defmodule Orb.IfElse do
 
       [
         Orb.ToWasm.to_wasm(condition, context),
-        [0x04, if(result, do: to_wasm_type(result), else: 0x40)],
+        [0x04, if(result, do: to_block_type(result, context), else: 0x40)],
         Orb.ToWasm.to_wasm(when_true, context),
         if(when_false, do: [0x05, Orb.ToWasm.to_wasm(when_false, context)], else: []),
         0x0B

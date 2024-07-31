@@ -38,7 +38,7 @@ defmodule Orb.Loop do
       context = Orb.ToWasm.Context.register_loop_identifier(context, identifier)
 
       [
-        [0x03, if(result, do: to_wasm_type(result), else: [0x40])],
+        [0x03, if(result, do: to_block_type(result, context), else: [0x40])],
         Orb.ToWasm.to_wasm(body, context),
         0x0B
       ]

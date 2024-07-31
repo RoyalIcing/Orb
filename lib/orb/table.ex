@@ -1,6 +1,5 @@
 defmodule Orb.Table do
   defmodule Type do
-    @callback type_name() :: atom()
     @callback table_func_keys() :: list(atom())
   end
 

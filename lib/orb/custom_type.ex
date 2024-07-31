@@ -5,11 +5,12 @@ defmodule Orb.CustomType do
               | {wasm_primitive(), wasm_primitive()}
               | {wasm_primitive(), wasm_primitive(), wasm_primitive()}
               | {wasm_primitive(), wasm_primitive(), wasm_primitive(), wasm_primitive()}
+  @callback type_name() :: atom()
   @callback load_instruction() ::
               :load | :load8_s | :load8_u | :load16_s | :load16_u | :load32_s | :load32_u
   # @callback store_instruction() :: :store | :store8 | :store16 | :store32
 
-  @optional_callbacks load_instruction: 0
+  @optional_callbacks type_name: 0, load_instruction: 0
 
   defmodule InvalidError do
     defexception [:mod, :message]

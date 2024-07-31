@@ -576,7 +576,7 @@ defmodule OrbTest do
       @impl Orb.CustomType
       def wasm_type, do: %Orb.Func.Type{result: I32}
 
-      @impl Orb.Table.Type
+      @impl Orb.CustomType
       def type_name, do: :answer
 
       @impl Orb.Table.Type
@@ -594,7 +594,7 @@ defmodule OrbTest do
       @impl Orb.CustomType
       def wasm_type, do: %Orb.Func.Type{result: I32}
 
-      @impl Orb.Table.Type
+      @impl Orb.CustomType
       def type_name, do: :other
 
       @impl Orb.Table.Type

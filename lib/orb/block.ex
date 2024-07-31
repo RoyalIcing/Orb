@@ -32,7 +32,7 @@ defmodule Orb.Block do
 
       [
         0x02,
-        if(push_type, do: to_wasm_type(push_type), else: 0x40),
+        if(push_type, do: to_block_type(push_type, context), else: 0x40),
         Orb.ToWasm.to_wasm(body, context),
         0x0B
       ]
