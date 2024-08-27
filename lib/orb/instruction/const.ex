@@ -9,7 +9,7 @@ defmodule Orb.Instruction.Const do
   end
 
   def wrap(push_type, value) do
-    wrap(push_type, value, "#{Ops.to_primitive_type(push_type)}.const")
+    wrap(push_type, value, "#{inspect(Ops.to_primitive_type(push_type))}.const")
   end
 
   def wrap(push_type, value, instruction_identifier) when is_number(value) do
