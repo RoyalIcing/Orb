@@ -150,18 +150,23 @@ defmodule I32ConveniencesTest do
   end
 
   test "I32.match output string constant" do
-    assert (TestHelper.module_wat do
-              use Orb
+    wat =
+      TestHelper.module_wat do
+        use Orb
 
-              defw get_path(), I32.U8.UnsafePointer, state: I32 do
-                state = 0
+        defw get_path(), Str, state: I32 do
+          state = 0
 
-                I32.match state do
-                  0 -> ~S[/initial]
-                  1 -> ~S[/disconnected]
-                end
-              end
-            end) =~ "/initial"
+          I32.match state do
+            0 -> ~S[/initial]
+            1 -> ~S[/disconnected]
+          end
+        end
+      end
+
+    assert wat =~ "/initial"
+
+    # TODO: compile to check we actually return (i32 i32) for each Str.
   end
 
   test "can return string constant" do
