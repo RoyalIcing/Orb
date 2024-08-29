@@ -113,6 +113,7 @@ Deno.serve(async (req: Request) => {
 <link rel="mask-icon" href="/favicon.ico" color="#74d1f0">
 <script src="https://cdn.usefathom.com/script.js" data-site="EFBQOFQL" defer></script>
 <link rel=stylesheet href="https://rsms.me/inter/inter.css">
+<title>Orb: Write WebAssembly with Elixir</title>
 <style>
 :root {
   font-family: Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
