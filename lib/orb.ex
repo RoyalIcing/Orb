@@ -475,6 +475,9 @@ defmodule Orb do
             def __wasm_body__(_), do: []
             defoverridable __wasm_body__: 1
 
+            def __wasm_data_defs__(_), do: []
+            defoverridable __wasm_data_defs__: 1
+
             # TODO: rename these to orb_ prefix instead of wasm_ ?
             Module.put_attribute(
               __MODULE__,
@@ -614,7 +617,7 @@ defmodule Orb do
         end
 
         def __wasm_module__() do
-          %{body: body, constants: constants, global_definitions: global_definitions} =
+          %{body: body, constants: constants, global_defs: global_defs, data_defs: data_defs} =
             Orb.Compiler.run(__MODULE__, @wasm_globals)
 
           memory = Memory.new(@wasm_memory, constants)
@@ -624,11 +627,11 @@ defmodule Orb do
             types: @wasm_types |> Enum.reverse() |> List.flatten(),
             table_size: @wasm_table_allocations |> List.flatten() |> length(),
             imports: @wasm_imports |> Enum.reverse() |> List.flatten(),
-            globals: global_definitions,
+            globals: global_defs,
             memory: memory,
             constants: constants,
             body: body,
-            data: @wasm_section_data |> Enum.reverse()
+            data: Enum.reverse(@wasm_section_data) ++ data_defs
           )
         end
 

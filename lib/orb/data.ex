@@ -2,7 +2,7 @@ defmodule Orb.Data do
   @moduledoc false
 
   # TODO: remove nul_terminated
-  defstruct [:offset, :value, :nul_terminated]
+  defstruct [:offset, :value, nul_terminated: false]
 
   defimpl Orb.ToWat do
     def to_wat(%Orb.Data{offset: offset, value: value, nul_terminated: nul_terminated}, indent) do

@@ -57,7 +57,7 @@ defmodule Orb.Memory do
   @doc "Initializes data in memory. In Wat is `(data …)`"
   defmacro initial_data!(offset, value) do
     quote bind_quoted: [offset: offset, value: value] do
-      @wasm_section_data %Orb.Data{offset: offset, value: value, nul_terminated: false}
+      @wasm_section_data %Orb.Data{offset: offset, value: value}
     end
   end
 
