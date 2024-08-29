@@ -2,6 +2,7 @@
     <summary>Getting Started</summary>
 
 - [Install](/install)
+- [Showcase](https://showcase.useorb.dev/)
 
 </details>
 
