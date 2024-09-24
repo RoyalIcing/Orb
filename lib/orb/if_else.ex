@@ -232,6 +232,8 @@ defmodule Orb.IfElse do
       end
     end
 
+    # TODO: remove as it’s being deprecated in Elixir
+    # https://x.com/moomerman/status/1838235643983364206
     defmacro unless(condition, clauses) do
       build_unless(condition, clauses)
     end
