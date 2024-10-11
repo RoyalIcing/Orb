@@ -3,7 +3,7 @@ defmodule Orb.Memory do
   Work with memory: load, store, declare pages & initial data.
   """
 
-  defstruct name: "", min: 0, exported_name: "memory"
+  defstruct name: "", min: 0, exported_name: "memory", is_imported?: false
 
   @doc false
   def new(page_definitions, constants)
@@ -186,7 +186,7 @@ defmodule Orb.Memory do
   end
 
   defimpl Orb.ToWat do
-    def to_wat(%Orb.Memory{min: min}, indent) do
+    def to_wat(%Orb.Memory{min: min, is_imported?: is_imported?}, indent) when not is_imported? do
       [
         indent,
         ~S{(memory (export "memory")},
@@ -196,6 +196,19 @@ defmodule Orb.Memory do
         end,
         ~S{)},
         "\n"
+      ]
+    end
+
+    def to_wat(%Orb.Memory{is_imported?: true, name: name, min: min}, indent) do
+      [
+        indent,
+        "(memory",
+        to_string(name),
+        case min do
+          nil -> []
+          min when min >= 0 -> [" ", to_string(min)]
+        end,
+        ")",
       ]
     end
   end

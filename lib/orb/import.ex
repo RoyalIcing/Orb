@@ -80,6 +80,12 @@ defmodule Orb.Import do
     end
   end
 
+  defmacro register_memory(global, namespace, min \\ nil) do
+    quote do
+      @wasm_imports [%Orb.Import{module: unquote(global), name: unquote(namespace), type: %Orb.Memory{is_imported?: true, min: unquote(min)}}]
+    end
+  end
+
   defimpl Orb.ToWat do
     def to_wat(%Orb.Import{module: nil, name: name, type: type}, indent) do
       [indent, ~S|(import "|, to_string(name), ~S|" |, Orb.ToWat.to_wat(type, ""), ?)]
@@ -98,6 +104,7 @@ defmodule Orb.Import do
       ]
     end
   end
+
 
   defmodule DSL do
     @moduledoc """
