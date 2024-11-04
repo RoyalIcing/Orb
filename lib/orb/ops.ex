@@ -8,8 +8,12 @@ defmodule Orb.Ops do
   @i_relative_ops ~w(eq ne lt_u lt_s gt_u gt_s le_u le_s ge_u ge_s)a
   # https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/Numeric/Wrap
   @i32_wrap_ops ~w(wrap_i64)a
+  # https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/Numeric/Reinterpret
+  @i32_reinterpret_ops ~w(reinterpret_f32)a
   # https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/Numeric/Extend
   @i64_extend_ops ~w(extend_i32_s extend_i32_u)a
+  # https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/Numeric/Reinterpret
+  @i64_reinterpret_ops ~w(reinterpret_f64)a
   # https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/Memory/Load
   @i32_load_ops ~w(load load8_u load8_s load16_s load16_u)a
   @i64_load_ops @i32_load_ops ++ ~w(load32_s load32_u)a
@@ -20,18 +24,19 @@ defmodule Orb.Ops do
   # https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/Numeric/Truncate_float_to_int
   @i_trunc_ops ~w(trunc_f32_s trunc_f32_u trunc_f64_s trunc_f64_u)a
 
-  @i32_ops_1 @i_unary_ops ++ @i_test_ops ++ @i_trunc_ops ++ @i32_wrap_ops
+  @i32_ops_1 @i_unary_ops ++ @i_test_ops ++ @i_trunc_ops ++ @i32_wrap_ops ++ @i32_reinterpret_ops
   @i32_ops_2 @i_binary_ops ++ @i_relative_ops
   @i32_ops_all @i32_ops_1 ++ @i32_ops_2 ++ @i32_load_ops ++ @i32_store_ops
 
-  @i64_ops_1 @i_unary_ops ++ @i_test_ops ++ @i_trunc_ops ++ @i64_extend_ops
+  @i64_ops_1 @i_unary_ops ++
+               @i_test_ops ++ @i_trunc_ops ++ @i64_extend_ops ++ @i64_reinterpret_ops
   @i64_ops_2 @i_binary_ops ++ @i_relative_ops
   @i64_ops_all @i64_ops_1 ++ @i64_ops_2 ++ @i64_load_ops ++ @i64_store_ops
 
-  @f32_ops_1 ~w(floor ceil trunc nearest abs neg sqrt convert_i32_s convert_i32_u demote_f64)a
+  @f32_ops_1 ~w(floor ceil trunc nearest abs neg sqrt convert_i32_s convert_i32_u demote_f64 reinterpret_i32)a
   @f32_ops_2 ~w(add sub mul div eq ne lt gt le ge copysign min max)a
 
-  @f64_ops_1 ~w(floor ceil trunc nearest abs neg sqrt convert_i32_s convert_i32_u convert_i64_s convert_i64_u promote_f32)a
+  @f64_ops_1 ~w(floor ceil trunc nearest abs neg sqrt convert_i32_s convert_i32_u convert_i64_s convert_i64_u promote_f32 reinterpret_i64)a
   @f64_ops_2 ~w(add sub mul div eq ne lt gt le ge copysign min max)a
 
   # TODO: add conversions ops https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/Numeric#conversion
