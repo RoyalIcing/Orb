@@ -128,6 +128,12 @@ defmodule Orb.Constants do
   def expand_if_needed(value) when is_binary(value), do: expand_string!(value)
   def expand_if_needed(value) when is_list(value), do: :lists.map(&expand_if_needed/1, value)
   def expand_if_needed(value) when is_struct(value, Orb.IfElse), do: Orb.IfElse.expand(value)
+  def expand_if_needed(nil), do: nil
+
+  def expand_if_needed(value) when is_atom(value) do
+    str = value |> Atom.to_string() |> expand_string!()
+    str.memory_offset
+  end
 
   # Handles Orb.InstructionSequence or anything with a `body`
   def expand_if_needed(%_{body: _} = struct) do

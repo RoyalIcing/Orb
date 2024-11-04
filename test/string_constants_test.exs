@@ -32,6 +32,41 @@ defmodule StringConstantsTest do
            """
   end
 
+  test "works with atoms" do
+    defmodule ABCAtom do
+      use Orb
+
+      defw alphabet(), I32 do
+        :abc
+      end
+
+      defw always_be_closing(), I32 do
+        :abc
+      end
+
+      defw australian_broadcasting_corporation(), Str do
+        "abc"
+      end
+    end
+
+    assert to_wat(ABCAtom) == """
+           (module $ABCAtom
+             (memory (export "memory") 1)
+             (; constants 4 bytes ;)
+             (data (i32.const 255) "abc")
+             (func $alphabet (export "alphabet") (result i32)
+               (i32.const 255)
+             )
+             (func $always_be_closing (export "always_be_closing") (result i32)
+               (i32.const 255)
+             )
+             (func $australian_broadcasting_corporation (export "australian_broadcasting_corporation") (result i32 i32)
+               (i32.const 255) (i32.const 3)
+             )
+           )
+           """
+  end
+
   describe "const/1" do
     test "assigns data" do
       defmodule ConstHTMLTypes do
