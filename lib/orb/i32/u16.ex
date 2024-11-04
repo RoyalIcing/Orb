@@ -1,6 +1,6 @@
-defmodule Orb.I32.U8 do
+defmodule Orb.I32.U16 do
   @moduledoc """
-  Type for unsigned 32-bit integer interpreted as an unsigned 8-bit byte.
+  Type for unsigned 32-bit integer interpreted as unsigned 16-bit (double byte).
   """
 
   with @behaviour Orb.CustomType do
@@ -8,6 +8,6 @@ defmodule Orb.I32.U8 do
     def wasm_type(), do: :i32
 
     @impl Orb.CustomType
-    def load_instruction(), do: :load8_u
+    def load_instruction(), do: :load16_u
   end
 end
