@@ -1,11 +1,10 @@
 defmodule Orb.Data do
   @moduledoc false
 
-  # TODO: remove nul_terminated
-  defstruct [:offset, :value, nul_terminated: false]
+  defstruct [:offset, :value]
 
   defimpl Orb.ToWat do
-    def to_wat(%Orb.Data{offset: offset, value: value, nul_terminated: nul_terminated}, indent) do
+    def to_wat(%Orb.Data{offset: offset, value: value}, indent) do
       [
         indent,
         "(data (i32.const ",
@@ -40,7 +39,6 @@ defmodule Orb.Data do
             end
             |> then(&[?", &1, ?"])
         end,
-        if(nul_terminated, do: ~S| "\00"|, else: []),
         ")\n"
       ]
     end
