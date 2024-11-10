@@ -1,0 +1,21 @@
+{
+  "actions" : {
+    "build" : {
+      "postActions" : [
+        {
+          "script" : "mix compile",
+          "type" : "runScript"
+        },
+        {
+          "script" : "mix format",
+          "type" : "runScript"
+        },
+        {
+          "script" : "mix test",
+          "type" : "runScript"
+        }
+      ]
+    }
+  },
+  "openLogOnRun" : "fail"
+}
