@@ -10,6 +10,7 @@ defmodule Orb.IfElse do
   alias Orb.Ops
   alias Orb.InstructionSequence
 
+  # FIXME: body is never list
   def new(%InstructionSequence{body: [if_else = %__MODULE__{}]}, concat_true) do
     new(if_else, concat_true)
   end
@@ -24,6 +25,7 @@ defmodule Orb.IfElse do
     new(type, condition, when_true, nil)
   end
 
+  # FIXME: body is never list
   def new(%InstructionSequence{body: [if_else = %__MODULE__{}]}, concat_true, concat_false) do
     new(if_else, concat_true, concat_false)
   end
@@ -35,6 +37,7 @@ defmodule Orb.IfElse do
     new(if_else.condition, when_true, when_false)
   end
 
+  # FIXME: body is never list
   def new(condition, when_true, %InstructionSequence{body: []})
       when is_struct(when_true) do
     new(condition, when_true)
