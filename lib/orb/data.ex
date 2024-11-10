@@ -15,7 +15,8 @@ defmodule Orb.Data do
           string when is_binary(string) ->
             # string |> String.replace(~S["], ~S[\"]) |> String.replace("\n", ~S"\n")
             string
-            |> inspect(binaries: :as_strings)
+            |> inspect(binaries: :as_strings, limit: :infinity, printable_limit: :infinity)
+            |> String.replace(~S|\0|, ~S|\00|)
             |> String.replace(~s[\\x], ~s[\\])
 
           list when is_list(list) ->

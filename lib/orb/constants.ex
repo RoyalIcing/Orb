@@ -160,16 +160,8 @@ defmodule Orb.Constants do
       [
         [indent, "(; constants #{byte_size} bytes ;)\n"],
         for {string, offset} <- lookup_table do
-          [
-            indent,
-            "(data (i32.const ",
-            to_string(offset),
-            ") ",
-            ?",
-            string |> String.replace(~S["], ~S[\"]) |> String.replace("\n", ~S"\n"),
-            ?",
-            ")\n"
-          ]
+          %Orb.Data{offset: offset, value: string}
+          |> Orb.ToWat.to_wat(indent)
         end
       ]
     end
