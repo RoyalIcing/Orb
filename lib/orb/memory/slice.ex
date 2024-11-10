@@ -44,8 +44,8 @@ defmodule Orb.Memory.Slice do
     byte_offset
   end
 
-  def get_byte_offset(range = %{push_type: _}) do
-    I32.wrap_i64(range)
+  def get_byte_offset(slice = %{push_type: _}) do
+    I32.wrap_i64(slice)
   end
 
   def get_byte_length(n) when is_integer(n) do
@@ -64,8 +64,31 @@ defmodule Orb.Memory.Slice do
     byte_length
   end
 
-  def get_byte_length(range = %{push_type: _}) do
-    I64.shr_u(range, 32) |> I32.wrap_i64()
+  def get_byte_length(slice = %{push_type: _}) do
+    I64.shr_u(slice, 32) |> I32.wrap_i64()
+  end
+
+  def drop_first_byte(slice = %{push_type: _}) do
+    require Orb
+
+    Orb.snippet do
+      if get_byte_length(slice) === 0 do
+        slice
+      else
+        from(get_byte_offset(slice) + 1, get_byte_length(slice) - 1)
+      end
+    end
+  end
+
+  with @behaviour b = Orb.Iterator do
+    @impl b
+    def valid?(var), do: get_byte_length(var)
+    @impl b
+    def value_type(), do: Orb.I32
+    @impl b
+    def value(var), do: Orb.Memory.load!(I32.U8, get_byte_offset(var))
+    @impl b
+    def next(var), do: drop_first_byte(var)
   end
 
   # defimpl Orb.ToWat do

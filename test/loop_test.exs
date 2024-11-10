@@ -56,6 +56,18 @@ defmodule LoopTest do
           Loop.continue()
         end
       end
+
+      #       defw get_is_valid2(len: I32), I32, str: Orb.Memory.Slice, char: I32 do
+      #         str = Orb.Memory.Slice.from(1024, len)
+      # 
+      #         loop char <- str, result: I32 do
+      #           if I32.eq(char, ?/) do
+      #             return 0
+      #           end
+      #         end
+      # 
+      #         return 1
+      #       end
     end
 
     assert """
@@ -395,5 +407,39 @@ defmodule LoopTest do
 
     assert wat === Orb.to_wat(NestedLoop)
     assert 28 = Wasm.call(NestedLoop, :nested_loop)
+  end
+
+  defmodule CountZeros do
+    use Orb
+
+    Memory.pages(1)
+
+    defw count_chars(), I32, slice: Memory.Slice, count: I32 do
+      slice = Str.to_slice("abcdefghijklmnopqrstuvwxyz")
+
+      loop char <- slice do
+        count = count + 1
+      end
+
+      count
+    end
+
+    defw count_zeros(), I32, slice: Memory.Slice, count: I32 do
+      slice = Str.to_slice("hello\0this\0has\0four\0zeroes")
+
+      loop char <- slice do
+        if char === 0 do
+          count = count + 1
+        end
+      end
+
+      count
+    end
+  end
+
+  test "memory slicing iteration" do
+    wat = Orb.to_wat(CountZeros)
+    assert 26 = Wasm.call(wat, :count_chars)
+    assert 4 = Wasm.call(wat, :count_zeros)
   end
 end
