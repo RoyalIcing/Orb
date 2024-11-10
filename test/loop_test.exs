@@ -157,7 +157,29 @@ defmodule LoopTest do
         @impl b
         def valid?(var), do: Orb.I32.le_u(var, ?z)
         @impl b
+        def value_type(), do: Orb.I32
+        @impl b
         def value(var), do: var
+        @impl b
+        def next(var), do: Orb.I32.add(var, 1)
+      end
+    end
+
+    defmodule AlphabetIterator64 do
+      def new(), do: ?a
+
+      with @behaviour b = Orb.CustomType do
+        @impl b
+        defdelegate wasm_type, to: Orb.I32
+      end
+
+      with @behaviour b = Orb.Iterator do
+        @impl b
+        def valid?(var), do: Orb.I32.le_u(var, ?z)
+        @impl b
+        def value_type(), do: Orb.I64
+        @impl b
+        def value(var), do: Orb.I64.extend_i32_u(var)
         @impl b
         def next(var), do: Orb.I32.add(var, 1)
       end
@@ -195,12 +217,23 @@ defmodule LoopTest do
 
         i
       end
+
+      defw test64, I64, i: I64, alpha: AlphabetIterator64 do
+        alpha = AlphabetIterator64.new()
+
+        loop char <- alpha do
+          i = i + char
+        end
+
+        i
+      end
     end
 
     test "behaves correctly" do
       assert 26 = Wasm.call(IteratorConsumer, :test)
       assert 26 = Wasm.call(IteratorConsumer, :test2)
       assert 2847 = Wasm.call(IteratorConsumer, :test3)
+      assert 2847 = Wasm.call(IteratorConsumer, :test64)
       assert 2847 = Enum.sum(?a..?z)
     end
 
@@ -259,6 +292,27 @@ defmodule LoopTest do
                        (local.get $alpha)
                        (local.set $char)
                        (i32.add (local.get $i) (local.get $char))
+                       (local.set $i)
+                       (i32.add (local.get $alpha) (i32.const 1))
+                       (local.set $alpha)
+                       (br $char)
+                     )
+                   )    )
+                 (local.get $i)
+               )
+               (func $test64 (export "test64") (result i64)
+                 (local $i i64)
+                 (local $alpha i32)
+                 (local $char i64)
+                 (i32.const 97)
+                 (local.set $alpha)
+                 (loop $char
+                   (i32.le_u (local.get $alpha) (i32.const 122))
+                   (if
+                     (then
+                       (i64.extend_i32_u (local.get $alpha))
+                       (local.set $char)
+                       (i64.add (local.get $i) (local.get $char))
                        (local.set $i)
                        (i32.add (local.get $alpha) (i32.const 1))
                        (local.set $alpha)

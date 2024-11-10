@@ -12,6 +12,7 @@ defmodule Orb.I64 do
   end
 
   for op <- Ops.i64(1) do
+    @doc Ops.doc(:i64, op)
     def unquote(op)(a) do
       Instruction.i64(unquote(op), a)
     end

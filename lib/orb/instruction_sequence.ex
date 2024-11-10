@@ -66,6 +66,7 @@ defmodule Orb.InstructionSequence do
   def new(push_type, instructions, opts \\ []) when is_list(instructions) do
     %__MODULE__{
       push_type: push_type,
+      pop_type: Keyword.get(opts, :pop_type, nil),
       body: instructions,
       locals: Keyword.get(opts, :locals, [])
     }

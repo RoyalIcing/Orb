@@ -11,7 +11,12 @@ defmodule Orb.Iterator do
   @callback valid?(var_ref) :: %Orb.Instruction{} | integer()
 
   @doc """
-  Extracts or calculates the current value.
+  The type for iterated elements.
+  """
+  @callback value_type() :: atom() | tuple()
+
+  @doc """
+  Extracts or calculates the current element value.
   """
   @callback value(var_ref) :: %Orb.Instruction{} | integer() | float()
 

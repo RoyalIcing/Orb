@@ -357,10 +357,21 @@ defmodule Orb.DSL do
                   nil
 
                 identifier ->
+                  source_type =
+                    quote do
+                      case unquote(source) do
+                        %Range{} ->
+                          Orb.I32
+
+                        %Orb.VariableReference{push_type: source_iterator} ->
+                          source_iterator.value_type()
+                      end
+                    end
+
                   quote(
                     do:
                       var!(unquote(var)) =
-                        Orb.VariableReference.local(unquote(identifier), Orb.I32)
+                        Orb.VariableReference.local(unquote(identifier), unquote(source_type))
                   )
               end,
             identifier: identifier,
@@ -370,7 +381,6 @@ defmodule Orb.DSL do
         %Range{first: first, last: last, step: 1} ->
           with do
             element_type = Orb.I32
-
             _ = init_elixir_var
 
             Orb.InstructionSequence.new([
@@ -405,9 +415,9 @@ defmodule Orb.DSL do
             |> Orb.InstructionSequence.concat_locals([{identifier, element_type}])
           end
 
-        source = %{push_type: source_iterator} when not is_nil(source_iterator) ->
+        %Orb.VariableReference{push_type: source_iterator} = source ->
           with do
-            element_type = Orb.I32
+            element_type = source_iterator.value_type()
             _ = init_elixir_var
 
             body =

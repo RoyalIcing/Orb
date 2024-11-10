@@ -256,4 +256,9 @@ defmodule Orb.Ops do
   defp nth(1), do: "2nd"
   defp nth(2), do: "3rd"
   defp nth(n), do: "#{n + 1}th"
+
+  def doc(type, op)
+  def doc(:i64, :extend_i32_u), do: "Convert unsigned i32 to unsigned i64."
+  def doc(:i64, :extend_i32_s), do: "Convert signed i32 to signed i64."
+  def doc(_type, _op), do: nil
 end
