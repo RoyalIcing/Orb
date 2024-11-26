@@ -209,9 +209,7 @@ defmodule Orb.DSL do
     end
   end
 
-  defguardp is_local(name, locals)
-            # and
-            when is_atom(name) and is_map_key(locals, name)
+  defguardp is_local(name, locals) when is_atom(name) and is_map_key(locals, name)
 
   def do_match(left, right, locals)
 
@@ -252,9 +250,7 @@ defmodule Orb.DSL do
             )
   end
 
-  def do_match(left, right, _locals), do: nil
-
-  # is_struct(:erlang.map_get(name, locals), Orb.VariableReference)
+  def do_match(_left, _right, _locals), do: nil
 
   def do_snippet(locals, block_items) do
     Macro.prewalk(block_items, fn
