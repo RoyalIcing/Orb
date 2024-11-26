@@ -281,17 +281,11 @@ defmodule Orb.DSL do
           |> Orb.Memory.Store.offset_by(unquote(delta))
         end
 
-      # Assigning local variable
-      {:=, _, [{local, _, nil}, input]}
-      when is_atom(local) and is_map_key(locals, local) and
-             is_struct(:erlang.map_get(local, locals), Orb.VariableReference) ->
-        quote do:
-                Orb.Instruction.local_set(unquote(locals[local]), unquote(local), unquote(input))
-
-      # Assigning local variable
+      # Setting variable
       {:=, _, [left, right]} = quoted ->
         do_match(left, right, locals) || quoted
 
+      # Getting variable
       {local, _meta, nil} when is_atom(local) and is_map_key(locals, local) ->
         quote do: Orb.VariableReference.local(unquote(local), unquote(locals[local]))
 
