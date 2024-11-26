@@ -60,6 +60,103 @@ defmodule OrbTest do
            """ = to_wat(MultipleReturn)
   end
 
+  test "assigning and returning tuples" do
+    defmodule VarInt do
+      use Orb
+
+      defw parse_varint(ptr: I32.UnsafePointer), {I32, I32},
+        int: I32,
+        size: I32,
+        new_int: I32,
+        high_bit: I32 do
+        loop offset <- 0..8 do
+          new_int = Memory.load!(I32.U8, ptr + offset)
+          high_bit = new_int &&& 0b1000_0000
+          new_int = new_int &&& 0b0111_1111
+          # <<high_bit::1, new_int::7>> = Memory.load!(I32.U8, ptr + 0)
+
+          if size === 8 do
+            return(%Orb.InstructionSequence{body: [{(int <<< 8) + new_int, size + 1}]})
+          end
+
+          if high_bit === 0 do
+            return(%Orb.InstructionSequence{body: [{(int <<< 7) + new_int, size + 1}]})
+          end
+
+          int = (int <<< 7) + new_int
+          size = size + 1
+        end
+
+        {int, size}
+      end
+
+      defw read_cell(ptr: I32.UnsafePointer, len: I32), {I32, I32},
+        payload_size: I32,
+        var_size: I32 do
+        {payload_size, var_size} = parse_varint(ptr)
+
+        {payload_size, var_size}
+      end
+    end
+
+    assert ~S"""
+           (module $VarInt
+             (func $parse_varint (export "parse_varint") (param $ptr i32) (result i32 i32)
+               (local $int i32)
+               (local $size i32)
+               (local $new_int i32)
+               (local $high_bit i32)
+               (local $offset i32)
+               (i32.const 0)
+               (local.set $offset)
+               (loop $offset
+                 (i32.load8_u (i32.add (local.get $ptr) (local.get $offset)))
+                 (local.set $new_int)
+                 (i32.and (local.get $new_int) (i32.const 128))
+                 (local.set $high_bit)
+                 (i32.and (local.get $new_int) (i32.const 127))
+                 (local.set $new_int)
+                 (i32.eq (local.get $size) (i32.const 8))
+                 (if
+                   (then
+                     (return (i32.add (i32.shl (local.get $int) (i32.const 8)) (local.get $new_int))
+           (i32.add (local.get $size) (i32.const 1))
+           )
+                   )
+                 )
+                 (i32.eq (local.get $high_bit) (i32.const 0))
+                 (if
+                   (then
+                     (return (i32.add (i32.shl (local.get $int) (i32.const 7)) (local.get $new_int))
+           (i32.add (local.get $size) (i32.const 1))
+           )
+                   )
+                 )
+                 (i32.add (i32.shl (local.get $int) (i32.const 7)) (local.get $new_int))
+                 (local.set $int)
+                 (i32.add (local.get $size) (i32.const 1))
+                 (local.set $size)
+                 (i32.add (local.get $offset) (i32.const 1))
+                 (local.set $offset)
+                 (i32.le_u (local.get $offset) (i32.const 8))
+                 (br_if $offset)
+               )
+               (local.get $int)
+               (local.get $size)
+             )
+             (func $read_cell (export "read_cell") (param $ptr i32) (param $len i32) (result i32 i32)
+               (local $payload_size i32)
+               (local $var_size i32)
+               (call $parse_varint (local.get $ptr))
+               (local.set $payload_size)
+               (local.set $var_size)
+               (local.get $payload_size)
+               (local.get $var_size)
+             )
+           )
+           """ = to_wat(VarInt)
+  end
+
   describe "memory" do
     test "Memory.pages/1" do
       defmodule Pages2 do

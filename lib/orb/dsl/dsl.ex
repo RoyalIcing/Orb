@@ -209,8 +209,56 @@ defmodule Orb.DSL do
     end
   end
 
+  defguardp is_local(name, locals)
+            # and
+            when is_atom(name) and is_map_key(locals, name)
+
+  def do_match(left, right, locals)
+
+  def do_match({:_, _, nil}, input, _locals) do
+    quote do: Orb.Stack.Drop.new(unquote(input))
+  end
+
+  def do_match({local, _, nil}, input, locals)
+      when is_atom(local) and is_map_key(locals, local) and
+             is_struct(:erlang.map_get(local, locals), Orb.VariableReference) do
+    quote do: Orb.Instruction.local_set(unquote(locals[local]), unquote(local), unquote(input))
+  end
+
+  def do_match({local, _, nil}, input, locals)
+      when is_atom(local) and is_map_key(locals, local) do
+    quote do: Orb.Instruction.local_set(unquote(locals[local]), unquote(local), unquote(input))
+  end
+
+  def do_match({{a, _, nil}, {b, _, nil}}, input, locals)
+      when is_local(a, locals) and is_local(b, locals) do
+    quote do:
+            Orb.InstructionSequence.new([
+              unquote(input),
+              Orb.VariableReference.local(unquote(a), unquote(locals[a]))
+              |> Orb.VariableReference.as_set(),
+              Orb.VariableReference.local(unquote(b), unquote(locals[b]))
+              |> Orb.VariableReference.as_set()
+            ])
+  end
+
+  # @some_global = input
+  def do_match({:@, _, [{global, _, nil}]}, input, _locals) do
+    quote do:
+            Orb.Instruction.Global.Set.new(
+              Orb.__lookup_global_type!(unquote(global)),
+              unquote(global),
+              unquote(input)
+            )
+  end
+
+  def do_match(left, right, _locals), do: nil
+
+  # is_struct(:erlang.map_get(name, locals), Orb.VariableReference)
+
   def do_snippet(locals, block_items) do
     Macro.prewalk(block_items, fn
+      # TODO: remove this
       # local[at!: delta] = value
       {:=, _meta,
        [
@@ -233,38 +281,19 @@ defmodule Orb.DSL do
           |> Orb.Memory.Store.offset_by(unquote(delta))
         end
 
+      # Assigning local variable
       {:=, _, [{local, _, nil}, input]}
       when is_atom(local) and is_map_key(locals, local) and
              is_struct(:erlang.map_get(local, locals), Orb.VariableReference) ->
         quote do:
                 Orb.Instruction.local_set(unquote(locals[local]), unquote(local), unquote(input))
 
-      {:=, _, [{local, _, nil}, input]}
-      when is_atom(local) and is_map_key(locals, local) ->
-        quote do:
-                Orb.Instruction.local_set(unquote(locals[local]), unquote(local), unquote(input))
+      # Assigning local variable
+      {:=, _, [left, right]} = quoted ->
+        do_match(left, right, locals) || quoted
 
       {local, _meta, nil} when is_atom(local) and is_map_key(locals, local) ->
         quote do: Orb.VariableReference.local(unquote(local), unquote(locals[local]))
-
-      # @some_global = input
-      {:=, _, [{:@, _, [{global, _, nil}]}, input]} when is_atom(global) ->
-        # quote do: Orb.Instruction.Global.Set.new(unquote(Macro.var(:wasm_global_type, nil)).(unquote(global)), unquote(global), unquote(input))
-        quote do:
-                Orb.Instruction.Global.Set.new(
-                  Orb.__lookup_global_type!(unquote(global)),
-                  unquote(global),
-                  unquote(input)
-                )
-
-      # @some_global
-      #       node = {:@, meta, [{global, _, nil}]} when is_atom(global) ->
-      #         if global == :weekdays_i32 do
-      #           dbg(meta)
-      #           dbg(node)
-      #         end
-      #
-      #         {:global_get, meta, [global]}
 
       # e.g. `_ = some_function_returning_value()`
       {:=, _, [{:_, _, nil}, value]} ->
