@@ -2,6 +2,7 @@ defmodule IfElseTest do
   use ExUnit.Case, async: true
 
   import Orb, only: [to_wat: 1]
+  require TestHelper
 
   test "no inferred type" do
     defmodule A do
@@ -172,6 +173,81 @@ defmodule IfElseTest do
     assert to_wat(InferredI64_B) =~ wat
     assert to_wat(InferredI64_C) =~ wat
     assert to_wat(InferredI64_D) =~ wat
+  end
+
+  test "cond" do
+    assert (TestHelper.module_wat do
+              use Orb
+
+              defw cond_abc(input: I32), I32 do
+                cond result: I32 do
+                  input === 0 -> ?a
+                  input === 1 -> ?b
+                  input === 2 -> ?c
+                end
+              end
+
+              defw cond_nop(input: I32), I32 do
+                cond result: nil do
+                  input === 0 -> %Orb.Nop{}
+                  input === 1 -> %Orb.Nop{}
+                  input === 2 -> %Orb.Nop{}
+                end
+              end
+            end) =~ """
+           (module $Sample
+             (func $cond_abc (export "cond_abc") (param $input i32) (result i32)
+               (block $cond_183 (result i32)
+                 (i32.eq (local.get $input) (i32.const 0))
+                 (if
+                   (then
+                     (i32.const 97)
+                     (br $cond_183)
+                   )
+                 )
+                 (i32.eq (local.get $input) (i32.const 1))
+                 (if
+                   (then
+                     (i32.const 98)
+                     (br $cond_183)
+                   )
+                 )
+                 (i32.eq (local.get $input) (i32.const 2))
+                 (if
+                   (then
+                     (i32.const 99)
+                     (br $cond_183)
+                   )
+                 )
+               )
+             )
+             (func $cond_nop (export "cond_nop") (param $input i32) (result i32)
+               (block $cond_191
+                 (i32.eq (local.get $input) (i32.const 0))
+                 (if
+                   (then
+                     nop
+                     (br $cond_191)
+                   )
+                 )
+                 (i32.eq (local.get $input) (i32.const 1))
+                 (if
+                   (then
+                     nop
+                     (br $cond_191)
+                   )
+                 )
+                 (i32.eq (local.get $input) (i32.const 2))
+                 (if
+                   (then
+                     nop
+                     (br $cond_191)
+                   )
+                 )
+               )
+             )
+           )
+           """
   end
 
   test "local effect" do

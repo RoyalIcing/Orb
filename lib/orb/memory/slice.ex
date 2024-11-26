@@ -22,7 +22,7 @@ defmodule Orb.Memory.Slice do
     byte_length <<< 32 ||| byte_offset
   end
 
-  def from(byte_offset = %{push_type: _}, byte_length = %{push_type: _}) do
+  def from(byte_offset, byte_length) do
     I64.extend_i32_u(byte_offset)
     |> I64.or(
       I64.extend_i32_u(byte_length)

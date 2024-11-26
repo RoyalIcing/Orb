@@ -235,6 +235,67 @@ defmodule Orb.IfElse do
       end
     end
 
+    defmacro cond(opts, do: block) do
+      do_cond(block, opts, __CALLER__)
+    end
+
+    def do_cond(block, opts, env) do
+      line = env.line
+      block_name = "cond_#{line}"
+
+      instructions =
+        for {:->, _, [[condition], result]} <- block do
+          quote bind_quoted: [
+                  condition: condition,
+                  result:
+                    case result do
+                      {:__block__, _meta, items} ->
+                        quote do: Orb.InstructionSequence.new(unquote(items))
+
+                      single ->
+                        single
+                    end,
+                  block_name: block_name
+                ] do
+            case condition do
+              true ->
+                result
+
+              condition ->
+                Orb.IfElse.new(
+                  condition,
+                  Orb.InstructionSequence.new([
+                    result,
+                    Orb.Control.break(block_name)
+                  ])
+                )
+                # TODO: need to add branch_type to Orb?
+                |> Map.put(:push_type, nil)
+
+                # Orb.InstructionSequence.new([
+                #   unquote(result),
+                #   Orb.Control.break(unquote(block_name), if: condition),
+                #   Orb.Stack.drop(%Orb.Nop{push_type: Orb.I32})
+                # ])
+            end
+          end
+        end
+
+      quote do
+        with do
+          require Orb.Control
+
+          instructions = unquote(instructions)
+          opts = unquote(opts)
+          result_type = Keyword.get(opts, :result)
+
+          Orb.Control.block unquote(block_name), result_type do
+            Orb.InstructionSequence.new(instructions)
+          end
+        end
+      end
+    end
+
     # TODO: remove as it’s being deprecated in Elixir
     # https://x.com/moomerman/status/1838235643983364206
     defmacro unless(condition, clauses) do
