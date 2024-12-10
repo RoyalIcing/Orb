@@ -233,9 +233,9 @@ defmodule Orb.DSL do
     quote do:
             Orb.InstructionSequence.new([
               unquote(input),
-              Orb.VariableReference.local(unquote(a), unquote(locals[a]))
-              |> Orb.VariableReference.as_set(),
               Orb.VariableReference.local(unquote(b), unquote(locals[b]))
+              |> Orb.VariableReference.as_set(),
+              Orb.VariableReference.local(unquote(a), unquote(locals[a]))
               |> Orb.VariableReference.as_set()
             ])
   end

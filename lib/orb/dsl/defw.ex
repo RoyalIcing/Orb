@@ -65,7 +65,7 @@ defmodule Orb.DSL.Defw do
         env
       )
 
-    quote do
+    quote generated: true do
       unquote(elixir_def)
 
       with do
@@ -135,7 +135,7 @@ defmodule Orb.DSL.Defw do
     params = Orb.Func.Type.params_from_call_args(func_args, env, meta[:line])
     param_types = for %{type: type} <- params, do: type
 
-    quote do
+    quote generated: true do
       unquote(def_kind)(unquote(def_call)) do
         Orb.Instruction.Call.new(
           unquote(result_type),
