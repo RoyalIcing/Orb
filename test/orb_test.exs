@@ -148,8 +148,8 @@ defmodule OrbTest do
                (local $payload_size i32)
                (local $var_size i32)
                (call $parse_varint (local.get $ptr))
-               (local.set $payload_size)
                (local.set $var_size)
+               (local.set $payload_size)
                (local.get $payload_size)
                (local.get $var_size)
              )
@@ -702,9 +702,28 @@ defmodule OrbTest do
       end
     end
 
-    types([Answer, Other])
+    defmodule Third do
+      @behaviour Orb.CustomType
+      @behaviour Orb.Table.Type
+
+      @impl Orb.CustomType
+      def wasm_type, do: %Orb.Func.Type{params: {I32, I32}, result: I32}
+
+      @impl Orb.CustomType
+      def type_name, do: :third
+
+      @impl Orb.Table.Type
+      def table_func_keys, do: [:a, :b]
+
+      def call(elem_index, a, b) do
+        Table.call_indirect(wasm_type(), type_name(), elem_index, a, b)
+      end
+    end
+
+    types([Answer, Other, Third])
     Table.allocate(Answer)
     Table.allocate(Other)
+    Table.allocate(Third)
 
     # global do
     #   i32 state(4), counter(0)
@@ -720,15 +739,26 @@ defmodule OrbTest do
 
     @table {Answer, :bad}
     @table {Other, :foo}
-    defw bad_answer(), I32 do
+    defwp bad_answer(), I32 do
       13
     end
 
-    defw answer(), {I32, I32, I32} do
+    @table {Third, :a}
+    defwp addition(a: I32, b: I32), I32 do
+      a + b
+    end
+
+    defw answer(), {I32, I32, I32, I32} do
       {
         Answer.call(Table.lookup!(Answer, :good)),
         Answer.call(Table.lookup!(Answer, :bad)),
-        Answer.call(Table.lookup!(Other, :foo))
+        Answer.call(Table.lookup!(Other, :foo)),
+        Third
+        |> Table.lookup!(:a)
+        |> Third.call(
+          i32(5),
+          i32(7)
+        )
       }
     end
   end
@@ -740,25 +770,31 @@ defmodule OrbTest do
            (module $TableExample
              (type $answer (func (result i32)))
              (type $other (func (result i32)))
-             (table 4 funcref)
+             (type $third (func (param i32 i32) (result i32)))
+             (table 6 funcref)
              (func $good_answer (export "good_answer") (result i32)
                (i32.const 42)
              )
              (elem (i32.const 0) $good_answer)
-             (func $bad_answer (export "bad_answer") (result i32)
+             (func $bad_answer (result i32)
                (i32.const 13)
              )
              (elem (i32.const 1) $bad_answer)
              (elem (i32.const 2) $bad_answer)
-             (func $answer (export "answer") (result i32 i32 i32)
+             (func $addition (param $a i32) (param $b i32) (result i32)
+               (i32.add (local.get $a) (local.get $b))
+             )
+             (elem (i32.const 4) $addition)
+             (func $answer (export "answer") (result i32 i32 i32 i32)
                (call_indirect (type $answer) (i32.const 0))
                (call_indirect (type $answer) (i32.const 1))
                (call_indirect (type $answer) (i32.const 2))
+               (call_indirect (type $third) (i32.const 5) (i32.const 7) (i32.const 4))
              )
            )
            """ = to_wat(TableExample)
 
-    assert Wasm.call(TableExample, :answer) === {42, 13, 13}
+    assert Wasm.call(TableExample, :answer) === {42, 13, 13, 12}
   end
 
   test "compiler errors reset state" do

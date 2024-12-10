@@ -137,10 +137,11 @@ defmodule Orb.Table do
           indent,
           "(call_indirect (type $",
           to_string(type_signature),
-          ") (i32.const ",
+          ")",
+          for(arg <- arguments, do: [" ", Orb.ToWat.to_wat(arg, "")]),
+          " (i32.const ",
           to_string(table_index),
           ?),
-          for(arg <- arguments, do: [" ", Orb.ToWat.to_wat(arg, "")]),
           ?)
         ]
       end
@@ -201,7 +202,8 @@ defmodule Orb.Table do
 
   defp do_call_indirect(func_type = %Orb.Func.Type{}, type_signature, table_index, arguments) do
     %CallIndirect{
-      pop_type: if(func_type.params, do: for(param <- func_type.params, do: param.type)),
+      pop_type: func_type.params,
+      # pop_type: if(func_type.params, do: for(param <- func_type.params, do: param.type)),
       push_type: func_type.result,
       type_signature: type_signature,
       table_index: table_index,
