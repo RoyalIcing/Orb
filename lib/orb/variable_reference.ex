@@ -96,6 +96,40 @@ defmodule Orb.VariableReference do
   end
 
   with @behaviour Access do
+    # some_str[:ptr]
+    @impl Access
+    def fetch(
+          %__MODULE__{entries: [%Local{identifier: local_name, type: Orb.Str}]},
+          :ptr
+        ) do
+      {:ok,
+       %__MODULE__{
+         entries: [
+           %Local{
+             identifier: "#{local_name}.ptr",
+             type: I32.UnsafePointer
+           }
+         ]
+       }}
+    end
+
+    # some_str[:size]
+    @impl Access
+    def fetch(
+          %__MODULE__{entries: [%Local{identifier: local_name, type: Orb.Str}]},
+          :size
+        ) do
+      {:ok,
+       %__MODULE__{
+         entries: [
+           %Local{
+             identifier: "#{local_name}.size",
+             type: I32
+           }
+         ]
+       }}
+    end
+
     @impl Access
     def fetch(
           %__MODULE__{entries: [%Local{type: mod}]} = var_ref,

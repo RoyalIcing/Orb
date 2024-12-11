@@ -26,6 +26,12 @@ defmodule Orb.Instruction.Call do
         {nil, []} ->
           []
 
+        {Orb.Str, [value]} when is_struct(value, Orb.VariableReference) ->
+          [value[:ptr], value[:size]]
+        
+        {Orb.Str, [value]} ->
+          [Orb.Constants.expand_if_needed(value)]
+
         {type, [value]} when is_atom(type) ->
           [Orb.Instruction.Const.wrap(type, value)]
 

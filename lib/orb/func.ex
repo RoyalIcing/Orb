@@ -150,8 +150,19 @@ defmodule Orb.Func do
       case args do
         [args] when is_list(args) ->
           for {name, type} <- args do
-            %Orb.Func.Param{name: name, type: Macro.expand_literals(type, env)}
+            Macro.expand_literals(type, env)
+            |> case do
+              # Orb.Str ->
+              #   [
+              #     %Orb.Func.Param{name: {name, :ptr}, type: I32.UnsafePointer},
+              #     %Orb.Func.Param{name: {name, :size}, type: I32}
+              #   ]
+
+              type ->
+                %Orb.Func.Param{name: name, type: type}
+            end
           end
+          |> List.flatten()
 
         [] ->
           []

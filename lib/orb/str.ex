@@ -41,6 +41,26 @@ defmodule Orb.Str do
     str.memory_offset
   end
 
+  # with @behaviour Access do
+  #   @impl Access
+  #   def fetch(%VariableReference{} = var_ref, :ptr) do
+  #     ast = %Orb.VariableReference.Local{
+  #       identifier: 
+  #     }
+  #     {:ok, ast}
+  #   end
+  # 
+  #   @impl Access
+  #   def get_and_update(_data, _key, _function) do
+  #     raise UndefinedFunctionError, module: __MODULE__, function: :get_and_update, arity: 3
+  #   end
+  # 
+  #   @impl Access
+  #   def pop(_data, _key) do
+  #     raise UndefinedFunctionError, module: __MODULE__, function: :pop, arity: 2
+  #   end
+  # end
+
   defimpl Orb.ToWat do
     def to_wat(
           %Orb.Str{memory_offset: memory_offset, string: string},

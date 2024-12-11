@@ -108,11 +108,12 @@ defmodule Orb.DSL do
           %{types: types, checks: checks} =
             for {name, type} <- args, reduce: %{types: [], checks: []} do
               %{types: types, checks: checks} ->
-                {type, check} =
-                  case Macro.expand_literals(type, env) do
+                {types, check} =
+                  Macro.expand_literals(type, env)
+                  |> case do
                     # Range
                     {:.., _, [min, max]} when min <= max ->
-                      {I32,
+                      {[{name, I32} | types],
                        Orb.DSL.assert!(
                          I32.band(
                            Orb.Instruction.local_get(I32, name) |> I32.ge_s(min),
@@ -122,10 +123,8 @@ defmodule Orb.DSL do
                        |> Macro.escape()}
 
                     type when is_atom(type) ->
-                      {type, nil}
+                      {[{name, type} | types], nil}
                   end
-
-                types = [{name, type} | types]
 
                 checks =
                   case check do
@@ -150,8 +149,18 @@ defmodule Orb.DSL do
 
     params =
       for {name, type} <- param_types do
-        Macro.escape(%Orb.Func.Param{name: name, type: type})
+        case type do
+          Orb.Str ->
+            [
+              %Orb.Func.Param{name: "#{name}.ptr", type: Orb.I32.UnsafePointer},
+              %Orb.Func.Param{name: "#{name}.size", type: Orb.I32}
+            ]
+
+          type ->
+            %Orb.Func.Param{name: name, type: type}
+        end
       end
+      |> List.flatten()
 
     result_type = Keyword.get(options, :result, nil) |> Macro.expand_literals(env)
 
@@ -198,7 +207,7 @@ defmodule Orb.DSL do
               {nil, name} -> name
               {prefix, name} -> "#{prefix}.#{name}"
             end,
-          params: unquote(params),
+          params: unquote(Macro.escape(params)),
           result: result,
           local_types: local_types,
           body: Orb.InstructionSequence.new(result, block_items),
@@ -228,6 +237,7 @@ defmodule Orb.DSL do
     quote do: Orb.Instruction.local_set(unquote(locals[local]), unquote(local), unquote(input))
   end
 
+  # De-structuring a tuple of two values
   def do_match({{a, _, nil}, {b, _, nil}}, input, locals)
       when is_local(a, locals) and is_local(b, locals) do
     quote do:
@@ -239,6 +249,15 @@ defmodule Orb.DSL do
               |> Orb.VariableReference.as_set()
             ])
   end
+
+  # def do_match({local, _, nil}, input, locals)
+  # when is_atom(local) and is_map_key(locals, local) do
+  # end
+  # {{:., _, [Access, :get]}, _,
+  # [
+  #   {local, _, nil},
+  #   [:ptr]
+  # ]}
 
   # @some_global = input
   def do_match({:@, _, [{global, _, nil}]}, input, _locals) do
@@ -253,6 +272,7 @@ defmodule Orb.DSL do
   def do_match(_left, _right, _locals), do: nil
 
   def do_snippet(locals, block_items) do
+    # dbg(locals)
     Macro.prewalk(block_items, fn
       # TODO: remove this
       # local[at!: delta] = value

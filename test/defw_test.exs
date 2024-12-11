@@ -74,6 +74,44 @@ defmodule DefwTest do
                  end
   end
 
+  test "Str argument is flattened into two params" do
+    defmodule AcceptStr do
+      use Orb
+
+      defwp str_length(a: Str), I32 do
+        a[:size]
+      end
+      
+      defwp middleman(a: Str), I32 do
+        str_length(a)
+      end
+
+      defw example(), I32 do
+        middleman("abc")
+      end
+    end
+
+    assert ~S"""
+           (module $AcceptStr
+             (memory (export "memory") 1)
+             (; constants 4 bytes ;)
+             (data (i32.const 255) "abc")
+             (func $str_length (param $a.ptr i32) (param $a.size i32) (result i32)
+               (local.get $a.size)
+             )
+             (func $middleman (param $a.ptr i32) (param $a.size i32) (result i32)
+               (call $str_length (local.get $a.ptr) (local.get $a.size))
+             )
+             (func $example (export "example") (result i32)
+               (call $middleman (i32.const 255) (i32.const 3))
+             )
+           )
+           """ = Orb.to_wat(AcceptStr)
+
+    i = Instance.run(AcceptStr)
+    assert Instance.call(i, :example) == 3
+  end
+
   test "constant strings are mapped into a single address space" do
     defmodule SharedStringConstants do
       use Orb
