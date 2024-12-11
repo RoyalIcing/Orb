@@ -56,4 +56,19 @@ defmodule ImportTest do
            )
            """ = Orb.to_wat(ImportsExample)
   end
+
+  defmodule ImportsGlobal do
+    use Orb
+
+    Orb.Import.register_memory(:env, :memory, 1)
+  end
+
+  test "importing memory should work" do
+
+    assert """
+           (module $ImportsGlobal
+             (import "env" "memory" (memory 1))
+           )
+           """ = Orb.to_wat(ImportsGlobal)
+  end
 end
