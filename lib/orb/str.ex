@@ -97,6 +97,13 @@ defmodule Orb.Str do
     """
     defstruct push_type: __MODULE__, slice64: nil
 
+    def to_str(str_slice) do
+      {
+        Orb.I32.wrap_i64(str_slice),
+        str_slice |> Orb.I64.shr_u(32) |> Orb.I32.wrap_i64()
+      }
+    end
+
     with @behaviour Orb.CustomType do
       @impl Orb.CustomType
       def wasm_type, do: :i64

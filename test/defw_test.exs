@@ -81,7 +81,7 @@ defmodule DefwTest do
       defwp str_length(a: Str), I32 do
         a[:size]
       end
-      
+
       defwp middleman(a: Str), I32 do
         str_length(a)
       end

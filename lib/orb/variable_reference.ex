@@ -102,15 +102,7 @@ defmodule Orb.VariableReference do
           %__MODULE__{entries: [%Local{identifier: local_name, type: Orb.Str}]},
           :ptr
         ) do
-      {:ok,
-       %__MODULE__{
-         entries: [
-           %Local{
-             identifier: "#{local_name}.ptr",
-             type: I32.UnsafePointer
-           }
-         ]
-       }}
+      {:ok, local("#{local_name}.ptr", Orb.I32.UnsafePointer)}
     end
 
     # some_str[:size]
@@ -119,15 +111,7 @@ defmodule Orb.VariableReference do
           %__MODULE__{entries: [%Local{identifier: local_name, type: Orb.Str}]},
           :size
         ) do
-      {:ok,
-       %__MODULE__{
-         entries: [
-           %Local{
-             identifier: "#{local_name}.size",
-             type: I32
-           }
-         ]
-       }}
+      {:ok, local("#{local_name}.size", Orb.I32)}
     end
 
     @impl Access
