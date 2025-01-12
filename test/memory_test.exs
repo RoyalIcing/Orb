@@ -3,7 +3,7 @@ defmodule MemoryTest do
   require TestHelper
   alias OrbWasmtime.Instance
 
-  test "import!/2" do
+  test "import/2" do
     defmodule ImportsMemory do
       use Orb
 
@@ -18,6 +18,21 @@ defmodule MemoryTest do
              (import "env" "memory" (memory 1))
            )
            """ = wat
+  end
+  
+  test "export/1" do
+    defmodule ExportsMemory do
+      use Orb
+
+      Memory.export(:foo)
+      Memory.pages(1)
+    end
+
+    assert ~S"""
+           (module $ExportsMemory
+             (memory (export "foo") 1)
+           )
+           """ = Orb.to_wat(ExportsMemory)
   end
 
   test "initial_data!/2" do
