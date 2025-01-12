@@ -3,7 +3,13 @@ defmodule Orb.Memory do
   Work with memory: load, store, declare pages & initial data.
   """
 
-  defstruct name: "", min: 0, exported_name: "memory"
+  defstruct name: "", min: 0, import_or_export: {:export, "memory"}
+
+  def __sum_min(wasm_memory) do
+    for {:min_add, page_count} <- wasm_memory, reduce: 0 do
+      total -> total + page_count
+    end
+  end
 
   @doc false
   def new(page_definitions, constants)
@@ -14,7 +20,7 @@ defmodule Orb.Memory do
   def new(list, %{offset: constants_offset, byte_size: constants_byte_size}) when is_list(list) do
     bytes_per_page = page_byte_size()
 
-    requested_page_count = Enum.sum(list)
+    requested_page_count = __sum_min(list)
 
     constants_page_count =
       if constants_byte_size > 0 do
@@ -25,12 +31,31 @@ defmodule Orb.Memory do
 
     total_page_count = requested_page_count + constants_page_count
 
+    import_or_export =
+      Enum.find(list, {:export, "memory"}, fn
+        {:export, _name} -> true
+        {:import, _namespace, _name} -> true
+        _ -> false
+      end)
+
     case total_page_count do
       0 ->
         nil
 
       min ->
-        %__MODULE__{min: min}
+        %__MODULE__{min: min, import_or_export: import_or_export}
+    end
+  end
+
+  defmacro import(namespace, name) do
+    quote bind_quoted: [namespace: namespace, name: name] do
+      @wasm_memory {:import, namespace, name}
+    end
+  end
+
+  defmacro export(name) do
+    quote bind_quoted: [name: name] do
+      @wasm_memory {:export, name}
     end
   end
 
@@ -46,8 +71,8 @@ defmodule Orb.Memory do
   """
   defmacro pages(page_count) do
     quote do
-      start_offset = Enum.sum(@wasm_memory)
-      @wasm_memory unquote(page_count)
+      start_offset = unquote(__MODULE__).__sum_min(@wasm_memory)
+      @wasm_memory {:min_add, unquote(page_count)}
       # FIXME: the idea is this returns the page offset, but constants will push this down
       # making this offset incorrect.
       start_offset
@@ -186,15 +211,34 @@ defmodule Orb.Memory do
   end
 
   defimpl Orb.ToWat do
-    def to_wat(%Orb.Memory{min: min}, indent) do
+    def to_wat(%Orb.Memory{min: min, import_or_export: import_or_export}, indent) do
       [
         indent,
-        ~S{(memory (export "memory")},
+        case import_or_export do
+          {:import, namespace, name} ->
+            [
+              ~S|(import "|,
+              to_string(namespace),
+              ~S|" "|,
+              to_string(name),
+              ~S|" (memory|
+            ]
+
+          {:export, name} ->
+            [
+            ~S|(memory (export "|,
+            to_string(name),
+            ~S|")|
+            ]
+        end,
         case min do
           nil -> []
           int -> [" ", to_string(int)]
         end,
-        ~S{)},
+        case import_or_export do
+          {:import, _namespace, _name} -> ~S|))|
+          _ -> ~S|)|
+        end,
         "\n"
       ]
     end

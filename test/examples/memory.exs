@@ -103,7 +103,6 @@ defmodule Examples.Memory do
 
           true ->
             Memory.pages(2)
-            # wasm_memory(min_pages: 2)
             # Memory.pages(min: 2)
             # Memory.pages(increase_by: 2)
 
