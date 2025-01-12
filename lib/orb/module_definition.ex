@@ -241,7 +241,7 @@ defmodule Orb.ModuleDefinition do
           nil ->
             []
 
-          %{exported_name: exported_name} ->
+          %{import_or_export: {:export, exported_name}} ->
             [
               [
                 sized(exported_name),
@@ -249,6 +249,9 @@ defmodule Orb.ModuleDefinition do
                 leb128_u(0)
               ]
             ]
+
+          %{import_or_export: {:import, _, _}} ->
+            []
         end
 
       func_code = for {f, _index} <- funcs, do: Orb.ToWasm.to_wasm(f, context)
