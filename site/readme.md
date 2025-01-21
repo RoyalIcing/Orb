@@ -18,6 +18,22 @@ Orb is the full power of Elixir at compile time and the portability of WebAssemb
 
 Orb is [alpha](https://github.com/RoyalIcing/Orb/issues?q=is%3Aopen+is%3Aissue+milestone%3AAlpha) in active development. My aim is to refine the current feature set and complete a `.wasm` compiler (current it compiles to WebAssembly’s `.wat` text format) in order to [get to beta](https://github.com/RoyalIcing/Orb/issues?q=is%3Aopen+is%3Aissue+milestone%3ABeta).
 
+## Features
+
+- Allow access to nearly all WebAssembly 1.0 instructions.
+- Produce tiny `.wasm` executables: kilobytes not megabytes.
+- Use Elixir modules to organize and reuse code.
+- Use Elixir functions and macros to create composable abstractions.
+- Run any Elixir code at compile time, including Hex packages.
+- Define your own WebAssembly instructions that output to `wat` and `wasm` formats.
+
+## Anti-Features
+
+- Allow executing any Elixir code in WebAssembly runtime. It’s not a goal of Orb to take a piece of everyday Elixir code and have it run in WebAssembly. However, because you can use macros you could decide to build that functionality on top of Orb.
+- Allow access to the DOM. I believe the DOM is a poor fit for WebAssembly with its big object graph.
+- WASI support. It’s not stabilized yet and for now I’d rather it be a library built on top of Orb.
+- Produce the most optimized code possible through deep analysis. I recommend using `wasm-opt` if you really need to squeeze every byte possible.
+
 ## Write functions using an Elixir subset
 
 You can write maths using familiar `+ - * /` operators in Orb.
