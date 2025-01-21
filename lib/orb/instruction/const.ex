@@ -2,7 +2,7 @@ defmodule Orb.Instruction.Const do
   @moduledoc false
   defstruct [:push_type, :value]
 
-  require alias Orb.Ops
+  alias require Orb.Ops
 
   def new(push_type, value) do
     %__MODULE__{push_type: push_type, value: value}

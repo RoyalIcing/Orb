@@ -5,7 +5,7 @@ defmodule Orb.I32 do
 
   import Kernel, except: [and: 2, or: 2]
 
-  require alias Orb.Ops
+  alias require Orb.Ops
   alias Orb.Instruction
   alias Orb.InstructionSequence
 

@@ -4,7 +4,7 @@ defmodule Orb.Numeric.DSL do
   """
 
   import Kernel, except: [+: 2, -: 2, *: 2, ===: 2, !==: 2, not: 1, or: 2]
-  require alias Orb.Ops
+  alias require Orb.Ops
 
   def left + right do
     case Ops.extract_common_type(left, right) do

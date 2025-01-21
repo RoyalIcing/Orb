@@ -3,8 +3,8 @@ defmodule Orb.Memory.Slice do
   Similar to [Rust’s slice](https://doc.rust-lang.org/1.77.0/std/primitive.slice.html) but across all memory.
   """
 
-  require Orb.I64 |> alias
-  require Orb.I32 |> alias
+  alias require Orb.I64
+  alias require Orb.I32
 
   with @behaviour Orb.CustomType do
     @impl Orb.CustomType

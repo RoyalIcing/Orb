@@ -84,7 +84,7 @@ defmodule Orb.IfElse do
 
   defimpl Orb.ToWat do
     import Orb.ToWat.Helpers
-    require Orb.Ops |> alias
+    alias require Orb.Ops
 
     def to_wat(
           %Orb.IfElse{
@@ -178,7 +178,7 @@ defmodule Orb.IfElse do
 
     import Kernel, except: [if: 2, unless: 2]
 
-    require InstructionSequence |> alias
+    alias require InstructionSequence
 
     # Multi-line
     defmacro if(condition, [result: result], do: when_true, else: when_false) do

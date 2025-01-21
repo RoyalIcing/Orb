@@ -3,7 +3,7 @@ defmodule Orb.I64 do
   Type for 64-bit integer.
   """
 
-  require alias Orb.Ops
+  alias require Orb.Ops
   alias Orb.Instruction
 
   with @behaviour Orb.CustomType do

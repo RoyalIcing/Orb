@@ -10,7 +10,7 @@ defmodule Orb.Stack do
 
     defstruct instruction: nil, count: 0, pop_type: nil, push_type: nil
 
-    require alias Orb.Ops
+    alias require Orb.Ops
 
     def new(instruction) do
       {_pop, type} = Ops.pop_push_of(instruction)
@@ -64,7 +64,7 @@ defmodule Orb.Stack do
 
     defstruct pop_type: nil, push_type: nil, count: 0
 
-    require alias Orb.Ops
+    alias require Orb.Ops
 
     def new(type) do
       count = type |> Ops.type_stack_count()

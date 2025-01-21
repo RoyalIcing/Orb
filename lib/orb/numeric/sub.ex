@@ -10,7 +10,7 @@ defmodule Orb.Numeric.Subtract do
   """
   alias Orb.CustomType
 
-  require alias Orb.Ops
+  alias require Orb.Ops
 
   # Perform at comptime.
   def optimized(_type, a, b) when is_integer(a) and is_integer(b), do: a - b

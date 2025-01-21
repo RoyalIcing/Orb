@@ -1,7 +1,7 @@
 defmodule Orb.TypeCheckError do
   defexception [:expected_type, :received_type, :instruction_identifier, :message]
 
-  require Orb.Ops |> alias
+  alias require Orb.Ops
 
   defp make_message(type_a, type_b, :if) do
     "if/else expected consistent clause types, if: #{format_type(type_a)}, but else: #{format_type(type_b)}."

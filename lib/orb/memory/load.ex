@@ -3,7 +3,7 @@ defmodule Orb.Memory.Load do
 
   defstruct push_type: nil, load_instruction: :load, address: nil, align: nil
 
-  require Orb.Ops |> alias
+  alias require Orb.Ops
 
   def new(type, address, opts) when is_atom(type) do
     load_instruction =

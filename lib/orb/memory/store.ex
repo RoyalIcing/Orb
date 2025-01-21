@@ -10,7 +10,7 @@ defmodule Orb.Memory.Store do
             value: nil
 
   alias Orb.Memory.Load
-  require Orb.Ops |> alias
+  alias require Orb.Ops
 
   def new(type, address, value, opts) when is_atom(type) do
     load_instruction =
