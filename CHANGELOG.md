@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## v0.2.0 (2025-03-01)
 
 ### Added
 - Support for accepting `Str` as function parameter
