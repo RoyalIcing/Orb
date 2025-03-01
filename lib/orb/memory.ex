@@ -226,9 +226,9 @@ defmodule Orb.Memory do
 
           {:export, name} ->
             [
-            ~S|(memory (export "|,
-            to_string(name),
-            ~S|")|
+              ~S|(memory (export "|,
+              to_string(name),
+              ~S|")|
             ]
         end,
         case min do

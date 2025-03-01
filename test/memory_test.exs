@@ -19,7 +19,7 @@ defmodule MemoryTest do
            )
            """ = wat
   end
-  
+
   test "export/1" do
     defmodule ExportsMemory do
       use Orb
