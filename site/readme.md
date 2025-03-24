@@ -6,17 +6,15 @@
 
 For years I’ve been a JavaScript developer. JavaScript runs everywhere: the browser where it was born, on the server, on your phone, on your laptop. But adopting JavaScript means adopting an increasingly complex and bloated suite of tools.
 
-WebAssembly offers a restart, again born in the browser and again running on the server, your phone and laptop. It takes things down to the studs, at a level even lower than JavaScript, which allows even better performance. But take an existing toolset and its WebAssembly output is often hundreds of kilobytes or more, and targets a single platform instead of running everywhere.
+WebAssembly offers a reset, again born in the browser and again running on the server, your phone and laptop. It takes things down to the studs, at a level even lower than JavaScript, allowing even better performance. But use an existing language and the WebAssembly it outputs is often in the hundreds of kilobytes or more, and targets a single platform instead of running everywhere.
 
-Orb takes the lesson of components that React taught: give developers the raw ingredients and make them easily composable. Make UI components. Make state machine components. Make decoder/encoder components for common formats. And then make those run everywhere.
+Orb takes the lessons of components from React: give developers the raw ingredients (here WebAssembly instructions instead of JSX’s HTML) and make them easily composable. Make UI components. Make state machine components. Make format decoder/encoder components. And then make those run everywhere.
 
 Orb piggybacks on the existing Elixir ecosystem: it has a module system, it has a [package manager](https://hex.pm), it has a [test runner](https://hexdocs.pm/ex_unit/ExUnit.html), it has a language server, and it has an awesome community.
 
-In fact, Orb lets you run any Elixir code when compiling your WebAssembly. It’s just like how React lets you write any JavaScript when rendering out primitive HTML. Orb is like JSX but for WebAssembly.
+You can run any Elixir code when compiling your WebAssembly. It’s just like how React lets you run any JavaScript when rendering out HTML. Orb is like JSX but for WebAssembly instructions.
 
-Orb is the full power of Elixir at compile time and the portability of WebAssembly at runtime.
-
-Orb is [alpha](https://github.com/RoyalIcing/Orb/issues?q=is%3Aopen+is%3Aissue+milestone%3AAlpha) in active development. My aim is to refine the current feature set and complete a `.wasm` compiler (current it compiles to WebAssembly’s `.wat` text format) in order to [get to beta](https://github.com/RoyalIcing/Orb/issues?q=is%3Aopen+is%3Aissue+milestone%3ABeta).
+Orb is the full power of Elixir at compile time and the portability of WebAssembly at runtime. It’s [alpha](https://github.com/RoyalIcing/Orb/issues?q=is%3Aopen+is%3Aissue+milestone%3AAlpha) in active development. My aim is to refine the current feature set and complete a `.wasm` compiler (current it compiles to WebAssembly’s `.wat` text format) in order to [get to beta](https://github.com/RoyalIcing/Orb/issues?q=is%3Aopen+is%3Aissue+milestone%3ABeta).
 
 ## Features
 
