@@ -20,6 +20,8 @@ Write WebAssembly using Elixir as your compiler:
 - **Write automated tests** using [Elixir’s ExUnit](https://hexdocs.pm/ex_unit/ExUnit.html).
 - Define your own custom WebAssembly instructions and abstractions that output to `wat` and `wasm` formats.
 
+I think of it as like how React’s JSX lets you write dynamic HTML in JavaScript, Orb lets you write dynamic WebAssembly in Elixir.
+
 ## Status
 
 Orb is alpha in active development. My aim is to refine the current feature set and complete a `.wasm` compiler (current it compiles to WebAssembly’s `.wat` text format) in order to get to beta.
