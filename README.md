@@ -15,7 +15,7 @@ Write WebAssembly using Elixir as your compiler:
 - Allow access to nearly all WebAssembly 1.0 instructions.
 - Produce tiny `.wasm` executables: **kilobytes not megabytes**. It has zero runtime overhead: define a function or global and that’s all that is compiled.
 - Use Elixir **modules to organize and reuse** code, functions and **macros to create composable abstractions**, and chain function calls together with the **pipe `|>` operator**. Publish your code to [Hex](https://hex.pm).
-- Run **any Elixir code at compile time**, including [Hex packages](https://hex.pm). e.g. call out to an Elixir library, or make network requests, or integrate within an existing Elixir application — and have it influence what WebAssembly instructions are output.
+- Run **any Elixir code at compile time** e.g. call out to an Elixir library, or make network requests, or integrate within an existing Elixir application — and have it influence what WebAssembly instructions are output.
 - **Dynamically assemble modules on-the-fly** e.g. use feature flags to conditionally compile code paths, creating custom “tree shaken” WebAssembly modules.
 - **Write automated tests** using [Elixir’s ExUnit](https://hexdocs.pm/ex_unit/ExUnit.html).
 - Define your own custom WebAssembly instructions and abstractions that output to `wat` and `wasm` formats.
