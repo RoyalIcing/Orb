@@ -2,7 +2,7 @@
   <img src="orb-logo-blue-orange.svg" alt="Orb logo" width="384" height="384">
 </p>
 
-<h1 align="center">Orb: Write WebAssembly with Elixir</h1>
+<h1 align="center">Orb: Write Composable WebAssembly using Elixir</h1>
 
 <p dir="ltr" align="center"><a href="https://hexdocs.pm/orb" rel="nofollow">Docs</a> | <a href="https://github.com/RoyalIcing/Orb/tree/main/examples">Examples</a></p>
 
@@ -10,16 +10,14 @@
 
 ## Features
 
-Write WebAssembly with the power of Elixir as your compiler:
+Write WebAssembly using Elixir as your compiler:
 
 - Allow access to nearly all WebAssembly 1.0 instructions.
-- Produce tiny `.wasm` executables: kilobytes not megabytes. It has zero runtime overhead: define a function or global and that’s all that is compiled.
-- Use Elixir modules to organize and reuse code.
-- Use Elixir functions and macros to create composable abstractions.
-- Chain function calls together with the **pipe `|>` operator**.
-- Run any Elixir code at compile time, including [Hex packages](https://hex.pm). e.g. talk to the rest of your Elixir application, call out to an Elixir library, or make network requests.
-- **Write unit tests** using [Elixir’s built-in ExUnit](https://hexdocs.pm/ex_unit/ExUnit.html).
+- Produce tiny `.wasm` executables: **kilobytes not megabytes**. It has zero runtime overhead: define a function or global and that’s all that is compiled.
+- Use Elixir modules to organize and reuse code, functions and **macros to create composable abstractions**, and chain function calls together with the **pipe `|>` operator**.
+- Run **any Elixir code at compile time**, including [Hex packages](https://hex.pm). e.g. call out to an Elixir library, or make network requests, or integrate within an existing Elixir application — and have it influence what WebAssembly instructions are compiled.
 - **Compile modules on-the-fly** e.g. use feature flags to conditionally compile code paths or enable particular WebAssembly instructions, creating a custom “tree shaken” WebAssembly module per user.
+- **Write unit tests** using [Elixir’s built-in ExUnit](https://hexdocs.pm/ex_unit/ExUnit.html).
 - Define your own WebAssembly instructions that output to `wat` and `wasm` formats.
 
 ## Status
