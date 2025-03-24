@@ -13,7 +13,7 @@
 Write WebAssembly with the power of Elixir as your compiler:
 
 - Allow access to nearly all WebAssembly 1.0 instructions.
-- Produce tiny `.wasm` executables: kilobytes not megabytes.
+- Produce tiny `.wasm` executables: kilobytes not megabytes. It has zero runtime overhead: define a function or global and that’s all that is compiled.
 - Use Elixir modules to organize and reuse code.
 - Use Elixir functions and macros to create composable abstractions.
 - Chain function calls together with the **pipe `|>` operator**.
@@ -28,14 +28,16 @@ Orb is alpha in active development. My aim is to refine the current feature set 
 
 ## Anti-Features
 
-- Allow executing any Elixir code in WebAssembly runtime. It’s not a goal of Orb to take a piece of everyday Elixir code and have it run in WebAssembly. However, because you can use macros you could decide to build that functionality on top of Orb.
-- Allow access to the DOM. I believe the DOM is a poor fit for WebAssembly with its big object graph.
+The following are a list of things that Orb has chosen **not** to support:
+
+- Execute any Elixir code at WebAssembly runtime. It’s not a goal of Orb to take any piece of everyday Elixir code and have it run in WebAssembly. However, because you can use macros you could decide to build that functionality on top of Orb.
+- Access to the DOM. I believe the DOM is a poor fit for WebAssembly with its big object graph requiring lots of communication between WebAssembly and its host. Instead we prefer things that serialize like HTML, SVG, XML, CSV.
 - WASI support. It’s not stabilized yet and for now I’d rather it be a library built on top of Orb.
-- Produce the most optimized code possible through deep analysis. I recommend using `wasm-opt` if you really need to squeeze every byte possible.
+- Produce the most optimized code theoretically possible through deep analysis. Use `wasm-opt` if you really need to squeeze every byte possible from your final `.wasm` file. However, Orb does aim to produce slim `.wasm` files without unnecessary bloat like heavy runtimes.
 
 ## Libraries
 
-- **Orb** (alpha): Write WebAssembly 1.0 in Elixir.
+- **Orb** (alpha): Write Core WebAssembly 1.0 in Elixir.
 - [**SilverOrb**](https://github.com/RoyalIcing/SilverOrb) (work-in-progress): Batteries-included standard library for Orb.
 - OrbExtismPDK (coming later): Write Extism plugins in Elixir with Orb.
 
