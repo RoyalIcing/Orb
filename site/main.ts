@@ -139,9 +139,10 @@ li {
 }
 
 body {
-  margin: 0;
   min-height: 100vh;
   line-height: 1.5;
+  max-width: 1232px;
+  margin: auto;
   display: grid;
   grid-template-areas:
     "nav"
@@ -154,7 +155,7 @@ main {
   grid-area: main;
   max-width: 48rem;
   margin: 0 auto;
-  padding: 3rem 3vw;
+  padding: 3rem 1.5vw;
   line-height: 1.75;
   --list-padding: 0 0 0 1em;
 }
@@ -170,8 +171,8 @@ nav {
   flex-wrap: wrap;
   text-align: center;
   gap: 1rem;
-  padding-left: 3vw;
-  padding-right: 3vw;
+  padding-left: 1.5vw;
+  padding-right: 1.5vw;
   padding-bottom: 2rem;
   background-color: var(--color-canvas-default);
   color: var(--color-fg-default);
