@@ -272,6 +272,26 @@ defmodule Orb.DSL do
     end
   end
 
+  # Special casing for when assigning a call returning Orb.Str to another Orb.Str
+  # TODO: composite types that allow any custom type to do this.
+  def do_match({local, _, nil}, source, locals)
+      when is_atom(local) and is_map_key(locals, local) and
+             :erlang.map_get(local, locals) == Orb.Str do
+    quote do
+      Orb.InstructionSequence.new(nil, [
+        unquote(source),
+        Orb.Instruction.local_set(
+          Orb.I32.UnsafePointer,
+          :"#{unquote(local)}.size"
+        ),
+        Orb.Instruction.local_set(
+          Orb.I32.UnsafePointer,
+          :"#{unquote(local)}.ptr"
+        )
+      ])
+    end
+  end
+
   def do_match({local, _, nil}, input, locals)
       when is_atom(local) and is_map_key(locals, local) and
              is_struct(:erlang.map_get(local, locals), Orb.VariableReference) do
