@@ -264,7 +264,7 @@ defmodule Orb.DSL do
           Orb.VariableReference.local(local_b, Orb.Str)[:ptr]
         ),
         Orb.Instruction.local_set(
-          Orb.I32.UnsafePointer,
+          Orb.I32,
           :"#{local_a}.size",
           Orb.VariableReference.local(local_b, Orb.Str)[:size]
         )
@@ -281,7 +281,7 @@ defmodule Orb.DSL do
       Orb.InstructionSequence.new(nil, [
         source,
         Orb.Instruction.local_set(
-          Orb.I32.UnsafePointer,
+          Orb.I32,
           :"#{local}.size"
         ),
         Orb.Instruction.local_set(
