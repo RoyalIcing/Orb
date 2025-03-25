@@ -455,7 +455,6 @@ defmodule Orb.DSL do
            when is_atom(identifier) do
     quote bind_quoted: [
             source: source,
-            # FIXME: need to support not just I32 but at least I64
             init_elixir_var:
               case identifier do
                 :_ ->
