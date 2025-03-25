@@ -86,8 +86,13 @@ defmodule DefwTest do
         str_length(a)
       end
 
-      defw example(), I32 do
-        middleman("abc")
+      defwp sets_var(a: Str), I32, b: Str do
+        b = a
+        b[:size]
+      end
+
+      defw example(), {I32, I32} do
+        {middleman("abc"), sets_var("abc")}
       end
     end
 
@@ -102,14 +107,24 @@ defmodule DefwTest do
              (func $middleman (param $a.ptr i32) (param $a.size i32) (result i32)
                (call $str_length (local.get $a.ptr) (local.get $a.size))
              )
-             (func $example (export "example") (result i32)
+             (func $sets_var (param $a.ptr i32) (param $a.size i32) (result i32)
+               (local $b.ptr i32)
+               (local $b.size i32)
+               (local.get $a.ptr)
+               (local.set $b.ptr)
+               (local.get $a.size)
+               (local.set $b.size)
+               (local.get $b.size)
+             )
+             (func $example (export "example") (result i32 i32)
                (call $middleman (i32.const 255) (i32.const 3))
+               (call $sets_var (i32.const 255) (i32.const 3))
              )
            )
            """ = Orb.to_wat(AcceptStr)
 
     i = Instance.run(AcceptStr)
-    assert Instance.call(i, :example) == 3
+    assert Instance.call(i, :example) == {3, 3}
   end
 
   test "constant strings are mapped into a single address space" do

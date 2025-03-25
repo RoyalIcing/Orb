@@ -164,15 +164,38 @@ defmodule Orb.DSL do
 
     result_type = Keyword.get(options, :result, nil) |> Macro.expand_literals(env)
 
-    local_types =
-      for {key, type} <- Keyword.get(options, :locals, []) do
+    local_vars =
+      for {name, type} <- Keyword.get(options, :locals, []) do
         type = Macro.expand_literals(type, env)
-        {key, type}
+
+        case type do
+          Orb.Str ->
+            {name, Orb.Str}
+
+          type ->
+            {name, type}
+        end
       end
+      |> List.flatten()
 
-    locals = Map.new(param_types ++ local_types)
+    local_type_defs =
+      for {name, type} <- Keyword.get(options, :locals, []) do
+        type = Macro.expand_literals(type, env)
 
-    # block = Macro.expand_once(block, __ENV__)
+        case type do
+          Orb.Str ->
+            [
+              {:"#{name}.ptr", Orb.I32.UnsafePointer},
+              {:"#{name}.size", Orb.I32}
+            ]
+
+          type ->
+            {name, type}
+        end
+      end
+      |> List.flatten()
+
+    locals = Map.new(param_types ++ local_vars)
 
     block_items =
       List.wrap(
@@ -198,7 +221,7 @@ defmodule Orb.DSL do
           |> List.keysort(0)
 
         local_types =
-          (unquote(local_types) ++ body_local_types)
+          (unquote(local_type_defs) ++ body_local_types)
           |> Keyword.new()
 
         %Orb.Func{
@@ -224,6 +247,29 @@ defmodule Orb.DSL do
 
   def do_match({:_, _, nil}, input, _locals) do
     quote do: Orb.Stack.Drop.new(unquote(input))
+  end
+
+  # Special casing for when assigning a Orb.Str to another Orb.Str
+  # TODO: composite types that allow any custom type to do this.
+  def do_match({local_a, _, nil}, {local_b, _, nil}, locals)
+      when is_atom(local_b) and is_map_key(locals, local_a) and
+             is_atom(local_b) and is_map_key(locals, local_b) and
+             :erlang.map_get(local_a, locals) == Orb.Str and
+             :erlang.map_get(local_b, locals) == Orb.Str do
+    quote do
+      Orb.InstructionSequence.new([
+        Orb.Instruction.local_set(
+          Orb.I32.UnsafePointer,
+          :"#{unquote(local_a)}.ptr",
+          Orb.VariableReference.local(unquote(local_b), Orb.Str)[:ptr]
+        ),
+        Orb.Instruction.local_set(
+          Orb.I32.UnsafePointer,
+          :"#{unquote(local_a)}.size",
+          Orb.VariableReference.local(unquote(local_b), Orb.Str)[:size]
+        )
+      ])
+    end
   end
 
   def do_match({local, _, nil}, input, locals)

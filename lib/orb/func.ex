@@ -152,12 +152,6 @@ defmodule Orb.Func do
           for {name, type} <- args do
             Macro.expand_literals(type, env)
             |> case do
-              # Orb.Str ->
-              #   [
-              #     %Orb.Func.Param{name: {name, :ptr}, type: I32.UnsafePointer},
-              #     %Orb.Func.Param{name: {name, :size}, type: I32}
-              #   ]
-
               type ->
                 %Orb.Func.Param{name: name, type: type}
             end
