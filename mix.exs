@@ -6,7 +6,7 @@ defmodule Orb.MixProject do
   def project do
     [
       app: :orb,
-      version: "0.2.0",
+      version: "0.2.1",
       elixir: "~> 1.17",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
