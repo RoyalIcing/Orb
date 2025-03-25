@@ -256,17 +256,17 @@ defmodule Orb.DSL do
              is_atom(local_b) and is_map_key(locals, local_b) and
              :erlang.map_get(local_a, locals) == Orb.Str and
              :erlang.map_get(local_b, locals) == Orb.Str do
-    quote do
+    quote bind_quoted: [local_a: local_a, local_b: local_b] do
       Orb.InstructionSequence.new([
         Orb.Instruction.local_set(
           Orb.I32.UnsafePointer,
-          :"#{unquote(local_a)}.ptr",
-          Orb.VariableReference.local(unquote(local_b), Orb.Str)[:ptr]
+          :"#{local_a}.ptr",
+          Orb.VariableReference.local(local_b, Orb.Str)[:ptr]
         ),
         Orb.Instruction.local_set(
           Orb.I32.UnsafePointer,
-          :"#{unquote(local_a)}.size",
-          Orb.VariableReference.local(unquote(local_b), Orb.Str)[:size]
+          :"#{local_a}.size",
+          Orb.VariableReference.local(local_b, Orb.Str)[:size]
         )
       ])
     end
@@ -277,16 +277,16 @@ defmodule Orb.DSL do
   def do_match({local, _, nil}, source, locals)
       when is_atom(local) and is_map_key(locals, local) and
              :erlang.map_get(local, locals) == Orb.Str do
-    quote do
+    quote bind_quoted: [local: local, source: source] do
       Orb.InstructionSequence.new(nil, [
-        unquote(source),
+        source,
         Orb.Instruction.local_set(
           Orb.I32.UnsafePointer,
-          :"#{unquote(local)}.size"
+          :"#{local}.size"
         ),
         Orb.Instruction.local_set(
           Orb.I32.UnsafePointer,
-          :"#{unquote(local)}.ptr"
+          :"#{local}.ptr"
         )
       ])
     end
