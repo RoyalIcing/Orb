@@ -770,10 +770,10 @@ defmodule Orb.DSL do
   """
   defmacro must!(do: block) do
     quote bind_quoted: [
-            must_be_truthy: __get_block_items(block) |> Enum.reduce(&Orb.I32.band/2)
+            checks: __get_block_items(block)
           ] do
       Orb.IfElse.new(
-        must_be_truthy,
+        Enum.reduce(checks, &Orb.I32.band/2),
         nop(),
         unreachable!()
       )

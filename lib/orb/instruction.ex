@@ -330,6 +330,7 @@ defmodule Orb.Instruction do
   defimpl Orb.ToWat do
     alias Orb.ToWat.Instructions
 
+    # TODO: remove
     def to_wat(
           %Orb.Instruction{
             operation: {:call, _param_types, f},
@@ -346,6 +347,7 @@ defmodule Orb.Instruction do
       ]
     end
 
+    # TODO: remove
     def to_wat(
           %Orb.Instruction{
             operation: {:call, f},
@@ -475,6 +477,31 @@ defmodule Orb.Instruction do
         to_string(Ops.to_primitive_type(type)),
         ".const ",
         to_string(number),
+        ")"
+      ]
+    end
+
+    def to_wat(
+          %Orb.Instruction{
+            push_type: type,
+            operation: operation,
+            operands: operands
+          },
+          indent
+        )
+        when operation in [:and] do
+      [
+        indent,
+        "(",
+        to_string(type),
+        ".",
+        to_string(operation),
+        for(
+          operand <- operands,
+          do: ["\n", Instructions.do_wat(operand, "  " <> indent)]
+        ),
+        ?\n,
+        indent,
         ")"
       ]
     end

@@ -289,7 +289,10 @@ defmodule OperatorsTest do
                (f32.const 2.0)
              )
              (func $normal? (export "normal?") (param $f f32) (result i32)
-               (i32.and (f32.ge (local.get $f) (f32.const 0.0)) (f32.le (local.get $f) (f32.const 1.0)))
+               (i32.and
+                 (f32.ge (local.get $f) (f32.const 0.0))
+                 (f32.le (local.get $f) (f32.const 1.0))
+               )
              )
              (func $lab_to_xyz (export "lab_to_xyz") (param $l f32) (param $a f32) (param $b f32) (result f32 f32 f32)
                (f32.const 0.0)

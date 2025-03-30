@@ -113,9 +113,15 @@ defmodule OrbTest do
                (loop $offset
                  (i32.load8_u (i32.add (local.get $ptr) (local.get $offset)))
                  (local.set $new_int)
-                 (i32.and (local.get $new_int) (i32.const 128))
+                 (i32.and
+                   (local.get $new_int)
+                   (i32.const 128)
+                 )
                  (local.set $high_bit)
-                 (i32.and (local.get $new_int) (i32.const 127))
+                 (i32.and
+                   (local.get $new_int)
+                   (i32.const 127)
+                 )
                  (local.set $new_int)
                  (i32.eq (local.get $size) (i32.const 8))
                  (if
@@ -515,13 +521,20 @@ defmodule OrbTest do
     assert (TestHelper.module_wat do
               use Orb
 
-              defw must_be_positive(a: I32), I32 do
+              defw must_be_positive(a: I32) do
                 must!(do: a > 0)
-                a
+              end
+
+              defw must_be_positive_and_even_and_not_too_big(a: I32) do
+                must! do
+                  a > 0
+                  I32.rem_u(a, 2) === 0
+                  a < 10_000
+                end
               end
             end) == """
            (module $Sample
-             (func $must_be_positive (export "must_be_positive") (param $a i32) (result i32)
+             (func $must_be_positive (export "must_be_positive") (param $a i32)
                (i32.gt_s (local.get $a) (i32.const 0))
                (if
                  (then
@@ -529,7 +542,21 @@ defmodule OrbTest do
                  (else
                    unreachable      )
                )
-               (local.get $a)
+             )
+             (func $must_be_positive_and_even_and_not_too_big (export "must_be_positive_and_even_and_not_too_big") (param $a i32)
+               (i32.and
+                 (i32.lt_s (local.get $a) (i32.const 10000))
+                 (i32.and
+                   (i32.eq (i32.rem_u (local.get $a) (i32.const 2)) (i32.const 0))
+                   (i32.gt_s (local.get $a) (i32.const 0))
+                 )
+               )
+               (if
+                 (then
+                   nop      )
+                 (else
+                   unreachable      )
+               )
              )
            )
            """
