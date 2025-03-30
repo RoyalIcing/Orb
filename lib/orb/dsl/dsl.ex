@@ -7,6 +7,33 @@ defmodule Orb.DSL do
   alias Orb.Ops
   require Ops
 
+  defmacro __using__(_opts) do
+    quote do
+      import Kernel,
+        except: [
+          if: 2,
+          unless: 2,
+          @: 1,
+          +: 2,
+          -: 2,
+          *: 2,
+          /: 2,
+          <: 2,
+          >: 2,
+          <=: 2,
+          >=: 2,
+          ===: 2,
+          !==: 2,
+          not: 1,
+          or: 2
+        ]
+
+      import Orb.DSL
+      require Orb.Control, as: Control
+      import Orb.IfElse.DSL
+    end
+  end
+
   # TODO: remove func, funcp
 
   defmacro func(call, do: block) do
