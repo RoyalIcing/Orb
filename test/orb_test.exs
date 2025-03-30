@@ -2,6 +2,7 @@ defmodule OrbTest do
   use ExUnit.Case, async: true
 
   import Orb, only: [to_wat: 1]
+  require TestHelper
 
   test "basic module" do
     import Orb.DSL
@@ -508,6 +509,30 @@ defmodule OrbTest do
 
     alias OrbWasmtime.Wasm
     assert {0.0, 0.5, 1.0} === Wasm.call(TupleTypes, :rgb_reverse, 1.0, 0.5, 0.0)
+  end
+
+  test "must!" do
+    assert (TestHelper.module_wat do
+              use Orb
+
+              defw must_be_positive(a: I32), I32 do
+                must!(do: a > 0)
+                a
+              end
+            end) == """
+           (module $Sample
+             (func $must_be_positive (export "must_be_positive") (param $a i32) (result i32)
+               (i32.gt_s (local.get $a) (i32.const 0))
+               (if
+                 (then
+                   nop      )
+                 (else
+                   unreachable      )
+               )
+               (local.get $a)
+             )
+           )
+           """
   end
 
   test "range-bounded params" do

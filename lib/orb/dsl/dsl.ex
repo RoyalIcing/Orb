@@ -765,6 +765,21 @@ defmodule Orb.DSL do
     )
   end
 
+  @doc """
+  Asserts multiple conditions that _must_ be true, otherwise traps with unreachable.
+  """
+  defmacro must!(do: block) do
+    quote bind_quoted: [
+            must_be_truthy: __get_block_items(block) |> Enum.reduce(&Orb.I32.band/2)
+          ] do
+      Orb.IfElse.new(
+        must_be_truthy,
+        nop(),
+        unreachable!()
+      )
+    end
+  end
+
   def mut!(term), do: Orb.MutRef.from(term)
 
   def __get_block_items(block) do
