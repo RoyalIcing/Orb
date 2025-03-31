@@ -773,8 +773,7 @@ defmodule Orb.DSL do
             checks: __get_block_items(block)
           ] do
       Orb.IfElse.new(
-        Enum.reduce(checks, &Orb.I32.band/2),
-        nop(),
+        Orb.I32.eqz(Enum.reduce(checks, &Orb.I32.band/2)),
         unreachable!()
       )
     end

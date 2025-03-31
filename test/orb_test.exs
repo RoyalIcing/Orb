@@ -535,26 +535,24 @@ defmodule OrbTest do
             end) == """
            (module $Sample
              (func $must_be_positive (export "must_be_positive") (param $a i32)
-               (i32.gt_s (local.get $a) (i32.const 0))
+               (i32.eqz
+                 (i32.gt_s (local.get $a) (i32.const 0))
+               )
                (if
                  (then
-                   nop      )
-                 (else
                    unreachable      )
                )
              )
              (func $must_be_positive_and_even_and_not_too_big (export "must_be_positive_and_even_and_not_too_big") (param $a i32)
-               (i32.and
-                 (i32.lt_s (local.get $a) (i32.const 10000))
-                 (i32.and
-                   (i32.eq (i32.rem_u (local.get $a) (i32.const 2)) (i32.const 0))
-                   (i32.gt_s (local.get $a) (i32.const 0))
-                 )
-               )
+               (i32.eqz (i32.and
+             (i32.lt_s (local.get $a) (i32.const 10000))
+             (i32.and
+               (i32.eq (i32.rem_u (local.get $a) (i32.const 2)) (i32.const 0))
+               (i32.gt_s (local.get $a) (i32.const 0))
+             )
+           ))
                (if
                  (then
-                   nop      )
-                 (else
                    unreachable      )
                )
              )

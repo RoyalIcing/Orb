@@ -330,6 +330,14 @@ defmodule Orb.Instruction do
   defimpl Orb.ToWat do
     alias Orb.ToWat.Instructions
 
+    defguardp is_likely_simple(value)
+              when is_struct(value, Orb.Instruction) or
+                     is_struct(value, Orb.Instruction.Const) or
+                     is_struct(value, Orb.Instruction.Global.Get) or
+                     is_struct(value, Orb.VariableReference) or
+                     is_struct(value, Orb.VariableReference.Global) or
+                     is_struct(value, Orb.VariableReference.Local)
+
     # TODO: remove
     def to_wat(
           %Orb.Instruction{
@@ -510,6 +518,50 @@ defmodule Orb.Instruction do
           %Orb.Instruction{
             push_type: type,
             operation: operation,
+            operands: [a]
+          },
+          indent
+        )
+        when is_likely_simple(a) do
+      [
+        indent,
+        "(",
+        to_string(type),
+        ".",
+        to_string(operation),
+        " ",
+        Instructions.do_wat(a),
+        ")"
+      ]
+    end
+
+    def to_wat(
+          %Orb.Instruction{
+            push_type: type,
+            operation: operation,
+            operands: [a, b]
+          },
+          indent
+        )
+        when is_likely_simple(a) and is_likely_simple(b) do
+      [
+        indent,
+        "(",
+        to_string(type),
+        ".",
+        to_string(operation),
+        " ",
+        Instructions.do_wat(a),
+        " ",
+        Instructions.do_wat(b),
+        ")"
+      ]
+    end
+
+    def to_wat(
+          %Orb.Instruction{
+            push_type: type,
+            operation: operation,
             operands: operands
           },
           indent
@@ -520,7 +572,9 @@ defmodule Orb.Instruction do
         to_string(type),
         ".",
         to_string(operation),
-        for(operand <- operands, do: [" ", Instructions.do_wat(operand)]),
+        for(operand <- operands, do: ["\n", Instructions.do_wat(operand, "  " <> indent)]),
+        ?\n,
+        indent,
         ")"
       ]
     end

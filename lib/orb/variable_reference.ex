@@ -1,6 +1,7 @@
 defmodule Orb.VariableReference do
   @moduledoc false
 
+  # TODO: merge with to Orb.Instruction.Global.Get
   defmodule Global do
     defstruct [:identifier, :type]
 
