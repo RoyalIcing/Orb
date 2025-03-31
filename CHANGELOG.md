@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.2.2 (2025-03-31)
+
+### Added
+
+- DSL macro `must!/1` for asserting multiple conditions, trapping `unreachable` if any are false (zero).
+
 ## v0.2.1 (2025-03-25)
 
 ### Added
