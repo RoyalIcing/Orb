@@ -188,7 +188,7 @@ defmodule IfElseTest do
               end
 
               defw cond_nop(input: I32), I32 do
-                cond result: nil do
+                if do
                   input === 0 -> %Orb.Nop{}
                   input === 1 -> %Orb.Nop{}
                   input === 2 -> %Orb.Nop{}

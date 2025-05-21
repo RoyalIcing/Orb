@@ -235,6 +235,18 @@ defmodule Orb.IfElse do
       end
     end
 
+    defmacro if(do: block) do
+      do_cond(block, [], __CALLER__)
+    end
+
+    # TODO: this can be replaced with Control.block Identifier result_type do
+    # The block is broken with the resulting value e.g.
+    # Control.block Identifier result_type do
+    #   when some_condition ->
+    #     Identifier.break(some_result)
+    # end
+    # See also: https://github.com/WebAssembly/design/issues/1034#issuecomment-292247623
+    # https://musteresel.github.io/posts/2020/01/webassembly-text-br_table-example.html
     defmacro cond(opts, do: block) do
       do_cond(block, opts, __CALLER__)
     end
@@ -287,7 +299,7 @@ defmodule Orb.IfElse do
 
           instructions = unquote(instructions)
           opts = unquote(opts)
-          result_type = Keyword.get(opts, :result)
+          result_type = Keyword.get(opts, :result, nil)
 
           Orb.Control.block unquote(block_name), result_type do
             Orb.InstructionSequence.new(instructions)
