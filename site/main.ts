@@ -74,7 +74,7 @@ async function getMarkdownForRequest(req: Request): Promise<string> {
     if (query === "github") {
       results = "- https://github.com/RoyalIcing/Orb"
     }
-    return `<form action=/search><input placeholder="Search" name=q value="${queryAttribute}"></form>` + "\n\n" + results;
+    return `<form action=/search><input placeholder="Search" name=q value="${queryAttribute}" style="margin-bottom: 1rem"></form>` + "\n\n" + results;
   }
 
   const cachedHTML = cache.get(pathname);
