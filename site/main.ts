@@ -70,7 +70,7 @@ async function getMarkdownForRequest(req: Request): Promise<string> {
     let query = searchParams.get("q") ?? ""
     query = query.replace(/[\n\r\t]/g, ' ').replace(/[ ]+/g, ' ')
     const queryAttribute = query.replace(/"/g, '&quot;')
-    return `<form action=/search><input type=search placeholder="Search" name=q value="${queryAttribute}"></form>`
+    return `<form action=/search><input placeholder="Search" name=q value="${queryAttribute}"></form>`
   }
 
   const cachedHTML = cache.get(pathname);
