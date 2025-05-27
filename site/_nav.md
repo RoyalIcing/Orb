@@ -7,7 +7,7 @@
 </details>
 
 
-<details data-path="/concepts">
+<details open data-path="/concepts">
     <summary>Core Concepts</summary>
 
 - [Core WebAssembly](/concepts/core-webassembly)
@@ -20,7 +20,7 @@
 </details>
 
 
-<details data-path="/run">
+<details open data-path="/run">
     <summary>Running Modules</summary>
 
 - [In JavaScript](/run/javascript)
@@ -29,7 +29,7 @@
 </details>
 
 
-<details data-path="/silverorb">
+<details open data-path="/silverorb">
     <summary>SilverOrb stdlib</summary>
 
 - [SilverOrb](/silverorb)
