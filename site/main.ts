@@ -114,6 +114,7 @@ Deno.serve(async (req: Request) => {
 <script src="https://cdn.usefathom.com/script.js" data-site="EFBQOFQL" defer></script>
 <link rel=stylesheet href="https://rsms.me/inter/inter.css">
 <title>Orb: Write WebAssembly with Elixir</title>
+<style>@view-transition {navigation: auto;}</style>
 <style>
 :root {
   font-family: Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
@@ -319,7 +320,7 @@ input { font-size: inherit; }
 }
 
 nav-primary details {
-  opacity: 0;
+  opacity: 1;
   transition: opacity 0.2s ease-in-out;
 }
 nav-primary:defined details {
