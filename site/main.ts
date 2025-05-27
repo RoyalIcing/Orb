@@ -70,11 +70,14 @@ async function getMarkdownForRequest(req: Request): Promise<string> {
     let query = searchParams.get("q") ?? ""
     query = query.trim().replace(/[\n\r\t]/g, ' ').replace(/[ ]+/g, ' ')
     const queryAttribute = query.replace(/"/g, '&quot;')
-    let results = ""
+    let results: Array<string> = []
     if (query === "github") {
-      results = "- https://github.com/RoyalIcing/Orb"
+      results.push("https://github.com/RoyalIcing/Orb", "https://github.com/RoyalIcing/SilverOrb")
     }
-    return `<form action=/search><input placeholder="Search" name=q value="${queryAttribute}" style="margin-bottom: 1rem"></form>` + "\n\n" + results;
+    if (query === "spec" || query === "specs") {
+      results.push("https://webassembly.org/specs/", "https://www.w3.org/TR/wasm-core-1/", "https://github.com/WebAssembly/WASI/blob/main/Proposals.md")
+    }
+    return `<form action=/search><input placeholder="Search" name=q value="${queryAttribute}" style="margin-bottom: 1rem"></form>` + "\n\n" + results.map(result => "- " + result).join("\n");
   }
 
   const cachedHTML = cache.get(pathname);
