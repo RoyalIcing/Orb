@@ -168,6 +168,7 @@ body {
 }
 
 main {
+  width: 100%;
   grid-area: main;
   max-width: 48rem;
   margin: 0 auto;
