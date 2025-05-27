@@ -70,7 +70,11 @@ async function getMarkdownForRequest(req: Request): Promise<string> {
     let query = searchParams.get("q") ?? ""
     query = query.replace(/[\n\r\t]/g, ' ').replace(/[ ]+/g, ' ')
     const queryAttribute = query.replace(/"/g, '&quot;')
-    return `<form action=/search><input placeholder="Search" name=q value="${queryAttribute}"></form>`
+    let results = ""
+    if (query === "github") {
+      results = "- https://github.com/RoyalIcing/Orb"
+    }
+    return `<form action=/search><input placeholder="Search" name=q value="${queryAttribute}"></form>` + "\n" + results;
   }
 
   const cachedHTML = cache.get(pathname);
