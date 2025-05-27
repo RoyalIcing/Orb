@@ -65,6 +65,11 @@ function getContentPath(path: `/${string}`): undefined | string {
 
 async function getMarkdownForRequest(req: Request): Promise<string> {
   const { pathname } = new URL(req.url);
+
+  if (pathname === "/search") {
+    return `<form action=/search><label>Query<input name=q></label><button>Search</button></form>`
+  }
+
   const cachedHTML = cache.get(pathname);
   if (cachedHTML) return cachedHTML;
 
