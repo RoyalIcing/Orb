@@ -64,10 +64,13 @@ function getContentPath(path: `/${string}`): undefined | string {
 }
 
 async function getMarkdownForRequest(req: Request): Promise<string> {
-  const { pathname } = new URL(req.url);
+  const { pathname, searchParams } = new URL(req.url);
 
   if (pathname === "/search") {
-    return `<form action=/search><label>Query<input name=q></label><button>Search</button></form>`
+    let query = searchParams.get("q") ?? ""
+    query = query.replace(/[\n\r\t]/g, ' ').replace(/[ ]+/g, ' ')
+    const queryAttribute = query.replace(/"/g, '&quot;')
+    return `<form action=/search><label>Query<input name=q value="${queryAttribute}"></label><button>Search</button></form>`
   }
 
   const cachedHTML = cache.get(pathname);
