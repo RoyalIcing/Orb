@@ -70,7 +70,7 @@ async function getMarkdownForRequest(req: Request): Promise<string> {
     let query = searchParams.get("q") ?? ""
     query = query.replace(/[\n\r\t]/g, ' ').replace(/[ ]+/g, ' ')
     const queryAttribute = query.replace(/"/g, '&quot;')
-    return `<form action=/search><label>Query<input name=q value="${queryAttribute}"></label><button>Search</button></form>`
+    return `<form action=/search><input type=search placeholder="Search" name=q value="${queryAttribute}"></form>`
   }
 
   const cachedHTML = cache.get(pathname);
@@ -124,7 +124,7 @@ Deno.serve(async (req: Request) => {
 <title>Orb: Write WebAssembly with Elixir</title>
 <style>
 @view-transition { navigation: auto }
-input { view-transition-name: input }
+input[OFF] { view-transition-name: input }
 </style>
 <style>
 :root {
