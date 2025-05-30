@@ -79,43 +79,23 @@ defmodule Examples.YoutubeParserTest do
     end
 
     def run(input) do
-      alias OrbWasmtime.Instance
+      {:ok, pid} = Wasmex.start_link(%{bytes: Orb.to_wat(__MODULE__)})
+      {:ok, memory} = Wasmex.memory(pid)
+      {:ok, store} = Wasmex.store(pid)
 
-      wat = Orb.to_wat(__MODULE__)
-      inst = Instance.run(wat)
+      {:ok, [input_offset]} = Wasmex.call_function(pid, :input_offset, [])
+      Wasmex.Memory.write_binary(store, memory, input_offset, input <> <<0>>)
 
-      input_offset = Instance.call(inst, :input_offset)
-      # Instance.write_memory(inst, input_offset, (input <> "\0") |> :binary.bin_to_list())
-      Instance.write_string_nul_terminated(inst, input_offset, input)
-
-      result = Instance.call(inst, :parse)
+      {:ok, [result]} = Wasmex.call_function(pid, :parse, [])
 
       case result do
         0 ->
           nil
 
         offset ->
-          Instance.read_memory(inst, offset, 255)
-          |> String.replace_trailing("\0", "")
+          binary = Wasmex.Memory.read_binary(store, memory, offset, 255)
+          String.trim_trailing(binary, <<0>>)
       end
-
-      # {:ok, pid} = Wasmex.start_link(%{bytes: Orb.to_wat(__MODULE__)})
-      # {:ok, memory} = Wasmex.memory(pid)
-      # {:ok, store} = Wasmex.store(pid)
-
-      # {:ok, [input_offset]} = Wasmex.call_function(pid, :input_offset, [])
-      # Wasmex.Memory.write_binary(store, memory, input_offset, input <> "\0")
-
-      # {:ok, [result]} = Wasmex.call_function(pid, :parse, [])
-
-      # case result do
-      #   0 ->
-      #     nil
-
-      #   offset ->
-      #     Wasmex.Memory.read_string(store, memory, offset, 255)
-      #     |> String.replace_trailing("\0", "")
-      # end
     end
   end
 

@@ -1,7 +1,7 @@
 defmodule LoopTest do
   use ExUnit.Case, async: true
   require TestHelper
-  alias OrbWasmtime.Wasm
+
 
   test "block stack" do
     require TestHelper
@@ -153,7 +153,7 @@ defmodule LoopTest do
     """
 
     assert wat == Orb.to_wat(Loop1To10)
-    assert 55 = Wasm.call(Loop1To10, :sum1to10)
+    assert 55 = TestHelper.wasm_call(Loop1To10, :sum1to10)
   end
 
   describe "iterators" do
@@ -242,10 +242,10 @@ defmodule LoopTest do
     end
 
     test "behaves correctly" do
-      assert 26 = Wasm.call(IteratorConsumer, :test)
-      assert 26 = Wasm.call(IteratorConsumer, :test2)
-      assert 2847 = Wasm.call(IteratorConsumer, :test3)
-      assert 2847 = Wasm.call(IteratorConsumer, :test64)
+      assert 26 = TestHelper.wasm_call(IteratorConsumer, :test)
+      assert 26 = TestHelper.wasm_call(IteratorConsumer, :test2)
+      assert 2847 = TestHelper.wasm_call(IteratorConsumer, :test3)
+      assert 2847 = TestHelper.wasm_call(IteratorConsumer, :test64)
       assert 2847 = Enum.sum(?a..?z)
     end
 
@@ -406,7 +406,7 @@ defmodule LoopTest do
     """
 
     assert wat === Orb.to_wat(NestedLoop)
-    assert 28 = Wasm.call(NestedLoop, :nested_loop)
+    assert 28 = TestHelper.wasm_call(NestedLoop, :nested_loop)
   end
 
   defmodule CountZeros do
@@ -439,7 +439,7 @@ defmodule LoopTest do
 
   test "memory slicing iteration" do
     wat = Orb.to_wat(CountZeros)
-    assert 26 = Wasm.call(wat, :count_chars)
-    assert 4 = Wasm.call(wat, :count_zeros)
+    assert 26 = TestHelper.wasm_call(wat, :count_chars)
+    assert 4 = TestHelper.wasm_call(wat, :count_zeros)
   end
 end

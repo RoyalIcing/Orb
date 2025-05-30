@@ -1,5 +1,6 @@
 defmodule MemorySliceTest do
   use ExUnit.Case, async: true
+  require TestHelper
 
   alias Orb.Memory
 
@@ -50,7 +51,7 @@ defmodule MemorySliceTest do
   end
 
   test "in WebAssembly" do
-    {c, a, b} = OrbWasmtime.Wasm.call(MemorySliceSubject, :test)
+    {c, a, b} = TestHelper.wasm_call(MemorySliceSubject, :test)
     assert c === 0x000000020000000F
     assert a === 0x0F
     assert b === 2

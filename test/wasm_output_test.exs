@@ -1,6 +1,6 @@
 defmodule WasmOutputTest do
-  alias OrbWasmtime.Wasm
   use ExUnit.Case, async: true
+  require TestHelper
 
   @moduletag timeout: 1_000
 
@@ -36,12 +36,12 @@ defmodule WasmOutputTest do
 
     wasm = Orb.to_wasm(Conditionals)
 
-    assert wasm |> Wasm.call(:is_odd?, 0) === 0
-    assert wasm |> Wasm.call(:is_odd?, 1) === 1
-    assert wasm |> Wasm.call(:is_odd?, 2) === 0
-    assert wasm |> Wasm.call(:is_odd?, 3) === 1
-    assert wasm |> Wasm.call(:is_odd?, 4) === 0
-    assert wasm |> Wasm.call(:is_odd?, 5) === 1
+    assert TestHelper.wasm_call(wasm, :is_odd?, 0) === 0
+    assert TestHelper.wasm_call(wasm, :is_odd?, 1) === 1
+    assert TestHelper.wasm_call(wasm, :is_odd?, 2) === 0
+    assert TestHelper.wasm_call(wasm, :is_odd?, 3) === 1
+    assert TestHelper.wasm_call(wasm, :is_odd?, 4) === 0
+    assert TestHelper.wasm_call(wasm, :is_odd?, 5) === 1
   end
 
   # test "encoding negative i32"
@@ -91,14 +91,14 @@ defmodule WasmOutputTest do
     end
 
     for source <- [wat, wasm] do
-      assert source |> Wasm.call(:fibonacci, 0) === 0
-      assert source |> Wasm.call(:fibonacci, 1) === 1
-      assert source |> Wasm.call(:fibonacci, 2) === 1
-      assert source |> Wasm.call(:fibonacci, 3) === 2
-      assert source |> Wasm.call(:fibonacci, 4) === 3
-      assert source |> Wasm.call(:fibonacci, 5) === 5
-      assert source |> Wasm.call(:fibonacci, 6) === 8
-      assert source |> Wasm.call(:fibonacci, 7) === 13
+      assert TestHelper.wasm_call(source, :fibonacci, 0) === 0
+      assert TestHelper.wasm_call(source, :fibonacci, 1) === 1
+      assert TestHelper.wasm_call(source, :fibonacci, 2) === 1
+      assert TestHelper.wasm_call(source, :fibonacci, 3) === 2
+      assert TestHelper.wasm_call(source, :fibonacci, 4) === 3
+      assert TestHelper.wasm_call(source, :fibonacci, 5) === 5
+      assert TestHelper.wasm_call(source, :fibonacci, 6) === 8
+      assert TestHelper.wasm_call(source, :fibonacci, 7) === 13
     end
 
     assert wat === ~S"""
@@ -159,8 +159,8 @@ defmodule WasmOutputTest do
     # extract_wasm_sections(wasm) |> dbg(base: :hex, limit: 1000)
 
     assert (11 * 7) |> div(4 + 11 - 7) === 9
-    assert wat |> Wasm.call(:math, 11, 7) === 9
-    assert wasm |> Wasm.call(:math, 11, 7) === 9
+    assert TestHelper.wasm_call(wat, :math, 11, 7) === 9
+    assert TestHelper.wasm_call(wasm, :math, 11, 7) === 9
   end
 
   test "i64 operations and func params" do
@@ -195,8 +195,8 @@ defmodule WasmOutputTest do
              Orb.to_wasm(MathI64)
 
     assert (11 * 7) |> div(4 + 11 - 7) === 9
-    assert Orb.to_wat(MathI64) |> Wasm.call(:math, {:i64, 11}, {:i64, 7}) === 9
-    assert Orb.to_wasm(MathI64) |> Wasm.call(:math, {:i64, 11}, {:i64, 7}) === 9
+    assert TestHelper.wasm_call(Orb.to_wat(MathI64), :math, {:i64, 11}, {:i64, 7}) === 9
+    assert TestHelper.wasm_call(Orb.to_wasm(MathI64), :math, {:i64, 11}, {:i64, 7}) === 9
   end
 
   test "blocks" do
@@ -250,13 +250,13 @@ defmodule WasmOutputTest do
       File.write!(path_wasm, wasm)
     end
 
-    assert Wasm.call(wat, :divide, {:i64, 22}, {:i64, 2}) === 11
-    assert Wasm.call(wat, :divide, {:i64, 0}, {:i64, 0}) === 0
-    assert Wasm.call(wasm, :divide, {:i64, 22}, {:i64, 2}) === 11
-    assert Wasm.call(wasm, :divide, {:i64, 0}, {:i64, 0}) === 0
+    assert TestHelper.wasm_call(wat, :divide, {:i64, 22}, {:i64, 2}) === 11
+    assert TestHelper.wasm_call(wat, :divide, {:i64, 0}, {:i64, 0}) === 0
+    assert TestHelper.wasm_call(wasm, :divide, {:i64, 22}, {:i64, 2}) === 11
+    assert TestHelper.wasm_call(wasm, :divide, {:i64, 0}, {:i64, 0}) === 0
 
-    assert Wasm.call(wat, :multiple_by_factor, {:i64, 7}) === 35
-    assert Wasm.call(wasm, :multiple_by_factor, {:i64, 7}) === 35
+    assert TestHelper.wasm_call(wat, :multiple_by_factor, {:i64, 7}) === 35
+    assert TestHelper.wasm_call(wasm, :multiple_by_factor, {:i64, 7}) === 35
   end
 
   defp extract_wasm_sections(<<"\0asm", 0x01000000::32>> <> bytes) do

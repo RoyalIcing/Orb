@@ -1,6 +1,5 @@
 defmodule DefwTest do
   use ExUnit.Case, async: true
-  alias OrbWasmtime.Instance
 
   require TestHelper
 
@@ -140,8 +139,7 @@ defmodule DefwTest do
            )
            """ = Orb.to_wat(AcceptStr)
 
-    i = Instance.run(AcceptStr)
-    assert Instance.call(i, :example) == {3, 5}
+    assert TestHelper.wasm_call(AcceptStr, :example) == {3, 5}
   end
 
   test "constant strings are mapped into a single address space" do
@@ -188,10 +186,9 @@ defmodule DefwTest do
     # TODO: switch to Wasmex so we can run wasm binaries properly
     for source <- [wat] do
       # IO.puts(SharedStringConsumer.to_wat())
-      i = Instance.run(source)
-      # assert Instance.read_memory(i, 0xFF, 20) == ""
-      assert Instance.call_reading_string(i, :cdata_start2) == "<![CDATA["
-      assert Instance.call_reading_string(i, :use_other) == "<![CDATA["
+      # assert TestHelper.read_memory(source, 0xFF, 20) == ""
+      assert TestHelper.wasm_call_reading_string(source, :cdata_start2) == "<![CDATA["
+      assert TestHelper.wasm_call_reading_string(source, :use_other) == "<![CDATA["
     end
   end
 

@@ -82,12 +82,11 @@ defmodule ParserTest do
   end
 
   test "works" do
-    alias OrbWasmtime.Instance
+    require TestHelper
 
     wat = Orb.to_wat(YouTubeURLParser)
     # IO.puts(wat)
-    inst = Instance.run(wat)
-    Instance.call(inst, :parse)
+    TestHelper.wasm_call(wat, :parse)
     # assert "" === wat
   end
 end

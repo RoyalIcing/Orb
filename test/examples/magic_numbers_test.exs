@@ -1,16 +1,15 @@
 defmodule Examples.MagicNumbersTest do
   use ExUnit.Case, async: true
+  require TestHelper
 
   Code.require_file("magic_numbers.exs", __DIR__)
   alias Examples.MagicNumbers
-
-  alias OrbWasmtime.Wasm
 
   describe "MobileThrottling" do
     alias MagicNumbers.MobileThrottling
 
     test "byte size vs json" do
-      assert byte_size(Wasm.to_wasm(MobileThrottling)) == 168
+      assert byte_size(Orb.to_wasm(MobileThrottling)) == 177
 
       assert byte_size(
                Jason.encode!(%{
@@ -30,7 +29,7 @@ defmodule Examples.MagicNumbersTest do
       path_wat = Path.join(__DIR__, "mobile_throttling.wat")
       path_opt_wasm = Path.join(__DIR__, "mobile_throttling_OPT.wasm")
       path_opt_wat = Path.join(__DIR__, "mobile_throttling_OPT.wat")
-      wasm = Wasm.to_wasm(URLEncoding)
+      wasm = Orb.to_wasm(URLEncoding)
       File.write!(path_wasm, wasm)
       System.cmd("wasm-opt", [path_wasm, "-o", path_opt_wasm, "-O"])
 
@@ -44,5 +43,5 @@ defmodule Examples.MagicNumbersTest do
     end
   end
 
-  # byte_size(Wasm.to_wasm(URLEncoding)) |> dbg()
+  # byte_size(Orb.to_wasm(URLEncoding)) |> dbg()
 end

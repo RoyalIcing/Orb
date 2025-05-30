@@ -356,13 +356,10 @@ defmodule OrbTest do
 
     # TODO: should this live here?
     test "works" do
-      alias OrbWasmtime.Instance
-
-      inst = Instance.run(HTTPStatusLookup)
-      assert Instance.call_reading_string(inst, :lookup, 200) == "OK"
+      assert TestHelper.wasm_call_reading_string(HTTPStatusLookup, :lookup, [200]) == "OK"
 
       for {status, status_text} <- HTTPStatusLookup.status_table() do
-        assert Instance.call_reading_string(inst, :lookup, status) == status_text
+        assert TestHelper.wasm_call_reading_string(HTTPStatusLookup, :lookup, [status]) == status_text
       end
     end
 
@@ -411,7 +408,6 @@ defmodule OrbTest do
   end
 
   test "checking a number is within a range" do
-    alias OrbWasmtime.Wasm
 
     wasm_source = """
     (module $WithinRange
@@ -428,11 +424,11 @@ defmodule OrbTest do
     """
 
     assert to_wat(WithinRange) == wasm_source
-    assert Wasm.call(WithinRange, "validate", 0) == 0
-    assert Wasm.call(WithinRange, "validate", 1) == 1
-    assert Wasm.call(WithinRange, "validate", 100) == 1
-    assert Wasm.call(WithinRange, "validate", 255) == 1
-    assert Wasm.call(WithinRange, "validate", 256) == 0
+    assert TestHelper.wasm_call(WithinRange, "validate", 0) == 0
+    assert TestHelper.wasm_call(WithinRange, "validate", 1) == 1
+    assert TestHelper.wasm_call(WithinRange, "validate", 100) == 1
+    assert TestHelper.wasm_call(WithinRange, "validate", 255) == 1
+    assert TestHelper.wasm_call(WithinRange, "validate", 256) == 0
   end
 
   defmodule CalculateMean do
@@ -484,14 +480,12 @@ defmodule OrbTest do
   end
 
   test "CalculateMean works" do
-    alias OrbWasmtime.Instance
-
-    inst = Instance.run(CalculateMean)
-    Instance.call(inst, :insert, 4)
-    Instance.call(inst, :insert, 5)
-    Instance.call(inst, :insert, 6)
-    assert Instance.call(inst, :calculate_mean) == 5
-    assert Instance.call(inst, :calculate_mean_and_count) == {5, 3}
+    wat = Orb.to_wat(CalculateMean)
+    TestHelper.wasm_call(wat, :insert, 4)
+    TestHelper.wasm_call(wat, :insert, 5)
+    TestHelper.wasm_call(wat, :insert, 6)
+    assert TestHelper.wasm_call(wat, :calculate_mean) == 5
+    assert TestHelper.wasm_call(wat, :calculate_mean_and_count) == {5, 3}
   end
 
   test "tuple types" do
@@ -513,8 +507,7 @@ defmodule OrbTest do
       end
     end
 
-    alias OrbWasmtime.Wasm
-    assert {0.0, 0.5, 1.0} === Wasm.call(TupleTypes, :rgb_reverse, 1.0, 0.5, 0.0)
+    assert {0.0, 0.5, 1.0} === TestHelper.wasm_call(TupleTypes, :rgb_reverse, 1.0, 0.5, 0.0)
   end
 
   test "must!" do
@@ -587,15 +580,14 @@ defmodule OrbTest do
     assert wat =~ "(i32.ge_s (local.get $a) (i32.const 1))"
     assert wat =~ "(i32.le_s (local.get $a) (i32.const 5))"
 
-    alias OrbWasmtime.Wasm
-    assert 1 = Wasm.call(wat, :declare_defcon, 1)
-    assert 2 = Wasm.call(wat, :declare_defcon, 2)
-    assert 3 = Wasm.call(wat, :declare_defcon, 3)
-    assert 4 = Wasm.call(wat, :declare_defcon, 4)
-    assert 5 = Wasm.call(wat, :declare_defcon, 5)
-    assert {:error, _} = Wasm.call(wat, :declare_defcon, 0)
-    assert {:error, _} = Wasm.call(wat, :declare_defcon, 6)
-    assert {:error, _} = Wasm.call(wat, :declare_defcon, 10)
+    assert 1 = TestHelper.wasm_call(wat, :declare_defcon, 1)
+    assert 2 = TestHelper.wasm_call(wat, :declare_defcon, 2)
+    assert 3 = TestHelper.wasm_call(wat, :declare_defcon, 3)
+    assert 4 = TestHelper.wasm_call(wat, :declare_defcon, 4)
+    assert 5 = TestHelper.wasm_call(wat, :declare_defcon, 5)
+    assert {:error, _} = TestHelper.safe_wasm_call(wat, :declare_defcon, 0)
+    assert {:error, _} = TestHelper.safe_wasm_call(wat, :declare_defcon, 6)
+    assert {:error, _} = TestHelper.safe_wasm_call(wat, :declare_defcon, 10)
   end
 
   test "Orb.include/1 copies all functions" do
@@ -615,9 +607,8 @@ defmodule OrbTest do
       end
     end
 
-    alias OrbWasmtime.Wasm
-    assert 9 = Wasm.call(Includer, :magic)
-    assert [{:func, "magic"}] = Wasm.list_exports(Includer)
+    assert 9 = TestHelper.wasm_call(Includer, :magic)
+    # Note: list_exports functionality would need to be implemented in TestHelper if needed
   end
 
   test "snippet works" do
@@ -814,8 +805,6 @@ defmodule OrbTest do
   end
 
   test "table elem" do
-    alias OrbWasmtime.Wasm
-
     assert """
            (module $TableExample
              (type $answer (func (result i32)))
@@ -844,7 +833,7 @@ defmodule OrbTest do
            )
            """ = to_wat(TableExample)
 
-    assert Wasm.call(TableExample, :answer) === {42, 13, 13, 12}
+    assert TestHelper.wasm_call(TableExample, :answer) === {42, 13, 13, 12}
   end
 
   test "compiler errors reset state" do

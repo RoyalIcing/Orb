@@ -1,7 +1,6 @@
 defmodule MemoryTest do
   use ExUnit.Case, async: true
   require TestHelper
-  alias OrbWasmtime.Instance
 
   test "import/2" do
     defmodule ImportsMemory do
@@ -85,30 +84,27 @@ defmodule MemoryTest do
            )
            """ = wat
 
-    alias OrbWasmtime.Instance
-
     for source <- [wat, wasm] do
-      inst = Instance.run(source)
-      assert ?a = Instance.call(inst, :read_u8, 0x100)
-      assert "abc\0" = Instance.call(inst, :read_i32, 0x100) |> i32_to_ascii()
+      assert ?a = TestHelper.wasm_call(source, :read_u8, 0x100)
+      assert "abc\0" = TestHelper.wasm_call(source, :read_i32, 0x100) |> i32_to_ascii()
 
-      assert "de\n\0" = Instance.call(inst, :read_i32, 0x200) |> i32_to_ascii()
+      assert "de\n\0" = TestHelper.wasm_call(source, :read_i32, 0x200) |> i32_to_ascii()
 
-      assert 1 = Instance.call(inst, :read_u8, 0x300)
-      assert 2 = Instance.call(inst, :read_u8, 0x301)
-      assert 3 = Instance.call(inst, :read_u8, 0x302)
-      assert 4 = Instance.call(inst, :read_u8, 0x303)
+      assert 1 = TestHelper.wasm_call(source, :read_u8, 0x300)
+      assert 2 = TestHelper.wasm_call(source, :read_u8, 0x301)
+      assert 3 = TestHelper.wasm_call(source, :read_u8, 0x302)
+      assert 4 = TestHelper.wasm_call(source, :read_u8, 0x303)
 
-      assert 0x7B = 123 = Instance.call(inst, :read_u8, 0x400)
+      assert 0x7B = 123 = TestHelper.wasm_call(source, :read_u8, 0x400)
 
-      assert 4 = Instance.call(inst, :read_u8, 0x500)
-      assert 16 = Instance.call(inst, :read_u8, 0x501)
-      assert 3 = Instance.call(inst, :read_u8, 0x502)
+      assert 4 = TestHelper.wasm_call(source, :read_u8, 0x500)
+      assert 16 = TestHelper.wasm_call(source, :read_u8, 0x501)
+      assert 3 = TestHelper.wasm_call(source, :read_u8, 0x502)
 
-      assert 4 = Instance.call(inst, :read_i32, 0x600)
-      assert 123_456 = Instance.call(inst, :read_i32, 0x604)
-      assert 3 = Instance.call(inst, :read_i32, 0x608)
-      # assert -1 = Instance.call(inst, :read_i32, 0x612)
+      assert 4 = TestHelper.wasm_call(source, :read_i32, 0x600)
+      assert 123_456 = TestHelper.wasm_call(source, :read_i32, 0x604)
+      assert 3 = TestHelper.wasm_call(source, :read_i32, 0x608)
+      # assert -1 = TestHelper.wasm_call(source, :read_i32, 0x612)
     end
   end
 
@@ -139,6 +135,9 @@ defmodule MemoryTest do
            """
   end
 
+  # Note: Stateful memory tests (like swap!/4) that require persistent state between calls
+  # are located in memory_stateful_test.exs using WasmexCase for proper state management.
+
   test "store!/3" do
     defmodule Store do
       use Orb
@@ -159,55 +158,7 @@ defmodule MemoryTest do
            """
   end
 
-  test "swap!/4" do
-    defmodule Swap do
-      use Orb
 
-      Memory.pages(1)
-      Memory.initial_data!(16, u32: [123_456, 456_789])
-
-      defw read(), {I32, I32} do
-        Memory.load!(I32, 16)
-        Memory.load!(I32, 20)
-      end
-
-      defw swap() do
-        Memory.swap!(I32, 16, 20, align: 4)
-      end
-    end
-
-    wat = Orb.to_wat(Swap)
-    wasm = Orb.to_wat(Swap)
-
-    assert ~S"""
-           (module $Swap
-             (memory (export "memory") 1)
-             (data (i32.const 16) "\40\e2\01\00\55\f8\06\00")
-             (func $read (export "read") (result i32 i32)
-               (i32.load (i32.const 16))
-               (i32.load (i32.const 20))
-             )
-             (func $swap (export "swap")
-               (i32.const 20)
-               (i32.load align=4 (i32.const 16))
-               (i32.const 16)
-               (i32.load align=4 (i32.const 20))
-               (i32.store align=4 (;i32;) (;i32;))
-               (i32.store align=4 (;i32;) (;i32;))
-             )
-           )
-           """ = wat
-
-    inst = Instance.run(wat)
-    assert {123_456, 456_789} = Instance.call(inst, :read)
-    Instance.call(inst, :swap)
-    assert {456_789, 123_456} = Instance.call(inst, :read)
-
-    inst = Instance.run(wasm)
-    assert {123_456, 456_789} = Instance.call(inst, :read)
-    Instance.call(inst, :swap)
-    assert {456_789, 123_456} = Instance.call(inst, :read)
-  end
 
   test "size/1 and grow!/1" do
     defmodule Grow do
