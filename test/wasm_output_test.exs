@@ -293,4 +293,16 @@ defmodule WasmOutputTest do
   end
 
   defp do_wasm_type(type, section), do: {type, section}
+
+  test "error handling for invalid types" do
+    # Test that nil types raise appropriate errors
+    assert_raise RuntimeError, "nil is not a valid type", fn ->
+      Orb.ToWasm.Helpers.to_wasm_type(nil)
+    end
+
+    assert_raise RuntimeError, "nil is not a valid type", fn ->
+      context = Orb.ToWasm.Context.new()
+      Orb.ToWasm.Helpers.to_block_type(nil, context)
+    end
+  end
 end

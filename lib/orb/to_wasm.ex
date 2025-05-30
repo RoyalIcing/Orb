@@ -7,6 +7,21 @@ defprotocol Orb.ToWasm do
   def to_wasm(data, options)
 end
 
+defmodule Orb.ToWasm.Error do
+  @moduledoc """
+  Exception struct for ToWasm conversion errors.
+  """
+  defexception [:message, :exception]
+
+  @impl Exception
+  def exception(opts) do
+    exception = Keyword.fetch!(opts, :exception)
+    value = Keyword.fetch!(opts, :value)
+    msg = Exception.message(exception) <> " | Source AST: #{inspect(value)}"
+    %__MODULE__{message: msg, exception: exception}
+  end
+end
+
 defmodule Orb.ToWasm.Helpers do
   @moduledoc false
 
@@ -14,9 +29,8 @@ defmodule Orb.ToWasm.Helpers do
   require Orb.Ops
 
   def sized(bytes) do
-    # TODO: use IO.iodata_length/1 to save allocating binary
-    bytes = IO.iodata_to_binary(bytes)
-    [byte_size(bytes) |> leb128_u(), bytes]
+    size = IO.iodata_length(bytes)
+    [leb128_u(size), bytes]
   end
 
   def vec(items) when is_list(items) do
@@ -26,6 +40,9 @@ defmodule Orb.ToWasm.Helpers do
     ]
   end
 
+  @doc """
+  Converts Elixir types to WebAssembly type bytes.
+  """
   def to_wasm_type(nil), do: raise("nil is not a valid type")
   def to_wasm_type(:i32), do: 0x7F
   def to_wasm_type(:i64), do: 0x7E
@@ -37,6 +54,12 @@ defmodule Orb.ToWasm.Helpers do
     Orb.Ops.to_primitive_type(custom_type) |> to_wasm_type()
   end
 
+  @doc """
+  Converts types to WebAssembly block type encoding.
+
+  For primitive types, returns the same as to_wasm_type/1.
+  For custom types, looks up the type index in the context.
+  """
   def to_block_type(nil, _context), do: raise("nil is not a valid type")
   def to_block_type(:i32, _context), do: 0x7F
   def to_block_type(:i64, _context), do: 0x7E
@@ -57,13 +80,20 @@ defmodule Orb.ToWasm.Helpers do
             raise "Must declare custom type using Orb.types([#{inspect(custom_type)}]). Registered types: #{inspect(context.custom_types_to_indexes)}"
 
           index when is_integer(index) ->
-            leb128_s(index)
+            # Type indexes should be unsigned
+            leb128_u(index)
         end
     end
   end
 end
 
 defmodule Orb.ToWasm.Context do
+  @moduledoc """
+  Context for managing name-to-index mappings during WASM compilation.
+
+  Tracks global variables, functions, custom types, local variables, and loop identifiers
+  to resolve references during binary generation.
+  """
   defstruct global_names_to_indexes: %{},
             func_names_to_indexes: %{},
             custom_types_to_indexes: %{},
@@ -82,6 +112,9 @@ defmodule Orb.ToWasm.Context do
       cond do
         function_exported?(custom_type, :type_name, 0) ->
           custom_type.type_name()
+
+        true ->
+          raise "Unknown custom type #{custom_type}"
       end
 
     Map.get(context.custom_types_to_indexes, identifier)
@@ -110,11 +143,6 @@ defmodule Orb.ToWasm.Context do
       Enum.with_index(local_types)
       |> Map.new(fn {{id, type}, index} -> {id, %{index: index, type: type}} end)
 
-    # Map.new(
-    #   for {{id, type}, index} <- Enum.with_index(local_types),
-    #       do: {id, %{index: index, type: type}}
-    # )
-
     put_in(context.local_indexes, local_indexes)
   end
 
@@ -123,6 +151,12 @@ defmodule Orb.ToWasm.Context do
     entry.index
   end
 
+  @doc """
+  Registers a loop identifier in the context for later reference.
+
+  Assigns an index to the loop identifier for use in branch instructions.
+  Index 0 is reserved for the function itself.
+  """
   def register_loop_identifier(%__MODULE__{loop_indexes: loop_indexes} = context, loop_identifier)
       when not is_map_key(loop_indexes, loop_identifier) do
     # Index 0 is the function itself, so we start at 1.
@@ -138,15 +172,19 @@ defmodule Orb.ToWasm.Context do
     %__MODULE__{context | loop_indexes: loop_indexes}
   end
 
+  @doc """
+  Retrieves the relative index for a loop identifier.
+
+  WebAssembly uses relative indexing where 0 refers to the innermost block/loop.
+  This function converts the stored absolute index to the correct relative index.
+
+  Example with 2 loops (a: 0, b: 1):
+  - For loop 'b': 2 - 1 - 1 = 0 (innermost)
+  - For loop 'a': 2 - 0 - 1 = 1 (outer)
+  """
   def fetch_loop_identifier_index!(%__MODULE__{loop_indexes: loop_indexes}, loop_identifier)
       when is_map_key(loop_indexes, loop_identifier) do
     index = Map.fetch!(loop_indexes, loop_identifier)
     map_size(loop_indexes) - index - 1
-
-    # 0
-    # a: 0
-    # b: 1
-    # 2 - 1 - 1 = 0
-    # 2 - 0 - 1 = 1
   end
 end
