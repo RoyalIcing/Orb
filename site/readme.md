@@ -167,9 +167,11 @@ You can write your own DSLs using Elixir functions that spit out Orb instruction
 
 ```elixir
 defmodule Assertions do
+  require Orb.Instruction
+  
   defmacro must!(do: conditions) do
     quote do
-      Orb.snippet do
+      Orb.Instruction.sequence do
         unquote(case conditions do
           {:__block__, _, multiple} -> multiple
           single -> [single]

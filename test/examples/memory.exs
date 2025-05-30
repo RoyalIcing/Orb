@@ -269,7 +269,9 @@ defmodule Examples.Memory do
     end
 
     def reverse_in_place!(%Orb.MutRef{read: read, write: write_instruction}) do
-      snippet do
+      require Orb.Instruction
+
+      Orb.Instruction.sequence do
         reverse_in_place(read)
         write_instruction
       end

@@ -3,9 +3,10 @@ defmodule Examples.YoutubeParserTest do
 
   defmodule CharParser do
     use Orb
+    require Orb.Instruction
 
     def may(chars, offset_mut_ref) when is_list(chars) do
-      Orb.snippet do
+      Orb.Instruction.sequence do
         chars
         |> Enum.with_index(fn char, index ->
           Memory.load!(I32.U8, offset_mut_ref.read + index) === char
@@ -19,7 +20,7 @@ defmodule Examples.YoutubeParserTest do
     end
 
     def must(chars, offset_mut_ref, fail_instruction) when is_list(chars) do
-      Orb.snippet do
+      Orb.Instruction.sequence do
         unless may(chars, offset_mut_ref) do
           fail_instruction
         end

@@ -33,9 +33,10 @@ Here’s an example of a parser helper that iterates through a list of character
 ```elixir
 defmodule CharParser do
   use Orb
+  require Orb.Instruction
 
   def parse_chars(chars, offset) when is_list(chars) do
-    Orb.snippet do
+    Orb.Instruction.sequence do
       chars
       |> Enum.with_index(fn char, index ->
         Memory.load!(I32.U8, offset + index) === char

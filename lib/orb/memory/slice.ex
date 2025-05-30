@@ -70,8 +70,9 @@ defmodule Orb.Memory.Slice do
 
   def drop_first_byte(slice = %{push_type: _}) do
     require Orb
+    require Orb.Instruction
 
-    Orb.snippet do
+    Orb.Instruction.sequence do
       if get_byte_length(slice) === 0 do
         slice
       else
@@ -83,10 +84,13 @@ defmodule Orb.Memory.Slice do
   with @behaviour b = Orb.Iterator do
     @impl b
     def valid?(var), do: get_byte_length(var)
+
     @impl b
     def value_type(), do: Orb.I32
+
     @impl b
     def value(var), do: Orb.Memory.load!(I32.U8, get_byte_offset(var))
+
     @impl b
     def next(var), do: drop_first_byte(var)
   end

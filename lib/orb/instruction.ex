@@ -1,9 +1,53 @@
 defmodule Orb.Instruction do
-  @moduledoc false
+  @moduledoc "Generic struct for many type of WebAssembly instructions"
   defstruct [:pop_type, :push_type, :operation, :operands]
 
   require Orb.Ops, as: Ops
   alias Orb.Constants
+
+  @doc """
+  Macro to quote a sequence of Orb instructions as a snippet.
+  """
+  defmacro sequence(do: block) do
+    block_items =
+      case block do
+        {:__block__, _meta, items} -> items
+        single -> [single]
+      end
+
+    quote do
+      # We want our imports to not pollute. so we use `with` as a finite scope.
+      with do
+        import Kernel,
+          except: [
+            if: 2,
+            unless: 2,
+            @: 1,
+            +: 2,
+            -: 2,
+            *: 2,
+            /: 2,
+            <: 2,
+            >: 2,
+            <=: 2,
+            >=: 2,
+            ===: 2,
+            !==: 2,
+            not: 1,
+            or: 2
+          ]
+
+        import Orb.DSL
+        import Orb.IfElse.DSL
+        import Orb.Numeric.DSL
+        import Orb.Global.DSL
+        require Orb.Control, as: Control
+
+        unquote(Orb.DSL.do_snippet([], block_items))
+        |> Orb.InstructionSequence.new()
+      end
+    end
+  end
 
   # def new(type, operation, operands \\ [])
   def new(type, operation), do: new(type, operation, [])
