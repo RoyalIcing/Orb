@@ -195,8 +195,8 @@ defmodule WasmOutputTest do
              Orb.to_wasm(MathI64)
 
     assert (11 * 7) |> div(4 + 11 - 7) === 9
-    assert TestHelper.wasm_call(Orb.to_wat(MathI64), :math, {:i64, 11}, {:i64, 7}) === 9
-    assert TestHelper.wasm_call(Orb.to_wasm(MathI64), :math, {:i64, 11}, {:i64, 7}) === 9
+    assert TestHelper.wasm_call(Orb.to_wat(MathI64), :math, 11, 7) === 9
+    assert TestHelper.wasm_call(Orb.to_wasm(MathI64), :math, 11, 7) === 9
   end
 
   test "blocks" do
@@ -250,13 +250,13 @@ defmodule WasmOutputTest do
       File.write!(path_wasm, wasm)
     end
 
-    assert TestHelper.wasm_call(wat, :divide, {:i64, 22}, {:i64, 2}) === 11
-    assert TestHelper.wasm_call(wat, :divide, {:i64, 0}, {:i64, 0}) === 0
-    assert TestHelper.wasm_call(wasm, :divide, {:i64, 22}, {:i64, 2}) === 11
-    assert TestHelper.wasm_call(wasm, :divide, {:i64, 0}, {:i64, 0}) === 0
+    assert TestHelper.wasm_call(wat, :divide, 22, 2) === 11
+    assert TestHelper.wasm_call(wat, :divide, 0, 0) === 0
+    assert TestHelper.wasm_call(wasm, :divide, 22, 2) === 11
+    assert TestHelper.wasm_call(wasm, :divide, 0, 0) === 0
 
-    assert TestHelper.wasm_call(wat, :multiple_by_factor, {:i64, 7}) === 35
-    assert TestHelper.wasm_call(wasm, :multiple_by_factor, {:i64, 7}) === 35
+    assert TestHelper.wasm_call(wat, :multiple_by_factor, 7) === 35
+    assert TestHelper.wasm_call(wasm, :multiple_by_factor, 7) === 35
   end
 
   defp extract_wasm_sections(<<"\0asm", 0x01000000::32>> <> bytes) do

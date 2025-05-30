@@ -28,26 +28,30 @@ defmodule TestHelper do
   def wasm_call(source, function), do: do_wasm_call(source, function, [])
   def wasm_call(source, function, arg1), do: do_wasm_call(source, function, [arg1])
   def wasm_call(source, function, arg1, arg2), do: do_wasm_call(source, function, [arg1, arg2])
-  def wasm_call(source, function, arg1, arg2, arg3), do: do_wasm_call(source, function, [arg1, arg2, arg3])
+
+  def wasm_call(source, function, arg1, arg2, arg3),
+    do: do_wasm_call(source, function, [arg1, arg2, arg3])
 
   # Stateful instance management for tests that need to maintain state between calls
   def wasm_instance_start(source) do
     source_key = source_cache_key(source)
+
     case Process.get({:wasm_instance, source_key}) do
       nil ->
         imports = %{}
         {:ok, pid} = Wasmex.start_link(%{bytes: wat_source(source), imports: imports})
         Process.put({:wasm_instance, source_key}, pid)
         pid
-      pid -> pid
+
+      pid ->
+        pid
     end
   end
 
   def wasm_instance_call(source, function, args \\ []) do
     pid = wasm_instance_start(source)
-    wasmex_args = Enum.map(args, &convert_arg_to_wasmex/1)
-    {:ok, result} = Wasmex.call_function(pid, to_string(function), wasmex_args)
-    
+    {:ok, result} = Wasmex.call_function(pid, to_string(function), args)
+
     case result do
       [] -> nil
       [single] -> single
@@ -56,12 +60,16 @@ defmodule TestHelper do
   end
 
   defp source_cache_key(source) when is_atom(source), do: {:module, source}
-  defp source_cache_key(source) when is_binary(source), do: {:binary, :crypto.hash(:sha256, source)}
+
+  defp source_cache_key(source) when is_binary(source),
+    do: {:binary, :crypto.hash(:sha256, source)}
 
   # Safe versions that return {:error, reason} instead of raising
   def safe_wasm_call(source, function), do: do_safe_wasm_call(source, function, [])
   def safe_wasm_call(source, function, arg1), do: do_safe_wasm_call(source, function, [arg1])
-  def safe_wasm_call(source, function, arg1, arg2), do: do_safe_wasm_call(source, function, [arg1, arg2])
+
+  def safe_wasm_call(source, function, arg1, arg2),
+    do: do_safe_wasm_call(source, function, [arg1, arg2])
 
   defp do_safe_wasm_call(source, function, args) do
     try do
@@ -78,19 +86,21 @@ defmodule TestHelper do
   def wasm_call_reading_string(source, function, args \\ []) do
     imports = %{}
     {:ok, pid} = Wasmex.start_link(%{bytes: wat_source(source), imports: imports})
-    
+
     # Call the function which may return just ptr or {ptr, length}
     {:ok, result} = Wasmex.call_function(pid, to_string(function), args)
-    
+
     # Read the string from memory
     {:ok, memory} = Wasmex.memory(pid)
     {:ok, store} = Wasmex.store(pid)
-    
+
     case result do
       [ptr, length] ->
         # Function returned pointer and length
         binary = Wasmex.Memory.read_binary(store, memory, ptr, length)
-        binary |> :binary.split(<<0>>) |> hd() # Remove null terminator if present
+        # Remove null terminator if present
+        binary |> :binary.split(<<0>>) |> hd()
+
       [ptr] ->
         # Function returned only pointer, read null-terminated string
         read_null_terminated_string(store, memory, ptr)
@@ -104,21 +114,25 @@ defmodule TestHelper do
 
   defp read_bytes_until_null(store, memory, ptr, offset, acc) do
     case Wasmex.Memory.read_binary(store, memory, ptr + offset, 1) do
-      <<0>> -> 
+      <<0>> ->
         # Found null terminator, return accumulated string
         acc |> Enum.reverse() |> IO.iodata_to_binary()
-      <<byte>> -> 
+
+      <<byte>> ->
         # Continue reading
         read_bytes_until_null(store, memory, ptr, offset + 1, [byte | acc])
     end
   end
 
   defp wat_source(source) when is_atom(source), do: Orb.to_wat(source)
+
   defp wat_source(source) when is_binary(source) do
     # Check if it's binary WASM (starts with magic number) or WAT text
     case source do
-      <<0, 97, 115, 109, _::binary>> -> source  # Binary WASM starts with "\0asm"
-      _ -> source  # Assume it's WAT text
+      # Binary WASM starts with "\0asm"
+      <<0, 97, 115, 109, _::binary>> -> source
+      # Assume it's WAT text
+      _ -> source
     end
   end
 
@@ -128,27 +142,26 @@ defmodule TestHelper do
 
   defp do_wasm_call(source, function, args) do
     source_bytes = wat_source(source)
-    
-    # Convert arguments to Wasmex format
-    wasmex_args = Enum.map(args, &convert_arg_to_wasmex/1)
-    
+
     # Check if this is a stateful test by looking for global variables in the source
     # For binary WASM, we'll default to stateless for now
-    is_stateful = case source_bytes do
-      <<0, 97, 115, 109, _::binary>> -> false  # Binary WASM - assume stateless
-      wat_text -> String.contains?(wat_text, "(global ")
-    end
-    
+    is_stateful =
+      case source_bytes do
+        # Binary WASM - assume stateless
+        <<0, 97, 115, 109, _::binary>> -> false
+        wat_text -> String.contains?(wat_text, "(global ")
+      end
+
     if is_stateful do
       # Use stateful instance for modules with globals
-      wasm_instance_call(source, function, wasmex_args)
+      wasm_instance_call(source, function, args)
     else
       # Use ephemeral instance for stateless modules
       imports = %{}
       {:ok, pid} = Wasmex.start_link(%{bytes: source_bytes, imports: imports})
-      
-      {:ok, result} = Wasmex.call_function(pid, to_string(function), wasmex_args)
-      
+
+      {:ok, result} = Wasmex.call_function(pid, to_string(function), args)
+
       case result do
         [] -> nil
         [single] -> single
@@ -156,11 +169,4 @@ defmodule TestHelper do
       end
     end
   end
-
-  # Convert OrbWasmtime-style arguments to Wasmex format
-  defp convert_arg_to_wasmex({:i64, value}), do: value
-  defp convert_arg_to_wasmex({:i32, value}), do: value
-  defp convert_arg_to_wasmex({:f32, value}), do: value
-  defp convert_arg_to_wasmex({:f64, value}), do: value
-  defp convert_arg_to_wasmex(value), do: value
 end
