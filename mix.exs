@@ -31,11 +31,6 @@ defmodule Orb.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      # {:wasmex, "~> 0.8.3", only: :test},
-      # {:wasmex,
-      #  git: "https://github.com/tessi/wasmex.git",
-      #  ref: "863cb01aba128420ed7d4ba6b755c2a9c421afef",
-      #  only: :test},
       {:wasmex, "~> 0.11.2", only: :test},
       {:jason, "~> 1.0", only: :test},
       {:ex_doc, "~> 0.31.2", only: :dev, runtime: false}
