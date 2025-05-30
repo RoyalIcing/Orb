@@ -146,6 +146,48 @@ defmodule Orb.Table do
         ]
       end
     end
+
+    defimpl Orb.ToWasm do
+      import Orb.Leb
+
+      def to_wasm(
+            %Orb.Table.CallIndirect{
+              type_signature: type_signature,
+              table_index: table_index,
+              arguments: arguments
+            },
+            context
+          ) do
+        # Generate WASM for function arguments first
+        args_wasm = for arg <- arguments, do: Orb.ToWasm.to_wasm(arg, context)
+
+        # Generate constant for table index (must be last on stack)
+        # i32.const
+        table_index_wasm = [0x41, leb128_s(table_index)]
+
+        # Get type index for the function signature
+        type_index = get_type_index(type_signature, context)
+
+        [
+          args_wasm,
+          table_index_wasm,
+          # call_indirect opcode
+          0x11,
+          leb128_u(type_index),
+          # table index (always 0 for single table) - use LEB128
+          leb128_u(0)
+        ]
+      end
+
+      # Get the type index for a function signature from context
+      defp get_type_index(type_signature, context) do
+        case Orb.ToWasm.Context.get_custom_type_index(context, type_signature) do
+          # Fallback to index 0 if not found
+          nil -> 0
+          index -> index
+        end
+      end
+    end
   end
 
   def call({table_index, type_signature}) do

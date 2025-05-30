@@ -183,8 +183,8 @@ defmodule Orb.ModuleDefinition do
     def to_wasm(
           %Orb.ModuleDefinition{
             types: types,
-            table_size: _table_size,
-            imports: _imports,
+            table_size: table_size,
+            imports: imports,
             globals: globals,
             memory: memory,
             constants: constants,
@@ -195,8 +195,64 @@ defmodule Orb.ModuleDefinition do
         ) do
       types_indexed = types |> Enum.with_index(&{&1.name, &2})
       globals_indexed = globals |> Enum.with_index()
+      imports_indexed = imports |> Enum.with_index()
 
       funcs = Enum.with_index(for f = %Orb.Func{} <- mod_body, do: f)
+
+      # Extract imported functions for function index space
+      imported_funcs =
+        for {%Orb.Import{type: %Orb.Func.Type{name: name}}, index} <- imports_indexed,
+            not is_nil(name) do
+          {name, index}
+        end
+
+      # Local functions start after imported functions
+      local_func_names =
+        for {f, local_index} <- funcs do
+          {f.name, local_index + length(imported_funcs)}
+        end
+
+      # Combine imported and local function indexes
+      all_func_indexes = Map.new(imported_funcs ++ local_func_names)
+
+      # Extract function types from custom types
+      custom_func_types =
+        for {custom_type, _} <- types_indexed do
+          if is_atom(custom_type) and function_exported?(custom_type, :wasm_type, 0) do
+            # Get the actual function type from the custom type
+            func_type = custom_type.wasm_type()
+
+            case func_type do
+              %Orb.Func.Type{params: params, result: result} ->
+                # Convert params to tuple format
+                params_tuple =
+                  if params do
+                    case params do
+                      params when is_list(params) -> List.to_tuple(params)
+                      params when is_tuple(params) -> params
+                      param -> {param}
+                    end
+                  else
+                    {}
+                  end
+
+                {params_tuple, result}
+
+              _ ->
+                # Fallback for unexpected format
+                {{}, nil}
+            end
+          else
+            # Fallback for non-custom types (should not happen in this context)
+            {{}, nil}
+          end
+        end
+
+      # Combine custom types and actual function types
+      uniq_func_types =
+        (custom_func_types ++
+           for({f, _index} <- funcs, do: func_type_tuple(f)))
+        |> Enum.uniq()
 
       context =
         context
@@ -204,19 +260,12 @@ defmodule Orb.ModuleDefinition do
         |> Orb.ToWasm.Context.set_global_name_index_lookup(
           Map.new(globals_indexed, fn {g, index} -> {g.name, index} end)
         )
-        |> Orb.ToWasm.Context.set_func_name_index_lookup(
-          Map.new(funcs, fn {f, index} -> {f.name, index} end)
-        )
+        |> Orb.ToWasm.Context.set_func_name_index_lookup(all_func_indexes)
 
       global_defs =
         for global <- globals do
           Orb.ToWasm.to_wasm(global, context)
         end
-
-      uniq_func_types =
-        (for({t, _} <- types_indexed, do: %Orb.Func{params: [], result: t}) ++
-           for({f, _index} <- funcs, do: func_type_tuple(f)))
-        |> Enum.uniq()
 
       func_defs =
         for {f, _index} <- funcs do
@@ -263,10 +312,53 @@ defmodule Orb.ModuleDefinition do
 
       constants_defs = Orb.ToWasm.to_wasm(constants, context)
 
+      import_defs =
+        for {import_item = %Orb.Import{}, _index} <- imports_indexed do
+          Orb.ToWasm.to_wasm(import_item, context)
+        end
+
+      table_def =
+        if table_size && table_size > 0 do
+          [
+            # funcref type
+            [0x70],
+            # limits: min only
+            [0x00, leb128_u(table_size)]
+          ]
+        else
+          nil
+        end
+
+      # Generate element segments for table functions
+      element_defs =
+        for {%Orb.Func{table_elem_indices: indices}, func_index} <- funcs,
+            elem_index <- indices do
+          [
+            # table index (always 0 for single table)
+            [0x00],
+            # i32.const offset
+            [0x41, leb128_u(elem_index)],
+            # end
+            [0x0B],
+            # function index
+            vec([leb128_u(func_index)])
+          ]
+        end
+
       [
         @wasm_prefix,
         section(:type, vec(for {p, r} <- uniq_func_types, do: encode_func_type(p, r))),
+        if import_defs != [] do
+          section(:import, vec(import_defs))
+        else
+          []
+        end,
         section(:function, vec(func_defs)),
+        if table_def do
+          section(:table, vec([table_def]))
+        else
+          []
+        end,
         if memory do
           section(:memory, vec([Orb.ToWasm.to_wasm(memory, context)]))
         else
@@ -283,6 +375,11 @@ defmodule Orb.ModuleDefinition do
 
           export_defs ->
             section(:export, vec(export_defs))
+        end,
+        if element_defs != [] do
+          section(:element, vec(element_defs))
+        else
+          []
         end,
         # section(:data_count, vec([])),
         section(:code, vec(func_code)),

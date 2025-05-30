@@ -4,6 +4,7 @@ defmodule MemoryStatefulTest do
   # Helper function to unwrap Wasmex.call_function results
   defp call_and_unwrap(context, function, args \\ []) do
     {:ok, result} = context.call_function.(function, args)
+
     case result do
       [] -> nil
       [single] -> single
@@ -32,10 +33,10 @@ defmodule MemoryStatefulTest do
     test "swap function modifies memory state", context do
       # Initial read should return the original values
       assert {123_456, 456_789} = call_and_unwrap(context, "read")
-      
+
       # Swap the values in memory
       call_and_unwrap(context, "swap")
-      
+
       # Read again should return swapped values
       assert {456_789, 123_456} = call_and_unwrap(context, "read")
     end
@@ -65,15 +66,15 @@ defmodule MemoryStatefulTest do
     test "counter maintains state between calls", context do
       # Initial count should be 0
       assert 0 = call_and_unwrap(context, "get_count")
-      
+
       # Increment and check
       call_and_unwrap(context, "increment")
       assert 1 = call_and_unwrap(context, "get_count")
-      
+
       # Increment again
       call_and_unwrap(context, "increment")
       assert 2 = call_and_unwrap(context, "get_count")
-      
+
       # Reset and check
       call_and_unwrap(context, "reset")
       assert 0 = call_and_unwrap(context, "get_count")

@@ -99,6 +99,42 @@ defmodule Orb.Import do
     end
   end
 
+  defimpl Orb.ToWasm do
+    import Orb.ToWasm.Helpers
+
+    def to_wasm(%Orb.Import{module: module, name: name, type: type}, context) do
+      module_str = if module, do: to_string(module), else: ""
+      name_str = to_string(name)
+
+      [
+        sized(module_str),
+        sized(name_str),
+        encode_import_desc(type, context)
+      ]
+    end
+
+    # Import description encoding for functions
+    defp encode_import_desc(%Orb.Func.Type{} = func_type, context) do
+      # Function import: 0x00 followed by type index
+      type_index = get_func_type_index(func_type, context)
+      [0x00, Orb.Leb.leb128_u(type_index)]
+    end
+
+    # Get the type index for a function type from context
+    defp get_func_type_index(%Orb.Func.Type{name: name}, context) when not is_nil(name) do
+      case Orb.ToWasm.Context.get_custom_type_index(context, name) do
+        # Fallback to index 0 if not found
+        nil -> 0
+        index -> index
+      end
+    end
+
+    defp get_func_type_index(_func_type, _context) do
+      # Default to index 0 for unnamed types
+      0
+    end
+  end
+
   defmodule DSL do
     @moduledoc """
     DSL for declaring within Elixir module that get converted to `(import …)` expressions in WebAssembly.

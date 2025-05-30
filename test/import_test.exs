@@ -1,5 +1,6 @@
 defmodule ImportTest do
   use ExUnit.Case, async: true
+  require TestHelper
 
   test "Orb.Import.register/1" do
     defmodule ImportsExample do
@@ -40,6 +41,10 @@ defmodule ImportTest do
       end
     end
 
+    wat = Orb.to_wat(ImportsExample)
+    wasm = Orb.to_wasm(ImportsExample)
+
+    # Test WAT output
     assert """
            (module $ImportsExample
              (import "echo" "int32" (func $ImportTest.ImportsExample.Echo.int32 (param $a i32) (result i32)))
@@ -54,6 +59,17 @@ defmodule ImportTest do
                drop
              )
            )
-           """ = Orb.to_wat(ImportsExample)
+           """ = wat
+
+    # Test WASM binary format contains WASM magic number and import section
+    assert <<"\0asm", 0x01000000::32, _rest::binary>> = wasm
+
+    # Test that WASM contains import section (section ID 0x02)
+    # This is a basic test to ensure imports are included in binary
+    assert String.contains?(wasm, "echo")
+    assert String.contains?(wasm, "int32")
+    assert String.contains?(wasm, "log")
+    assert String.contains?(wasm, "time")
+    assert String.contains?(wasm, "unix_time")
   end
 end

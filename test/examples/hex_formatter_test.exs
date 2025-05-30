@@ -8,7 +8,7 @@ defmodule Examples.HexFormatterTest do
   # - Instance.capture for function references
   # - Instance.read_memory for reading from WASM memory
   # - Stateful instance management with memory operations
-  
+
   test "u32_to_hex_lower" do
     # IO.puts(HexFormatter.to_wat())
 

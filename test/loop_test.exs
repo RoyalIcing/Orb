@@ -2,7 +2,6 @@ defmodule LoopTest do
   use ExUnit.Case, async: true
   require TestHelper
 
-
   test "block stack" do
     require TestHelper
 

@@ -1,6 +1,6 @@
 defmodule Examples.WasiTest do
   use ExUnit.Case, async: true
-  
+
   # TODO: Migrate to Wasmex - needs implementation of:
   # - Instance.run with WASI imports
   # - Instance.capture for function references

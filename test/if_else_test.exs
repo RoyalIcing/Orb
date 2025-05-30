@@ -283,7 +283,7 @@ defmodule IfElseTest do
     # - Instance.capture for function references
     # - Instance.write_string_nul_terminated for memory writing
     # - Stateful instance management with memory operations
-    
+
     # alias OrbWasmtime.Instance
     # inst = Instance.run(URLSearchParams)
     # count = Instance.capture(inst, :url_search_params_count, 1)
@@ -350,7 +350,7 @@ defmodule IfElseTest do
     # - Instance.capture for function references  
     # - Instance.write_string_nul_terminated for memory writing
     # - Import handling for external functions
-    
+
     # alias OrbWasmtime.Instance
 
     # inst =

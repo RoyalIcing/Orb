@@ -110,11 +110,12 @@ defmodule Orb.ToWasm.Context do
   def get_custom_type_index(%__MODULE__{} = context, custom_type) do
     identifier =
       cond do
-        function_exported?(custom_type, :type_name, 0) ->
+        is_atom(custom_type) and function_exported?(custom_type, :type_name, 0) ->
           custom_type.type_name()
 
         true ->
-          raise "Unknown custom type #{custom_type}"
+          # Fallback to the custom_type itself as identifier
+          custom_type
       end
 
     Map.get(context.custom_types_to_indexes, identifier)

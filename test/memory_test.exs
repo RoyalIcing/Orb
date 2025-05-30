@@ -158,8 +158,6 @@ defmodule MemoryTest do
            """
   end
 
-
-
   test "size/1 and grow!/1" do
     defmodule Grow do
       use Orb
