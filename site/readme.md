@@ -32,6 +32,12 @@ Orb is the full power of Elixir at compile time and the portability of WebAssemb
 - WASI support. It’s not stabilized yet and for now I’d rather it be a library built on top of Orb.
 - Produce the most optimized code possible through deep analysis. I recommend using `wasm-opt` if you really need to squeeze every byte possible.
 
+## Videos
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/UnMcBa2efX4?si=Pu6qFVWlXeDX9Xdb" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/_nhN6h8iLNM?si=v6PR8tRs2j-cQ1di" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 ## Write functions using an Elixir subset
 
 You can write maths using familiar `+ - * /` operators in Orb.
