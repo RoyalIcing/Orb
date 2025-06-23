@@ -26,7 +26,7 @@ defmodule Orb.Memory.Load do
     %__MODULE__{
       push_type: type,
       load_instruction: load_instruction,
-      address: address,
+      address: Orb.Instruction.Const.wrap(:i32, address),
       align: align
     }
   end
@@ -40,7 +40,7 @@ defmodule Orb.Memory.Load do
     %__MODULE__{
       push_type: primitive_type,
       load_instruction: load_instruction,
-      address: address,
+      address: Orb.Instruction.Const.wrap(:i32, address),
       align: align
     }
   end

@@ -53,26 +53,25 @@ defmodule WasmexCase do
   end
 
   setup context do
-    wat =
-      case Map.fetch(context, :wat) do
-        {:ok, wat} -> wat
-        :error -> raise "You must set :wat in context"
+    {bytes, has_memory?} =
+      case {Map.fetch(context, :wat), Map.fetch(context, :wasm)} do
+        {{:ok, wat}, :error} ->
+          {wat, String.contains?(wat, "(memory ")}
+
+        {:error, {:ok, wasm}} ->
+          {wasm, true}  # Assume WASM binary has memory for now
+
+        {{:ok, _wat}, {:ok, _wasm}} ->
+          raise "You cannot set both :wat and :wasm in context, choose one"
+
+        {:error, :error} ->
+          raise "You must set either :wat or :wasm in context"
       end
 
     imports = Map.get(context, :wasm_imports, %{})
     imports = Map.put_new_lazy(imports, :log, &log_import/0)
 
-    has_memory? = String.contains?(wat, "(memory ")
-    # Add memory export to the WAT if needed
-    # wat_with_memory =
-    #   if not String.contains?(wat, "(memory ") do
-    #     String.replace(wat, "(module", "(module\n  (memory (export \"memory\") 1)")
-    #     |> dbg()
-    #   else
-    #     wat
-    #   end
-
-    {:ok, pid} = Wasmex.start_link(%{bytes: wat, imports: imports})
+    {:ok, pid} = Wasmex.start_link(%{bytes: bytes, imports: imports})
     {:ok, store} = Wasmex.store(pid)
     {:ok, instance} = Wasmex.instance(pid)
 

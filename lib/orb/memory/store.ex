@@ -36,10 +36,10 @@ defmodule Orb.Memory.Store do
     %__MODULE__{
       store_type: type,
       store_instruction: store_instruction,
-      address: address,
+      address: Orb.Instruction.Const.wrap(:i32, address),
       align: align,
       natural_align: natural_align,
-      value: value
+      value: Orb.Instruction.Const.wrap(primitive_type, value)
     }
   end
 
@@ -55,10 +55,10 @@ defmodule Orb.Memory.Store do
     %__MODULE__{
       store_type: primitive_type,
       store_instruction: store_instruction,
-      address: address,
+      address: Orb.Instruction.Const.wrap(:i32, address),
       align: align,
       natural_align: natural_align,
-      value: value
+      value: Orb.Instruction.Const.wrap(primitive_type, value)
     }
   end
 

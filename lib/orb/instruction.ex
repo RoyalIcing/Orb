@@ -209,7 +209,13 @@ defmodule Orb.Instruction do
   # TODO: add effects map. See InstructionSequence for a sketch.
   def memory_grow(value), do: new(:i32, {:memory, :grow}, [value])
 
-  def memory_copy(dest_index, src_index, length), do: new(nil, {:memory, :copy}, [dest_index, src_index, length])
+  def memory_copy(dest_index, src_index, length) do
+    new(nil, {:memory, :copy}, [
+      Orb.Instruction.Const.wrap(:i32, dest_index),
+      Orb.Instruction.Const.wrap(:i32, src_index),
+      Orb.Instruction.Const.wrap(:i32, length)
+    ])
+  end
 
   defp type_check_call!(param_types, name, params) do
     params

@@ -118,6 +118,33 @@ defmodule MemoryStatefulTest do
       assert {?a, ?b, ?c} = call_and_unwrap(context, "read_output_string")
     end
   end
+
+  describe "simple WASM tests" do
+    defmodule SimpleWasmTest do
+      use Orb
+
+      Memory.pages(1)
+      Memory.initial_data!(100, "hello")
+
+      defw read_char(), I32 do
+        Memory.load!(I32.U8, 100)
+      end
+
+      defw store_and_read(), I32 do
+        Memory.store!(I32.U8, 200, ?x)
+        Memory.load!(I32.U8, 200)
+      end
+    end
+
+    @tag wasm: Orb.to_wasm(SimpleWasmTest)
+    test "basic memory operations work with WASM binary", context do
+      assert ?h = call_and_unwrap(context, "read_char")
+      assert ?x = call_and_unwrap(context, "store_and_read")
+    end
+
+    # Note: memory.copy (bulk memory operations) may require specific WASM runtime features
+    # that aren't available in all environments. The WAT format test still works.
+  end
 end
 
 defmodule MemoryWatGenerationTest do
