@@ -209,6 +209,8 @@ defmodule Orb.Instruction do
   # TODO: add effects map. See InstructionSequence for a sketch.
   def memory_grow(value), do: new(:i32, {:memory, :grow}, [value])
 
+  def memory_copy(dest_index, src_index, length), do: new(nil, {:memory, :copy}, [dest_index, src_index, length])
+
   defp type_check_call!(param_types, name, params) do
     params
     |> Enum.with_index(fn param, index ->
@@ -517,6 +519,23 @@ defmodule Orb.Instruction do
 
     def to_wat(
           %Orb.Instruction{
+            push_type: nil,
+            operation: {:memory, memory_op},
+            operands: operands
+          },
+          indent
+        ) do
+      [
+        indent,
+        "(memory.",
+        to_string(memory_op),
+        for(operand <- operands, do: [" ", Instructions.do_wat(operand)]),
+        ")"
+      ]
+    end
+
+    def to_wat(
+          %Orb.Instruction{
             push_type: type,
             operation: :const,
             operands: [number]
@@ -684,6 +703,47 @@ defmodule Orb.Instruction do
         for(operand <- operands, do: Orb.ToWasm.to_wasm(operand, context)),
         0x21,
         leb128_u(Orb.ToWasm.Context.fetch_local_index!(context, identifier))
+      ]
+    end
+
+    def to_wasm(
+          %Orb.Instruction{
+            push_type: :i32,
+            operation: {:memory, :size},
+            operands: []
+          },
+          _context
+        ) do
+      [0x3F]
+    end
+
+    def to_wasm(
+          %Orb.Instruction{
+            push_type: :i32,
+            operation: {:memory, :grow},
+            operands: [delta]
+          },
+          context
+        ) do
+      [
+        Orb.ToWasm.to_wasm(delta, context),
+        0x40
+      ]
+    end
+
+    def to_wasm(
+          %Orb.Instruction{
+            push_type: nil,
+            operation: {:memory, :copy},
+            operands: [dest_index, src_index, length]
+          },
+          context
+        ) do
+      [
+        Orb.ToWasm.to_wasm(dest_index, context),
+        Orb.ToWasm.to_wasm(src_index, context),
+        Orb.ToWasm.to_wasm(length, context),
+        0xFC, 0x0A
       ]
     end
 

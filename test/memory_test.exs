@@ -187,4 +187,24 @@ defmodule MemoryTest do
            )
            """
   end
+
+  test "copy!/3" do
+    defmodule Copy do
+      use Orb
+
+      defw copy_memory() do
+        Memory.copy!(0x200, 0x100, 32)
+        Memory.copy!(0x300, 0x150, 16)
+      end
+    end
+
+    assert Orb.to_wat(Copy) == """
+           (module $Copy
+             (func $copy_memory (export "copy_memory")
+               (memory.copy (i32.const 512) (i32.const 256) (i32.const 32))
+               (memory.copy (i32.const 768) (i32.const 336) (i32.const 16))
+             )
+           )
+           """
+  end
 end

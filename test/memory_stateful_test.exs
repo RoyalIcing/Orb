@@ -80,6 +80,44 @@ defmodule MemoryStatefulTest do
       assert 0 = call_and_unwrap(context, "get_count")
     end
   end
+
+  describe "copy!/3" do
+    defmodule StringCopier do
+      use Orb
+
+      Memory.pages(1)
+      # Store "abc" at offset 100
+      Memory.initial_data!(100, "abc")
+      # Store "xyz" at offset 200
+      Memory.initial_data!(200, "xyz")
+
+      defw copy_string(choose: I32) do
+        if choose === 1 do
+          # Copy "abc" (3 bytes) from offset 100 to output buffer at offset 300
+          Memory.copy!(300, 100, 3)
+        else
+          # Copy "xyz" (3 bytes) from offset 200 to output buffer at offset 300
+          Memory.copy!(300, 200, 3)
+        end
+      end
+
+      defw read_output_string(), {I32, I32, I32} do
+        {Memory.load!(I32.U8, 300), Memory.load!(I32.U8, 301), Memory.load!(I32.U8, 302)}
+      end
+    end
+
+    @tag wat: Orb.to_wat(StringCopier)
+    test "copies different strings based on condition", context do
+      call_and_unwrap(context, "copy_string", [1])
+      assert {?a, ?b, ?c} = call_and_unwrap(context, "read_output_string")
+
+      call_and_unwrap(context, "copy_string", [0])
+      assert {?x, ?y, ?z} = call_and_unwrap(context, "read_output_string")
+
+      call_and_unwrap(context, "copy_string", [1])
+      assert {?a, ?b, ?c} = call_and_unwrap(context, "read_output_string")
+    end
+  end
 end
 
 defmodule MemoryWatGenerationTest do

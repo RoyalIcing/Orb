@@ -210,6 +210,24 @@ defmodule Orb.Memory do
     Orb.Instruction.memory_grow(delta)
   end
 
+  @doc """
+  Copies a region of memory from a source memory location to a destination memory location.
+
+  Takes three i32 parameters:
+  - `dest_index`: The destination memory offset to copy to
+  - `src_index`: The source memory offset to copy from  
+  - `length`: The number of bytes to copy
+
+  https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/Memory/Copy
+
+  ```elixir
+  Memory.copy!(dest_index, src_index, length)
+  ```
+  """
+  def copy!(dest_index, src_index, length) do
+    Orb.Instruction.memory_copy(dest_index, src_index, length)
+  end
+
   defimpl Orb.ToWat do
     def to_wat(%Orb.Memory{min: min, import_or_export: import_or_export}, indent) do
       [
