@@ -59,7 +59,8 @@ defmodule WasmexCase do
           {wat, String.contains?(wat, "(memory ")}
 
         {:error, {:ok, wasm}} ->
-          {wasm, true}  # Assume WASM binary has memory for now
+          # Assume WASM binary has memory for now
+          {wasm, true}
 
         {{:ok, _wat}, {:ok, _wasm}} ->
           raise "You cannot set both :wat and :wasm in context, choose one"
@@ -67,6 +68,20 @@ defmodule WasmexCase do
         {:error, :error} ->
           raise "You must set either :wat or :wasm in context"
       end
+
+    if Map.has_key?(context, :dbg_write) do
+      File.write!(
+        Path.join([
+          __DIR__,
+          "..",
+          case bytes do
+            "\0asm" <> _ -> "dbg.wasm"
+            _ -> "dbg.wat"
+          end
+        ]),
+        bytes
+      )
+    end
 
     imports = Map.get(context, :wasm_imports, %{})
     imports = Map.put_new_lazy(imports, :log, &log_import/0)

@@ -26,3 +26,6 @@ orb-*.tar
 /tmp/
 
 .DS_Store
+
+dbg.wasm
+dbg.wat
