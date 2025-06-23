@@ -107,7 +107,19 @@ defmodule MemoryStatefulTest do
     end
 
     @tag wat: Orb.to_wat(StringCopier)
-    test "copies different strings based on condition", context do
+    test "wat: copies different strings based on condition", context do
+      call_and_unwrap(context, "copy_string", [1])
+      assert {?a, ?b, ?c} = call_and_unwrap(context, "read_output_string")
+
+      call_and_unwrap(context, "copy_string", [0])
+      assert {?x, ?y, ?z} = call_and_unwrap(context, "read_output_string")
+
+      call_and_unwrap(context, "copy_string", [1])
+      assert {?a, ?b, ?c} = call_and_unwrap(context, "read_output_string")
+    end
+
+    @tag wasm: Orb.to_wasm(StringCopier)
+    test "wasm: copies different strings based on condition", context do
       call_and_unwrap(context, "copy_string", [1])
       assert {?a, ?b, ?c} = call_and_unwrap(context, "read_output_string")
 

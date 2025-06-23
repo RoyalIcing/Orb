@@ -749,7 +749,11 @@ defmodule Orb.Instruction do
         Orb.ToWasm.to_wasm(dest_index, context),
         Orb.ToWasm.to_wasm(src_index, context),
         Orb.ToWasm.to_wasm(length, context),
-        0xFC, 0x0A
+        # memory.copy opcode + destination memory index + source memory index
+        0xFC,
+        0x0A,
+        0x00,
+        0x00
       ]
     end
 
