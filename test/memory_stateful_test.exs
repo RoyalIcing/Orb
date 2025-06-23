@@ -190,10 +190,8 @@ defmodule MemoryWatGenerationTest do
              """ = wat
     end
 
-    # Note: Binary WASM test commented out due to Orb library compilation issues
-    # test "binary wasm format works" do
-    #   wasm = Orb.to_wasm(Swap)  # This would fail with Protocol.UndefinedError
-    #   # TODO: Re-enable when Orb.to_wasm compilation is fixed
-    # end
+    test "swap!/4 compiles to wasm" do
+      wasm = Orb.to_wasm(Swap)
+    end
   end
 end

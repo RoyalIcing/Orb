@@ -169,9 +169,9 @@ defmodule Orb.Memory do
     opts = Keyword.take(opts, [:align])
 
     Orb.InstructionSequence.new(nil, [
-      address_b,
+      Orb.Instruction.Const.wrap(:i32, address_b),
       load!(type, address_a, opts),
-      address_a,
+      Orb.Instruction.Const.wrap(:i32, address_a),
       load!(type, address_b, opts),
       store!(type, Orb.Stack.pop(I32), Orb.Stack.pop(I32), opts),
       store!(type, Orb.Stack.pop(I32), Orb.Stack.pop(I32), opts)
