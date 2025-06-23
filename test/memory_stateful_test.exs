@@ -85,6 +85,11 @@ defmodule MemoryStatefulTest do
     defmodule StringCopier do
       use Orb
 
+      # memory Const, pages: 1 do
+      #   {100, "abc"}
+      #   {200, "xyz"}
+      # end
+
       Memory.pages(1)
       # Store "abc" at offset 100
       Memory.initial_data!(100, "abc")
@@ -128,6 +133,70 @@ defmodule MemoryStatefulTest do
 
       call_and_unwrap(context, "copy_string", [1])
       assert {?a, ?b, ?c} = call_and_unwrap(context, "read_output_string")
+    end
+  end
+
+  describe "fill!/3 and copy!/3 combined" do
+    defmodule FillAndCopy do
+      use Orb
+
+      Memory.pages(1)
+      Memory.initial_data!(100, "hello")
+
+      defw setup_buffer() do
+        # Fill a buffer with 0x42 at offset 200 (64 bytes)
+        Memory.fill!(200, 0x42, 64)
+        # Fill another buffer with 0xFF at offset 300 (32 bytes)
+        Memory.fill!(300, 0xFF, 32)
+      end
+
+      defw copy_data() do
+        # Copy "hello" from offset 100 to the 0x42-filled buffer at offset 200
+        Memory.copy!(200, 100, 5)
+        # Copy first 3 bytes from the hello buffer to the 0xFF buffer
+        Memory.copy!(300, 100, 3)
+      end
+
+      defw read_buffers(), {I32, I32, I32, I32, I32, I32} do
+        {
+          # 'h' after copy
+          Memory.load!(I32.U8, 200),
+          # should be 0x42 (from fill)
+          Memory.load!(I32.U8, 205),
+          # should be 0x42 (from fill)
+          Memory.load!(I32.U8, 210),
+          # 'h' after copy
+          Memory.load!(I32.U8, 300),
+          # should be 0xFF (from fill)
+          Memory.load!(I32.U8, 303),
+          # should be 0xFF (from fill)
+          Memory.load!(I32.U8, 310)
+        }
+      end
+    end
+
+    @tag wasm: Orb.to_wasm(FillAndCopy)
+    test "fill and copy operations work together", context do
+      call_and_unwrap(context, "setup_buffer")
+      {0x42, 0x42, 0x42, 0xFF, 0xFF, 0xFF} = call_and_unwrap(context, "read_buffers")
+
+      # Copy data into the filled buffers
+      call_and_unwrap(context, "copy_data")
+
+      # After copy, some positions should have copied data
+      {b1, b2, b3, b4, b5, b6} = call_and_unwrap(context, "read_buffers")
+      # 'h' copied from "hello"
+      assert b1 == ?h
+      # still 0x42 (beyond copied data)
+      assert b2 == 0x42
+      # still 0x42 (beyond copied data)
+      assert b3 == 0x42
+      # 'h' copied from "hello"
+      assert b4 == ?h
+      # still 0xFF (beyond copied data)
+      assert b5 == 0xFF
+      # still 0xFF (beyond copied data)
+      assert b6 == 0xFF
     end
   end
 

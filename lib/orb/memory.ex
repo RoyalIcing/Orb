@@ -228,6 +228,24 @@ defmodule Orb.Memory do
     Orb.Instruction.memory_copy(dest_index, src_index, length)
   end
 
+  @doc """
+  Fills a region of memory with a specified byte value.
+
+  Takes three i32 parameters:
+  - `dest_index`: The memory offset to start filling at
+  - `value`: The byte value (0-255) to fill with
+  - `length`: The number of bytes to fill
+
+  https://developer.mozilla.org/en-US/docs/WebAssembly/Reference/Memory/Fill
+
+  ```elixir
+  Memory.fill!(dest_index, value, length)
+  ```
+  """
+  def fill!(dest_index, value, length) do
+    Orb.Instruction.memory_fill(dest_index, value, length)
+  end
+
   defimpl Orb.ToWat do
     def to_wat(%Orb.Memory{min: min, import_or_export: import_or_export}, indent) do
       [

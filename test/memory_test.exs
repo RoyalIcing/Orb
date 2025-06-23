@@ -207,4 +207,24 @@ defmodule MemoryTest do
            )
            """
   end
+
+  test "fill!/3" do
+    defmodule Fill do
+      use Orb
+
+      defw fill_memory() do
+        Memory.fill!(0x100, 0, 64)
+        Memory.fill!(0x200, 0xFF, 32)
+      end
+    end
+
+    assert Orb.to_wat(Fill) == """
+           (module $Fill
+             (func $fill_memory (export "fill_memory")
+               (memory.fill (i32.const 256) (i32.const 0) (i32.const 64))
+               (memory.fill (i32.const 512) (i32.const 255) (i32.const 32))
+             )
+           )
+           """
+  end
 end

@@ -217,6 +217,14 @@ defmodule Orb.Instruction do
     ])
   end
 
+  def memory_fill(dest_index, value, length) do
+    new(nil, {:memory, :fill}, [
+      Orb.Instruction.Const.wrap(:i32, dest_index),
+      Orb.Instruction.Const.wrap(:i32, value),
+      Orb.Instruction.Const.wrap(:i32, length)
+    ])
+  end
+
   defp type_check_call!(param_types, name, params) do
     params
     |> Enum.with_index(fn param, index ->
@@ -753,6 +761,25 @@ defmodule Orb.Instruction do
         0xFC,
         0x0A,
         0x00,
+        0x00
+      ]
+    end
+
+    def to_wasm(
+          %Orb.Instruction{
+            push_type: nil,
+            operation: {:memory, :fill},
+            operands: [dest_index, value, length]
+          },
+          context
+        ) do
+      [
+        Orb.ToWasm.to_wasm(dest_index, context),
+        Orb.ToWasm.to_wasm(value, context),
+        Orb.ToWasm.to_wasm(length, context),
+        # memory.fill opcode + memory index
+        0xFC,
+        0x0B,
         0x00
       ]
     end
