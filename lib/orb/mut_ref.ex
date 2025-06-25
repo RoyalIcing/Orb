@@ -11,6 +11,6 @@ defmodule Orb.MutRef do
 
   def store(%__MODULE__{write: write}, value) do
     # TODO: Use InstructionSequence
-    [value, write]
+    Orb.InstructionSequence.new(nil, [value, write])
   end
 end
