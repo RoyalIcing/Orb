@@ -3,7 +3,8 @@
 locals_without_parens = [
   i32: 1,
   let: 1,
-  return: 1
+  return: 1,
+  local: 1
 ]
 
 [

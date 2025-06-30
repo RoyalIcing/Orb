@@ -56,9 +56,7 @@ defmodule Orb.InstructionSequence do
 
   def new(instructions) when is_list(instructions) do
     push_type = do_pop_push_type([], instructions)
-
-    local_types =
-      do_local_types(instructions, [])
+    local_types = do_local_types(instructions, [])
 
     new(push_type, instructions, locals: local_types)
   end
@@ -130,7 +128,7 @@ defmodule Orb.InstructionSequence do
   end
 
   defp do_local_types([%{body: %__MODULE__{locals: locals}} | rest], local_types) do
-    local_types = merge_locals(local_types, locals)
+    local_types = merge_locals(locals, local_types)
     do_local_types(rest, local_types)
   end
 
@@ -142,7 +140,7 @@ defmodule Orb.InstructionSequence do
   end
 
   def concat_locals(instruction_sequence = %__MODULE__{}, locals) do
-    new_locals = merge_locals(instruction_sequence.locals, locals)
+    new_locals = merge_locals(locals, instruction_sequence.locals)
     %{instruction_sequence | locals: new_locals}
   end
 

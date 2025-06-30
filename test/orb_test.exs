@@ -400,12 +400,24 @@ defmodule OrbTest do
   defmodule WithinRange do
     use Orb
 
-    defw validate(num: I32), I32, under?: I32, over?: I32 do
+    # defw validate(num: I32), I32, under?: I32, over?: I32 do
+    defw validate(num: I32) :: I32 do
+      local under?: I32, over?: I32
+      # local under? = num < 1
+      # local over? = num > 255
+
       under? = num < 1
       over? = num > 255
 
       not (under? or over?)
     end
+
+    # defw validate(num: I32), I32, under?: I32, over?: I32 do
+    #   under? = num < 1
+    #   over? = num > 255
+
+    #   not (under? or over?)
+    # end
   end
 
   test "checking a number is within a range" do

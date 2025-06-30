@@ -8,6 +8,10 @@ defmodule Orb.DSL.Defw do
     Module.put_attribute(__CALLER__.module, :wasm_mode, mode)
   end
 
+  defmacro defw({:"::", _meta, [call, result]}, do: block) do
+    define(call, :public, result, [], block, __CALLER__)
+  end
+
   defmacro defw(call, do: block) do
     define(call, :public, nil, [], block, __CALLER__)
   end
@@ -117,7 +121,7 @@ defmodule Orb.DSL.Defw do
         [] ->
           []
 
-        [keywords] ->
+        [keywords] when is_list(keywords) ->
           for {keyword, _type} <- keywords do
             Macro.var(keyword, nil)
           end

@@ -222,8 +222,6 @@ defmodule Orb.DSL do
       end
       |> List.flatten()
 
-    locals = Map.new(param_types ++ local_vars)
-
     block_items =
       List.wrap(
         case block do
@@ -233,8 +231,23 @@ defmodule Orb.DSL do
       )
 
     block_items = Macro.expand(block_items, env)
-    block_items = do_snippet(locals, block_items)
 
+    local_inline_defs =
+      for {:local, _, [keyword]} <- Macro.prewalker(block_items) do
+        Macro.expand_literals(keyword, env)
+      end
+      |> List.flatten()
+
+    locals = Map.new(param_types ++ local_vars ++ local_inline_defs)
+
+    # local_var_refs =
+    #   Enum.map(local_inline_defs, fn {key, type} ->
+    #     quote do
+    #       unquote(key) = Orb.VariableReference.local(unquote(key), unquote(type))
+    #     end
+    #   end)
+
+    block_items = do_snippet(locals, block_items)
     block_items = runtime_checks ++ block_items
 
     quote do
@@ -245,10 +258,11 @@ defmodule Orb.DSL do
         body_local_types =
           for(%{locals: locals} <- block_items, do: locals)
           |> List.flatten()
-          |> List.keysort(0)
+
+        # |> List.keysort(0)
 
         local_types =
-          (unquote(local_type_defs) ++ body_local_types)
+          (unquote(local_type_defs) ++ body_local_types ++ unquote(local_inline_defs))
           |> Keyword.new()
 
         %Orb.Func{
@@ -260,7 +274,10 @@ defmodule Orb.DSL do
           params: unquote(Macro.escape(params)),
           result: result,
           local_types: local_types,
-          body: Orb.InstructionSequence.new(result, block_items),
+          body:
+            with do
+              Orb.InstructionSequence.new(result, block_items)
+            end,
           exported_names: unquote(exported_names)
         }
         |> Orb.Func.narrow_if_needed()
@@ -407,6 +424,7 @@ defmodule Orb.DSL do
     end)
   end
 
+  # TODO: remove
   def export(f = %Orb.Func{}, name) when is_binary(name) do
     update_in(f.exported_names, fn names -> [name | names] end)
   end
@@ -439,6 +457,20 @@ defmodule Orb.DSL do
         other
     end
   end
+
+  def local(locals) do
+    # %{locals: locals}
+    Orb.InstructionSequence.new(nil, [], locals: locals)
+  end
+
+  # defmacro local({:=, _meta, [a, b]}) do
+  #   # dbg(arg)
+
+  #   quote do
+  #     # nil
+  #     var!(unquote(a)) = nil
+  #   end
+  # end
 
   @doc """
   Declare a loop that iterates through an Orb.Iterator or Elixir.Range.
