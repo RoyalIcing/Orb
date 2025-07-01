@@ -96,21 +96,14 @@ defmodule Orb.Ops do
   def typeof(n) when is_float(n), do: Elixir.Float
   def typeof(%{push_type: type}), do: type
   def typeof(%{type_signature: type_signature}), do: %{type_signature: type_signature}
-  def typeof(%{if: _}), do: :control
-  def typeof(str) when is_binary(str), do: :i32
+  def typeof(%{if: _}), do: nil
+  def typeof(str) when is_binary(str), do: Orb.Str
   # def typeof(_), do: :unknown_effect
 
   def typeof(value, :primitive), do: typeof(value) |> to_primitive_type()
 
-  def pop_push_of(n) when is_integer(n), do: {nil, Elixir.Integer}
-  def pop_push_of(n) when is_float(n), do: {nil, Elixir.Float}
   def pop_push_of(%{pop_type: pop_type, push_type: push_type}), do: {pop_type, push_type}
-  def pop_push_of(%{push_type: push_type}), do: {nil, push_type}
-  # Orb.Loop.Branch, Orb.Block.Branch
-  # Probably should add a `control: :branch`, `control: :return` field.
-  def pop_push_of(%{if: _}), do: {nil, nil}
-  # TODO: String64
-  def pop_push_of(str) when is_binary(str), do: {nil, Process.get(Orb.StringConstantType, :i32)}
+  def pop_push_of(type), do: {nil, typeof(type)}
 
   def extract_common_type(a, b) do
     {nil, push_a} = pop_push_of(a)
