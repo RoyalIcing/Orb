@@ -130,6 +130,7 @@ defmodule Orb.Constants do
   def expand_if_needed(value) when is_struct(value, Orb.IfElse), do: Orb.IfElse.expand(value)
   def expand_if_needed(nil), do: nil
 
+  # Atoms get expanded into a i32 to their memory offset.
   def expand_if_needed(value) when is_atom(value) do
     str = value |> Atom.to_string() |> expand_string!()
     str.memory_offset
