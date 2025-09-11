@@ -22,6 +22,7 @@ defmodule Examples.ArenaTest do
       Second.alloc(16)
       First.rewind()
       First.alloc(16)
+      Second.rewind()
     end
 
     defw just_enough(), I32, i: I32, final: I32 do
@@ -77,6 +78,7 @@ defmodule Examples.ArenaTest do
                (call $Examples.ArenaTest.A.Second.alloc (i32.const 16))
                (call $Examples.ArenaTest.A.First.rewind)
                (call $Examples.ArenaTest.A.First.alloc (i32.const 16))
+               (call $Examples.ArenaTest.A.Second.rewind)
              )
            """
   end

@@ -41,18 +41,20 @@ defmodule Orb.ModuleDefinition do
     struct!(__MODULE__, options)
   end
 
+  # TODO: move this to Orb.Compiler
   def get_body_of(mod) do
     mod.__wasm_body__(nil)
     |> expand_body_func_refs()
     |> expand_body_func_constants()
   end
 
-  defp resolve_func_ref({:mod_func_ref, visiblity, {mod, name}}) do
-    fetch_func!(get_body_of(mod), visiblity, mod, name)
+  defp resolve_func_ref({:mod_func_ref, visibility, {mod, name}}) do
+    fetch_func!(get_body_of(mod), visibility, mod, name)
   end
 
-  defp resolve_func_ref({:mod_func_ref, visiblity, mod}) when is_atom(mod) do
-    fetch_func!(get_body_of(mod), visiblity, mod)
+  defp resolve_func_ref({:mod_func_ref, visibility, mod}) when is_atom(mod) do
+    # FIXME: don’t repeatedly call get_body_of, instead call it once per module.
+    fetch_func!(get_body_of(mod), visibility, mod)
   end
 
   defmodule FetchFuncError do
@@ -68,9 +70,11 @@ defmodule Orb.ModuleDefinition do
     body = List.flatten(body)
     exported? = visibility == :exported
 
-    funcs =
-      Enum.flat_map(body, fn
-        %Orb.Func{} = func ->
+    Enum.flat_map(body, fn
+      %Orb.Func{} = func ->
+        count = Orb.Compiler.count_func_calls(func.name)
+
+        if count > 0 do
           [
             %{
               func
@@ -78,19 +82,19 @@ defmodule Orb.ModuleDefinition do
                 source_module: func.source_module || source_module
             }
           ]
-
-        _ ->
+        else
           []
-      end)
+        end
 
-    funcs
+      _ ->
+        []
+    end)
   end
 
   def fetch_func!(body, visibility, source_module, name) when is_list(body) do
     body = List.flatten(body)
     exported? = visibility == :exported
 
-    # func = Enum.find(body, &match?(%Orb.Func{name: ^name}, &1))
     func =
       Enum.find_value(body, fn
         %Orb.Func{name: ^name} = func ->
@@ -107,11 +111,13 @@ defmodule Orb.ModuleDefinition do
     func || raise FetchFuncError, func_name: name, source_module: source_module
   end
 
+  # TODO: unused
   def func_ref!(mod, name) when is_atom(mod) do
     # TODO: convert to struct
     {:mod_func_ref, :exported, {mod, name}}
   end
 
+  # TODO: unused
   def func_ref_all!(mod) when is_atom(mod) do
     {:mod_func_ref, :exported, mod}
   end

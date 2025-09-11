@@ -402,7 +402,7 @@ defmodule OrbTest do
 
     # defw validate(num: I32), I32, under?: I32, over?: I32 do
     defw validate(num: I32) :: I32 do
-      local under?: I32, over?: I32
+      local(under?: I32, over?: I32)
       # local under? = num < 1
       # local over? = num > 255
 
@@ -620,6 +620,33 @@ defmodule OrbTest do
     end
 
     assert 9 = TestHelper.wasm_call(Includer, :magic)
+    # Note: list_exports functionality would need to be implemented in TestHelper if needed
+  end
+
+  test "Excludes included function if they are unused" do
+    defmodule MathUtils2 do
+      use Orb
+
+      defw(square_a(n: I32), I32, do: n * n)
+      defw(square_b(n: I32), I32, do: n * n)
+    end
+
+    defmodule Includer2 do
+      use Orb
+
+      Orb.include(MathUtils2)
+
+      defw magic(), I32 do
+        MathUtils2.square_a(3)
+      end
+    end
+
+    wat = Orb.to_wat(Includer2)
+    IO.puts(wat)
+    assert wat =~ "square_a"
+    refute wat =~ "square_b"
+
+    assert 9 = TestHelper.wasm_call(Includer2, :magic)
     # Note: list_exports functionality would need to be implemented in TestHelper if needed
   end
 

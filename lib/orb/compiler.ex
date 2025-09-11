@@ -2,6 +2,9 @@ defmodule Orb.Compiler do
   @moduledoc false
 
   def run(mod, globals) do
+    tid = :ets.new(__MODULE__, [:set, :private])
+    Process.put(__MODULE__, tid)
+
     global_types =
       globals
       |> List.flatten()
@@ -32,5 +35,22 @@ defmodule Orb.Compiler do
     }
   after
     Orb.Constants.__cleanup()
+
+    Process.delete(__MODULE__) |> :ets.delete()
+  end
+
+  def will_call_func(func_name) do
+    tid = Process.get(__MODULE__) || raise "Must be compiling"
+    key = {:func, func_name}
+    :ets.update_counter(tid, key, {2, 1}, {key, 1})
+  end
+
+  def count_func_calls(func_name) do
+    tid = Process.get(__MODULE__) || raise "Must be compiling"
+    key = {:func, func_name}
+    case :ets.lookup(tid, key) do
+      [{^key, count}] when is_integer(count) -> count
+      _ -> 0
+    end
   end
 end

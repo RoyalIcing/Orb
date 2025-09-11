@@ -141,13 +141,18 @@ defmodule Orb.DSL.Defw do
 
     quote generated: true do
       unquote(def_kind)(unquote(def_call)) do
-        Orb.Instruction.Call.new(
-          unquote(result_type),
-          unquote(param_types),
+        func_name =
           case {@wasm_func_prefix, unquote(name)} do
             {nil, name} -> name
             {prefix, name} -> "#{prefix}.#{name}"
-          end,
+          end
+
+        Orb.Compiler.will_call_func(func_name)
+
+        Orb.Instruction.Call.new(
+          unquote(result_type),
+          unquote(param_types),
+          func_name,
           unquote(def_args)
         )
       end

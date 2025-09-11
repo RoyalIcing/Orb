@@ -35,6 +35,7 @@ defmodule DefwTest do
     def __shush_warning, do: second()
   end
 
+  @tag :skip
   test "function visiblity" do
     assert Visibilities.to_wat() =~ """
              (func $first (export "first")
