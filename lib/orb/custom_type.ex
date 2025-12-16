@@ -1,4 +1,21 @@
 defmodule Orb.CustomType do
+  @moduledoc """
+  Define custom types composed of other types. Your type can then be passed as parameters or result types.
+
+  Composite types (tuples) are not supported as locals currently, as locals can only be primitive types.
+
+  ```elixir
+  defmodule RGB do
+    @behaviour Orb.CustomType
+    @impl Orb.CustomType
+    def wasm_type, do: {:f32, :f32, :f32}
+    
+    # TODO: allow naming each element:
+    # def wasm_type, do: [r: :f32, g: :f32, b: :f32]
+  end
+  ```
+  """
+
   @type wasm_primitive() :: :i64 | :i32 | :f64 | :f32
   @callback wasm_type() ::
               wasm_primitive()
