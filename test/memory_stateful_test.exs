@@ -16,6 +16,10 @@ defmodule MemoryStatefulTest do
     defmodule Swap do
       use Orb
 
+      # Memory.def First do
+      #   data!(16, u32: [123_456, 456_789])
+      # end
+
       Memory.pages(1)
       Memory.initial_data!(16, u32: [123_456, 456_789])
 
@@ -47,18 +51,18 @@ defmodule MemoryStatefulTest do
       use Orb
 
       Memory.pages(1)
-      Memory.initial_data!(0, u32: 0)
+      Memory.initial_data!(0x0, u32: 0)
 
       defw get_count(), I32 do
-        Memory.load!(I32, 0)
+        Memory.load!(I32, 0x0)
       end
 
       defw increment() do
-        Memory.store!(I32, 0, Memory.load!(I32, 0) + 1)
+        Memory.store!(I32, 0x0, Memory.load!(I32, 0) + 1)
       end
 
       defw reset() do
-        Memory.store!(I32, 0, 0)
+        Memory.store!(I32, 0x0, 0)
       end
     end
 
