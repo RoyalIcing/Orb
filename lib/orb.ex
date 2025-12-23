@@ -962,6 +962,10 @@ defmodule Orb do
     Orb.ToWasm.to_wasm(term, context) |> IO.iodata_to_binary()
   end
 
+  def webgl2(module) do
+    "// TODO"
+  end
+
   def __get_block_items(block) do
     case block do
       nil -> nil

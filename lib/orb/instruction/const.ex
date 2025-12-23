@@ -4,12 +4,12 @@ defmodule Orb.Instruction.Const do
 
   alias require Orb.Ops
 
-  def new(push_type, value) do
-    %__MODULE__{push_type: push_type, value: value}
+  def new(type, value) do
+    %__MODULE__{push_type: type, value: value}
   end
 
-  def wrap(push_type, value) do
-    wrap(push_type, value, "#{inspect(Ops.to_primitive_type(push_type))}.const")
+  def wrap(type, value) do
+    wrap(type, value, "#{inspect(Ops.to_primitive_type(type))}.const")
   end
 
   def wrap(push_type, value, instruction_identifier) when is_number(value) do

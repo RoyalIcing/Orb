@@ -1,8 +1,6 @@
 defmodule Orb.I32.UnsafePointer do
   @moduledoc """
   Custom `Orb.CustomType` for pointer to a 32-bit integer in memory.
-
-  It is aligned to 4 bytes or 32-bits, so you can only load/store at memory offsets divisible by 4.
   """
 
   with @behaviour Orb.CustomType do

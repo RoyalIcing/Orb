@@ -12,7 +12,8 @@
 
 Write WebAssembly using Elixir as your compiler:
 
-- Allow access to nearly all WebAssembly 1.0 instructions.
+- Like how React’s JSX lets you run JavaScript that produces HTML documents, Orb lets you write Elixir that produces WebAssembly modules.
+- Write using any WebAssembly 1.0 instructions.
 - Produce tiny `.wasm` executables: **kilobytes not megabytes**. It has zero runtime overhead: define a function or global and that’s all that is compiled.
 - Use Elixir **modules to organize and reuse** code, functions and **macros to create composable abstractions**, and chain function calls together with the **pipe `|>` operator**. Publish your code to [Hex](https://hex.pm).
 - Run **any Elixir code at compile time** e.g. call out to an Elixir library, or make network requests, or integrate within an existing Elixir application — and have it influence what WebAssembly instructions are output.
@@ -21,6 +22,29 @@ Write WebAssembly using Elixir as your compiler:
 - Define your own custom WebAssembly instructions and abstractions that output to `wat` and `wasm` formats.
 
 I think of it as like how React’s JSX lets you write dynamic HTML in JavaScript, Orb lets you write dynamic WebAssembly in Elixir.
+
+- HTML document loaded by the browser running…
+  - JavaScript loading…
+    - React library rendering…
+      - Your components producing…
+        - HTML that then updates document
+
+- HTML document loaded by the browser running…
+  - JavaScript loading…
+    - React library streaming…
+      - Node.js running on server bundling…
+        - Your server components producing…
+          - JSX & references to client components
+      - Server streamed output & client components rendering…
+        - HTML that then updates document
+
+- HTML document loaded by the browser running…
+  - JavaScript loading…
+    - WebAssembly module compiled from…
+      - Elixir running on server assembling…
+        - WebAssembly globals, functions, and memory
+    - WebAssembly instance executing and producing…
+        - HTML that then updates document
 
 ## Status
 
@@ -31,9 +55,9 @@ Orb is alpha in active development. My aim is to refine the current feature set 
 The following are a list of things that Orb has chosen **not** to support:
 
 - Execute any Elixir code at WebAssembly runtime. It’s not a goal of Orb to take any piece of everyday Elixir code and have it run in WebAssembly. However, because you can use macros you could decide to build that functionality on top of Orb.
-- Access to the DOM. I believe the DOM is a poor fit for WebAssembly with its big object graph requiring lots of communication between WebAssembly and its host. Instead we prefer things that serialize like HTML, SVG, XML, CSV.
+- Access the DOM. I believe the DOM is a poor fit for WebAssembly with its big object graph requiring lots of communication between WebAssembly and its host. Instead we prefer things that serialize like HTML, SVG, XML, CSV.
 - WASI support. It’s not stabilized yet and for now I’d rather it be a library built on top of Orb.
-- Produce the most optimized code theoretically possible through deep analysis. Use `wasm-opt` if you really need to squeeze every byte possible from your final `.wasm` file. However, Orb does aim to produce slim `.wasm` files without unnecessary bloat like heavy runtimes.
+- Produce the most optimized code theoretically possible. Use `wasm-opt` if you really need to squeeze every byte possible from your final `.wasm` file. However, Orb does aim to produce slim `.wasm` files without unnecessary bloat like heavy runtimes.
 
 ## Libraries
 
