@@ -80,21 +80,21 @@ defmodule DefcTest do
       defc escape_html(), I32 do
         Output.clear!()
 
-        loop char <- Input.Bytes do
-          if do
-            char === ?< ->
-              Output.write!("&lt;")
+        # loop char <- Input.Bytes do
+        #   if do
+        #     char === ?< ->
+        #       Output.write!("&lt;")
 
-            char === ?> ->
-              Output.write!("&gt;")
+        #     char === ?> ->
+        #       Output.write!("&gt;")
 
-            char === ?& ->
-              Output.write!("&amp;")
+        #     char === ?& ->
+        #       Output.write!("&amp;")
 
-            true ->
-              Output.write!(char)
-          end
-        end
+        #     true ->
+        #       Output.write!(char)
+        #   end
+        # end
 
         # loop Input.Bytes do
         #   ?< ->

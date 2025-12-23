@@ -62,9 +62,9 @@ defmodule Examples.CardsTest do
       # end
 
       defc deal_cards() do
-        ColumnFaceDownCount.set!(0, 3)
-        ColumnFaceDownCount.set!(1, 3)
-        ColumnFaceDownCount.set!(2, 3)
+        # ColumnFaceDownCount.set!(0, 3)
+        # ColumnFaceDownCount.set!(1, 3)
+        # ColumnFaceDownCount.set!(2, 3)
 
         # ColumnFaceDownCount.read!()
       end
