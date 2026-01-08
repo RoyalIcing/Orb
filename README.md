@@ -77,6 +77,14 @@ defw GET(path_and_query: Input.Str, headers: Input.Str) :: {MediaType, Output.Ra
 defw POST(query: Input.Range, body: Input.Range) :: {MediaType, Output.Range}
 ```
 
+## Iterate towards optimized
+
+1. Start with a simple implementation in WebAssembly, called the “prototype”.
+2. Derive contracts that specify behavior — e.g. for this input expect this output.
+3. Use a LLM to refactor: add SIMD, try different algorithms, port to a different language.
+4. Use fuzz A/B testing to compare the base prototype implementation to the optimized one.
+5. You are guaranteed that the optimized implementation has the same security as the base one.
+
 ## Testing
 
 ```sh
