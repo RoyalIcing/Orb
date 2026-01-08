@@ -12,6 +12,12 @@ defmodule Orb.Instruction.Const do
     wrap(type, value, "#{inspect(Ops.to_primitive_type(type))}.const")
   end
 
+  def wrap(Elixir.Integer, value, _instruction_identifier) when is_number(value),
+    do: raise("Need concrete type not Elixir.Integer for constants.")
+
+  def wrap(Elixir.Float, value, _instruction_identifier) when is_number(value),
+    do: raise("Need concrete type not Elixir.Float for constants.")
+
   def wrap(push_type, value, instruction_identifier) when is_number(value) do
     received_type =
       cond do

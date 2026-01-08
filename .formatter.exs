@@ -5,7 +5,9 @@ locals_without_parens = [
   let: 1,
   return: 1,
   local: 1,
-  global: 1
+  global: 1,
+  const: 1,
+  defc: 2
 ]
 
 [

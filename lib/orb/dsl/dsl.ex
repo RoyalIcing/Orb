@@ -250,7 +250,7 @@ defmodule Orb.DSL do
     block_items = do_snippet(locals, block_items)
     block_items = runtime_checks ++ block_items
 
-    quote do
+    quote generated: true do
       with do
         result = unquote(result_type)
         block_items = unquote(block_items)
@@ -429,7 +429,7 @@ defmodule Orb.DSL do
     update_in(f.exported_names, fn names -> [name | names] end)
   end
 
-  def i32(n) when is_integer(n), do: Instruction.i32(:const, n)
+  def i32(n) when is_integer(n), do: Instruction.Const.new(:i32, n)
 
   # TODO: should either commit to this idea (with a unit test) or remove it.
   def i32(locals) when is_list(locals) do
@@ -442,9 +442,9 @@ defmodule Orb.DSL do
     )
   end
 
-  def i64(n) when is_integer(n), do: Instruction.i64(:const, n)
-  def f32(n) when is_float(n), do: Instruction.f32(:const, n)
-  def f64(n) when is_float(n), do: Instruction.f64(:const, n)
+  def i64(n) when is_integer(n), do: Instruction.Const.new(:i64, n)
+  def f32(n) when is_float(n), do: Instruction.Const.new(:f32, n)
+  def f64(n) when is_float(n), do: Instruction.Const.new(:f64, n)
 
   def __expand_identifier(identifier, env) do
     identifier = Macro.expand_once(identifier, env) |> Kernel.to_string()
@@ -746,6 +746,7 @@ defmodule Orb.DSL do
   @doc """
   Declare a constant string, which will be extracted to the top of the module, and its address substituted in place.
   """
+  # TODO: rename to str!()
   def const(value) do
     Orb.Constants.expand_if_needed(value)
   end

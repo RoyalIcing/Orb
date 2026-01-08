@@ -7,24 +7,84 @@ defmodule DefcTest do
 
       # const PI, f32(3.141592653589793)
 
-      # global do
-      @pi 3.141592653589793
+      # const do
+      #   @pi f32(3.141592653589793)
       # end
 
-      # def component
-      defc area_of_circle(radius: F32), F32 do
-        @pi * radius * radius
+      # const(PI: f32(3.141592653589793))
+      const pi: f32(3.141592653589793)
+      # const(PI: F32 = 3.141592653589793, HELLO: F32 = 5.0)
+
+      # defc pi() :: F32, do: 3.141592653589793
+      # defc(pi :: F32 = 3.141592653589793)
+      # defc(PI = f32(3.141592653589793))
+
+      # define component
+      defc area_of_circle(radius: F32) :: F32 do
+        pi() * radius * radius
+        # @PI * radius * radius
+        # PI * radius * radius
+        # ~C[PI] * radius * radius
+        # %PI{} * radius * radius
+      end
+
+      fact do
+        assert!(area_of_circle(0.0) === 0.0)
       end
     end
 
-    # WebGL2 fragment shader
-    # assert Orb.webgl2(Geometry) === ~S"""
-    #        const float PI = 3.141592653589793;
+    assert Geometry.area_of_circle(1.0) == %Orb.Instruction{
+             operands: [
+               %Orb.Instruction{
+                 operands: [
+                   %Orb.Component.GlobalConst{identifier: :pi, type: :f32},
+                   %Orb.Instruction.Const{push_type: :f32, value: 1.0}
+                 ],
+                 operation: :mul,
+                 pop_type: nil,
+                 push_type: :f32
+               },
+               %Orb.Instruction.Const{push_type: :f32, value: 1.0}
+             ],
+             push_type: :f32,
+             operation: :mul,
+             pop_type: nil
+           }
 
-    #        float area_of_circle(float radius) {
-    #          return PI * radius * radius;
-    #        }
-    #        """
+    assert Geometry.area_of_circle(Orb.VariableReference.local(:foo, :f32)) == %Orb.Instruction{
+             operands: [
+               %Orb.Instruction{
+                 operands: [
+                   %Orb.Component.GlobalConst{identifier: :pi, type: :f32},
+                   %Orb.VariableReference{
+                     push_type: :f32,
+                     entries: [%Orb.VariableReference.Local{identifier: :foo, type: :f32}],
+                     pop_type: nil
+                   }
+                 ],
+                 operation: :mul,
+                 pop_type: nil,
+                 push_type: :f32
+               },
+               %Orb.VariableReference{
+                 push_type: :f32,
+                 entries: [%Orb.VariableReference.Local{identifier: :foo, type: :f32}],
+                 pop_type: nil
+               }
+             ],
+             push_type: :f32,
+             operation: :mul,
+             pop_type: nil
+           }
+
+    # WebGL2 fragment shader
+    assert Orb.glsl(Geometry) === ~S"""
+           const float PI = 3.141592653589793;
+
+           float area_of_circle(float radius) {
+             return PI * radius * radius;
+           }
+           """
   end
 
   test "css units" do
@@ -33,6 +93,9 @@ defmodule DefcTest do
 
       @default_font_size 16.0
 
+      # input()
+      # params()
+      # runtime()
       uniform(
         root_font_size: f32(@default_font_size),
         line_height: f32(1.2),
@@ -40,28 +103,46 @@ defmodule DefcTest do
         viewport_height: f32(568.0)
       )
 
-      defc rem(input: F32), F32 do
-        input * @root_font_size
+      defc rem(value: F32) :: F32 do
+        value * @root_font_size
       end
 
-      defc lh(input: F32), F32 do
-        input * @line_height
+      defc lh(value: F32) :: F32 do
+        value * @line_height
       end
 
-      defc vw(input: F32), F32 do
-        input * @viewport_width / 100.0
+      defc vw(value: F32) :: F32 do
+        value * @viewport_width / 100.0
       end
 
-      defc vh(input: F32), F32 do
-        input * @viewport_height / 100.0
+      defc vh(value: F32) :: F32 do
+        value * @viewport_height / 100.0
       end
+
+      # test_wasm do
+      # end
     end
+
+    assert CSSUnits.rem(1.0) == %Orb.Instruction{
+             operands: [
+               %Orb.Instruction.Const{push_type: :f32, value: 1.0},
+               %Orb.Instruction.Const{push_type: :f32, value: 16.0}
+             ],
+             push_type: :f32,
+             operation: :mul,
+             pop_type: nil
+           }
   end
 
   test "escape HTML" do
     defmodule HTMLEscape do
       use Orb.Component
 
+      # Do we declare memory regions up-front,
+      # or are they passed as parameters?
+      # Components produce instructions that are copied
+      # so they can have their parameters replaced when
+      # copying the instructions out.
       region(Input, pages: 1) do
         global Size :: I32
 
@@ -71,13 +152,13 @@ defmodule DefcTest do
       region(Output, pages: 1) do
         global Size :: I32
 
-        defc write!(string) do
+        defc write!(string) :: nil do
           Size.set!(Size.get!() + string[:size])
         end
       end
 
       # defc escape_html(Input: Memory.Slice, Output: Memory.Slice), I32 do
-      defc escape_html(), I32 do
+      defc escape_html() :: I32 do
         Output.clear!()
 
         # loop char <- Input.Bytes do

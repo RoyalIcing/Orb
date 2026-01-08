@@ -14,7 +14,7 @@ defmodule Orb.I32 do
     def wasm_type, do: :i32
   end
 
-  def const(n) when is_integer(n), do: Instruction.wrap_constant!(:i32, n)
+  def const(n) when is_integer(n), do: Instruction.Const.wrap(:i32, n)
 
   def add(a, b)
   def sub(a, b)

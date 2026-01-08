@@ -248,7 +248,7 @@ defmodule OrbTest do
                  body: %Orb.InstructionSequence{
                    push_type: Orb.I32,
                    body: [
-                     %Orb.Instruction{push_type: :i32, operation: :const, operands: [42]}
+                     %Orb.Instruction.Const{push_type: :i32, value: 42}
                    ]
                  },
                  exported_names: ["answer"]

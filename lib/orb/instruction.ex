@@ -77,38 +77,6 @@ defmodule Orb.Instruction do
     }
   end
 
-  def wrap_constant!(type, value)
-
-  def wrap_constant!(Elixir.Integer, value) when is_number(value),
-    do: raise("Need concrete type not Elixir.Integer for constants.")
-
-  def wrap_constant!(Elixir.Float, value) when is_number(value),
-    do: raise("Need concrete type not Elixir.Float for constants.")
-
-  # TODO: replace with Orb.Instruction.Const
-  def wrap_constant!(type, value) when is_number(value),
-    do: %__MODULE__{
-      push_type: type,
-      operation: :const,
-      operands: [value]
-    }
-
-  def wrap_constant!(type, %{push_type: type} = value), do: value
-
-  # TODO: remove
-  def wrap_constant!(type_a, %{push_type: type_b} = value) do
-    case Ops.types_compatible?(type_a, type_b) do
-      true ->
-        value
-
-      false ->
-        raise Orb.TypeCheckError,
-          expected_type: type_a,
-          received_type: type_b,
-          instruction_identifier: "#{type_a}.const"
-    end
-  end
-
   def i32(operation), do: new(:i32, operation)
   def i32(operation, a) when is_list(a), do: new(:i32, operation, a)
   def i32(operation, a), do: new(:i32, operation, [a])
@@ -242,7 +210,7 @@ defmodule Orb.Instruction do
 
       types_must_match!(expected_type, received_type, "call #{name} param #{index}")
 
-      wrap_constant!(expected_type, param)
+      Orb.Instruction.Const.wrap(expected_type, param)
     end)
   end
 
@@ -284,7 +252,7 @@ defmodule Orb.Instruction do
         number
 
       expected_type ->
-        wrap_constant!(expected_type, number)
+        Orb.Instruction.Const.wrap(expected_type, number)
     end
   end
 
@@ -294,14 +262,14 @@ defmodule Orb.Instruction do
 
     types_must_match!(expected_type, received_type, "i32.#{op}")
 
-    wrap_constant!(expected_type, operand)
+    Orb.Instruction.Const.wrap(expected_type, operand)
   end
 
   # TODO: can this be removed? I believe it is handled by clause above.
   defp type_check_operand!(:i32, op, operand, param_index) when is_atom(op) do
     expected_type = Ops.i32_param_type!(op, param_index)
 
-    wrap_constant!(expected_type, operand)
+    Orb.Instruction.Const.wrap(expected_type, operand)
   end
 
   defp type_check_operand!(:i64, op, %{push_type: received_type} = operand, param_index)
@@ -310,14 +278,14 @@ defmodule Orb.Instruction do
 
     types_must_match!(expected_type, received_type, "i64.#{op}")
 
-    wrap_constant!(expected_type, operand)
+    Orb.Instruction.Const.wrap(expected_type, operand)
   end
 
   # TODO: can this be removed?
   defp type_check_operand!(:i64, op, operand, param_index) when is_atom(op) do
     expected_type = Ops.i64_param_type!(op, param_index)
 
-    wrap_constant!(expected_type, operand)
+    Orb.Instruction.Const.wrap(expected_type, operand)
   end
 
   defp type_check_operand!(

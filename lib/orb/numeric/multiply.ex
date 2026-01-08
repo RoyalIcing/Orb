@@ -15,8 +15,8 @@ defmodule Orb.Numeric.Multiply do
   # Perform at comptime.
   def optimized(_type, a, b) when is_integer(a) and is_integer(b), do: a * b
   # Multiply anything by zero equals zero.
-  def optimized(type, _, 0), do: Orb.Instruction.wrap_constant!(type, 0)
-  def optimized(type, 0, _), do: Orb.Instruction.wrap_constant!(type, 0)
+  def optimized(type, _, 0), do: Orb.Instruction.Const.wrap(type, 0)
+  def optimized(type, 0, _), do: Orb.Instruction.Const.wrap(type, 0)
   # Multiply one by anything is that same thing.
   def optimized(_type, a, 1), do: a
   def optimized(_type, 1, b), do: b

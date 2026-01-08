@@ -95,7 +95,9 @@ defmodule Orb.Ops do
   def typeof(n) when is_integer(n), do: Elixir.Integer
   def typeof(n) when is_float(n), do: Elixir.Float
   def typeof(%{push_type: type}), do: type
+  def typeof(%{type: type}), do: type
   def typeof(%{type_signature: type_signature}), do: %{type_signature: type_signature}
+  # TODO: remove
   def typeof(%{if: _}), do: nil
   def typeof(str) when is_binary(str), do: Orb.Str
   # def typeof(_), do: :unknown_effect

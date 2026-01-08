@@ -563,6 +563,7 @@ defmodule Orb do
           fn ->
             Orb.to_wat(__wasm_module__())
           end
+          # TODO: I can’t remember why I was doing this
           |> Task.async()
           |> Task.await()
         end
@@ -962,10 +963,25 @@ defmodule Orb do
     Orb.ToWasm.to_wasm(term, context) |> IO.iodata_to_binary()
   end
 
-  def webgl2(module) do
-    "// TODO"
+  def glsl(module) when is_atom(module) do
+    context = Orb.ToGLSL.Context.new()
+
+    constants = module.list_constants()
+    functions = module.list_functions()
+
+    result = [
+      for %{name: name, type: type, value: value} <- constants do
+      end,
+      for {name, _} <- functions do
+        apply(module, name, [])
+        |> Orb.ToGLSL.to_glsl(context)
+      end
+    ]
+
+    result |> IO.iodata_to_binary()
   end
 
+  # TODO: remove
   def __get_block_items(block) do
     case block do
       nil -> nil

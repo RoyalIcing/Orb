@@ -12,10 +12,10 @@ defimpl Orb.TypeNarrowable, for: Integer do
   def type_narrow_to(i, narrower_type) do
     case Orb.Ops.to_primitive_type(narrower_type) do
       :i64 ->
-        Orb.Instruction.wrap_constant!(:i64, i)
+        Orb.Instruction.Const.wrap(:i64, i)
 
       :i32 ->
-        Orb.Instruction.wrap_constant!(:i32, i)
+        Orb.Instruction.Const.wrap(:i32, i)
 
       _ ->
         i
@@ -27,10 +27,10 @@ defimpl Orb.TypeNarrowable, for: Float do
   def type_narrow_to(i, narrower_type) do
     case Orb.Ops.to_primitive_type(narrower_type) do
       :f64 ->
-        Orb.Instruction.wrap_constant!(:f64, i)
+        Orb.Instruction.Const.wrap(:f64, i)
 
       :f32 ->
-        Orb.Instruction.wrap_constant!(:f32, i)
+        Orb.Instruction.Const.wrap(:f32, i)
 
       _ ->
         i

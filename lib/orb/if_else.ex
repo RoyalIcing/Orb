@@ -96,6 +96,8 @@ defmodule Orb.IfElse do
           indent
         )
         when not is_nil(condition) do
+      dbg(when_true)
+
       [
         Orb.ToWat.to_wat(condition, indent),
         [
@@ -206,6 +208,17 @@ defmodule Orb.IfElse do
               when_false: when_false
             ] do
         Orb.IfElse.new(result, condition, when_true, when_false)
+      end
+    end
+
+    defmacro if(condition, select: result, do: when_true, else: when_false) do
+      quote bind_quoted: [
+              result: result,
+              condition: condition,
+              when_true: when_true,
+              when_false: when_false
+            ] do
+        Orb.Select.new(result, condition, when_true, when_false)
       end
     end
 

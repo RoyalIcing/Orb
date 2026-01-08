@@ -50,6 +50,45 @@ I think of it as like how React’s JSX lets you write dynamic HTML in JavaScrip
 
 Orb is alpha in active development. My aim is to refine the current feature set and complete a `.wasm` compiler (current it compiles to WebAssembly’s `.wat` text format) in order to get to beta.
 
+## Components
+
+Components in Orb are deterministic functions with an explicit contract of inputs to output.
+
+Component inputs can be encoded to a URL query. This make collaborating and debugging much easier — just share a URL.
+
+Components can output numbers or an array of memory. They cannot produce side-effects.
+
+## Contracts
+
+```
+#defw url_path_input(used: Str.Size) :: Str
+#defw url_query_input(used: Str.Size) :: Str
+
+region Input
+region Output
+
+defw get_input_range() :: Input.Range
+defw get_query_keys() :: Output.Range
+defw get_media_types() :: Output.Range
+
+defw GET(query: Input.Range) :: {MediaType, Output.Range}
+defw GET(path_and_query: Input.Str, headers: Input.Str) :: {MediaType, Output.Range}
+
+defw POST(query: Input.Range, body: Input.Range) :: {MediaType, Output.Range}
+```
+
+## Testing
+
+```sh
+silk -I example.wasm
+silk -X GET example.wasm
+silk -i example.wasm
+silk --data-urlencode "q=hello world" --data-urlencode "page=2" example.wasm
+
+silk serve example.wasm --port 7777
+silk image example.wasm -o still.png
+```
+
 ## Anti-Features
 
 The following are a list of things that Orb has chosen **not** to support:

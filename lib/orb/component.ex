@@ -1,8 +1,10 @@
 defmodule Orb.Component do
   defmacro __using__(_opts) do
     quote do
-      Module.register_attribute(__MODULE__, :orb_component_definitions, accumulate: true)
+      Module.register_attribute(__MODULE__, :orb_constants, accumulate: true)
       Module.register_attribute(__MODULE__, :orb_uniforms, accumulate: true)
+
+      @before_compile unquote(__MODULE__).BeforeCompile
 
       def __components__(_), do: []
       defoverridable __components__: 1
@@ -11,9 +13,47 @@ defmodule Orb.Component do
     end
   end
 
-  defmacro defc(call, result_type \\ nil, do_block)
+  defmodule BeforeCompile do
+    defmacro __before_compile__(%{module: _module}) do
+      quote bind_quoted: [] do
+        # def __orb_component_uniforms, do: @orb_uniforms
 
-  defmacro defc(call, result_type, do: block) do
+        for {key, value} <- List.flatten(@orb_constants) do
+          def __orb_component_constant(key), do: unquote(Macro.escape(value))
+        end
+
+        def __orb_component_constant(key), do: raise("Unknown constant #{key}")
+
+        for {key, value} <- List.flatten(@orb_uniforms) do
+          def __orb_component_uniform(key), do: unquote(Macro.escape(value))
+        end
+
+        def __orb_component_uniform(key), do: raise("Unknown uniform #{key}")
+      end
+    end
+  end
+
+  defmodule DSL do
+    defmacro @{name, _meta, _args} do
+      quote bind_quoted: [name: name] do
+        __orb_component_uniform(name)
+      end
+    end
+  end
+
+  defmodule GlobalConst do
+    defstruct [:identifier, :type]
+  end
+
+  defmodule UniformReference do
+    defstruct [:identifier, :type]
+  end
+
+  defmacro defc(name_and_type, do: block) do
+    do_defc(name_and_type, block)
+  end
+
+  defp do_defc({:"::", _meta, [call, result_type]}, block) do
     {name, args} = Macro.decompose_call(call)
 
     args =
@@ -24,7 +64,10 @@ defmodule Orb.Component do
 
     args = Macro.expand_once(args, __ENV__)
 
-    dbg(args)
+    def_args =
+      for {arg, _type} <- args do
+        Macro.var(arg, nil)
+      end
 
     block_items =
       List.wrap(
@@ -33,6 +76,15 @@ defmodule Orb.Component do
           single -> single
         end
       )
+
+    instruction =
+      quote do
+        Orb.InstructionSequence.new(unquote(result_type), unquote(block_items))
+        |> case do
+          %{body: [single]} -> single
+          instructions -> instructions
+        end
+      end
 
     vars =
       for {arg_name, type} <- args do
@@ -46,33 +98,38 @@ defmodule Orb.Component do
         end
       end
 
-    # dbg(Macro.to_string(vars))
+    {_, meta, _} = call
+    def_call = {name, meta, def_args}
 
-    new_entry =
-      quote generated: true do
-        {unquote(name), unquote(block_items)}
+    quote do
+      def unquote(def_call) do
+        use Orb.DSL
+        import Orb.Numeric.DSL
+        import Orb.Component.DSL
+
+        unquote(instruction)
       end
+    end
+  end
 
-    quote bind_quoted: [
-            name: name,
-            args: args,
-            result_type: result_type,
-            vars: vars,
-            new_entry: new_entry
-          ] do
-      # Module.put_attribute(__MODULE__, :orb_component_definitions, {name, args, result_type})
+  defmacro const(key_values) do
+    quote bind_quoted: [key_values: key_values] do
+      Module.put_attribute(__MODULE__, :orb_constants, key_values)
 
-      def __components__(context) do
-        previous = super(context)
+      for {key, value} <- key_values do
+        def unquote({key, [], []}) do
+          use Orb.DSL
+          import Orb.Numeric.DSL
+          import Orb.Component.DSL
 
-        previous ++
-          with do
-            # unquote(vars)
-            # unquote(new_entry)
-          end
+          # unquote(Macro.escape(value))
+
+          unquote(
+            %GlobalConst{type: value.push_type, identifier: key}
+            |> Macro.escape()
+          )
+        end
       end
-
-      defoverridable __components__: 1
     end
   end
 
